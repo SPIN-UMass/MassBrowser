@@ -1,0 +1,17 @@
+{
+  "name": "yaler",
+  "version": "0.0.0",
+  "description": "P2P Proxy",
+  "main": "./dist/main.js",
+  "dependencies": {
+    "babel-runtime": "^6.23.0",
+    "vue": "^2.1.10",
+    "vue-electron": "^1.0.6",
+    "vue-resource": "^1.0.3",
+    "vue-router": "^2.1.2",
+    "vuetify": "^0.10.4",
+    "vuex": "^2.1.1"
+  },
+  "devDependencies": {},
+  "author": "ha-D <hadi@cs.umass.edu>"
+}
