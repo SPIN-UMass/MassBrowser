@@ -6,14 +6,7 @@ const fs = require('fs')
 import {ConnectionReceiver} from './ConnectionReceiver'
 
 export function runOBFSserver (port) {
-  const options = {
-    key: fs.readFileSync('./app/core/test-certs/relay-key.pem'),
-    cert: fs.readFileSync('./app/core/test-certs/relay-cert.pem'),
-    rejectUnauthorized: false,
-    // This is necessary only if using the client certificate authentication.
-    requestCert: false
 
-  }
 
   const server = net.createServer((socket) => {
     console.log('server connected',
