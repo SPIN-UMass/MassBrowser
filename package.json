@@ -17,7 +17,9 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack -p --progress --colors --config webpack.renderer.config.js",
     "test": "npm run unit",
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix && cd app && npm install"
+    "postinstall": "npm run lint:fix && cd app && npm install",
+    "client": "node ./app/build/client/main.js",
+    "server": "node ./app/build/server/main.js"
   },
   "author": "Greg Holguin <simulatedgreg@gmail.com>",
   "license": "MIT",
@@ -72,9 +74,8 @@
     "vue-style-loader": "^1.0.0",
     "vue-template-compiler": "^2.1.10",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.3.0"
-  },
-  "dependencies": {
-    "vuetify": "^0.10.4"
+    "webpack-dev-server": "^2.3.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2"
   }
 }

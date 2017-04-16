@@ -5,6 +5,14 @@
       "presets": ["es2015", "stage-0"],
       "plugins": ["istanbul"]
     },
+    "core": {
+      "presets": [
+        ["es2015", {
+          "targets": { "node": 6 },
+          "useBuiltIns": true
+        }]
+      ]
+    },
     "main": {
       "presets": ["es2015", "stage-0"]
     },
