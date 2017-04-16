@@ -6,11 +6,10 @@
 </template>
 
 <script>
-  import State from '../state'
   import Bus from '../bus'
 
   export default {
-    data() {
+    data () {
       return {
         text: '',
         show: false,

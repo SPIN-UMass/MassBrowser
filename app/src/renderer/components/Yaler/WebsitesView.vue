@@ -30,22 +30,20 @@
 </template>
 
 <script>
-  import Bus from '../../bus'
-  import State from '../../state'
   import Datastore from '../../datastore'
   import WebsiteService from '../../services/WebsiteService'
 
   const tableHeaders = ['Active', 'Name', 'Category']
 
   export default {
-    data() {
+    data () {
       return {
         websites: [],
-        headers: tableHeaders.map((val, index) => {return {text: val, value: index, left: true}}),
+        headers: tableHeaders.map((val, index) => { return {text: val, value: index, left: true} }),
         query: ''
       }
     },
-    created() {
+    created () {
       // {name: { $regex: /.*face.*/i}}
       Datastore.collection('websites')
         .then(websiteCollection => websiteCollection.find())
@@ -58,7 +56,7 @@
     },
     methods: {
       changed: (website, state) => {
-        console.log("Setting website " + website + " to " + state)
+        console.log('Setting website ' + website + ' to ' + state)
         WebsiteService.setWebsiteEnabled(website, state)
       }
     }

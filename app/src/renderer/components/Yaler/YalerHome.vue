@@ -35,7 +35,6 @@
 </template>
 
 <script>
-  import Bus from '../../bus'
   import State from '../../state'
   import MapView from './MapView'
   import RelayView from './RelayView'
@@ -46,24 +45,23 @@
   import WebsiteServer from '../../services/WebsiteService'
 
   export default {
-    data() {
+    data () {
       return {
         e1: 'websites'
       }
     },
     components: {
-        MapView,
-        RelayView,
-        WebsitesView,
-        StatusWidget
+      MapView,
+      RelayView,
+      WebsitesView,
+      StatusWidget
     },
     created () {
-
-        RelayService.start()
-        WebsiteServer.start()
+      RelayService.start()
+      WebsiteServer.start()
     },
     methods: {
-      showStatus(status, options) {
+      showStatus (status, options) {
         State.status(status, options)
       }
     }

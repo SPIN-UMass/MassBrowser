@@ -9,9 +9,6 @@ import routes from './routes'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 
-import State from './state'
-
-
 Vue.use(Electron)
 Vue.use(Resource)
 Vue.use(Router)

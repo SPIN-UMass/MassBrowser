@@ -11,20 +11,18 @@
 </template>
 
 <script>
-  import RelayService from '../../services/RelayService'
-  import Bus from '../../bus'
   import State from '../../state'
 
   const tableHeaders = ['Relay ID', 'IP Address', 'Port']
 
   export default {
-    data() {
+    data () {
       return {
         relays: State.getRelays(),
-        headers: tableHeaders.map((val, index) => {return {text: val, value: index, left: true}})
+        headers: tableHeaders.map((val, index) => { return {text: val, value: index, left: true} })
       }
     },
-    created() {
+    created () {
       State.listen('relays', (relays) => {
         this.relays = relays
       })

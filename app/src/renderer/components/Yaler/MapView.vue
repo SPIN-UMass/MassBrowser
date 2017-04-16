@@ -5,12 +5,13 @@
 </template>
 
 <script>
-  function initializeMap() {
+  function initializeMap () {
+    /* global AmCharts */
     AmCharts.makeChart('mapdiv', {
           /**
            * this tells amCharts it's a map
            */
-          'type': 'map',
+      'type': 'map',
 
           /**
            * create data provider object
@@ -20,35 +21,35 @@
            * in case you don't set it to true, all the areas except listed in data
            * provider will be treated as unlisted.
            */
-          'dataProvider': {
-              'map': 'worldLow',
-              'getAreasFromMap': true
-          },
+      'dataProvider': {
+        'map': 'worldLow',
+        'getAreasFromMap': true
+      },
 
           /**
            * create areas settings
            * autoZoom set to true means that the map will zoom-in when clicked on the area
            * selectedColor indicates color of the clicked area.
            */
-          'areasSettings': {
+      'areasSettings': {
               // 'autoZoom': true,
             //   'selectedColor': '#CC0000',
-            outlineThickness: 0
-          },
-          handDraw: true,
-          handDrawScatter: 100,
-          handDrawThickness: 10,
-          "zoomControl": {
-              "zoomControlEnabled": false,
-              homeButtonEnabled: false
-          },
-          zoomOnDoubleClick: false
-      } );
-  }
+        outlineThickness: 0
+      },
+      handDraw: true,
+      handDrawScatter: 100,
+      handDrawThickness: 10,
+      'zoomControl': {
+        'zoomControlEnabled': false,
+        homeButtonEnabled: false
+      },
+      zoomOnDoubleClick: false
+    })
+}
   
   export default {
     created () {
-      initializeMap();
+      initializeMap()
     }
   }
 </script>

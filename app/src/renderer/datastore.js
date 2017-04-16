@@ -2,7 +2,6 @@ import Datastore from 'nedb'
 import fs from 'fs'
 import path from 'path'
 
-const DB_NAME = 'yalerdb'
 const DATA_DIR = path.join(process.env.HOME, '.yaler')
 
 if (!fs.existsSync(DATA_DIR)) {
@@ -10,30 +9,30 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 class DatastoreManager {
-  constructor() {
+  constructor () {
     this.collections = {}
   }
 
-  setItem(key, val) {
+  setItem (key, val) {
     return new Promise((resolve, reject) => {
       localStorage.setItem(key, JSON.stringify(val))
       resolve()
     })
   }
 
-  getItem(key) {
+  getItem (key) {
     return new Promise((resolve, reject) => {
       resolve(JSON.parse(localStorage.getItem(key)))
     })
   }
 
-  collection(name) {
+  collection (name) {
     return new Promise((resolve, reject) => {
       if (name in this.collections) {
         return resolve(this.collections[name])
       }
 
-      console.log("Creating datastore " + name)
+      console.log('Creating datastore ' + name)
       var collection = new Collection(name)
 
       this.collections[name] = collection
@@ -43,15 +42,15 @@ class DatastoreManager {
 }
 
 class Collection {
-  constructor(name) {
+  constructor (name) {
     this.name = name
-    this._store =  new Datastore({
-      filename: path.join(DATA_DIR, name +'.db'),
+    this._store = new Datastore({
+      filename: path.join(DATA_DIR, name + '.db'),
       autoload: true
     })
   }
 
-  _promisize(func, args) {
+  _promisize (func, args) {
     return new Promise((resolve, reject) => {
       var eArgs = Array.from(args)
       eArgs.push((err, result) => {
@@ -63,23 +62,23 @@ class Collection {
       func.apply(this._store, eArgs)
     })
   }
-  
-  find(q) {
+
+  find (q) {
     if (q === undefined) {
       q = {}
     }
     return this._promisize(this._store.find, [q])
   }
 
-  insert() {
+  insert () {
     return this._promisize(this._store.insert, arguments)
   }
 
-  update() {
+  update () {
     return this._promisize(this._store.update, arguments)
   }
 }
 
 const dataStore = new DatastoreManager()
 
-export default dataStore;
+export default dataStore

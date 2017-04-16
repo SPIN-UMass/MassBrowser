@@ -1,7 +1,7 @@
 import Bus from './bus'
 
 class StatusManager {
-  constructor() {
+  constructor () {
     this.statuses = []
     this.idCounter = 0
 
@@ -12,13 +12,13 @@ class StatusManager {
     })
   }
 
-  removeStatus(status) {
-    let index = this.statuses.findIndex(s => s.id == status.id)
-    if (index == this.statuses.length - 1) {
+  removeStatus (status) {
+    let index = this.statuses.findIndex(s => s.id === status.id)
+    if (index === this.statuses.length - 1) {
       this.statuses.pop()
 
       if (!this.statuses.length) {
-        Bus.$emit('status-cleared')  
+        Bus.$emit('status-cleared')
       } else {
         Bus.$emit('status-changed', this.statuses[this.statuses.length - 1])
       }
@@ -27,7 +27,7 @@ class StatusManager {
     }
   }
 
-  addStatus(message, options) {
+  addStatus (message, options) {
     options = options || {}
 
     let status = {
@@ -52,31 +52,31 @@ class StatusManager {
 }
 
 class State {
-  constructor() {
+  constructor () {
     this.relays = []
 
     this._statusManager = new StatusManager()
   }
 
-  getRelays() {
+  getRelays () {
     return this.relays
   }
 
-  setRelays(relays) {
+  setRelays (relays) {
     let oldVal = this.relays
     this.relays = relays
     this.emit('relays', relays, oldVal)
   }
 
-  status(message, options) {
+  status (message, options) {
     return this._statusManager.addStatus(message, options)
   }
 
-  emit(state, newVal, oldVal) {
+  emit (state, newVal, oldVal) {
     Bus.$emit('state-changed-' + state, newVal, oldVal)
   }
 
-  listen(state, func) {
+  listen (state, func) {
     Bus.$on('state-changed-' + state, func)
   }
 }
