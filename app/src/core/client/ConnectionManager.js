@@ -1,14 +1,13 @@
 /**
  * Created by milad on 4/12/17.
  */
-import {RelayConnection} from './RelayConnection';
-const jspack = require('jspack');
-const crypto = require('crypto');
+import RelayConnection from './RelayConnection';
+import crypto from 'crypto';
 
 class ConnectionManager {
   constructor() {
+    this.relayAssigner = null;
 
-    this.relayConnections = [];
     this.ClientConnections = {};
     this.Connectionmaps = {};
     this.carrylen = 0;
@@ -18,6 +17,10 @@ class ConnectionManager {
     this.lastsize = 0;
     this.newconcarry = '';
 
+  }
+
+  setRelayAssigner(relayAssigner) {
+    this.relayAssigner = relayAssigner
   }
 
   newConnection(ip, port, conid) {
@@ -120,18 +123,14 @@ class ConnectionManager {
     this.Connectionmaps[conid].write(conid, 'D', data);
   }
 
-  newRelayConnection(relayip, relayport, relaycert,desc) {
-    try {
-      var relay = new RelayConnection(relayip, relayport, relaycert, (data) => {
-        this.listener(data);
-      }, this.connection_close,desc);
-      this.relayConnections.push(relay);
-    }
-    catch (err) {
-      console.error('Error creating relay', err);
-    }
-
-
+  newRelayConnection(relayip, relayport, desc) {
+    var relay = new RelayConnection(relayip, relayport, desc)
+    
+    relay.on('data', data => this.listener(data))
+    relay.on('close', () => this.connection_close())
+    
+    return relay.connect()
+      .then(() => relay)
   }
 
   assignRelay(ip,port) {
@@ -144,25 +143,28 @@ class ConnectionManager {
     var conid = crypto.randomBytes(2).readUInt16BE();
 
     console.log(conid, dstip, dstport);
-    if (this.relayConnections.length === 0) {
-      console.log("No Relay To connect!!!");
-      throw "ERROR";
+    
+    if (!this.relayAssigner) {
+      throw "No Relay Assigner has been set for the ConnectionManager"
     }
+    
     this.ClientConnections[conid] = connection;
-    this.Connectionmaps[conid] = this.assignRelay(dstip,dstport);
-    var cr = String(dstip) + ':' + String(dstport);
-    console.log('sendsize:', cr.length);
-    this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
-    connection.on('data', (data) => {
-      this.writer(data, conid);
+    this.relayAssigner.assignRelay(dstip,dstport)
+      .then(relay => {
+        this.Connectionmaps[conid] = relay
+        var cr = String(dstip) + ':' + String(dstport);
+        console.log('sendsize:', cr.length);
+        this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
+        connection.on('data', (data) => {
+          this.writer(data, conid);
 
-    });
-
-
+        });
+      })
   }
 
 }
 
 
 var ConMgr = new ConnectionManager();
-module.exports = {Conmgr: ConMgr};
+// module.exports = {ConnectionManager: _ConMgr};
+export default ConMgr
