@@ -7,7 +7,6 @@
           <td class='text-xs-left'>{{ props.item.port }}</td>
         </template>
       </v-data-table>
-      <button v-on:click='foo'>CLICKME</button>
     </div>
 </template>
 
@@ -31,9 +30,6 @@
       })
     },
     methods: {
-      foo: function() {
-        this.relays = [{'ip': 'testing'}]
-      }
     }
   }
 </script>

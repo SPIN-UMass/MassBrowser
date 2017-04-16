@@ -28,31 +28,44 @@
               <v-icon>cloud</v-icon>
             </v-btn>
         </v-bottom-nav>
-        <!--<v-footer>Footer</v-footer>-->
+        <status-widget></status-widget>
+       <!--<v-footer>Footer</v-footer>-->
+       <button v-on:click="showStatus('asdflkjasdfljsdaf')">CLICKMEEEE</button>
     </div>
 </template>
 
 <script>
+  import Bus from '../../bus'
+  import State from '../../state'
   import MapView from './MapView'
   import RelayView from './RelayView'
-  import RelayService from '../../services/RelayService'
   import WebsitesView from './WebsitesView'
+  import StatusWidget from '../StatusWidget'
+
+  import RelayService from '../../services/RelayService'
+  import WebsiteServer from '../../services/WebsiteService'
 
   export default {
     data() {
       return {
-        e1: 'home'
+        e1: 'websites'
       }
     },
     components: {
         MapView,
         RelayView,
-        WebsitesView
+        WebsitesView,
+        StatusWidget
     },
     created () {
+
         RelayService.start()
+        WebsiteServer.start()
     },
     methods: {
+      showStatus(status, options) {
+        State.status(status, options)
+      }
     }
   }
 </script>
