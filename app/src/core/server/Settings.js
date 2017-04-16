@@ -3,7 +3,7 @@
  */
 
 export class SettingManager {
-  constructor(){
-    this.tbd = '' ;
+  constructor () {
+    this.tbd = ''
   }
 }

@@ -3,15 +3,14 @@
  */
 
 export class PolicyManager {
-  constructor() {
-    this.server = 'TBD';
-
+  constructor () {
+    this.server = 'TBD'
   }
 
-  checkDestination(ip, port) {
-    return true;
+  checkDestination (ip, port) {
+    return true
   }
 
 }
-var Police = new PolicyManager();
-module.exports = {policy: Police};
+var Police = new PolicyManager()
+module.exports = {policy: Police}
