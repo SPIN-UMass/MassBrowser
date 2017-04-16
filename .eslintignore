@@ -1,6 +1,6 @@
 app/node_modules/**
 app/dist/**
-app/src/core/*
+app/src/core/**
 test/unit/coverage/**
 test/unit/*.js
 test/e2e/*.js
