@@ -1,8 +1,8 @@
 /**
  * Created by milad on 4/11/17.
  */
-const net = require('net')
-import {Crypto} from '../crypt/crypto'
+import net from 'net'
+import { Crypto } from '../crypt/crypto'
 import { EventEmitter } from 'events'
 
 export default class RelayConnection extends EventEmitter {

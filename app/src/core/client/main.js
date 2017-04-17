@@ -1,3 +1,3 @@
-import {startClient} from './ClientMain';
-console.log('test');
-startClient();
+import {startClient} from './ClientMain'
+console.log('test')
+startClient()

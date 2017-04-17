@@ -1,14 +1,14 @@
-import { increment } from '../actions/counter';
-import { runtestserver } from './server/TLSReceiver';
+import { increment } from '../actions/counter'
+import { runtestserver } from './server/TLSReceiver'
 
 export class YalerCore {
   store;
 
-  constructor(store) {
-    this.store = store;
+  constructor (store) {
+    this.store = store
   }
 
-  start() {
+  start () {
 
     // setInterval(() => {
     //   this.store.dispatch(increment());

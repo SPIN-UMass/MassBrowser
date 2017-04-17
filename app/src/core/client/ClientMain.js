@@ -1,7 +1,7 @@
 /**
  * Created by milad on 4/11/17.
  */
-import {startClientSocks} from './ClientSocks';
+import { startClientSocks } from './ClientSocks';
 import ConnectionManager from './ConnectionManager';
 import RelayConnection from './RelayConnection'
 import { RandomRelayAssigner } from './RelayAssigner'
