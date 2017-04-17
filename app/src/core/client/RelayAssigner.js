@@ -1,10 +1,6 @@
 
 
 export class RelayAssigner {
-  constructor() {
-
-  }
-  
   /**
    * Assign a relay to a (ip, port)
    * Should return with a promise
@@ -14,8 +10,6 @@ export class RelayAssigner {
   assignRelay(ip, port) {
     return null;
   }
-
-
 }
 
 export class RandomRelayAssigner extends RelayAssigner {

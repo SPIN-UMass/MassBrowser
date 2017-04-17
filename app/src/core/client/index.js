@@ -1,3 +1,3 @@
-export { ConnectionManager } from './ConnectionManager'
-export { RelayConnection } from './RelayConnection'
+export { default as ConnectionManager } from './ConnectionManager'
+export { default as RelayConnection } from './RelayConnection'
 export { RelayAssigner } from './RelayAssigner'

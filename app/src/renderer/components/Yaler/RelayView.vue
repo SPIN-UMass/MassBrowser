@@ -12,18 +12,19 @@
 
 <script>
   import State from '../../state'
+  import RelayService from '../../services/RelayService'
 
   const tableHeaders = ['Relay ID', 'IP Address', 'Port']
 
   export default {
     data () {
       return {
-        relays: State.getRelays(),
+        relays: RelayService.getConnectedRelays(),
         headers: tableHeaders.map((val, index) => { return {text: val, value: index, left: true} })
       }
     },
     created () {
-      State.listen('relays', (relays) => {
+      RelayService.on('connected-relays-changed', (relays) => {
         this.relays = relays
       })
     },

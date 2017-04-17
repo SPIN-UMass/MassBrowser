@@ -4,7 +4,7 @@
 import RelayConnection from './RelayConnection';
 import crypto from 'crypto';
 
-class ConnectionManager {
+class _ConnectionManager {
   constructor() {
     this.relayAssigner = null;
 
@@ -165,6 +165,6 @@ class ConnectionManager {
 }
 
 
-var ConMgr = new ConnectionManager();
+var ConnectionManager = new _ConnectionManager();
 // module.exports = {ConnectionManager: _ConMgr};
-export default ConMgr
+export default ConnectionManager
