@@ -2,7 +2,16 @@
     <div class='relay-container'>
       <v-data-table v-model='relays' v-bind:headers="headers" hide-actions class='elevation-0'>
         <template slot='items' scope='props'>
-          <relay-row :relay="props.item"></relay-row>
+          <!--<relay-row :relay="props.item"></relay-row>-->
+          <td class='text-xs-left' style='width: 10px'>
+            <div class='led' v-bind:class="{green: props.item.connected, yellow: props.item.connecting, red: !props.item.connecting && !props.item.connected}"> 
+            </div>
+          </td>
+          <td class='text-xs-left' style='width: 20px'>{{ props.item._id }}</td>
+          <td class='text-xs-left'>{{ props.item.bytesSent }}</td>
+          <td class='text-xs-left'>{{ props.item.bytesReceived }}</td>
+          <td class='text-xs-left'>{{ props.item.ip }}</td>
+          <td class='text-xs-left'>{{ props.item.port }}</td>
         </template>
       </v-data-table>
     </div>
@@ -11,24 +20,24 @@
 <script>
   import State from '../../state'
   import RelayService from '../../services/RelayService'
-  import RelayRow from './RelayRow'
+  import { Relay } from '../../services/RelayService'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 
   export default {
     data () {
       return {
-        relays: RelayService.getRelays(),
+        relays: [new Relay(0)],
         headers: tableHeaders.map((val, index) => { return {text: val, value: index, left: true} })
       }
     },
     components: {
-      RelayRow
     },
     created () {
+      this.relays = RelayService.getRelays()
+
       RelayService.on('relays-changed', relays => {
-        this.relays = relays.map(r => r)
-        
+        this.relays = relays
       })
       
     },

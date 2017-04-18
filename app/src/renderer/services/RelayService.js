@@ -8,7 +8,7 @@ import { EventEmitter } from 'events'
  * duck typing for now
  */
 
-class Relay extends EventEmitter {
+export class Relay extends EventEmitter {
   constructor(id, ip, port) {
     super()
 
@@ -57,9 +57,13 @@ class RelayService extends EventEmitter {
     const clientid= Buffer.alloc(4);
     const desc={'writekey':'12345678123456781234567812345678','writeiv':'a2xhcgAAAAAAAAAA','readkey':'12345678123456791234567812345679','readiv':'a2xhcgAAAAAAAAAB','clientid':String(clientid)};
     
+    relay.connecting = true
     return ConnectionManager.newRelayConnection(relay.ip, relay.port, desc)
       .then(relayConnection => {
         this.relayConnections[relay._id] = relayConnection
+        
+        relay.connected = true
+        relay.connecting = false
 
         relayConnection.on('data', data => {
           relay.addReceivedBytes(data.length)
@@ -80,7 +84,7 @@ class RelayService extends EventEmitter {
     return API.getRelays()
       .then(relays => {
         this.relays = relays.map(r => new Relay(r._id, r.ip, r.port))
-        this.emit('relays-changed', relays)
+        this.emit('relays-changed', this.relays)
       })
   }
 }

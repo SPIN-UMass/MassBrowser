@@ -5,7 +5,7 @@
             <v-container fluid>
                 <!--<div class="title">Main Content</div>-->
                 <div v-show="e1 === 'home'">
-                  <map-view class='map-view'></map-view>
+                  <!--<map-view class='map-view'></map-view>-->
                   <relay-view class='relay-view'></relay-view>
                 </div>
                 <div v-show="e1 === 'websites'">
@@ -30,7 +30,7 @@
         </v-bottom-nav>
         <status-widget></status-widget>
        <!--<v-footer>Footer</v-footer>-->
-       <button v-on:click="showStatus('asdflkjasdfljsdaf')">CLICKMEEEE</button>
+       <!--<button v-on:click="showStatus('asdflkjasdfljsdaf')">CLICKMEEEE</button>-->
     </div>
 </template>
 
