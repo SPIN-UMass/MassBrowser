@@ -9,10 +9,10 @@ import {Crypto} from '../crypt/crypto'
 import {pendMgr} from './PendingConnections'
 
 export class ConnectionReceiver {
-  constructor (socket) {
-    this.socket = socket
-
-    this.socket.on('data', (data) => {
+  constructor (socketup,socketdown) {
+    this.socketup = socketup
+    this.socketdown = socketdown
+    this.socketup.on('data', (data) => {
       // console.log('DATA RECIEVED', data);
       if (this.isAuthenticated) {
         this.crypt.decrypt(data)
@@ -64,7 +64,7 @@ export class ConnectionReceiver {
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendpacket, data])
-    this.socket.write(this.crypt.encrypt(b))
+    this.socketdown.write(this.crypt.encrypt(b))
   }
 
   newConnection (ip, port, conid) {
@@ -72,6 +72,7 @@ export class ConnectionReceiver {
       if (policy.checkDestination(ip, port)) {
         this.connections[conid] = net.connect(ip, port, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
+
         })
         this.connections[conid].on('data', (data) => {
           this.write(conid, 'D', data)
