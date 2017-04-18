@@ -24,7 +24,7 @@ class _ConnectionManager {
   }
 
   newConnection(ip, port, conid) {
-    console.log("Connection Created");
+    this.ClientConnections[conid].relayConnected()
 
   }
 
@@ -59,10 +59,15 @@ class _ConnectionManager {
       }
     }
     if (CMD === 'C') {
-      this.ClientConnections[lastconid].end();
+      this.cleanClose(lastconid)
+
     }
   }
+  cleanClose(conid){
+    this.ClientConnections[conid].end()
+    //delete this.ClientConnections[conid]
 
+  }
   listener(data) {
     //console.log('DATA RECEIVED', data);
     while (data) {
@@ -139,7 +144,7 @@ class _ConnectionManager {
   }
 
 
-  newClientConnection(connection, dstip, dstport) {
+  newClientConnection(connection, dstip, dstport,onConnect) {
     var conid = crypto.randomBytes(2).readUInt16BE();
 
     console.log(conid, dstip, dstport);
@@ -149,17 +154,28 @@ class _ConnectionManager {
     }
     
     this.ClientConnections[conid] = connection;
-    this.relayAssigner.assignRelay(dstip,dstport)
-      .then(relay => {
-        this.Connectionmaps[conid] = relay
-        var cr = String(dstip) + ':' + String(dstport);
-        console.log('sendsize:', cr.length);
-        this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
-        connection.on('data', (data) => {
-          this.writer(data, conid);
+    this.ClientConnections[conid].relayConnected=()=>{onConnect()}
+    return new Promise((resolve,reject)=> {
+      this.relayAssigner.assignRelay(dstip, dstport)
+        .then(relay => {
 
-        });
-      })
+          this.Connectionmaps[conid] = relay
+          var cr = String(dstip) + ':' + String(dstport);
+          console.log('sendsize:', cr.length);
+          this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
+          connection.on('data', (data) => {
+            this.writer(data, conid);
+
+
+          });
+          resolve("Assigned")
+
+        }, (err) => {
+
+          delete this.ClientConnections[conid]
+          reject("Don't Proxy")
+        })
+    })
   }
 
 }

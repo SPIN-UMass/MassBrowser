@@ -1,6 +1,3 @@
-/**
- * Created by milad on 4/12/17.
- */
 'use strict'
 
 var net = require('net'),

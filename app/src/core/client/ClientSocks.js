@@ -22,8 +22,67 @@ export function startClientSocks (mhost, mport) {
   function onConnection(socket, port, address, proxy_ready) {
     // Implement your own proxy here! Do encryption, tunnelling, whatever! Go flippin' mental!
     // I plan to tunnel everything including SSH over an HTTP tunnel. For now, though, here is the plain proxy:
-    ConnectionManager.newClientConnection(socket, port, address)
-    proxy_ready()
+    ConnectionManager.newClientConnection(socket, port, address,proxy_ready).then(()=>{}, (error)=>{
+
+
+
+
+      var proxy = net.createConnection({port:port, host:address}, proxy_ready);
+      var localAddress,localPort;
+      proxy.on('connect', ()=>{
+
+        localPort=proxy.localPort;
+      })
+      proxy.on('data', (d)=> {
+        try {
+          //console.log('receiving ' + d.length + ' bytes from proxy');
+          if (!socket.write(d)) {
+            proxy.pause();
+
+            socket.on('drain', function(){
+              proxy.resume();
+            });
+            setTimeout(function(){
+              proxy.resume();
+            }, 100);
+          }
+        } catch(err) {
+        }
+      });
+      socket.on('data', function(d) {
+        // If the application tries to send data before the proxy is ready, then that is it's own problem.
+        try {
+          //console.log('sending ' + d.length + ' bytes to proxy');
+          if (!proxy.write(d)) {
+            socket.pause();
+
+            proxy.on('drain', function(){
+              socket.resume();
+            });
+            setTimeout(function(){
+              socket.resume();
+            }, 100);
+          }
+        } catch(err) {
+        }
+      });
+
+      proxy.on('error', function(err){
+        //console.log('Ignore proxy error');
+      });
+      proxy.on('close', function(had_error) {
+        try {
+          if(localAddress && localPort)
+            console.log('The proxy %s:%d closed', localAddress, localPort);
+          else
+            console.error('Connect to %s:%d failed', address, port);
+          socket.end();
+        } catch (err) {
+        }
+      }.bind(this));
+
+    })
+
   }
 
   return new Promise((resolve, reject) => {
