@@ -16,15 +16,15 @@ export function runTLSserver () {
   }
 
   const server = tls.createServer(options, (socket) => {
-    console.log('server connected',
+    console.log('relay connected',
       socket.authorized ? 'authorized' : 'unauthorized')
 
     var recver = new ConnectionReceiver(socket)
   })
 
   server.listen(8040, () => {
-    console.log('server bound')
+    console.log('relay bound')
   })
-  console.log('test server started on 8040')
+  console.log('test relay started on 8040')
 }
 

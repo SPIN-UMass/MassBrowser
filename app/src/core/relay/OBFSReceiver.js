@@ -13,7 +13,7 @@ export function runOBFSserver (port) {
   var up_limit= ThrottleGroup({rate:100000})
   var down_limit = ThrottleGroup({rate:100000})
   const server = net.createServer((socket) => {
-    console.log('server connected',
+    console.log('relay connected',
       socket.authorized ? 'authorized' : 'unauthorized')
     //var dd=socket.pipe(tg.throttle())
     var my_up= up_limit.throttle()
@@ -25,7 +25,7 @@ export function runOBFSserver (port) {
   })
 
   server.listen(port, () => {
-    console.log('server bound')
+    console.log('relay bound')
   })
-  console.log('test server started on ', port)
+  console.log('test relay started on ', port)
 }

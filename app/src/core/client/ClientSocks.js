@@ -7,7 +7,7 @@ var net = require('net'),
 import ConnectionManager from './ConnectionManager'
 
 // Create server
-// The server accepts SOCKS connections. This particular server acts as a proxy.
+// The relay accepts SOCKS connections. This particular relay acts as a proxy.
 
 export function startClientSocks (mhost, mport) {
   var HOST = mhost,

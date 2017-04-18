@@ -10,11 +10,11 @@ gulp.task("client", function() {
     pipe(gulp.dest("app/build/client/"));
 });
 
-gulp.task("server", function() {
+gulp.task("relay", function() {
   process.env.BABEL_ENV = 'core'
-  return gulp.src("app/src/core/server/*.js").
+  return gulp.src("app/src/core/relay/*.js").
     pipe(babel()).
-    pipe(gulp.dest("app/build/server/"));
+    pipe(gulp.dest("app/build/relay/"));
 });
 
 gulp.task("crypto", function() {
@@ -24,8 +24,8 @@ gulp.task("crypto", function() {
     pipe(gulp.dest("app/build/crypt/"));
 });
 
-gulp.task("watch", ['client', 'server','crypto'], function() {
+gulp.task("watch", ['client', 'relay','crypto'], function() {
   gulp.watch('app/src/core/client/*', ['client']);
-  gulp.watch('app/src/core/server/*', ['server']);
+  gulp.watch('app/src/core/relay/*', ['relay']);
   gulp.watch('app/src/core/crypt/*', ['crypto']);
 });

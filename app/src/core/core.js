@@ -1,5 +1,5 @@
 import { increment } from '../actions/counter'
-import { runtestserver } from './server/TLSReceiver'
+import { runtestserver } from './relay/TLSReceiver'
 
 export class YalerCore {
   store;
