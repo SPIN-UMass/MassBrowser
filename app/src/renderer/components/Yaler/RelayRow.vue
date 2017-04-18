@@ -1,36 +1,40 @@
 <template>
-    <div class='relay-container'>
-      <v-data-table v-model='relays' v-bind:headers="headers" hide-actions class='elevation-0'>
-        <template slot='items' scope='props'>
-          <relay-row :relay="props.item"></relay-row>
-        </template>
-      </v-data-table>
-    </div>
+  <div>
+    <td class='text-xs-left' style='width: 10px'>
+      <div class='led' v-bind:class="{green: relay.connected, yellow: relay.connecting, red: !relay.connecting && !relay.connected}"> 
+      </div>
+    </td>
+    <td class='text-xs-left' style='width: 20px'>{{ relay._id }}</td>
+    <td class='text-xs-left'>{{ bytesSent }}</td>
+    <td class='text-xs-left'>{{ bytesReceived }}</td>
+    <td class='text-xs-left'>{{ relay.ip }}</td>
+    <td class='text-xs-left'>{{ relay.port }}</td>
+  </div>
 </template>
 
 <script>
   import State from '../../state'
   import RelayService from '../../services/RelayService'
-  import RelayRow from './RelayRow'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 
   export default {
     data () {
       return {
-        relays: RelayService.getRelays(),
-        headers: tableHeaders.map((val, index) => { return {text: val, value: index, left: true} })
+        bytesSent: 0,
+        bytesReceived: 0
       }
     },
-    components: {
-      RelayRow
-    },
+    props: ['relay'],
     created () {
-      RelayService.on('relays-changed', relays => {
-        this.relays = relays.map(r => r)
+      relay.on('recieved', () => {
         
       })
-      
+      // var foo = () => {
+      //   this.$forceUpdate()
+      //   setTimeout(foo, 500)
+      // }
+      // setTimeout(foo, 500)
     },
     methods: {
     }

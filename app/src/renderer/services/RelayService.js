@@ -8,6 +8,30 @@ import { EventEmitter } from 'events'
  * duck typing for now
  */
 
+class Relay extends EventEmitter {
+  constructor(id, ip, port) {
+    super()
+
+    this._id = id
+    this.ip = ip
+    this.port = port
+
+    this.connected = false
+    this.connecting = false
+
+    this.bytesSent = 0
+    this.bytesReceived = 0
+  }
+
+  addReceivedBytes(size) {
+    this.bytesReceived += size
+  }
+
+  addSentBytes(size) {
+    this.bytesSent += size
+  }
+}
+
 class RelayService extends EventEmitter {
   constructor() {
     super()
@@ -25,36 +49,38 @@ class RelayService extends EventEmitter {
   assignRelay(ip, port) {
     var relay = this.relays[0]
 
-    if (relay.id in this.relayConnections) {
-      return new Promise((resolve, reject) => resolve(this.relayConnections[relay.id]))
+    if (relay._id in this.relayConnections) {
+      return new Promise((resolve, reject) => resolve(this.relayConnections[relay._id]))
     }
 
     console.debug("Creating new relay connection")
+    const clientid= Buffer.alloc(4);
     const desc={'writekey':'12345678123456781234567812345678','writeiv':'a2xhcgAAAAAAAAAA','readkey':'12345678123456791234567812345679','readiv':'a2xhcgAAAAAAAAAB','clientid':String(clientid)};
+    
     return ConnectionManager.newRelayConnection(relay.ip, relay.port, desc)
       .then(relayConnection => {
-        this.relayConnections[relay.id] = relayConnection
-        this._updateConnectedRelays()
+        this.relayConnections[relay._id] = relayConnection
+
+        relayConnection.on('data', data => {
+          relay.addReceivedBytes(data.length)
+        })
+
+        relayConnection.on('send', data => {
+          relay.addSentBytes(data.length)
+        })
         return relayConnection
       })
   }
 
-  _updateConnectedRelays() {
-    return new Promise((resolve, reject) => {
-      this.connectedRelays = this.relays.filter(relay => {relay.id in this.relayConnections})
-      this.emit('connected-relays-changed', this.connectedRelays)
-      resolve()
-    })
-  }
-
-  getConnectedRelays () {
-    return this.connectedRelays
+  getRelays () {
+    return this.relays
   }
 
   fetchRelays () {
     return API.getRelays()
       .then(relays => {
-        this.relays = relays
+        this.relays = relays.map(r => new Relay(r._id, r.ip, r.port))
+        this.emit('relays-changed', relays)
       })
   }
 }

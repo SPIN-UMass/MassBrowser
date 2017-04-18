@@ -44,10 +44,12 @@
   import RelayService from '../../services/RelayService'
   import WebsiteServer from '../../services/WebsiteService'
 
+  import { startClientSocks } from '../../../core/client' 
+
   export default {
     data () {
       return {
-        e1: 'websites'
+        e1: 'home'
       }
     },
     components: {
@@ -59,6 +61,15 @@
     created () {
       RelayService.start()
       WebsiteServer.start()
+
+      var status = State.status('Starting SOCKS proxy')
+      startClientSocks()
+        .then(() => status.clear())
+        .catch(err => {
+          console.log(err)
+          status.clear()
+          State.status('Starting SOCKS proxy failed', { timeout: true, level: 'error'})
+        })
     },
     methods: {
       showStatus (status, options) {

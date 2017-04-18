@@ -76,6 +76,7 @@ export default class RelayConnection extends EventEmitter {
     console.log('writing to the relay', b)
     const enc = this.cipher.encrypt(b)
     console.log('writing to the relay enc', enc)
+    this.emit('send', enc)
     this.socket.write(enc)
   }
   
