@@ -23,5 +23,10 @@
       ]
     }
   },
-  "plugins": ["transform-runtime"]
+  "plugins": [
+    "transform-runtime",
+    ["babel-plugin-root-import", {
+      "rootPathSuffix": "app/src/"
+    }]
+  ]
 }

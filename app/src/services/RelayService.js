@@ -1,6 +1,5 @@
 import API from '../api'
-import State from '../state'
-import { ConnectionManager } from '../../core/client'
+import { ConnectionManager } from '~/core/client'
 import { EventEmitter } from 'events'
 
 /**

@@ -19,8 +19,8 @@
 
 <script>
   import State from '../../state'
-  import RelayService from '../../services/RelayService'
-  import { Relay } from '../../services/RelayService'
+  import RelayService from '~/services/RelayService'
+  import { Relay } from '~/services/RelayService'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 

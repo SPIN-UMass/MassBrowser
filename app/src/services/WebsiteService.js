@@ -1,6 +1,5 @@
 import API from '../api'
-import State from '../state'
-import Datasore from '../datastore'
+import Datasore from '../renderer/datastore'
 
 class WebsiteService {
   constructor () {
@@ -9,7 +8,6 @@ class WebsiteService {
 
   start () {
     this._loadEnabledWebsites()
-    this.syncWebsites()
   }
 
   _loadEnabledWebsites () {
@@ -55,10 +53,7 @@ class WebsiteService {
   }
 
   syncWebsites () {
-    var status = State.status('Syncing website database...')
-    console.log('Syncing website database')
-
-    Promise.all([this.getLastSyncTime(), API.getLastWebsiteModificationTime()])
+    return Promise.all([this.getLastSyncTime(), API.getLastWebsiteModificationTime()])
       .then(([lastSyncTime, lastModifiedTime]) => {
         if (lastModifiedTime > lastSyncTime) {
           console.debug('Website sync is required, fetching modified websites')
@@ -68,11 +63,6 @@ class WebsiteService {
         }
       })
       .then(([_, __, lastSyncTime]) => this.updateLastSyncTime(lastSyncTime))
-      .catch(err => {
-        console.log(err)
-        State.status('Syncing websites failed', { timeout: true, level: 'error' })
-      })
-      .then(() => { status.clear() })
   }
 
   _performWebsiteSync (lastModifiedTime, lastSyncTime) {

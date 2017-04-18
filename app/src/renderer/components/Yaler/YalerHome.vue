@@ -41,10 +41,10 @@
   import WebsitesView from './WebsitesView'
   import StatusWidget from '../StatusWidget'
 
-  import RelayService from '../../services/RelayService'
-  import WebsiteServer from '../../services/WebsiteService'
+  import RelayService from '~/services/RelayService'
+  import WebsiteService from '~/services/WebsiteService'
 
-  import { startClientSocks } from '../../../core/client' 
+  import { startClientSocks } from '~/core/client' 
 
   export default {
     data () {
@@ -60,7 +60,18 @@
     },
     created () {
       RelayService.start()
-      WebsiteServer.start()
+      WebsiteService.start()
+
+      console.log('Syncing website database')
+      var status = State.status('Syncing website database...')
+      WebsiteService.syncWebsites()
+        .then(() => {
+          status.clear()
+        })
+        .catch(err => {
+          console.log(err)
+          State.status('Syncing websites failed', { timeout: true, level: 'error' })
+        })
 
       var status = State.status('Starting SOCKS proxy')
       startClientSocks()

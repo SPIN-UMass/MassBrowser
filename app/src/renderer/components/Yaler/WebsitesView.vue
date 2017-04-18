@@ -31,7 +31,7 @@
 
 <script>
   import Datastore from '../../datastore'
-  import WebsiteService from '../../services/WebsiteService'
+  import WebsiteService from '~/services/WebsiteService'
 
   const tableHeaders = ['Active', 'Name', 'Category']
 

@@ -387,7 +387,5 @@ function proxyReady4 () {
   log('socks4 Connected to: %s:%d:%s', this.socksAddress, this.socksPort, this.socksUid)
 }
 
-module.exports = {
-  createServer: createSocksServer
-}
+export const createServer = createSocksServer
 
