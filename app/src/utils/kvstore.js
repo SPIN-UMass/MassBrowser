@@ -12,7 +12,7 @@ class _KVStore {
   }
 
   set(key, value) {
-    return this.model.update({_id: key}, {_id: key, value: value})
+    return this.model.update({_id: key}, {_id: key, value: value}, {upsert: true})
   }
 
   get(key) {
