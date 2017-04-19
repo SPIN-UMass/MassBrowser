@@ -16,8 +16,7 @@ function _createModel(name, schemaModel, meta, datastore) {
       super()
 
       if (!schema) {
-        schema = Object.keys(this).filter(k => !k.startsWith('_'))
-        schema.push('_id')
+        schema = ['_id'].concat(Object.keys(this).filter(k => !k.startsWith('_')))
       }
       
       this._schema = schema
@@ -42,7 +41,7 @@ function _createModel(name, schemaModel, meta, datastore) {
     }
 
     static find (q) {
-      console.debug("[DATABASE] " + this.name + " find")
+      console.debug("[DATABASE] <find> " + this.name)
       if (q === undefined) {
         q = {}
       }
@@ -51,7 +50,7 @@ function _createModel(name, schemaModel, meta, datastore) {
     }
 
     static findOne (q) {
-      console.debug("[DATABASE] " + this.name + " findOne")
+      console.debug("[DATABASE] <findOne> " + this.name)
       if (q === undefined) {
         q = {}
       }
@@ -60,13 +59,13 @@ function _createModel(name, schemaModel, meta, datastore) {
     }
 
     static insert () {
-      console.debug("[DATABASE] " + this.name + " insert")
+      console.debug("[DATABASE] <insert> " + this.name)
       console.log(arguments[0])
       return this._promisize(datastore.insert, arguments)
     }
 
     static update () {
-      console.debug("[DATABASE] " + this.name + " update")
+      console.debug("[DATABASE] <update> " + this.name)
       return this._promisize(datastore.update, arguments)
     }
 
@@ -104,11 +103,11 @@ function _createModel(name, schemaModel, meta, datastore) {
             return insert()
           }
 
-          var changed = this._schema.reduce((r, k) => { r |= doc[k] !== this[k] }, false)
+          var changed = this._schema.reduce((r, k) =>  r || (doc[k] !== this[k]), false)
           if (changed) {
             return this.constructor.update({_id: this._id}, this.toObject())
           }
-
+          
           return doc
         })
     }

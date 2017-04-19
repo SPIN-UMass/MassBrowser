@@ -5,44 +5,10 @@ import Website from '~/models/Website'
 
 class WebsiteService {
   constructor () {
-    this.enabledWebsites = new Set()
   }
 
   start () {
-    this._loadEnabledWebsites()
-  }
 
-  _loadEnabledWebsites () {
-    console.log('Loading enabled websites set')
-    KVStore.get('enabled-websites')
-      .then(enabledWebsites => {
-        enabledWebsites = enabledWebsites || []
-        this.enabledWebsites.clear()
-        enabledWebsites.forEach(website => { this.enabledWebsites.add(website) })
-      })
-  }
-
-  _saveEnabledWebsites () {
-    KVStore.set('enabled-websites', Array.from(this.enabledWebsites))
-  }
-
-  isWebsiteEnabled (website) {
-    return this.enabledWebsites.has(website)
-  }
-
-  setWebsiteEnabled (website, enabled) {
-    // Don't do anything if no change is made
-    if (this.enabledWebsites.has(website) === enabled) {
-      return
-    }
-
-    if (enabled) {
-      this.enabledWebsites.add(website)
-    } else {
-      this.enabledWebsites.delete(website)
-    }
-
-    this._saveEnabledWebsites()
   }
 
   getLastSyncTime () {
@@ -74,9 +40,17 @@ class WebsiteService {
         
         var savePromises = []
         websites.forEach(websiteInfo => {
-          var website = new Website()
-          Object.assign(website, websiteInfo)
-          savePromises.push(website.save())
+          savePromises.push(Website.findOne({_id: websiteInfo._id})
+            .then(website => {
+              if (!website) {
+                var website = new Website()
+              }
+
+              Object.assign(website, websiteInfo)              
+              return website.save()
+            })
+          )
+          
         })
 
         return Promise.all(savePromises)

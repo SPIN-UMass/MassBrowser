@@ -19,7 +19,7 @@
           >
           <template slot="items" scope="props">
             <td class="text-xs-left" style='width: 50px'>
-              <v-switch primary v-model="props.item.enabled" v-on:change='changed(props.item._id, props.item.enabled)' light/>
+              <v-switch primary v-model="props.item.enabled" v-on:change='changed(props.item)' light/>
             </td>
             <td class="text-xs-left">{{ props.item.name }}</td>
             <td class="text-xs-left">{{ props.item.category }}</td>
@@ -46,16 +46,13 @@
       // {name: { $regex: /.*face.*/i}}
       Website.find()
         .then(websites => {
-          websites.forEach(website => {
-            website.enabled = WebsiteService.isWebsiteEnabled(website._id)
-          })
           this.websites = websites
         })
     },
     methods: {
       changed: (website, state) => {
-        console.log('Setting website ' + website + ' to ' + state)
-        WebsiteService.setWebsiteEnabled(website, state)
+        console.log('Setting website ' + website.name + ' to ' + website.enabled)
+        website.save()
       }
     }
   }
