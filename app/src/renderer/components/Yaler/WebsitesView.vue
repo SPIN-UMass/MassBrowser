@@ -30,9 +30,8 @@
 </template>
 
 <script>
-  import Datastore from '../../datastore'
   import WebsiteService from '~/services/WebsiteService'
-
+  import Website from '~/models/Website'
   const tableHeaders = ['Active', 'Name', 'Category']
 
   export default {
@@ -45,8 +44,7 @@
     },
     created () {
       // {name: { $regex: /.*face.*/i}}
-      Datastore.collection('websites')
-        .then(websiteCollection => websiteCollection.find())
+      Website.find()
         .then(websites => {
           websites.forEach(website => {
             website.enabled = WebsiteService.isWebsiteEnabled(website._id)

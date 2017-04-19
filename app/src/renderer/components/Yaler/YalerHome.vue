@@ -44,7 +44,7 @@
   import RelayService from '~/services/RelayService'
   import WebsiteService from '~/services/WebsiteService'
 
-  import { startClientSocks } from '~/core/client' 
+  import { startClientSocks } from '~/core/client'
 
   export default {
     data () {

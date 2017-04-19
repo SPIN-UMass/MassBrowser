@@ -1,5 +1,7 @@
 import API from '../api'
-import Datasore from '../renderer/datastore'
+import KVStore from '~/utils/kvstore'
+import Website from '~/models/Website'
+
 
 class WebsiteService {
   constructor () {
@@ -12,7 +14,7 @@ class WebsiteService {
 
   _loadEnabledWebsites () {
     console.log('Loading enabled websites set')
-    Datasore.getItem('enabled-websites')
+    KVStore.get('enabled-websites')
       .then(enabledWebsites => {
         enabledWebsites = enabledWebsites || []
         this.enabledWebsites.clear()
@@ -21,7 +23,7 @@ class WebsiteService {
   }
 
   _saveEnabledWebsites () {
-    Datasore.setItem('enabled-websites', Array.from(this.enabledWebsites))
+    KVStore.set('enabled-websites', Array.from(this.enabledWebsites))
   }
 
   isWebsiteEnabled (website) {
@@ -44,12 +46,12 @@ class WebsiteService {
   }
 
   getLastSyncTime () {
-    return Datasore.getItem('last-website-sync')
+    return KVStore.get('last-website-sync')
       .then(value => value || 0)
   }
 
   updateLastSyncTime (syncTime) {
-    return Datasore.setItem('last-website-sync', syncTime)
+    return KVStore.set('last-website-sync', syncTime)
   }
 
   syncWebsites () {
@@ -69,12 +71,16 @@ class WebsiteService {
     return API.getWebsites(lastSyncTime)
       .then(websites => {
         console.log(websites.length + ' websites synced')
-        return Datasore.collection('websites')
-          .then(websiteCollection => {
-            websites.forEach(website => {
-              websiteCollection.update({_id: website._id}, website, {upsert: true})
-            })
-          }).then(() => {
+        
+        var savePromises = []
+        websites.forEach(websiteInfo => {
+          var website = new Website()
+          Object.assign(website, websiteInfo)
+          savePromises.push(website.save())
+        })
+
+        return Promise.all(savePromises)
+          .then(websites => {
             return [websites, lastModifiedTime, lastSyncTime]
           })
       })
