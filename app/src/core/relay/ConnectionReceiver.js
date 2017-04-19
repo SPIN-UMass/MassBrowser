@@ -70,7 +70,7 @@ export class ConnectionReceiver {
   newConnection (ip, port, conid) {
     try {
       if (policy.checkDestination(ip, port)) {
-        this.connections[conid] = net.connect(ip, port, () => {
+        this.connections[conid] = net.connect({host:ip ,port:port}, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
 
         })

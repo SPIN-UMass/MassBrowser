@@ -22,7 +22,7 @@ export function startClientSocks (mhost, mport) {
   function onConnection(socket, port, address, proxy_ready) {
     // Implement your own proxy here! Do encryption, tunnelling, whatever! Go flippin' mental!
     // I plan to tunnel everything including SSH over an HTTP tunnel. For now, though, here is the plain proxy:
-    ConnectionManager.newClientConnection(socket, port, address,proxy_ready).then(()=>{}, (error)=>{
+    ConnectionManager.newClientConnection(socket, address,port,proxy_ready).then(()=>{}, (error)=>{
 
 
 
