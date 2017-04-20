@@ -30,7 +30,6 @@
 </template>
 
 <script>
-  import WebsiteService from '~/services/WebsiteService'
   import Website from '~/models/Website'
   const tableHeaders = ['Active', 'Name', 'Category']
 

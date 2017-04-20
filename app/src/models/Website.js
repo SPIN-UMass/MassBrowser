@@ -4,6 +4,7 @@ class WebsiteSchema {
   constructor() {
     this.name = null
     this.category = null
+    this.blocked = null
     this.enabled = false
   }
 }

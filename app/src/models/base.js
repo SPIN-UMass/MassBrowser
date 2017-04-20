@@ -20,6 +20,7 @@ function _createModel(name, schemaModel, meta, datastore) {
       }
       
       this._schema = schema
+      this.model = Model
       this._new_instance = true
     }
 
@@ -60,7 +61,6 @@ function _createModel(name, schemaModel, meta, datastore) {
 
     static insert () {
       console.debug("[DATABASE] <insert> " + this.name)
-      console.log(arguments[0])
       return this._promisize(datastore.insert, arguments)
     }
 

@@ -45,7 +45,19 @@ class RelayService extends EventEmitter {
     this.fetchRelays()
   }
 
-  assignRelay(ip, port) {
+  assignRelay(host, port) {
+    // Only support domains
+    const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
+    if (ipRegex.test(host)) {
+      console.error("IP based filtering not supported")
+      return
+    }
+
+    Domain.findDomain(host)
+      .then(domain => {
+        // TODO: Implement Policy Here
+      })
+    
     var relay = this.relays[0]
 
     if (relay._id in this.relayConnections) {
