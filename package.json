@@ -19,7 +19,7 @@
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix && cd app && npm install",
     "client": "node ./app/build/client/main.js",
-    "server": "node ./app/build/server/main.js"
+    "relay": "node ./app/build/relay/main.js"
   },
   "author": "Greg Holguin <simulatedgreg@gmail.com>",
   "license": "MIT",
@@ -80,5 +80,8 @@
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
     "webpack-merge": "^2.4.0"
+  },
+  "dependencies": {
+    "babel-plugin-root-import": "^5.1.0"
   }
 }

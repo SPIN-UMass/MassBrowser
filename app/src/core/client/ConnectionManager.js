@@ -161,7 +161,7 @@ class _ConnectionManager {
 
           this.Connectionmaps[conid] = relay
           var cr = String(dstip) + ':' + String(dstport);
-          console.log('sendsize:', cr.length);
+          console.log('sendsize:', cr.length,cr);
           this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
           connection.on('data', (data) => {
             this.writer(data, conid);

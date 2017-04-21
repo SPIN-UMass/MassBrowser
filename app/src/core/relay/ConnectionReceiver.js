@@ -27,7 +27,7 @@ export class ConnectionReceiver {
     this.lastcommand = ''
     this.lastconid = ''
     this.lastsize = 0
-    this.headersize = 5
+    this.headersize = 32
 
     this.newconnectioncarry = Buffer(0)
 
@@ -39,20 +39,24 @@ export class ConnectionReceiver {
     // data = Buffer.concat([this.newconcarry, data]);
     // console.log("MY DATA", data);
     if (data.length >= this.headersize) {
-      const conid = data.toString('ascii', 0, 4)
-      const desc = pendMgr.getPendingConnection(conid)
-      console.log('Conid', conid)
+      const sessiontoken = data.toString('ascii', 0, this.headersize)
+      const desc = pendMgr.getPendingConnection(sessiontoken)
+      console.log('Conid', sessiontoken)
       if (desc) {
-        console.log('clientID', conid)
+        console.log('clientID', sessiontoken)
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
         }, () => {
+          console.log("I am here 3")
           this.socket.end()
         })
-        this.crypt.decrypt(data.slice(4, data.length))
+        console.log("I am here")
+        this.crypt.decrypt(data.slice(this.headersize, data.length))
+        console.log("I am here 2")
         this.isAuthenticated = true
         console.log('Authenticated')
       } else {
+        console.log("I am here 4")
         this.socket.end()
       }
     }
@@ -70,6 +74,7 @@ export class ConnectionReceiver {
   newConnection (ip, port, conid) {
     try {
       if (policy.checkDestination(ip, port)) {
+        console.log("ip",ip,"port",port);
         this.connections[conid] = net.connect({host:ip ,port:port}, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
 
@@ -88,7 +93,7 @@ export class ConnectionReceiver {
       }
     } catch (err) {
       this.write(conid, 'C', Buffer(ip + ':' + String(port)))
-      console.debug(err)
+      console.log(err)
     }
   }
 
@@ -96,7 +101,9 @@ export class ConnectionReceiver {
     if (CMD === 'N') {
       data = String(data)
       if (data.length === size) {
+        console.log("new con",data)
         const sp = data.split(':')
+
         const ip = sp[0]
         const port = sp[1]
         console.log('CREATE CONNECTION', ip, port)
