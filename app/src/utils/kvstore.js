@@ -19,6 +19,10 @@ class _KVStore {
     return this.model.findOne({_id: key})
       .then(doc => { return doc ? doc.value : null })
   }
+  getWithDefault(key,def) {
+    return this.model.findOne({_id: key})
+      .then(doc => { return doc ? doc.value : def })
+  }
 }
 
 const KVStore = new _KVStore()

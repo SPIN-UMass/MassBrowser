@@ -8,9 +8,10 @@ var ThrottleGroup = require('./throttle').ThrottleGroup;
 
 
 
-export function runOBFSserver (port) {
+export function runOBFSserver (publicIP,publicPort) {
 
   var up_limit= ThrottleGroup({rate:100000})
+
   var down_limit = ThrottleGroup({rate:100000})
   const server = net.createServer((socket) => {
     console.log('relay connected',
@@ -24,8 +25,9 @@ export function runOBFSserver (port) {
     var recver = new ConnectionReceiver(my_up,my_down )
   })
 
-  server.listen(port, () => {
+  server.listen(publicPort, () => {
+
     console.log('relay bound')
   })
-  console.log('test relay started on ', port)
+  console.log('test relay started on ', publicPort)
 }
