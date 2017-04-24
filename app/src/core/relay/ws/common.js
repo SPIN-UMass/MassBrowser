@@ -12,7 +12,7 @@ class WSServerConnection extends EventEmitter {
     super()
     this.IPaddr = KVStore.getWithDefault('serverIP', '127.0.0.1')
     this.port = KVStore.getWithDefault('serverPort', '8000')
-    this.fingerprint = KVStore.get('fingerprint')
+    this.fingerprint = KVStore.get('serverFingerprint')
     this.ws = new WebSocket(util.format('ws://%s:%s/', this.IPaddr, this.port), {
       perMessageDeflate: false
 
