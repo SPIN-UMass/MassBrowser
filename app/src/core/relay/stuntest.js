@@ -7,7 +7,7 @@ var localIP = '0.0.0.0'; // You can try 0.0.0.0
 var net    = require('net');
 var stun   = require('vs-stun');
 var events = require('events');
-server = {
+var server = {
   host: 'stun.l.google.com',
   port: 19302
 };
@@ -17,7 +17,6 @@ var st=stun.connect(server , (error,socket) => {
     s.pipe(s);
   });
   sock.listen(socket.stun.local.port, socket.stun.local.host);
-  st.emit('refresh',stun)
   console.log("Local listening socket:");
   console.log(sock.address());
 

@@ -1,4 +1,4 @@
-import API from '../api'
+import API from '../api/httpAPI'
 import KVStore from '~/utils/kvstore'
 import { Website, Domain, CDN, Region, Category } from '~/models'
 

@@ -18,8 +18,8 @@
     "test": "npm run unit",
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix && cd app && npm install",
-    "client": "node ./app/build/client/main.js",
-    "relay": "node ./app/build/relay/main.js"
+    "client": "node ./app/build/core/client/main.js",
+    "relay": "node ./app/build/core/relay/main.js"
   },
   "author": "Greg Holguin <simulatedgreg@gmail.com>",
   "license": "MIT",
