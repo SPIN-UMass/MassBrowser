@@ -4,7 +4,7 @@
 import KVStore from '~/utils/kvstore'
 const util = require('util')
 import { EventEmitter } from 'events'
-const relayPath= '/relays'
+const relayPath= '/api/relays/'
 const WebSocket = require('ws')
 
 class WSServerConnection extends EventEmitter {
@@ -19,15 +19,15 @@ class WSServerConnection extends EventEmitter {
     var pip = KVStore.getWithDefault('serverIP', '127.0.0.1')
     var pport = KVStore.getWithDefault('serverPort', 8000)
 
-    var pfinger = KVStore.get('serverFingerprint')
-    Promise.all([pip, pport, pfinger]).then(values => {
+    var prid = KVStore.getWithDefault('relayid','mEJOxpfXi3Q')
+    Promise.all([pip, pport, prid]).then(values => {
       console.log(values)
       this.IPaddr = values[0]
 
       this.port = values[1]
-      this.fingerprint = values[2]
+      this.relayid = values[2]
       console.log(sessionid)
-      this.ws = new WebSocket(util.format('ws://%s:%s/relay/?session_key=%s', this.IPaddr, this.port,sessionid), {
+      this.ws = new WebSocket(util.format('ws://%s:%s/api/?session_key=%s', this.IPaddr, this.port,sessionid), {
         perMessageDeflate: false,
 
 
@@ -61,8 +61,9 @@ class WSServerConnection extends EventEmitter {
   }
 
   replayReceived(resp) {
-    if (resp['id'] in this.connectionMap) {
-      this.connectionMap[resp['id']](resp['data'])
+    if (resp['message_id'] in this.connectionMap) {
+      console.log('I am HERE',this.connectionMap[resp['message_id']])
+      this.connectionMap[resp['message_id']](resp['data'])
     }
 
 
@@ -84,7 +85,7 @@ class WSServerConnection extends EventEmitter {
 
 
     var sproto = JSON.stringify(proto)
-    console.log('I am sending', sproto)
+    console.log('I am sending with resp' , sproto)
     this.ws.send(sproto)
   }
   sendJSON (path,method,data,resolve) {
@@ -104,10 +105,8 @@ class WSServerConnection extends EventEmitter {
   }
 
   relayUp (ip, port, nattype) {
-    return Promise((resolve, reject) => {
-        if (this.fingerprint === null) {
-          this.register(ip, port).then(() => {this.relayUp(ip, port).then(resolve, reject)})
-        } else {
+    return new Promise((resolve, reject) => {
+
           var proto = {'ip': ip,
             'port': port,
             'fingerprint': this.fingerprint,
@@ -115,14 +114,14 @@ class WSServerConnection extends EventEmitter {
             'natType': nattype,}
 
 
-          this.sendJSON(relayPath,'post', proto,resolve)
-        }
+          this.sendReceiveJSON(relayPath+this.relayid,'POST', proto,resolve)
+
       }
     )
   }
 
   register (ip, port, nattype) {
-    return Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       var proto = {
         'cmd': 'register',
         'ip': ip,
