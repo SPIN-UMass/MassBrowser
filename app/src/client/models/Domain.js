@@ -1,4 +1,4 @@
-import { createModel } from './base'
+import { createModel } from '~/models'
 
 const globalRegexCache = {}
 

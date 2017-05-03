@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:8000/'
+const API_URL = 'http://mac:8000/'
 // const API_URL = 'http://demo6707596.mockable.io/'
 const request = require('request')
 
@@ -18,36 +18,37 @@ class API {
   }
 
   getLastModificationTime (entity) {
-    return fetch(API_URL + 'meta/last_modification/' + entity)
-      .then(response => response.json())
+    return fetch(API_URL + 'api/meta/last_modification_date')
+      .then(response => response.text())
+      .then(text => new Date(text))
   }
 
   getWebsites (modifiedSince) {
-    return fetch(API_URL + 'websites?modified_since=' + modifiedSince)
+    return fetch(API_URL + 'api/websites?modified_since=' + modifiedSince)
       .then(response => response.json())
       .then(json => json.results)
   }
 
   getDomains (modifiedSince) {
-    return fetch(API_URL + 'domains?modified_since=' + modifiedSince)
+    return fetch(API_URL + 'api/domains?modified_since=' + modifiedSince)
       .then(response => response.json())
       .then(json => json.results)
   }
 
   getCategories (modifiedSince) {
-    return fetch(API_URL + 'categories?modified_since=' + modifiedSince)
+    return fetch(API_URL + 'api/categories?modified_since=' + modifiedSince)
       .then(response => response.json())
       .then(json => json.results)
   }
 
   getRegions (modifiedSince) {
-    return fetch(API_URL + 'regions?modified_since=' + modifiedSince)
+    return fetch(API_URL + 'api/regions?modified_since=' + modifiedSince)
       .then(response => response.json())
       .then(json => json.results)
   }
 
   getCDNs (modifiedSince) {
-    return fetch(API_URL + 'cdns?modified_since=' + modifiedSince)
+    return fetch(API_URL + 'api/cdns?modified_since=' + modifiedSince)
       .then(response => response.json())
       .then(json => json.results)
   }

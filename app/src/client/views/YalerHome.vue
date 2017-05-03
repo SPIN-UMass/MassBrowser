@@ -35,14 +35,14 @@
 </template>
 
 <script>
-  import State from '../../state'
+  import State from '~/utils/state'
   import MapView from './MapView'
   import RelayView from './RelayView'
   import WebsitesView from './WebsitesView'
-  import StatusWidget from '../StatusWidget'
+  import StatusWidget from './StatusWidget'
 
-  import RelayService from '~/services/RelayService'
-  import SyncService from '~/services/SyncService'
+  import RelayService from '~/client/services/RelayService'
+  import SyncService from '~/client/services/SyncService'
 
   import { startClientSocks } from '~/core/client'
 

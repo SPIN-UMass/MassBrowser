@@ -1,0 +1,186 @@
+/**
+ * Created by milad on 4/12/17.
+ */
+import RelayConnection from './RelayConnection';
+import crypto from 'crypto';
+
+class _ConnectionManager {
+  constructor() {
+    this.relayAssigner = null;
+
+    this.ClientConnections = {};
+    this.Connectionmaps = {};
+    this.carrylen = 0;
+    this.carry = '';
+    this.lastcommand = '';
+    this.lastconid = '';
+    this.lastsize = 0;
+    this.newconcarry = '';
+
+  }
+
+  setRelayAssigner(relayAssigner) {
+    this.relayAssigner = relayAssigner
+  }
+
+  newConnection(ip, port, conid) {
+    this.ClientConnections[conid].relayConnected()
+
+  }
+
+  commandParser(lastconid, CMD, size, data) {
+    if (CMD === 'N') {
+      data = String(data);
+      if (data.length === size) {
+        const sp = data.split(':');
+        const ip = sp[0];
+        const port = sp[1];
+        console.log('CREATE CONNECTION', ip, port);
+        this.newconcarry = '';
+        this.newConnection(ip, port, lastconid);
+      } else {
+        this.newconcarry += data;
+        if (this.newconcarry.length === size) {
+          const sp = this.newconcarry.split(':');
+          const ip = sp[0];
+          const port = sp[1];
+          console.log('CREATE CONNECTION', ip, port);
+          this.newConnection(ip, port, lastconid);
+
+
+        }
+      }
+    }
+    if (CMD === 'D') {
+      //console.log(this.ClientConnections);
+      if (lastconid in this.ClientConnections) {
+        //console.log("I AM HERE");
+        this.ClientConnections[lastconid].write(data);
+      }
+    }
+    if (CMD === 'C') {
+      this.cleanClose(lastconid)
+
+    }
+  }
+  cleanClose(conid){
+    this.ClientConnections[conid].end()
+    //delete this.ClientConnections[conid]
+
+  }
+  listener(data) {
+    //console.log('DATA RECEIVED', data);
+    while (data) {
+      if (this.carrylen > 0) {
+        if (data.length <= this.carrylen) {
+          this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data);
+          this.carrylen -= data.length;
+          break;
+        } else {
+          this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(0, this.carrylen));
+
+          data = data.slice(this.carrylen);
+          this.carrylen = 0;
+        }
+
+
+      }
+      else {
+        if (this.carry) {
+          data = Buffer(this.carry + data);
+        }
+        if (data.length < 7) {
+          this.carry = data;
+        }
+
+        this.lastconid = data.readUInt16BE(0);
+        this.lastcommand = data.toString('ascii', 2, 3);
+
+        this.carrylen = data.readUInt32BE(3);
+        this.lastsize = this.carrylen;
+
+        console.log(data, String(data), this.lastconid, this.lastsize, this.lastcommand);
+
+
+        if ((data.length - 7) <= this.carrylen) {
+          this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(7));
+          this.carrylen -= (data.length - 7);
+          break;
+        } else {
+          this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(7, this.carrylen + 7));
+          this.carrylen -= 0;
+          data = data.slice(this.carrylen + 7);
+        }
+
+
+      }
+    }
+
+  }
+
+  connectionClose(socket) {
+    console.log('closed');
+
+  }
+
+  writer(data, conid) {
+    console.log('DATA SEND', data, conid);
+    this.Connectionmaps[conid].write(conid, 'D', data);
+  }
+
+  newRelayConnection(relayip, relayport, desc) {
+    var relay = new RelayConnection(relayip, relayport, desc)
+    
+    relay.on('data', data => this.listener(data))
+    relay.on('close', () => this.connection_close())
+    
+    return relay.connect()
+      .then(() => relay)
+  }
+
+  assignRelay(ip,port) {
+    return this.relayConnections[Math.floor(Math.random() * this.relayConnections.length)];
+
+  }
+
+
+  newClientConnection(connection, dstip, dstport,onConnect) {
+    var conid = crypto.randomBytes(2).readUInt16BE();
+
+    console.log(conid, dstip, dstport);
+    
+    if (!this.relayAssigner) {
+      throw "No Relay Assigner has been set for the ConnectionManager"
+    }
+    
+    this.ClientConnections[conid] = connection;
+    this.ClientConnections[conid].relayConnected=()=>{onConnect()}
+    return new Promise((resolve,reject)=> {
+      this.relayAssigner.assignRelay(dstip, dstport)
+        .then(relay => {
+
+          this.Connectionmaps[conid] = relay
+          var cr = String(dstip) + ':' + String(dstport);
+          console.log('sendsize:', cr.length,cr);
+          this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
+          connection.on('data', (data) => {
+            this.writer(data, conid);
+
+
+          });
+          resolve("Assigned")
+
+        }, (err) => {
+
+          delete this.ClientConnections[conid]
+          reject("Don't Proxy")
+        })
+    })
+  }
+
+}
+
+
+var ConnectionManager = new _ConnectionManager();
+// module.exports = {ConnectionManager: _ConMgr};
+export default ConnectionManager

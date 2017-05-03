@@ -1,6 +1,6 @@
-import API from '../api/httpAPI'
+import API from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
-import { Website, Domain, CDN, Region, Category } from '~/models'
+import { Website, Domain, CDN, Region, Category } from '~/client/models'
 
 class _SyncService {
   constructor () {
@@ -42,11 +42,11 @@ class _SyncService {
 
   _getLastSyncTime (entity) {
     return KVStore.get('last-sync-' + entity)
-      .then(value => value || 0)
+      .then(value => value ? new Date(value) : new Date())
   }
 
   _updateLastSyncTime (entity, syncTime) {
-    return KVStore.set('last-sync-' + entity, syncTime)
+    return KVStore.set('last-sync-' + entity, new Date(syncTime))
   }
 
   _sync (entity, syncFunction) {

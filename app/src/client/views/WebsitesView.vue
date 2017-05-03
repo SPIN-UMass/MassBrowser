@@ -30,7 +30,7 @@
 </template>
 
 <script>
-  import Website from '~/models/Website'
+  import Website from '~/client/models/Website'
   const tableHeaders = ['Active', 'Name', 'Category']
 
   export default {

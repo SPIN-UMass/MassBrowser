@@ -14,10 +14,11 @@ let rendererConfig = {
   devtool: '#eval-source-map',
   devServer: { overlay: true },
   entry: {
-    renderer: path.join(__dirname, 'app/src/renderer/main.js')
+    renderer: path.join(__dirname, 'app/src/app/main.js')
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
+    exprContextCritical: false,
     rules: [
       {
         test: /\.css$/,
@@ -82,7 +83,7 @@ let rendererConfig = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: './app/index.ejs',
+      template: './app/src/app/index.ejs',
       appModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(__dirname, 'app/node_modules')
         : false,

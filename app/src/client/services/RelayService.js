@@ -1,4 +1,4 @@
-import API from '../api/httpAPI'
+import API from '~/api/httpAPI'
 import { ConnectionManager } from '~/core/client'
 import { EventEmitter } from 'events'
 
