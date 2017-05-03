@@ -1,20 +1,44 @@
 const API_URL = 'http://mac:8000/'
 // const API_URL = 'http://demo6707596.mockable.io/'
 const request = require('request')
+const SESSION_URL = '/sessions'
+const CLIENT_URL = 'api/client/'
+import KVStore from '~/utils/kvstore'
 
 class API {
   constructor () {
     this.jar = request.jar()
-    this.sessionid=''
+    this.sessionid = ''
+    var prid = KVStore.getWithDefault('clientid', 'mEJOxpfXi3Q')
+    Promise.all([prid]).then((values) => {
+      this.clientid = values[0]
+
+    })
   }
-  getSessionid() {
+
+  getSessionid () {
     return this.sessionid
   }
 
-  getRelays () {
-    return fetch(API_URL + 'relays')
-      .then(response => response.json())
-      .then(json => json.relays)
+  getSessions () {
+
+    return new Promise((resolve, reject) => {
+      request.get({
+          url: API_URL + CLIENT_URL + this.clientid + '/sessions?limit=50&status=1',
+          json: true,
+          jar: this.jar,
+        },
+        function (err, res, body) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(body.results)
+          }
+
+          // `body` is a js object if request was successful
+        })
+    })
+
   }
 
   getLastModificationTime (entity) {
@@ -52,11 +76,10 @@ class API {
       .then(response => response.json())
       .then(json => json.results)
   }
+
   whoAmI () {
     return new Promise((resolve, reject) => {
-        var requestData = {
-
-        }
+        var requestData = {}
 
         request.get({
             url: API_URL + 'api/auth',
@@ -65,7 +88,7 @@ class API {
             body: requestData
           },
           function (err, res, body) {
-            console.log(res,body)
+            console.log( body)
             if (err) {
               reject(err)
             } else {
@@ -91,10 +114,10 @@ class API {
             jar: this.jar,
             body: requestData
           },
-           (err, res, body) =>{
-          this.sessionid=body['session_key']
+          (err, res, body) => {
+            this.sessionid = body['session_key']
 
-            console.log(body,this.sessionid)
+            console.log(body, this.sessionid)
             if (err) {
               reject(err)
             } else {
@@ -107,20 +130,47 @@ class API {
     )
   }
 
-  requestSession (ip) {
+  clientUp () {
     return new Promise((resolve, reject) => {
         var requestData = {
-          'ip': ip
+          'DATA': 'TBD'
         }
 
         request.post({
-            url: API_URL + 'api/client/requestsession',
+            url: API_URL + CLIENT_URL + this.clientid,
             json: true,
             jar: this.jar,
             body: requestData
           },
           function (err, res, body) {
-            console.log(res, body)
+            console.log('clientup', body)
+            if (err) {
+              reject(err)
+            } else {
+              resolve()
+            }
+
+            // `body` is a js object if request was successful
+          })
+      }
+    )
+
+  }
+
+  requestSession () {
+    return new Promise((resolve, reject) => {
+        var requestData = {
+          'DATA': 'TBD'
+        }
+
+        request.post({
+            url: API_URL + CLIENT_URL + this.clientid + SESSION_URL,
+            json: true,
+            jar: this.jar,
+            body: requestData
+          },
+          function (err, res, body) {
+            console.log( body)
             if (err) {
               reject(err)
             } else {

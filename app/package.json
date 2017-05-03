@@ -14,7 +14,8 @@
     "vuex": "^2.1.1",
     "limiter": "^1.1.0",
     "throttle": "^1.0.3",
-    "vs-stun": "0.0.7"
+    "vs-stun": "0.0.7",
+    "node-schedule": "^1.2.1"
   },
   "devDependencies": {},
   "author": "ha-D <hadi@cs.umass.edu>"
