@@ -4,8 +4,16 @@
 import KVStore from '~/utils/kvstore'
 const util = require('util')
 import { EventEmitter } from 'events'
-const relayPath= '/api/relays/'
+
+import { pendMgr } from '../core/relay/PendingConnections'
 const WebSocket = require('ws')
+
+
+const SESSION_PATH='/api/session/'
+
+const RELAY_PATH= '/api/relays/'
+const CLIENT_PATH= '/api/client/'
+
 
 class WSServerConnection extends EventEmitter {
   constructor () {
@@ -57,7 +65,40 @@ class WSServerConnection extends EventEmitter {
 
   }
   eventReceived(resp) {
+    if (resp.event=== 'new-session') {
+      this.onNewSession(resp.data)
 
+    }
+
+
+  }
+
+  onNewSession(data) {
+
+    var desc = {
+      'writekey': (Buffer.from(data.read_key,'base64')),
+      'writeiv': (Buffer.from(data.read_iv,'base64')),
+      'readkey': (Buffer.from(data.write_key,'base64')),
+      'readiv': (Buffer.from(data.write_iv,'base64')),
+      'token': (Buffer.from(data.token,'base64')),
+
+    }
+    console.log('session',desc,desc.token.length,Buffer.from(data.token,'base64').length)
+
+    pendMgr.addPendingConnection((desc.token),desc)
+    this.acceptSession(data.client,data.id)
+
+
+
+  }
+  acceptSession(client,sessionid) {
+    return new Promise((resolve,reject) => {
+      var proto = {}
+
+
+      this.sendJSON(SESSION_PATH+sessionid,'PUT', proto,resolve)
+
+    })
   }
 
   replayReceived(resp) {
@@ -114,30 +155,13 @@ class WSServerConnection extends EventEmitter {
             'natType': nattype,}
 
 
-          this.sendReceiveJSON(relayPath+this.relayid,'POST', proto,resolve)
+          this.sendReceiveJSON(RELAY_PATH+this.relayid,'POST', proto,resolve)
 
       }
     )
   }
 
-  register (ip, port, nattype) {
-    return new Promise((resolve, reject) => {
-      var proto = {
-        'cmd': 'register',
-        'ip': ip,
-        'port': port,
-        'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-        'natType': nattype,
-      }
-      this.on('registered', (data) => {
-        KVStore.set('fingerprint', data.fingerprint)
-        this.fingerprint = data.fingerprint
-        resolve()
-      })
 
-      this.sendJSON(proto)
-    })
-  }
 
 }
 var ServerConnection = new WSServerConnection()

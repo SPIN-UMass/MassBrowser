@@ -5,17 +5,20 @@ class PendingConnections {
   constructor () {
     this.connections = {}
   }
-  addPendingConnection (clientid, description) {
-    this.connections[clientid] = description
+  addPendingConnection (token, description) {
+    this.connections[token] = description
   }
-  getPendingConnection (clientid) {
-    if (clientid in this.connections) {
-      const desc = this.connections[clientid]
-      delete (this.connections[clientid])
+  getPendingConnection (token) {
+    if (token in this.connections) {
+      const desc = this.connections[token]
+      delete (this.connections[token])
       return desc
     }
     return false
   }
+
+
+
 }
 var pendman = new PendingConnections()
 
