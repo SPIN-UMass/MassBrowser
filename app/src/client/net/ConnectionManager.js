@@ -128,15 +128,11 @@ class _ConnectionManager {
     this.Connectionmaps[conid].write(conid, 'D', data);
   }
 
-  newRelayConnection(relayip, relayport, desc) {
-    var relay = new RelayConnection(relayip, relayport, desc)
-    
-    relay.on('data', data => this.listener(data))
-    relay.on('close', () => this.connection_close())
-    
-    return relay.connect()
-      .then(() => relay)
-  }
+
+
+
+
+
 
   assignRelay(ip,port) {
     return this.relayConnections[Math.floor(Math.random() * this.relayConnections.length)];

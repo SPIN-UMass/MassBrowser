@@ -5,7 +5,7 @@ import KVStore from '~/utils/kvstore'
 const util = require('util')
 import { EventEmitter } from 'events'
 
-import { pendMgr } from '../core/relay/PendingConnections'
+import { pendMgr } from '~/relay/net/PendingConnections'
 const WebSocket = require('ws')
 
 

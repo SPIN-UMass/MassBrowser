@@ -4,7 +4,7 @@
 import {policy} from './Policer'
 const net = require('net')
 
-import {Crypto} from '../crypt/crypto'
+import {Crypto} from '~/utils/crypto'
 
 import {pendMgr} from './PendingConnections'
 
@@ -39,7 +39,7 @@ export class ConnectionReceiver {
     // data = Buffer.concat([this.newconcarry, data]);
     // console.log("MY DATA", data);
     if (data.length >= this.headersize) {
-      const sessiontoken = data.toString('ascii', 0, this.headersize)
+      const sessiontoken = data.slice( 0, this.headersize)
       const desc = pendMgr.getPendingConnection(sessiontoken)
       console.log('Conid', sessiontoken)
       if (desc) {

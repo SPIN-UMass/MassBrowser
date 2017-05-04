@@ -2,7 +2,7 @@
  * Created by milad on 4/11/17.
  */
 import net from 'net'
-import { Crypto } from '../crypt/crypto'
+import { Crypto } from '~/utils/crypto'
 import { EventEmitter } from 'events'
 
 export default class RelayConnection extends EventEmitter {
@@ -21,8 +21,13 @@ export default class RelayConnection extends EventEmitter {
   connect() {
     return new Promise((resolve, reject) => {
       try {
-        var socket = net.connect(this.relayport, this.relayip, () => resolve(socket))
+
+        var socket = net.connect(this.relayport, this.relayip, () => {
+          console.log('Connected')
+          resolve(socket)
+        })
       } catch (err) {
+        console.log('error cannot connect',err.message)
         reject(err)
       }
     })
@@ -54,7 +59,7 @@ export default class RelayConnection extends EventEmitter {
 
     var desc = this.desc
     var i = Math.random() * (100 - 1) + 1
-    var padarr = [Buffer(desc['clientid'])]
+    var padarr = [Buffer(desc['token'])]
     while (i > 0) {
       padarr.push(this.cipher.encryptzero())
       i -= 1
