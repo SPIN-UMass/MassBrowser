@@ -68,6 +68,7 @@
     "karma-webpack": "^2.0.1",
     "mocha": "^3.0.2",
     "node-sass": "^4.5.2",
+    "pug": "^2.0.0-rc.1",
     "sass-loader": "^6.0.3",
     "style-loader": "^0.13.1",
     "tree-kill": "^1.1.0",

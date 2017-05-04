@@ -6,9 +6,18 @@
 
     <!-- TODO: Move this to local assets -->
     <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
-    <script src="ammap/ammap.js" type="text/javascript"></script>
-    <script src="ammap/maps/worldLow.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="ammap/ammap.css" type="text/css" media="all" /> 
+    
+    <script src="lib/ammap/ammap.js" type="text/javascript"></script>
+    <script src="lib/ammap/maps/worldLow.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="lib/ammap/ammap.css" type="text/css" media="all" /> 
+
+    <!--<script src="lib/jquery/jquery-2.2.1.min.js" type="text/javascript"></script>-->
+
+    <link rel="stylesheet" href="lib/bootstrap/bootstrap.min.css" type="text/css" media="all" /> 
+    <!--<script src="lib/bootstrap/bootstrap.min.js" type="text/javascript"></script>-->
+
+    <link rel="stylesheet" href="lib/nifty/nifty.min.css" type="text/css" media="all" /> 
+
     <% if (htmlWebpackPlugin.options.appModules) { %>
       <!-- Add `app/node_modules` to global paths so `require` works properly in development -->
       <script>
@@ -19,5 +28,7 @@
   <body>
     <v-app id="app"></v-app>
     <!-- webpack builds are automatically injected -->
+
+
   </body>
 </html>

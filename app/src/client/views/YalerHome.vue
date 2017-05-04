@@ -59,7 +59,7 @@
       StatusWidget
     },
     created () {
-      RelayService.start()
+      // RelayService.start()
       SyncService.start()
 
       console.log('Syncing database')

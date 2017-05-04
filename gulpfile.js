@@ -31,7 +31,7 @@ var babel = require('gulp-babel');
 // });
 gulp.task("compile", function() {
   process.env.BABEL_ENV = 'core'
-  return gulp.src(["app/src/**/*.js", "!app/src/renderer/**/*.js", "!app/src/main/**/*.js"]).
+  return gulp.src(["app/src/**/*.js", "!app/src/renderer/**/*.js", "!app/src/app/**/*.js"]).
   pipe(babel()).
   pipe(gulp.dest("app/build/"));
 });

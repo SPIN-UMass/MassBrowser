@@ -1,11 +1,16 @@
 export default [
-  // {
-  //   path: '/',
-  //   name: 'landing-page',
-  //   component: require('~/client/views/LandingPageView')
-  // },
   {
     path: '/',
+    name: 'home',
+    component: require('./views/Home')
+  },
+  {
+    path: '/roleselect',
+    name: 'roleSelect',
+    component: require('./views/RoleSelect')
+  },
+  {
+    path: '/yaler',
     name: 'yaler-home',
     component: require('~/client/views/YalerHome')
   },

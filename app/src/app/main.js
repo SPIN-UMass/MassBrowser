@@ -6,13 +6,18 @@ import Router from 'vue-router'
 import App from './App'
 import routes from './routes'
 
-import Vuetify from 'vuetify'
-import 'vuetify/dist/vuetify.min.css'
+// import Vuetify from 'vuetify'
+// import 'vuetify/dist/vuetify.min.css'
+
+// window.jQuery = window.$ = require('jquery/dist/jquery.min')
+// import 'bootstrap/dist/js/bootstrap.min'
+// import 'bootstrap/dist/css/bootstrap.min.css'
+
 
 Vue.use(Electron)
 Vue.use(Resource)
 Vue.use(Router)
-Vue.use(Vuetify)
+// Vue.use(Vuetify)
 Vue.config.debug = true
 
 const router = new Router({

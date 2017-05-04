@@ -1,4 +1,4 @@
-const API_URL = 'http://mac:8000/'
+const API_URL = 'http://127.0.0.1:8000/'
 // const API_URL = 'http://demo6707596.mockable.io/'
 const request = require('request')
 const SESSION_URL = '/sessions'
