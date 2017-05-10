@@ -23,7 +23,7 @@ export function runOBFSserver (publicIP, publicPort) {
     var recver = new ConnectionReceiver(my_up, my_down, socket)
     socket.on('error', (err) => {
       console.log('socket error', err.message)
-      recver.closeall()
+      recver.closeAll()
 
     })
   })
