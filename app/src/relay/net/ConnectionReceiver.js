@@ -10,8 +10,9 @@ import ServerConnection from '~/api/wsAPI'
 import {pendMgr} from './PendingConnections'
 
 export class ConnectionReceiver {
-  constructor (socketup,socketdown) {
+  constructor (socketup,socketdown,socket) {
     this.socketup = socketup
+    this.socket=socket
     this.socketdown = socketdown
     this.socketup.on('data', (data) => {
       // console.log('DATA RECIEVED', data);

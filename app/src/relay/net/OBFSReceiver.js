@@ -22,7 +22,7 @@ export function runOBFSserver (publicIP,publicPort) {
     socket.pipe(my_up)
     my_down.pipe(socket)
 
-    var recver = new ConnectionReceiver(my_up,my_down )
+    var recver = new ConnectionReceiver(my_up,my_down,socket )
   })
 
   server.listen(publicPort, () => {
