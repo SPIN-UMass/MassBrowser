@@ -6,8 +6,8 @@ import httpServerConnection from '~/api/httpAPI'
 import KVstore from '~/utils/kvstore'
 
 
-KVstore.set('relayid','rJLZ3f86r48')
-httpServerConnection.authenticate('rJLZ3f86r48', 'qgx0JUahuBBRv2UFn9cX7v01onLOjrNeqpBe76fk5846-VvdkyWjGlPH5aFXHmCRssuqiDYiOFtSTfYmvvb5YsbHXymVBcJf_sXsc_VbN22D1r866f2ef1NFAUcKfEQBp38cP2Fe6bvCt6-hqWnSbdgbGbkDO2g-JT9TX5Q3KrE=').then(() => {
+KVstore.set('relayid','r-K6Qso9OUg')
+httpServerConnection.authenticate('r-K6Qso9OUg', 'uvoFMxGG3QmlqahM6rPpOCVdyvwSkgdTR3cLRkp90vUU8-QlElmkF3SdIznrdHFgt-jN83Oy4_Lm9bksBi3Iz4fiEFXPdwGBuywmMM29NdKbUc0I6WYPKPDX9Upi0MHVhE41aKiLSbUj0JH9Ccc2BCuXOzluMpUarVJUGCncglE=').then(() => {
 
   console.log('ses',httpServerConnection.getSessionid())
   ServerConnection.connect(httpServerConnection.getSessionid())

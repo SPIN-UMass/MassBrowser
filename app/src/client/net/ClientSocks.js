@@ -79,7 +79,7 @@ export function startClientSocks (mhost, mport) {
             console.log('The proxy %s:%d closed', localAddress, localPort);
           else
             console.error('Connect to %s:%d failed', address, port);
-          socket.end();
+          socket.close();
         } catch (err) {
         }
       }.bind(this));
@@ -96,7 +96,7 @@ export function startClientSocks (mhost, mport) {
 
     server.on('error', function (e) {
       console.error('SERVER ERROR: %j', e)
-      if (e.code == 'EADDRINUSE') {
+      if (e.code === 'EADDRINUSE') {
         console.log('Address in use, retrying in 10 seconds...')
         setTimeout(function () {
           console.log('Reconnecting to %s:%s', HOST, PORT)

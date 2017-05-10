@@ -5,9 +5,11 @@ class PendingConnections {
   constructor () {
     this.connections = {}
   }
+
   addPendingConnection (token, description) {
     this.connections[token] = description
   }
+
   getPendingConnection (token) {
     if (token in this.connections) {
       const desc = this.connections[token]
@@ -16,8 +18,6 @@ class PendingConnections {
     }
     return false
   }
-
-
 
 }
 var pendman = new PendingConnections()

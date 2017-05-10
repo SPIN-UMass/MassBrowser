@@ -6,6 +6,7 @@ const net = require('net')
 
 import {Crypto} from '~/utils/crypto'
 
+import ServerConnection from '~/api/wsAPI'
 import {pendMgr} from './PendingConnections'
 
 export class ConnectionReceiver {
@@ -43,12 +44,14 @@ export class ConnectionReceiver {
       const desc = pendMgr.getPendingConnection(sessiontoken)
       console.log('Conid', sessiontoken)
       if (desc) {
+        ServerConnection.clientSessionConnected(desc.client,desc.sessionId)
         console.log('clientID', sessiontoken)
+
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
         }, () => {
           console.log("I am here 3")
-          this.socket.end()
+          this.socket.close()
         })
         console.log("I am here")
         this.crypt.decrypt(data.slice(this.headersize, data.length))
@@ -57,7 +60,7 @@ export class ConnectionReceiver {
         console.log('Authenticated')
       } else {
         console.log("I am here 4")
-        this.socket.end()
+        this.socket.close()
       }
     }
   }

@@ -81,6 +81,8 @@ class WSServerConnection extends EventEmitter {
       'readkey': (Buffer.from(data.write_key,'base64')),
       'readiv': (Buffer.from(data.write_iv,'base64')),
       'token': (Buffer.from(data.token,'base64')),
+      'client': data.client,
+      'sessionId': data.id
 
     }
     console.log('session',desc,desc.token.length,Buffer.from(data.token,'base64').length)
@@ -100,6 +102,17 @@ class WSServerConnection extends EventEmitter {
 
     })
   }
+
+  clientSessionConnected(client,sessionid) {
+    return new Promise((resolve,reject) => {
+      var proto = {}
+
+
+      this.sendJSON(SESSION_PATH+sessionid,'POST', proto,resolve)
+
+    })
+  }
+
 
   replayReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {

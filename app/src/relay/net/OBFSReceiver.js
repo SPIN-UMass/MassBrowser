@@ -4,7 +4,7 @@
 const net = require('net')
 const fs = require('fs')
 import {ConnectionReceiver} from './ConnectionReceiver'
-var ThrottleGroup = require('./throttle').ThrottleGroup;
+var ThrottleGroup = require('./throttle').ThrottleGroup
 
 
 
