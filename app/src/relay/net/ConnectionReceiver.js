@@ -52,7 +52,7 @@ export class ConnectionReceiver {
           this.onData(d)
         }, () => {
           console.log('I am here 3')
-          this.socket.close()
+          this.socket.end()
         })
         console.log('I am here')
         this.crypt.decrypt(data.slice(this.headersize, data.length))
@@ -61,7 +61,7 @@ export class ConnectionReceiver {
         console.log('Authenticated')
       } else {
         console.log('I am here 4')
-        this.socket.close()
+        this.socket.end()
       }
     }
   }
