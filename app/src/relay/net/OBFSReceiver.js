@@ -3,26 +3,29 @@
  */
 const net = require('net')
 const fs = require('fs')
-import {ConnectionReceiver} from './ConnectionReceiver'
+import { ConnectionReceiver } from './ConnectionReceiver'
 var ThrottleGroup = require('./throttle').ThrottleGroup
 
+export function runOBFSserver (publicIP, publicPort) {
 
+  var up_limit = ThrottleGroup({rate: 100000})
 
-export function runOBFSserver (publicIP,publicPort) {
-
-  var up_limit= ThrottleGroup({rate:100000})
-
-  var down_limit = ThrottleGroup({rate:100000})
+  var down_limit = ThrottleGroup({rate: 100000})
   const server = net.createServer((socket) => {
     console.log('relay connected',
       socket.authorized ? 'authorized' : 'unauthorized')
     //var dd=socket.pipe(tg.throttle())
-    var my_up= up_limit.throttle()
-    var my_down= down_limit.throttle()
+    var my_up = up_limit.throttle()
+    var my_down = down_limit.throttle()
     socket.pipe(my_up)
     my_down.pipe(socket)
 
-    var recver = new ConnectionReceiver(my_up,my_down,socket )
+    var recver = new ConnectionReceiver(my_up, my_down, socket)
+    socket.on('error', (err) => {
+      console.log('socket error', err.message)
+      recver.closeall()
+
+    })
   })
 
   server.listen(publicPort, () => {

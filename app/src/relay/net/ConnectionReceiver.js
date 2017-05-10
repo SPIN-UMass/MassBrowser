@@ -1,18 +1,18 @@
 /**
  * Created by milad on 4/12/17.
  */
-import {policy} from './Policer'
+import { policy } from './Policer'
 const net = require('net')
 
-import {Crypto} from '~/utils/crypto'
+import { Crypto } from '~/utils/crypto'
 
 import ServerConnection from '~/api/wsAPI'
-import {pendMgr} from './PendingConnections'
+import { pendMgr } from './PendingConnections'
 
 export class ConnectionReceiver {
-  constructor (socketup,socketdown,socket) {
+  constructor (socketup, socketdown, socket) {
     this.socketup = socketup
-    this.socket=socket
+    this.socket = socket
     this.socketdown = socketdown
     this.socketup.on('data', (data) => {
       // console.log('DATA RECIEVED', data);
@@ -41,26 +41,26 @@ export class ConnectionReceiver {
     // data = Buffer.concat([this.newconcarry, data]);
     // console.log("MY DATA", data);
     if (data.length >= this.headersize) {
-      const sessiontoken = data.slice( 0, this.headersize)
+      const sessiontoken = data.slice(0, this.headersize)
       const desc = pendMgr.getPendingConnection(sessiontoken)
       console.log('Conid', sessiontoken)
       if (desc) {
-        ServerConnection.clientSessionConnected(desc.client,desc.sessionId)
+        ServerConnection.clientSessionConnected(desc.client, desc.sessionId)
         console.log('clientID', sessiontoken)
 
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
         }, () => {
-          console.log("I am here 3")
+          console.log('I am here 3')
           this.socket.close()
         })
-        console.log("I am here")
+        console.log('I am here')
         this.crypt.decrypt(data.slice(this.headersize, data.length))
-        console.log("I am here 2")
+        console.log('I am here 2')
         this.isAuthenticated = true
         console.log('Authenticated')
       } else {
-        console.log("I am here 4")
+        console.log('I am here 4')
         this.socket.close()
       }
     }
@@ -78,8 +78,8 @@ export class ConnectionReceiver {
   newConnection (ip, port, conid) {
     try {
       if (policy.checkDestination(ip, port)) {
-        console.log("ip",ip,"port",port);
-        this.connections[conid] = net.connect({host:ip ,port:port}, () => {
+        console.log('ip', ip, 'port', port)
+        this.connections[conid] = net.connect({host: ip, port: port}, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
 
         })
@@ -105,7 +105,7 @@ export class ConnectionReceiver {
     if (CMD === 'N') {
       data = String(data)
       if (data.length === size) {
-        console.log("new con",data)
+        console.log('new con', data)
         const sp = data.split(':')
 
         const ip = sp[0]
@@ -132,6 +132,12 @@ export class ConnectionReceiver {
     if (CMD === 'C') {
       this.connections[lastconid].end()
     }
+  }
+
+  closeAll () {
+    this.connections.forEach((key) => {
+      this.connections[key].end()
+    })
   }
 
   onData (data) {
