@@ -130,7 +130,10 @@ export class ConnectionReceiver {
       }
     }
     if (CMD === 'C') {
-      this.connections[lastconid].end()
+      if (lastconid in this.connections) {
+        this.connections[lastconid].end()
+      }
+
     }
   }
 

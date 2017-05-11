@@ -160,10 +160,17 @@ class _ConnectionManager {
           console.log('sendsize:', cr.length,cr);
           this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
           connection.on('data', (data) => {
+
             this.writer(data, conid);
 
 
-          });
+          })
+          connection.on('close', () => {
+            this.Connectionmaps[conid].write(conid, 'C', Buffer(0));
+          })
+          connection.on('error', (err) => {
+            this.Connectionmaps[conid].write(conid, 'C', Buffer(0));
+          })
           resolve("Assigned")
 
         }, (err) => {
