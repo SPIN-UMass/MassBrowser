@@ -99,7 +99,7 @@ class _ConnectionManager {
         this.carrylen = data.readUInt32BE(3);
         this.lastsize = this.carrylen;
 
-        console.log(data, String(data), this.lastconid, this.lastsize, this.lastcommand);
+        //console.log(data, String(data), this.lastconid, this.lastsize, this.lastcommand);
 
 
         if ((data.length - 7) <= this.carrylen) {
@@ -124,7 +124,7 @@ class _ConnectionManager {
   }
 
   writer(data, conid) {
-    console.log('DATA SEND', data, conid);
+    //console.log('DATA SEND', data, conid);
     this.Connectionmaps[conid].write(conid, 'D', data);
   }
 

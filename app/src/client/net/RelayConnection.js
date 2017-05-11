@@ -13,12 +13,12 @@ export default class RelayConnection extends EventEmitter {
     this.relayip = relayip
     this.relayport = relayport
     this.desc = desc
-    
+
     this.cipher = null
     this.socket = null
   }
 
-  connect() {
+  connect () {
     return new Promise((resolve, reject) => {
       try {
 
@@ -27,15 +27,15 @@ export default class RelayConnection extends EventEmitter {
           resolve(socket)
         })
       } catch (err) {
-        console.log('error cannot connect',err.message)
+        console.log('error cannot connect', err.message)
         reject(err)
       }
     })
-    .then((socket) => this._initSocket(socket))
-    .then((socket) => this._initRelay(socket))
+      .then((socket) => this._initSocket(socket))
+      .then((socket) => this._initRelay(socket))
   }
 
-  _initSocket(socket) {
+  _initSocket (socket) {
     socket.on('data', (data) => {
       this.cipher.decrypt(data)
     })
@@ -48,14 +48,14 @@ export default class RelayConnection extends EventEmitter {
       this.socket.end()
     })
 
-    this.socket = socket    
+    this.socket = socket
     this.cipher = cipher
-    
+
     return socket
   }
 
-  _initRelay(socket) {
-    console.log(this.relayip, this.relayport, 'SENDING DATA')
+  _initRelay (socket) {
+    //console.log(this.relayip, this.relayport, 'SENDING DATA')
 
     var desc = this.desc
     var i = Math.random() * (100 - 1) + 1
@@ -65,25 +65,25 @@ export default class RelayConnection extends EventEmitter {
       i -= 1
     }
 
-    console.log('I am sending', (Buffer.concat(padarr)))
+    //console.log('I am sending', (Buffer.concat(padarr)))
 
     socket.write(Buffer.concat(padarr))
 
     return socket
   }
-  
+
   write (conid, command, data) {
     let sendpacket = Buffer(7)
     sendpacket.writeUInt16BE(conid)
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendpacket, data])
-    console.log('writing to the relay', b)
+    //console.log('writing to the relay', b)
     const enc = this.cipher.encrypt(b)
-    console.log('writing to the relay enc', enc)
+    //console.log('writing to the relay enc', enc)
     this.emit('send', enc)
     this.socket.write(enc)
   }
-  
+
 }
 
