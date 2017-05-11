@@ -135,7 +135,7 @@ export class ConnectionReceiver {
   }
 
   closeAll () {
-    this.connections.forEach((key) => {
+    Object.keys(this.connections).forEach((key) => {
       this.connections[key].end()
     })
   }
