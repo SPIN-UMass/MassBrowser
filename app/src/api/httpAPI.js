@@ -1,30 +1,32 @@
-const API_URL = 'http://nonpiaz.cs.umass.edu:8000/'
+const API_URL = 'http://127.0.0.1:8000/'
 // const API_URL = 'http://demo6707596.mockable.io/'
 const request = require('request')
 const SESSION_URL = '/sessions'
 const CLIENT_URL = 'api/client/'
+
 import KVStore from '~/utils/kvstore'
+import * as errors from '~/utils/errors'
 
 class API {
   constructor () {
     this.jar = request.jar()
-    this.sessionid = ''
-    var prid = KVStore.getWithDefault('clientid', 'mEJOxpfXi3Q')
-    Promise.all([prid]).then((values) => {
-      this.clientid = values[0]
+    this.sessionID = ''
 
-    })
+    // var prid = KVStore.getWithDefault('clientid', 'mEJOxpfXi3Q')
+    // Promise.all([prid]).then((values) => {
+    //   this.clientid = values[0]
+    // })
   }
 
-  getSessionid () {
-    return this.sessionid
+  getSessionID () {
+    return this.sessionID
   }
 
   getSessions () {
 
     return new Promise((resolve, reject) => {
       request.get({
-          url: API_URL + CLIENT_URL + this.clientid + '/sessions?limit=50&status=1',
+          url: API_URL + CLIENT_URL + this.clientID + '/sessions?limit=50&status=1',
           json: true,
           jar: this.jar,
         },
@@ -115,19 +117,18 @@ class API {
             body: requestData
           },
           (err, res, body) => {
-            this.sessionid = body['session_key']
+            this.sessionID = body['session_key']
 
-            console.log(body, this.sessionid)
             if (err) {
               reject(err)
             } else {
-              resolve()
+              handleResponse(res, body, resolve, reject)
             }
-
-            // `body` is a js object if request was successful
           })
       }
-    )
+    ).then(() => {
+      this.clientID = username
+    })
   }
 
   clientUp () {
@@ -137,20 +138,17 @@ class API {
         }
 
         request.post({
-            url: API_URL + CLIENT_URL + this.clientid,
+            url: API_URL + CLIENT_URL + this.clientID,
             json: true,
             jar: this.jar,
             body: requestData
           },
           function (err, res, body) {
-            console.log('clientup', body)
             if (err) {
               reject(err)
             } else {
-              resolve()
+              handleResponse(res, body, resolve, reject)
             }
-
-            // `body` is a js object if request was successful
           })
       }
     )
@@ -164,124 +162,72 @@ class API {
         }
 
         request.post({
-            url: API_URL + CLIENT_URL + this.clientid + SESSION_URL,
+            url: API_URL + CLIENT_URL + this.clientID + SESSION_URL,
             json: true,
             jar: this.jar,
             body: requestData
           },
           function (err, res, body) {
-            console.log( body)
             if (err) {
               reject(err)
             } else {
-              resolve()
+              handleResponse(res, body, resolve, reject)
             }
-
-            // `body` is a js object if request was successful
           })
       }
     )
   }
 
-  register (ip) {
+  registerClient (ip) {
     return new Promise((resolve, reject) => {
-        var requestData = {
-          'ip': ip
-        }
-
         request.post({
-            url: API_URL + 'api/client',
+            url: API_URL + 'api/clients',
             json: true,
-            jar: this.jar,
-            body: requestData
+            jar: this.jar
           },
 
           function (err, res, body) {
-            console.log(res, body)
             if (err) {
-              reject(err)
+              reject(new errors.NetworkError())
             } else {
-              resolve()
+              handleResponse(res, body, resolve, reject)
             }
+          })
+      }
+    )
+  }
 
-            // `body` is a js object if request was successful
+  registerRelay (ip) {
+    return new Promise((resolve, reject) => {
+        request.post({
+            url: API_URL + 'api/relays',
+            json: true,
+            jar: this.jar
+          },
+
+          function (err, res, body) {
+            if (err) {
+              reject(new errors.NetworkError())
+            } else {
+              handleResponse(res, body, resolve, reject)
+            }
           })
       }
     )
   }
 }
 
-const mock = (data) => {
-  return new Promise((resolve, reject) => {
-    resolve(data)
-  })
+function handleResponse(res, body, resolve, reject) {
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      resolve(body)
+    } else if (res.statusCode >= 500) {
+      reject(new errors.ServerError())
+    } else {
+      reject(new errors.RequestError(res.statusCode, res.reason))
+    }
 }
 
-class MockAPI extends API {
-  getLastModificationTime (entity) {
-    return mock(1492289721)
-  }
 
-  getRelays () {
-    return mock([
-      {_id: 1, ip: '127.0.0.1', port: 8087}
-    ])
-  }
-
-  getWebsites (modifiedSince) {
-    return mock([
-      {_id: 1, name: 'Facebook', category: 1},
-      {_id: 2, name: 'Google', category: 1},
-      {_id: 3, name: 'Yahoo', category: 1},
-      {_id: 4, name: 'Youtube', category: 1}
-    ])
-  }
-
-  getDomains (modifiedSince) {
-    return mock([
-      {
-        _id: 1,
-        name: 'googlevideo.com',
-        subdomain: '.*',
-        blocked: {
-          china: true,
-          iran: true
-        },
-        website: 4,
-        cdn: null
-      },
-      {
-        _id: 2,
-        name: 'xx.fbcdn.com',
-        subdomain: '.*',
-        blocked: {
-          china: true,
-          iran: true
-        },
-        website: 1,
-        cdn: null
-      }
-    ])
-  }
-
-  getCategories (modifiedSince) {
-    return mock([
-      {_id: 1, name: 'Video Sharing'},
-      {_id: 2, name: 'Social Networks'},
-      {_id: 3, name: 'Search Engine'}
-    ])
-  }
-
-  getRegions (modifiedSince) {
-    return mock([
-      {_id: 1, name: 'china'}
-    ])
-  }
-
-  getCDNs (modifiedSince) {
-    return mock([])
-  }
-}
 
 const api = new API()
 export default api

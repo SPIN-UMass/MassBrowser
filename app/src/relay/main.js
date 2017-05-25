@@ -2,28 +2,52 @@ import { runTLSserver } from './net/TLSReceiver'
 import { runOBFSserver } from './net/OBFSReceiver'
 import { pendMgr } from './net/PendingConnections'
 import ServerConnection from '~/api/wsAPI'
-import httpServerConnection from '~/api/httpAPI'
-import KVstore from '~/utils/kvstore'
+import httpAPI from '~/api/httpAPI'
+import KVStore from '~/utils/kvstore'
+import * as errors from '~/utils/errors'
 
 
-KVstore.set('relayid','r-K6Qso9OUg')
-httpServerConnection.authenticate('r-K6Qso9OUg', 'uvoFMxGG3QmlqahM6rPpOCVdyvwSkgdTR3cLRkp90vUU8-QlElmkF3SdIznrdHFgt-jN83Oy4_Lm9bksBi3Iz4fiEFXPdwGBuywmMM29NdKbUc0I6WYPKPDX9Upi0MHVhE41aKiLSbUj0JH9Ccc2BCuXOzluMpUarVJUGCncglE=').then(() => {
 
-  console.log('ses',httpServerConnection.getSessionid())
-  ServerConnection.connect(httpServerConnection.getSessionid())
-    ServerConnection.on('connected', () => {
-      //ServerConnection.authenticate('qfIQORjZZvQ','zxasqw12')
-
-      console.log('WS CONNECTED')
-      ServerConnection.relayUp('mac', '8087', 'FullCone').then((data) => {
-          console.log('I AM HERE')
-          console.log('data', data)
-          runOBFSserver('0.0.0.0', 8087)
-
-        }
-      )
+KVStore.get('relay', null)
+.then(relay => {
+  if (relay) {
+    return relay
+  } else {
+    console.log("Registering Relay")
+    return httpAPI.registerRelay()
+    .then(relay => {
+      KVStore.set('relay', {id: relay.id, password: relay.password})
+      return {id: relay.id, password: relay.password}
     })
+  }
+})
+.then(relay => {
+  console.log("Authenticating Relay")
+  return httpAPI.authenticate(relay.id, relay.password)
+})
+.then(() => {
+  console.log('Connecting to server')
+  return ServerConnection.connect(httpAPI.getSessionID())  
+})
+.then(() => {
+  console.log('Server connection established')
+  return ServerConnection.relayUp('mac', '8087', 'FullCone')
+})
+.then(data => {
+  console.log("Starting Relay")
+  runOBFSserver('0.0.0.0', 8087)
+})
+.catch(err => {
+  if (err instanceof errors.NetworkError) {
+    console.error("Could not connect to the server")
+  } else if (err instanceof errors.AuthenticationError) {
+    console.error("Authentication failed with server")
+  } else if (err instanceof errors.RequestError) {
+    console.error("Error occured in request to server " + err.message)
+  } else if (err instanceof errors.ServerError) {
+    console.error("There is a problem with the server, please try again later")
+  } else {
+    console.log("Unknown error occured: " + err.toString())
+  }
+})
 
-    }
-
-)

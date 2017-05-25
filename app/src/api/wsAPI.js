@@ -2,11 +2,13 @@
  * Created by milad on 4/23/17.
  */
 import KVStore from '~/utils/kvstore'
-const util = require('util')
+import * as util from 'util'
+// const util = require('util')
 import { EventEmitter } from 'events'
 
 import { pendMgr } from '~/relay/net/PendingConnections'
-const WebSocket = require('ws')
+import WebSocket from 'ws'
+import * as errors from '~/utils/errors'
 
 
 const SESSION_PATH='/api/session/'
@@ -17,60 +19,62 @@ const CLIENT_PATH= '/api/client/'
 
 class WSServerConnection extends EventEmitter {
   constructor () {
-
     super()
-    this.messageID=0
-    this.connectionMap={}
-
+    this.messageID = 0
+    this.connectionMap = {}
   }
+
   connect(sessionid) {
-    var pip = KVStore.getWithDefault('serverIP', '127.0.0.1')
-    var pport = KVStore.getWithDefault('serverPort', 8000)
+    return new Promise((resolve, reject) => {
+      var pip = KVStore.getWithDefault('serverIP', '127.0.0.1')
+      var pport = KVStore.getWithDefault('serverPort', 8000)
+      var prid = KVStore.getWithDefault('relayID','mEJOxpfXi3Q')
 
-    var prid = KVStore.getWithDefault('relayid','mEJOxpfXi3Q')
-    Promise.all([pip, pport, prid]).then(values => {
-      console.log(values)
-      this.IPaddr = values[0]
+      Promise.all([pip, pport, prid]).then(values => {
+        this.IPaddr = values[0]
+        this.port = values[1]
+        this.relayid = values[2]
 
-      this.port = values[1]
-      this.relayid = values[2]
-      console.log(sessionid)
-      this.ws = new WebSocket(util.format('ws://%s:%s/api/?session_key=%s', this.IPaddr, this.port,sessionid), {
-        perMessageDeflate: false,
+        this.ws = new WebSocket(util.format('ws://%s:%s/api/?session_key=%s', this.IPaddr, this.port, sessionid), {
+          perMessageDeflate: false,
+        })
 
+        this.ws.on('open', () => {
+          this.emit('connected')
+        })
 
-      })
-      this.ws.on('open', () => {
-        console.log("connecting")
-        this.emit('connected')
-      })
+        var messageHandlers = {
+          reply: m => this.replyReceived(m),
+          event: m => this.eventReceived(m),
+          auth: m => handleAuth(m)
+        }
 
-      this.ws.on('message', (message) => {
-        console.log(message)
-
-        var resp = JSON.parse(message)
-        if ('type' in resp) {
-          if ( resp['type']==='reply') {
-            this.replayReceived(resp)
+        this.ws.on('message', (message) => {
+          var resp = JSON.parse(message)
+          var handler = messageHandlers[resp.type]
+          if (handler === undefined) {
+            console.error("Invalid message type received from server")
+            return
           }
-          if (resp['type']==='event') {
-            this.eventReceived(resp)
+          handler(resp)
+        })
+
+        const handleAuth = resp => {
+          if (resp.status == 200) {
+            resolve()
+            this.emit("authenticated")
+          } else {
+            reject(new errors.AuthenticationError())
           }
-
-
         }
       })
-
     })
-
   }
+
   eventReceived(resp) {
     if (resp.event=== 'new-session') {
       this.onNewSession(resp.data)
-
     }
-
-
   }
 
   onNewSession(data) {
@@ -89,10 +93,8 @@ class WSServerConnection extends EventEmitter {
 
     pendMgr.addPendingConnection((desc.token),desc)
     this.acceptSession(data.client,data.id)
-
-
-
   }
+
   acceptSession(client,sessionid) {
     return new Promise((resolve,reject) => {
       var proto = {}
@@ -113,69 +115,54 @@ class WSServerConnection extends EventEmitter {
     })
   }
 
-
-  replayReceived(resp) {
+  replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
-      console.log('I am HERE',this.connectionMap[resp['message_id']])
+      // console.log('I am HERE',this.connectionMap[resp['message_id']])
       this.connectionMap[resp['message_id']](resp['data'])
     }
-
-
   }
 
-
-
-
-  sendReceiveJSON (path,method,data,resolve) {
+  sendReceiveJSON(path, method, data, resolve) {
     var proto = {}
-    proto['id']=this.messageID
-    proto['data']= data
-    proto['method']=method
-    proto['path']= path
+    proto['id'] = this.messageID
+    proto['data'] = data
+    proto['method'] = method
+    proto['path'] = path
 
-    this.connectionMap[this.messageID]=resolve
-    this.messageID+=1
-
-
+    this.connectionMap[this.messageID] = resolve
+    this.messageID += 1
 
     var sproto = JSON.stringify(proto)
-    console.log('I am sending with resp' , sproto)
+    // console.log('I am sending with resp' , sproto)
     this.ws.send(sproto)
   }
-  sendJSON (path,method,data,resolve) {
+
+  sendJSON(path, method, data, resolve) {
     var proto = {}
-    proto['id']=this.messageID
-    proto['data']= data
-    proto['method']=method
-    proto['path']= path
-    this.messageID+=1
-
-
+    proto['id'] = this.messageID
+    proto['data'] = data
+    proto['method'] = method
+    proto['path'] = path
+    this.messageID += 1
 
     var sproto = JSON.stringify(proto)
-    console.log('I am sending', sproto)
+    // console.log('I am sending', sproto)
     this.ws.send(sproto)
     resolve()
   }
 
   relayUp (ip, port, nattype) {
     return new Promise((resolve, reject) => {
-
-          var proto = {'ip': ip,
-            'port': port,
-            'fingerprint': this.fingerprint,
-            'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-            'natType': nattype,}
-
-
-          this.sendReceiveJSON(RELAY_PATH+this.relayid,'POST', proto,resolve)
-
+      var proto = {
+        'ip': ip,
+        'port': port,
+        'fingerprint': this.fingerprint,
+        'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
+        'natType': nattype,
       }
-    )
+      this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
   }
-
-
-
 }
 var ServerConnection = new WSServerConnection()
 export default ServerConnection

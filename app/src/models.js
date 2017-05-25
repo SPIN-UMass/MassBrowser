@@ -42,7 +42,7 @@ function _createModel(name, schemaModel, meta, datastore) {
     }
 
     static find (q) {
-      console.log("[DATABASE] <find> " + this.name)
+      // console.debug("[DATABASE] <find> " + this.name)
       if (q === undefined) {
         q = {}
       }
@@ -51,7 +51,7 @@ function _createModel(name, schemaModel, meta, datastore) {
     }
 
     static findOne (q) {
-      console.log("[DATABASE] <findOne> " + this.name)
+      // console.debug("[DATABASE] <findOne> " + this.name)
       if (q === undefined) {
         q = {}
       }
@@ -60,12 +60,12 @@ function _createModel(name, schemaModel, meta, datastore) {
     }
 
     static insert () {
-      console.log("[DATABASE] <insert> " + this.name)
+      // console.debug("[DATABASE] <insert> " + this.name)
       return this._promisize(datastore.insert, arguments)
     }
 
     static update () {
-      console.log("[DATABASE] <update> " + this.name)
+      // console.debug("[DATABASE] <update> " + this.name)
       return this._promisize(datastore.update, arguments)
     }
 
