@@ -54,7 +54,7 @@ class _ConnectionManager {
     if (CMD === 'D') {
       //console.log(this.ClientConnections);
       if (lastconid in this.ClientConnections) {
-        //console.log("I AM HERE");
+
         this.ClientConnections[lastconid].write(data);
       }
     }
@@ -162,6 +162,7 @@ class _ConnectionManager {
           connection.on('data', (data) => {
 
             this.writer(data, conid);
+
 
 
           })

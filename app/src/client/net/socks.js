@@ -118,7 +118,7 @@ function initSocksConnection (on_accept) {
    }); */
 
   this.on('error', function (e) {
-    errorLog('%j', e)
+    errorLog('my error %j', e)
   })
 
   // do a handshake

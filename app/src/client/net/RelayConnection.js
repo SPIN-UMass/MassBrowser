@@ -65,7 +65,7 @@ export default class RelayConnection extends EventEmitter {
       i -= 1
     }
 
-    //console.log('I am sending', (Buffer.concat(padarr)))
+
 
     socket.write(Buffer.concat(padarr))
 
@@ -78,11 +78,12 @@ export default class RelayConnection extends EventEmitter {
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendpacket, data])
-    //console.log('writing to the relay', b)
+    //console.log('writing to the relay')
     const enc = this.cipher.encrypt(b)
     //console.log('writing to the relay enc', enc)
     this.emit('send', enc)
     this.socket.write(enc)
+    //console.log('written')
   }
 
 }
