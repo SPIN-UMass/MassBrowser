@@ -1,5 +1,5 @@
 import API from '~/api/httpAPI'
-import { ConnectionManager } from '~/core/client'
+import { ConnectionManager } from '~/client/net'
 import { EventEmitter } from 'events'
 
 /**

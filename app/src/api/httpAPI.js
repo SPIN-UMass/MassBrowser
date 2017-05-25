@@ -117,16 +117,16 @@ class API {
             body: requestData
           },
           (err, res, body) => {
-            this.sessionID = body['session_key']
-
+            
             if (err) {
-              reject(err)
+              reject(new errors.NetworkError(err))
             } else {
               handleResponse(res, body, resolve, reject)
             }
           })
       }
-    ).then(() => {
+    ).then(body => {
+      this.sessionID = body['session_key']
       this.clientID = username
     })
   }
@@ -145,7 +145,7 @@ class API {
           },
           function (err, res, body) {
             if (err) {
-              reject(err)
+              reject(new errors.NetworkError(err))
             } else {
               handleResponse(res, body, resolve, reject)
             }
@@ -169,7 +169,7 @@ class API {
           },
           function (err, res, body) {
             if (err) {
-              reject(err)
+              reject(new errors.NetworkError(err))
             } else {
               handleResponse(res, body, resolve, reject)
             }
