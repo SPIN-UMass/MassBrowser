@@ -1,5 +1,3 @@
-import SessionManger from './SessionManager'
-
 export class RelayAssigner {
   /**
    * Assign a relay to a (ip, port)
@@ -19,7 +17,7 @@ export class RandomRelayAssigner extends RelayAssigner {
   }
   
   assignRelay(ip, port) {
-    return new Promise((resolve, reject) => resolve(SessionManger.relays[Math.floor(Math.random() * SessionManger.relays.length)]));
+    // return new Promise((resolve, reject) => resolve(SessionManger.relays[Math.floor(Math.random() * SessionManger.relays.length)]));
   }
 
   addRelay(relay) {

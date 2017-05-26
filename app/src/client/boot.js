@@ -5,14 +5,12 @@ import { startClientSocks } from './net/ClientSocks'
 import ConnectionManager from './net/ConnectionManager'
 import RelayConnection from './net/RelayConnection'
 import { RandomRelayAssigner } from './net/RelayAssigner'
-import SessionManager from './net/SessionManager'
 const crypto = require('crypto')
 import httpAPI from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
-var schedule = require('node-schedule')
 import * as errors from '~/utils/errors'
-
 import Status from '~/utils/status'
+import SessionService from '~/client/services/SessionService'
 
 export default function bootClient() {
   KVStore.get('client', null)
@@ -36,20 +34,12 @@ export default function bootClient() {
     .then(() => {status.clear()})
   })
   .then(() => {
-      var relayAssigner = new RandomRelayAssigner()
-      ConnectionManager.setRelayAssigner(relayAssigner)
-
-      schedule.scheduleJob('*/1 * * * * *', () => {httpAPI.getSessions().then((ses => SessionManager.retrivedSessions(ses)  ))})
-  })
-  .then(() => {
-    let status = Status.info("Requesting Session")
-    return httpAPI.requestSession() 
-    .then(() => {status.clear()})
-  })
-  .then(() => {
     let status = Status.info("Server connection established")
     return httpAPI.clientUp()
     .then(() => {status.clear()})
+  })
+  .then(() => {
+    return SessionService.start()
   })
   .then(() => {
     let status = Status.info("Starting SOCKS server")
@@ -58,6 +48,7 @@ export default function bootClient() {
   })
   .catch(err => {
     Status.clearAll()
+
     if (err instanceof errors.NetworkError) {
       Status.error("Could not connect to the server")
     } else if (err instanceof errors.AuthenticationError) {
