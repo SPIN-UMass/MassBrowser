@@ -1,12 +1,10 @@
-<template>
-    <v-snackbar v-bind:class="level" :timeout='0' :top="true" v-model="show">
-      <strong>{{text}}</strong>
-      <v-btn flat class="pink--text" v-show="closable" @click.native="show = false"><v-icon>clear</v-icon></v-btn>
-    </v-snackbar>
+<template lang="pug">
+    .status {{text}}
 </template>
 
 <script>
-  import Bus from '~/utils/bus'
+  // import Bus from '~/utils/bus'
+  import Status from '~/utils/status'
 
   export default {
     data () {
@@ -30,10 +28,10 @@
         this.level = false
         this.closable = false
       }
-      Bus.$on('status-changed', showStatus)
-      Bus.$on('status-cleared', clearStatus)
+      Status.on('status-changed', showStatus)
+      Status.on('status-cleared', clearStatus)
 
-      Bus.$emit('status-request')
+      Status.emit('status-request')
     }
   }
 </script>

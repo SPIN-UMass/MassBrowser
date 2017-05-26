@@ -10,9 +10,15 @@ export default [
     component: require('./views/RoleSelect')
   },
   {
-    path: '/yaler',
-    name: 'yaler-home',
-    component: require('~/client/views/YalerHome')
+    path: '/client',
+    name: 'client-index',
+    component: require('~/client/views/Index'),
+    children: [
+      {
+        path: 'home',
+        component: require('~/client/views/Home')
+      }
+    ]
   },
   {
     path: '*',

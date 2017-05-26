@@ -1,43 +1,40 @@
-<template>
-    <div class='relay-container'>
-      <v-data-table v-model='relays' v-bind:headers="headers" hide-actions class='elevation-0'>
-        <template slot='items' scope='props'>
-          <!--<relay-row :relay="props.item"></relay-row>-->
-          <td class='text-xs-left' style='width: 10px'>
-            <div class='led' v-bind:class="{green: props.item.connected, yellow: props.item.connecting, red: !props.item.connecting && !props.item.connected}"> 
-            </div>
-          </td>
-          <td class='text-xs-left' style='width: 20px'>{{ props.item._id }}</td>
-          <td class='text-xs-left'>{{ props.item.bytesSent }}</td>
-          <td class='text-xs-left'>{{ props.item.bytesReceived }}</td>
-          <td class='text-xs-left'>{{ props.item.ip }}</td>
-          <td class='text-xs-left'>{{ props.item.port }}</td>
-        </template>
-      </v-data-table>
-    </div>
+<template lang="pug">
+   .table-container
+      table.table.table-fixed
+        thead
+          tr
+            th ip address
+            th bytes sent
+            th bytes received
+            th graph
+        tbody
+          tr(v-for="item in sessions")
+            td {{ item.ip }}
+            td {{ item.bytesSent }}
+            td {{ item.bytesReceived }}
+            td
 </template>
 
 <script>
-  import State from '~/utils/state'
-  import RelayService from '~/client/services/RelayService'
-  import { Relay } from '~/client/services/RelayService'
+  import SessionService from '~/client/services/SessionService'
+  import { Session } from '~/client/services/SessionService'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 
   export default {
     data () {
       return {
-        relays: [new Relay(0)],
+        sessions: [new Session()],
         headers: tableHeaders.map((val, index) => { return {text: val, value: index, left: true} })
       }
     },
     components: {
     },
     created () {
-      this.relays = RelayService.getRelays()
+      this.sessions = SessionService.getSessions()
 
-      RelayService.on('relays-changed', relays => {
-        this.relays = relays
+      SessionService.on('sessions-changed', sessions => {
+        this.sessions = sessions
       })
       
     },
@@ -47,33 +44,57 @@
 </script>
 
 <style scoped lang='scss'>
-  .led {
-    margin: 20px auto;
-    width: 8px;
-    height: 8px;
+  @import '~styles/settings';
 
-    &.red {
-      background-color: #940;
-      border-radius: 50%;
-      box-shadow: #000 0 0px 3px 1px, inset #600 0 -1px 9px, #F00 0 2px 12px;
+  $tbody_height: 100%;
+  $tcell_width: 25%;
+
+  .table-container {
+    background: $color_back;
+  
+    table {
+      width: 100%;
+      margin-bottom: 0px;  
+    }
+    
+    thead {
+      font-family: $font-menu;
     }
 
-    &.yellow {
-      background-color: #A90;
-      border-radius: 50%;
-      box-shadow: #000 0 -1px 7px 1px, inset #660 0 -1px 9px, #DD0 0 2px 12px;
+    thead>tr {
+      background-color: $color_main; 
+      color: #777;
     }
 
-    &.green {
-      background-color: #690;
-      border-radius: 50%;
-      box-shadow: #000 0 -0px 5px 0px, inset #460 0 0px 6px, #7D0 0 2px 12px;
+    tbody>tr:nth-child(2n+1) {
+      background-color: rgba(0, 0, 0, 0.02);  
+    }
+    
+    td,th {
+      text-align: center;
     }
 
-    &.blue {
-      background-color: #4AB;
-      border-radius: 50%;
-      box-shadow: #000 0 -1px 7px 1px, inset #006 0 -1px 9px, #06F 0 2px 14px;
+    // Scrollable body
+    tbody {
+      height: $tbody_height;
+      overflow-y: auto;
+      box-shadow: 0px -2px 0 0 rgba(0, 0, 0, 0.1);
+    }
+    
+    thead, tbody, tr, td, th {
+      display: block;
+    }
+    
+    tr:after {
+      content: ' ';
+      display: block;
+      visibility: hidden;
+      clear: both;
+    }
+
+    tbody td, thead th {
+      width: $tcell_width;
+      float: left;
     }
   }
 </style>

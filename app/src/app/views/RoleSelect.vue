@@ -5,19 +5,20 @@
 
       .row.roles
         .col-xs-6
-          .role.panel.panel-colorful.panel-info.text-center
-            .panel-body
-              h2 Volunteer Relay
-              p.description 
-                | You live in an uncensoring region and would like to volunteer to provide full internet access to restricted users.
-              a.relay.btn.btn-rounded.btn-lg I Volunteer
+          transition(name='tt')
+            .role.panel.panel-colorful.panel-info.text-center
+              .panel-body
+                h2 Relay Volunteer
+                p.description 
+                  | You live in an uncensoring region and would like to volunteer to provide full internet access to restricted users.
+                a.relay.btn.btn-rounded.btn-lg I Volunteer
         .col-xs-6
           .role.panel.panel-colorful.panel-success.text-center
             .panel-body
               h2 Proxy User
               p.description 
                 | You live in censoring region and your access to the Internet is restricted.
-              a.client.btn.btn-rounded.btn-lg Just Give me Internet
+              a.client.btn.btn-rounded.btn-lg(href='#/client/home') Take me to the Internet
 </template>
 
 <script>
@@ -43,6 +44,10 @@
           margin-top: 5px
         }
         height: 250px;
+
+        &.big {
+          height: 350px;
+        }
 
         .description {
           margin-top: 25px;
