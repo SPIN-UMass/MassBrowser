@@ -16,7 +16,7 @@ var st=stun.connect(server , (error,socket) => {
   sock = net.createServer((s)=>{
     s.pipe(s);
   });
-  sock.listen(socket.stun.local.port, socket.stun.local.host);
+  sock.listen(54108, socket.stun.local.host);
   console.log("Local listening socket:");
   console.log(sock.address());
 

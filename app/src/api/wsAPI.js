@@ -26,7 +26,7 @@ class WSServerConnection extends EventEmitter {
 
   connect(sessionid) {
     return new Promise((resolve, reject) => {
-      var pip = KVStore.getWithDefault('serverIP', '127.0.0.1')
+      var pip = KVStore.getWithDefault('serverIP', 'nonpiaz.cs.umass.edu')
       var pport = KVStore.getWithDefault('serverPort', 8000)
       var prid = KVStore.getWithDefault('relayID','mEJOxpfXi3Q')
 
@@ -53,6 +53,7 @@ class WSServerConnection extends EventEmitter {
           var resp = JSON.parse(message)
           var handler = messageHandlers[resp.type]
           if (handler === undefined) {
+
             console.error("Invalid message type received from server")
             return
           }
@@ -117,7 +118,7 @@ class WSServerConnection extends EventEmitter {
 
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
-      // console.log('I am HERE',this.connectionMap[resp['message_id']])
+      console.log('I am HERE',this.connectionMap[resp['message_id']])
       this.connectionMap[resp['message_id']](resp['data'])
     }
   }
@@ -158,7 +159,7 @@ class WSServerConnection extends EventEmitter {
         'port': port,
         'fingerprint': this.fingerprint,
         'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-        'natType': nattype,
+        'nat_type': nattype,
       }
       this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
     })

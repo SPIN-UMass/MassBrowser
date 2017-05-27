@@ -1,4 +1,5 @@
-const API_URL = 'http://127.0.0.1:8000/'
+const API_URL = 'http://nonpiaz.cs.umass.edu:8000/'
+//const API_URL = 'http://127.0.0.1:8000/'
 // const API_URL = 'http://demo6707596.mockable.io/'
 const request = require('request')
 const SESSION_URL = '/sessions'
@@ -180,14 +181,20 @@ class API {
 
   registerClient (ip) {
     return new Promise((resolve, reject) => {
+      var requestData = {
+        'ip': ip
+      }
+
         request.post({
             url: API_URL + 'api/clients',
             json: true,
-            jar: this.jar
+            jar: this.jar,
+            body: requestData
           },
 
           function (err, res, body) {
             if (err) {
+
               reject(new errors.NetworkError())
             } else {
               handleResponse(res, body, resolve, reject)
@@ -197,12 +204,16 @@ class API {
     )
   }
 
-  registerRelay (ip) {
+  registerRelay () {
+
     return new Promise((resolve, reject) => {
+        var requestData = {
+        }
         request.post({
             url: API_URL + 'api/relays',
             json: true,
-            jar: this.jar
+            jar: this.jar,
+            body: requestData
           },
 
           function (err, res, body) {
@@ -221,6 +232,7 @@ function handleResponse(res, body, resolve, reject) {
     if (res.statusCode == 200 || res.statusCode == 201) {
       resolve(body)
     } else if (res.statusCode >= 500) {
+      console.log(res)
       reject(new errors.ServerError())
     } else {
       reject(new errors.RequestError(res.statusCode, res.reason))
