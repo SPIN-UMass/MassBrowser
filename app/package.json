@@ -15,7 +15,9 @@
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.2",
     "vuetify": "^0.10.4",
-    "vuex": "^2.1.1"
+    "vuex": "^2.1.1",
+    "node-forge": "^0.7.1"
+
   },
   "devDependencies": {},
   "author": "ha-D <hadi@cs.umass.edu>"

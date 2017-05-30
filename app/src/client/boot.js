@@ -11,7 +11,7 @@ import KVStore from '~/utils/kvstore'
 import * as errors from '~/utils/errors'
 import Status from '~/utils/status'
 import SessionService from '~/client/services/SessionService'
-
+import CacheProxy from '~/client/cachebrowser/CacheProxy'
 export default function bootClient() {
   KVStore.get('client', null)
   .then(client => {
@@ -40,6 +40,11 @@ export default function bootClient() {
   })
   .then(() => {
     return SessionService.start()
+  })
+  .then(() => {
+    let status = Status.info("Starting CacheBrowser server")
+    return CacheProxy.startCacheProxy()
+      .then(()=> {status.clear()})
   })
   .then(() => {
     let status = Status.info("Starting SOCKS server")
