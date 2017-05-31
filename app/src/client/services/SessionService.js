@@ -7,6 +7,8 @@ import httpAPI from '~/api/httpAPI'
 import { EventEmitter } from 'events'
 var schedule = require('node-schedule')
 
+import { Domain, Category } from '~/client/models'
+
 
 /**
  * Implements RelayAssigner
@@ -24,23 +26,55 @@ class _SessionService extends EventEmitter {
     ConnectionManager.setRelayAssigner(this)
     this._startSessionPoll()
 
-    this.createSession()
+    // this.createSession()
   }
 
   getSessions() {
     return this.sessions
   }
 
-  assignRelay(ip, port) {
-    return new Promise((resolve, reject) => {
-      var session = this.sessions[Math.floor(Math.random() * this.sessions.length)]
-      resolve(session.connection)
+  assignRelay(host, port) {
+    return Domain.findDomain(host)
+    .then(domain => domain.getWebsite())
+    .then(website => website.getCategory())
+    .then(category => {
+      /* TODO optimization */
+      /* TODO is always returning the first one found */
+      for (var i = 0; i < this.sessions.length; i++) {
+        if (this.sessions[i].allowedCategories.has(category.id)) {
+          return this.sessions[i]
+        }
+      }
+
+      // No suitable session found
+      return this.createSession(category)
     })
+    .then(session => session.connection)
+
+    // return new Promise((resolve, reject) => {
+    //   var session = this.sessions[Math.floor(Math.random() * this.sessions.length)]
+    //   resolve(session.connection)
+    // })
   }
 
-  createSession() {
+  /**
+   * Request a new session from the server.
+   * 
+   * @param categories A category or array of categories which the session
+   * should allow
+   * 
+   * @return A promise which is resolved when the session has been accepted by
+   * the corresponding Relay
+   */
+  createSession(categories) {
+    if (!Array.isArray(categories)) {
+      categories = [categories]
+    }
+
+    var categoryIDs = categories.map(c => (c instanceof Category ? c.id : c))
+
     return new Promise((resolve, reject) => {
-      httpAPI.requestSession()
+      httpAPI.requestSession(categoryIDs)
       .then(session => {
         this.pendingSessions[session.id] = {resolve: resolve, reject: reject}
       })
@@ -64,13 +98,13 @@ class _SessionService extends EventEmitter {
         this.processedSessions[session.id] = desc
         console.log('relay ip is',session.relay.ip, session.relay.port)
     
-        var _session = new Session(session.id, session.relay.ip,  session.relay.port, desc)
+        var _session = new Session(session.id, session.relay.ip,  session.relay.port, desc, session.relay['allowed_categories'])
         this.sessions.push(_session)
         _session.connect()
 
         if (session.id in this.pendingSessions) {
-          pendingSessions[session.id].resolve(_session)
-          delete pendingSessions[session.id]
+          this.pendingSessions[session.id].resolve(_session)
+          delete this.pendingSessions[session.id]
         }
 
         this.emit('sessions-changed', this.sessions)
@@ -91,13 +125,14 @@ export default SessionService
 
 
 export class Session extends EventEmitter {
-  constructor(id, ip, port, desc) {
+  constructor(id, ip, port, desc, allowedCategories) {
     super()
 
     this.id = id
     this.ip = ip
     this.port = port
     this.desc = desc
+    this.allowedCategories = new Set(allowedCategories)
     this.connection = null
     
     this.connected = false
@@ -113,10 +148,12 @@ export class Session extends EventEmitter {
     relay.on('data', data => {
       ConnectionManager.listener(data)
       this.bytesReceived += data.length
+      this.emit('receive', data.length)
     })
 
     relay.on('send', data => {
       this.bytesSent += data.length
+      this.emit('send', data.length)
     })
 
     relay.on('close', () => {
