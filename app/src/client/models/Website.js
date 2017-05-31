@@ -1,9 +1,9 @@
-import { createModel } from '~/models'
+import { createModel, RelationField } from '~/utils/orm'
 
 class WebsiteSchema {
   constructor() {
     this.name = null
-    this.category = null
+    this.category = new RelationField('Category')
     this.blocked = null
     this.enabled = false
   }

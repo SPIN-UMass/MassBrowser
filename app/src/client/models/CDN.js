@@ -1,4 +1,4 @@
-import { createModel } from '~/models'
+import { createModel, RelationField } from '~/utils/orm'
 
 class CDNSchema {
   constructor() {

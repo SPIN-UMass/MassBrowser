@@ -1,9 +1,9 @@
-import { createModel } from '~/models'
+import { createModel, RelationField } from '~/utils/orm'
 
 class CategorySchema {
   constructor() {
     this.name = null
-    this.parent = null
+    this.parent = new RelationField('Category')
   }
 }
 

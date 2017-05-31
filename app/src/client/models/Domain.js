@@ -1,4 +1,5 @@
-import { createModel } from '~/models'
+import { createModel, RelationField } from '~/utils/orm'
+import Website from './website'
 
 const globalRegexCache = {}
 
@@ -6,9 +7,10 @@ class DomainSchema {
   constructor() {
     this.name = null
     this.subdomain = null
-    this.blocked = null
-    this.website = null
-    this.cdn = null
+    this.blockedRegions = null
+    this.website = new RelationField('Website')
+    this.cdn = new RelationField('CDN')
+    this.ssl = null
 
     this._regex_cache = null
   }

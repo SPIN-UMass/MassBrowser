@@ -1,4 +1,4 @@
-import { createModel } from '~/models'
+import { createModel } from './orm'
 
 class KeyValSchema {
   constructor() {
