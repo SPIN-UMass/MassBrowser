@@ -9,7 +9,7 @@ var net = require('net'),
   info = console.log.bind(console)
 import ConnectionManager from './ConnectionManager'
 import CacheManager from '~/client/cachebrowser/CacheManager'
-
+import PolicyManager from '~/client/services/PolicyManager'
 // Create server
 // The relay accepts SOCKS connections. This particular relay acts as a proxy.
 
@@ -23,72 +23,88 @@ export function startClientSocks (mhost, mport) {
     PORT = '7080'
   }
 
-  function onConnection (socket, port, address, proxy_ready) {
+  function onConnection (socket, port, address, proxyReady) {
     // Implement your own proxy here! Do encryption, tunnelling, whatever! Go flippin' mental!
     // I plan to tunnel everything including SSH over an HTTP tunnel. For now, though, here is the plain proxy:
-    //ConnectionManager.newClientConnection(socket, address, port, proxy_ready).then(() => {}, (error) => {
-
-      CacheManager.newCacheConnection(socket, address, port, proxy_ready).then(() => {}, (error) => {
-
-        var proxy = net.createConnection({port: port, host: address}, proxy_ready)
-        var localAddress, localPort
-        proxy.on('connect', () => {
-
-          localPort = proxy.localPort
-        })
-        proxy.on('data', (d) => {
-          try {
-            //console.log('receiving ' + d.length + ' bytes from proxy');
-            if (!socket.write(d)) {
-              proxy.pause()
-
-              socket.on('drain', function () {
-                proxy.resume()
-              })
-              setTimeout(function () {
-                proxy.resume()
-              }, 100)
-            }
-          } catch (err) {
-          }
-        })
-        socket.on('data', function (d) {
-          // If the application tries to send data before the proxy is ready, then that is it's own problem.
-          try {
-            //console.log('sending ' + d.length + ' bytes to proxy');
-            if (!proxy.write(d)) {
-              socket.pause()
-
-              proxy.on('drain', function () {
-                socket.resume()
-              })
-              setTimeout(function () {
-                socket.resume()
-              }, 100)
-            }
-          } catch (err) {
-          }
+    PolicyManager.getDomainPolicy(address, port).then((proxyType) => {
+      if (proxyType === PolicyManager.POLICY_YALER_PROXY) {
+        ConnectionManager.newClientConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
+          regularProxy(socket, port, address, proxyReady)
         })
 
-        proxy.on('error', function (err) {
-          //console.log('Ignore proxy error');
+      }
+      else if (proxyType === PolicyManager.POLICY_CACHEBROWSE) {
+        CacheManager.newCacheConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
+          regularProxy(socket, port, address, proxyReady)
         })
-        socket.on('error',(err)=>{
 
-        })
+      }
+      else {
+        regularProxy(socket, port, address, proxyReady)
 
-        proxy.on('close', function (had_error) {
-          try {
-            if (localAddress && localPort)
-              console.log('The proxy %s:%d closed', localAddress, localPort)
-            else
-              console.error('Connect to %s:%d failed', address, port)
-            socket.close()
-          } catch (err) {
-          }
-        }.bind(this))
-      })
-    //})
+      }
+
+    })
+
+  }
+
+  function regularProxy (socket, port, address, proxyReady) {
+    var proxy = net.createConnection({port: port, host: address}, proxyReady)
+    var localAddress, localPort
+    proxy.on('connect', () => {
+
+      localPort = proxy.localPort
+    })
+    proxy.on('data', (d) => {
+      try {
+        if (!socket.write(d)) {
+          proxy.pause()
+
+          socket.on('drain', function () {
+            proxy.resume()
+          })
+          setTimeout(function () {
+            proxy.resume()
+          }, 100)
+        }
+      } catch (err) {
+      }
+    })
+    socket.on('data', function (d) {
+      // If the application tries to send data before the proxy is ready, then that is it's own problem.
+      try {
+        //console.log('sending ' + d.length + ' bytes to proxy');
+        if (!proxy.write(d)) {
+          socket.pause()
+
+          proxy.on('drain', function () {
+            socket.resume()
+          })
+          setTimeout(function () {
+            socket.resume()
+          }, 100)
+        }
+      } catch (err) {
+      }
+    })
+
+    proxy.on('error', function (err) {
+      //console.log('Ignore proxy error');
+    })
+    socket.on('error', (err) => {
+
+    })
+
+    proxy.on('close', function (had_error) {
+      try {
+        if (localAddress && localPort)
+          console.log('The proxy %s:%d closed', localAddress, localPort)
+        else
+          console.error('Connect to %s:%d failed', address, port)
+        socket.close()
+      } catch (err) {
+      }
+    }.bind(this))
 
   }
 

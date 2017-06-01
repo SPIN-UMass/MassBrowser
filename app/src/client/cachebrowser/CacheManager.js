@@ -31,7 +31,6 @@ class _CacheManager {
     })
 
     proxy.on('data', (d) => {
-      console.log('writing stuff')
       try {
         if (!socket.write(d)) {
           proxy.pause()

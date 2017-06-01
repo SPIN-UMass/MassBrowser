@@ -13,7 +13,6 @@ class _CacheProxy {
     this.proxyoptions = {
       SNICallback: function (domain, cb) {
         CertificateManager.getServerCerts(domain).then((data) => {
-          console.log('SNI CALL BACK', data)
           return cb(null, tls.createSecureContext(data))
         })
       },
@@ -94,7 +93,6 @@ class _CacheProxy {
     })
 
     socket.on('data', (d) => {
-      console.log('sending data')
       proxysocket.write(d)
     })
     socket.on('error', (err) => {

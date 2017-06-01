@@ -17,7 +17,7 @@ class _PolicyManager extends EventEmitter {
    * @return A promise which resolves with the policy which should be 
    * applied to the host
    */
-  getDomainPolicy(host) {
+  getDomainPolicy(host,port) {
     const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
     return new Promise((resolve, reject) => {
