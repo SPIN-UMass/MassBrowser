@@ -1,5 +1,4 @@
 import { createModel, RelationField } from '~/utils/orm'
-import Website from './website'
 
 const globalRegexCache = {}
 

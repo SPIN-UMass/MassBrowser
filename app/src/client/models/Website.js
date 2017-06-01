@@ -5,7 +5,7 @@ class WebsiteSchema {
     this.name = null
     this.category = new RelationField('Category')
     this.blocked = null
-    this.enabled = false
+    this.enabled = true
   }
 }
 

@@ -1,5 +1,6 @@
 <template lang="pug">
   .y-home
+    .top
     .bottom
       ul.options
         li #[a relays]
@@ -9,6 +10,7 @@
 
 <script>
   import RelayView from './RelayView'
+  import GraphWidget from './GraphWidget'
 
   export default {
     data () {
@@ -16,7 +18,11 @@
       }
     },
     components: {
-      RelayView
+      RelayView,
+      GraphWidget
+    },
+    mounted() {
+
     }
   }
 </script>
@@ -24,6 +30,11 @@
 <style scoped lang='scss'>
   @import '~styles/settings';
 
+  .top {
+    height: 150px;
+    background: $color_main;
+  }
+  
   .y-home{
     .bottom {
       background: $color_main;
