@@ -35,7 +35,7 @@ class WSServerConnection extends EventEmitter {
         this.port = values[1]
         this.relayid = values[2]
 
-        this.ws = new WebSocket(util.format('ws://%s:%s/api/?session_key=%s', this.IPaddr, this.port, sessionid), {
+        this.ws = new WebSocket(util.format('wss://%s:%s/api/?session_key=%s', this.IPaddr, this.port, sessionid), {
           perMessageDeflate: false,
         })
 
