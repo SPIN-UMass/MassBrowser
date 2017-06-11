@@ -18,6 +18,7 @@ class _PolicyManager extends EventEmitter {
    * applied to the host
    */
   getDomainPolicy(host,port) {
+    console.log(host,port)
     const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
     return new Promise((resolve, reject) => {
@@ -25,7 +26,7 @@ class _PolicyManager extends EventEmitter {
       if (ipRegex.test(host)) {
         return reject("IP based filtering not supported")
       }
-
+      return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
       .then(domain => {
         if (!domain) {

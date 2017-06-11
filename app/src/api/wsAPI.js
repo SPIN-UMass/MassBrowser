@@ -26,8 +26,8 @@ class WSServerConnection extends EventEmitter {
 
   connect(sessionid) {
     return new Promise((resolve, reject) => {
-      var pip = KVStore.getWithDefault('serverIP', 'nonpiaz.cs.umass.edu')
-      var pport = KVStore.getWithDefault('serverPort', 8000)
+      var pip = KVStore.getWithDefault('serverIP', 'yaler.co')
+      var pport = KVStore.getWithDefault('serverPort', 443)
       var prid = KVStore.getWithDefault('relayID','mEJOxpfXi3Q')
 
       Promise.all([pip, pport, prid]).then(values => {

@@ -1,4 +1,4 @@
-const API_URL = 'http://nonpiaz.cs.umass.edu:8000/'
+const API_URL = 'https://yaler.co/'
 //const API_URL = 'http://127.0.0.1:8000/'
 // const API_URL = 'http://demo6707596.mockable.io/'
 const request = require('request')
@@ -158,6 +158,7 @@ class API {
 
   requestSession () {
     return new Promise((resolve, reject) => {
+      console.log('requesting')
         var requestData = {
           'DATA': 'TBD'
         }
