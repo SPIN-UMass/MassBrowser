@@ -116,6 +116,7 @@ class WSServerConnection extends EventEmitter {
     })
   }
   clientSessionDisconnected(client,sessionid) {
+    console.log('closing session')
     return new Promise((resolve,reject) => {
       var proto = {}
 
