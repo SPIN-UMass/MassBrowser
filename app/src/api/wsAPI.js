@@ -115,6 +115,15 @@ class WSServerConnection extends EventEmitter {
 
     })
   }
+  clientSessionDisconnected(client,sessionid) {
+    return new Promise((resolve,reject) => {
+      var proto = {}
+
+
+      this.sendJSON(SESSION_PATH+sessionid,'DELETE', proto,resolve)
+
+    })
+  }
 
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {

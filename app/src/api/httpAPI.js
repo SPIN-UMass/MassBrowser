@@ -135,7 +135,7 @@ class API {
   clientUp () {
     return new Promise((resolve, reject) => {
         var requestData = {
-          'DATA': 'TBD'
+          'categoie': 'TBD'
         }
 
         request.post({
@@ -158,18 +158,17 @@ class API {
 
   requestSession () {
     return new Promise((resolve, reject) => {
-      console.log('requesting')
         var requestData = {
           'DATA': 'TBD'
         }
-
+        console.log('sessions request',API_URL + CLIENT_URL + this.clientID + SESSION_URL)
         request.post({
             url: API_URL + CLIENT_URL + this.clientID + SESSION_URL,
             json: true,
             jar: this.jar,
             body: requestData
           },
-          function (err, res, body) {
+      function (err, res, body) {
             if (err) {
               reject(new errors.NetworkError(err))
             } else {
@@ -230,7 +229,8 @@ class API {
 }
 
 function handleResponse(res, body, resolve, reject) {
-    if (res.statusCode == 200 || res.statusCode == 201) {
+
+  if (res.statusCode == 200 || res.statusCode == 201) {
       resolve(body)
     } else if (res.statusCode >= 500) {
       console.log(res)

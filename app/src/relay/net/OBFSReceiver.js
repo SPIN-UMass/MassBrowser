@@ -8,9 +8,9 @@ var ThrottleGroup = require('./throttle').ThrottleGroup
 
 export function runOBFSserver (publicIP, publicPort) {
 
-  var up_limit = ThrottleGroup({rate: 100000})
+  var up_limit = ThrottleGroup({rate: 100000000})
 
-  var down_limit = ThrottleGroup({rate: 100000})
+  var down_limit = ThrottleGroup({rate: 100000000})
   const server = net.createServer((socket) => {
     console.log('relay connected',
       socket.authorized ? 'authorized' : 'unauthorized')
@@ -23,8 +23,20 @@ export function runOBFSserver (publicIP, publicPort) {
     var recver = new ConnectionReceiver(my_up, my_down, socket)
     socket.on('error', (err) => {
       console.log('socket error', err.message)
-      recver.closeAll()
+      recver.closeConnections()
+      socket.unpipe(my_up)
+      my_down.unpipe(socket)
+      my_down.end()
+      my_up.end()
 
+    })
+    socket.on('close', () => {
+      console.log('socket clossing',)
+      recver.closeConnections()
+      socket.unpipe(my_up)
+      my_down.unpipe(socket)
+      my_down.end()
+      my_up.end()
     })
   })
 

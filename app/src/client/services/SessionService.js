@@ -23,11 +23,10 @@ class _SessionService extends EventEmitter {
 
   start () {
     ConnectionManager.setRelayAssigner(this)
-    httpAPI.requestSession([])
     console.log('Starting Session Services')
     this._startSessionPoll()
 
-    // this.createSession()
+    this.createSession()
   }
 
   getSessions () {
@@ -68,49 +67,59 @@ class _SessionService extends EventEmitter {
    * the corresponding Relay
    */
   createSession (categories) {
-    if (!Array.isArray(categories)) {
-      categories = [categories]
-    }
+    var categoryIDs = []
 
-    var categoryIDs = categories.map(c => (c instanceof Category ? c.id : c))
+    if (categories !== undefined) {
+      if (!Array.isArray(categories)) {
+        categories = [categories]
+      }
+      categoryIDs = categories.map(c => (c instanceof Category ? c.id : c))
+    }
+    console.log('I AM HERE CREATING SESSIONS', categoryIDs)
 
     return new Promise((resolve, reject) => {
       httpAPI.requestSession(categoryIDs)
         .then(session => {
+          console.log('accepting')
+
           this.pendingSessions[session.id] = {resolve: resolve, reject: reject}
+          resolve()
         })
         .catch(err => {
+          console.log('rejecting ')
           reject(err)
         })
     })
   }
 
   _handleRetrievedSessions (ses) {
-    ses.forEach((session) => {
-      var desc = {
-        'readkey': Buffer.from(session.read_key, 'base64'),
-        'readiv': Buffer.from(session.read_iv, 'base64'),
-        'writekey': Buffer.from(session.write_key, 'base64'),
-        'writeiv': Buffer.from(session.write_iv, 'base64'),
-        'token': Buffer.from(session.token, 'base64'),
-      }
-
-      if (!(session.id in this.sessions)) {
-        this.processedSessions[session.id] = desc
-        console.log('relay ip is', session.relay.ip, session.relay.port)
-
-        var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
-        this.sessions.push(_session)
-        _session.connect()
-
-        if (session.id in this.pendingSessions) {
-          this.pendingSessions[session.id].resolve(_session)
-          delete this.pendingSessions[session.id]
+    if (ses !== undefined) {
+      ses.forEach((session) => {
+        var desc = {
+          'readkey': Buffer.from(session.read_key, 'base64'),
+          'readiv': Buffer.from(session.read_iv, 'base64'),
+          'writekey': Buffer.from(session.write_key, 'base64'),
+          'writeiv': Buffer.from(session.write_iv, 'base64'),
+          'token': Buffer.from(session.token, 'base64'),
         }
 
-        this.emit('sessions-changed', this.sessions)
-      }
-    })
+        if (!(session.id in this.sessions)) {
+          this.processedSessions[session.id] = desc
+          console.log('relay ip is', session.relay.ip, session.relay.port)
+
+          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
+          this.sessions.push(_session)
+          _session.connect()
+
+          if (session.id in this.pendingSessions) {
+            this.pendingSessions[session.id].resolve(_session)
+            delete this.pendingSessions[session.id]
+          }
+
+          this.emit('sessions-changed', this.sessions)
+        }
+      })
+    }
   }
 
   _startSessionPoll () {

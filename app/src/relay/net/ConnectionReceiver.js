@@ -22,6 +22,7 @@ export class ConnectionReceiver {
         this.authenticate(data)
       }
     })
+
     this.crypt = false
     this.isAuthenticated = false
     this.carrylen = 0
@@ -30,7 +31,7 @@ export class ConnectionReceiver {
     this.lastconid = ''
     this.lastsize = 0
     this.headersize = 32
-
+    this.desciber = {}
     this.newconnectioncarry = Buffer(0)
 
     this.initcarry = ''
@@ -46,8 +47,8 @@ export class ConnectionReceiver {
       console.log('Conid', sessiontoken)
       if (desc) {
         ServerConnection.clientSessionConnected(desc.client, desc.sessionId)
+        this.desciber = desc
         console.log('clientID', sessiontoken)
-
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
         }, () => {
@@ -137,7 +138,11 @@ export class ConnectionReceiver {
     }
   }
 
-  closeAll () {
+  closeConnections () {
+    if (this.isAuthenticated) {
+      ServerConnection.clientSessionDisconnected(this.desciber.client, this.desciber.sessionId)
+    }
+
     Object.keys(this.connections).forEach((key) => {
       this.connections[key].end()
     })
