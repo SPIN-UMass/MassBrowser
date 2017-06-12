@@ -6,6 +6,7 @@ import ServerConnection from '~/api/wsAPI'
 import httpAPI from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
 import * as errors from '~/utils/errors'
+import StatusReporter from './net/StatusReporter'
 var stunserver = {
   host: 'stun.l.google.com',
   port: 19302
@@ -49,6 +50,7 @@ KVStore.get('relay', null)
     return ServerConnection.relayUp(stun.public.host, '8087', 'PublicIP')
   })
   .then(data => {
+    StatusReporter.startRoute()
     console.log('Starting Relay')
     runOBFSserver('0.0.0.0', 8087)
   })
