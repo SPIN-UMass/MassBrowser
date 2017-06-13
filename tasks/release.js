@@ -1,41 +1,237 @@
-'use strict'
+process.env.NODE_ENV = 'production'
 
-const exec = require('child_process').exec
-const packager = require('electron-packager')
+const inquirer = require('inquirer')
+const fs = require('fs-extra')
+const shell = require('shelljs')
+const { say } = require('cfonts')
+const chalk = require('chalk')
+const del = require('del')
+const { spawn } = require('child_process')
+const webpack = require('webpack')
+const Multispinner = require('multispinner')
 
-if (process.env.PLATFORM_TARGET === 'clean') {
-  require('del').sync(['builds/*', '!.gitkeep'])
-  console.log('\x1b[33m`builds` directory cleaned.\n\x1b[0m')
-} else pack()
 
-/**
- * Build webpack in production
- */
-function pack () {
-  console.log('\x1b[33mBuilding webpack in production mode...\n\x1b[0m')
-  let pack = exec('npm run pack')
+const mainConfig = require('../webpack.main.config')
+const rendererConfig = require('../webpack.renderer.config')
 
-  pack.stdout.on('data', data => console.log(data))
-  pack.stderr.on('data', data => console.error(data))
-  pack.on('exit', code => build())
+
+const doneLog = chalk.bgGreen.white(' DONE ') + ' '
+const errorLog = chalk.bgRed.white(' ERROR ') + ' '
+const okayLog = chalk.bgBlue.white(' OKAY ') + ' '
+const isCI = process.env.CI || false
+
+
+CONF_FILE = '.release.json'
+
+if (process.env.BUILD_TARGET === 'clean') clean()
+else release()
+
+
+function release (target) {
+  greeting()
+
+  if (!target) {
+    inquirer.prompt([{
+      type: "list",
+      name: "target",
+      message: 'Select release target',
+      choices: ["sentry", "git"]
+    }])
+    .then(answer => {
+      if (answer.target == 'git') {
+        return releaseGithub()
+      } else if (answer.target == 'sentry') {
+        return releaseSentry()
+      }
+    })
+  }
 }
 
-/**
- * Use electron-packager to build electron app
- */
-function build () {
-  let options = require('../config').building
 
-  console.log('\x1b[34mBuilding electron app(s)...\n\x1b[0m')
-  packager(options, (err, appPaths) => {
-    if (err) {
-      console.error('\x1b[31mError from `electron-packager` when building app...\x1b[0m')
-      console.error(err)
-    } else {
-      console.log('Build(s) successful!')
-      console.log(appPaths)
-
-      console.log('\n\x1b[34mDONE\n\x1b[0m')
+function ensureConfig() {
+  return fs.pathExists(CONF_FILE)
+  .then(exists => {
+    if (!exists) {
+      return fs.writeJson(CONF_FILE, {})
     }
   })
+}
+
+function run(command) {
+  console.log(command)
+  return shell.exec(command)
+}
+
+
+/* ------- Github -------- */
+function releaseGithub() {
+  return fs.readJson('package.json')
+  .then(package => inquirer.prompt([{
+      type: 'confirm',
+      name: 'confirm',
+      message: `Version is ${package.version}, confirm?`,
+      defaultt: true
+  }]))
+  .then(answer => answer.confirm ? getGithubConfig() : process.exit(0))
+  .then(config => {
+    run(`cross-env GH_TOKEN=${config.authToken} build -l -p always`)
+  })
+}
+
+function getGithubConfig() {
+  return ensureConfig()
+  .then(() => fs.readJson(CONF_FILE))
+  .then(config => config.github || createGithubConfig())
+}
+
+function createGithubConfig() {
+  var config = {
+    authToken: null
+  }
+
+  var questions = [+
+    {
+      name: 'authToken',
+      message: 'Enter your github API Token',
+      default: config.authToken
+    }
+  ]
+  
+  return fs.readJson(CONF_FILE)
+  .then(config => {
+    return inquirer.prompt(questions)
+    .then(answers => {
+      config.github = answers
+      return fs.writeJson(CONF_FILE, config, {spaces: 2})
+    })
+    .then(() => config.github)
+  })
+}
+
+/* -------------- -------- */
+
+/* ------- Sentry -------- */
+
+function releaseSentry() {
+  getSentryConfig()  
+  .then(config => {
+    process.env['SENTRY_AUTH_TOKEN'] = config.authToken
+    process.env['SENTRY_URL'] = config.sentryURL
+    process.env['SENTRY_ORG'] = config.sentryOrg
+
+    if (config.version == 'auto') {
+      config.version = run(`sentry-cli releases propose-version`).stdout
+      console.log(`Version: ${config.version}`)
+    }
+
+    run(`sentry-cli releases new -p ${config.projects.join(' -p ')} ${config.version}`)
+
+    for (let i = 0; i < config.projects.length; i++) {
+      process.env['SENTRY_PROJECT'] = config.projects[i]
+
+      if (config.commit === 'auto') {
+        run(`sentry-cli releases set-commits ${config.version} --auto`)
+      } else {
+        run(`sentry-cli releases set-commits ${config.version} --commit ${config.commit}`)
+      }
+    }
+    
+    
+    // shell.exec(`sentry-cli releases set-commits ${config.version} --commit ${config.commit}`)
+  })
+}
+
+
+
+function getSentryConfig() {
+  return ensureConfig()
+  .then(() => fs.readJson(CONF_FILE))
+  .then(config => config.sentry || createSentryConfig())
+  .then(config => {
+    return inquirer.prompt([
+      {
+        'name': 'commit',
+        'message': 'Enter release commit ID',
+        'default': 'auto'
+      },
+      {
+        'name': 'version',
+        'message': 'Enter version identifier',
+        'default': 'auto'
+      }
+    ])
+    .then(answers => {
+      config.commit = answers.commit
+      config.version = answers.version
+      return config
+    })
+  })
+}
+
+function createSentryConfig() {
+  var config = {
+    authToken: '',
+    repoName: '',
+    projects: '',
+    sentryURL: 'https://sentry.yaler.co/',
+    sentryOrg: 'sentry'
+  }
+
+  var questions = [
+    {
+      name: 'sentryURL',
+      message: 'Whats your sentry release URL?',
+      default: config.sentryURL
+    },
+        {
+      name: 'sentryOrg',
+      message: 'Whats your sentry organization slug?',
+      default: config.sentryOrg
+    },
+    {
+      name: 'repoName',
+      message: 'Whats the repository name? (e.g. someon/someproject)',
+      default: config.repoName
+    },
+    {
+      name: 'projects',
+      message: 'List the related sentry project names (space seperated)',
+      filter: a => a.split(' ')
+    },
+    {
+      name: 'authToken',
+      message: 'Enter your sentry Auth Token',
+      default: config.authToken
+    }
+  ]
+  
+  return fs.readJson(CONF_FILE)
+  .then(config => {
+    return inquirer.prompt(questions)
+    .then(answers => {
+      config.sentry = answers
+      return fs.writeJson(CONF_FILE, config, {spaces: 2})
+    })
+    .then(() => config.sentry)
+  })
+}
+
+/* ----------------------- */
+
+function greeting () {
+  const cols = process.stdout.columns
+  let text = ''
+
+  if (cols > 85) text = 'release'
+  else if (cols > 60) text = 'release'
+  else text = false
+
+  if (text && !isCI) {
+    say(text, {
+      colors: ['yellow'],
+      font: 'simple3d',
+      space: false
+    })
+  } else console.log(chalk.yellow.bold('\n  lets-build'))
+  console.log()
 }

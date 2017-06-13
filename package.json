@@ -1,15 +1,15 @@
 {
   "name": "yaler",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "P2P Proxy",
   "scripts": {
-    "build": "node tasks/release.js",
-    "build:clean": "cross-env PLATFORM_TARGET=clean node tasks/release.js",
-    "build:darwin": "cross-env PLATFORM_TARGET=darwin node tasks/release.js",
-    "build:linux": "cross-env PLATFORM_TARGET=linux node tasks/release.js",
-    "build:mas": "cross-env PLATFORM_TARGET=mas node tasks/release.js",
-    "build:win32": "cross-env PLATFORM_TARGET=win32 node tasks/release.js",
+    "build": "node tasks/build.js && build",
+    "build:all": "node tasks/build.js && build -mwl",
+    "build:help": "build -mwl",
+    "build:dir": "node tasks/build.js && build --dir",
+    "build:clean": "cross-env BUILD_TARGET=clean node tasks/build.js",
     "dev": "node tasks/runner.js",
+    "dev2": "node tasks/dev-runner.js",
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter app test",
     "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix app test",
     "pack": "npm run pack:main && npm run pack:renderer",
@@ -18,10 +18,49 @@
     "test": "npm run unit",
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix && cd app && npm install",
+    "release": "node tasks/release.js",
+    "release:sentry": "node tasks/sentry.js",
+    "release:github": "node tasks/pre-release.js && build -mwl -p always",
     "client": "node ./app/build/client/main.js",
     "relay": "node ./app/build/relay/main.js"
   },
-  "author": "Greg Holguin <simulatedgreg@gmail.com>",
+  "build": {
+    "productName": "yaler",
+    "appId": "co.yaler.client",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "node_modules/",
+      "dist/",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icons"
+    }
+  },
+  "author": "Hadi Zolfaghari <hadi@cs.umass.edu>",
   "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.8.0",
@@ -29,20 +68,23 @@
     "babel-loader": "^6.2.4",
     "babel-plugin-istanbul": "^3.1.2",
     "babel-plugin-root-import": "^5.1.0",
+    "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-plugin-transform-runtime": "^6.8.0",
     "babel-preset-es2015": "^6.6.0",
+    "babel-preset-latest": "^6.24.1",
     "babel-preset-stage-0": "^6.5.0",
-    "babel-register": "^6.18.0",
+    "babel-register": "^6.24.1",
     "babel-runtime": "^6.6.1",
+    "cfonts": "^1.1.3",
     "chai": "^3.5.0",
     "cross-env": "^3.1.4",
     "css-loader": "^0.26.1",
     "del": "^2.2.1",
     "devtron": "^1.1.0",
     "electron": "^1.3.1",
+    "electron-builder": "^18.6.2",
     "electron-debug": "^1.1.0",
-    "electron-devtools-installer": "^2.0.1",
-    "electron-packager": "^8.5.0",
+    "electron-devtools-installer": "^2.2.0",
     "electron-rebuild": "^1.1.3",
     "eslint": "^3.13.1",
     "eslint-config-standard": "^6.2.1",
@@ -58,6 +100,7 @@
     "gulp-babel": "^6.1.2",
     "html-webpack-plugin": "^2.16.1",
     "inject-loader": "^2.0.1",
+    "inquirer": "^3.1.0",
     "json-loader": "^0.5.4",
     "karma": "^1.3.0",
     "karma-chai": "^0.1.0",
@@ -68,9 +111,13 @@
     "karma-spec-reporter": "0.0.26",
     "karma-webpack": "^2.0.1",
     "mocha": "^3.0.2",
+    "multispinner": "^0.2.1",
     "node-sass": "^4.5.2",
     "pug": "^2.0.0-rc.1",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.1",
     "sass-loader": "^6.0.3",
+    "shelljs": "^0.7.8",
     "sinon": "^2.3.2",
     "sinon-chai": "^2.10.0",
     "style-loader": "^0.13.1",
@@ -83,9 +130,7 @@
     "vue-template-compiler": "^2.1.10",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
+    "webpack-hot-middleware": "^2.18.0",
     "webpack-merge": "^2.4.0"
-  },
-  "dependencies": {
-    "babel-plugin-root-import": "^5.1.0"
   }
 }

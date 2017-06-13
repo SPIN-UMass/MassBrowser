@@ -11,7 +11,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 let rendererConfig = {
-  devtool: '#eval-source-map',
+  devtool: '#source-map',
   devServer: { overlay: true },
   entry: {
     renderer: path.join(__dirname, 'app/src/app/main.js')
@@ -35,7 +35,7 @@ let rendererConfig = {
         test: /\.js$/,
         use: 'babel-loader',
         include: [ path.resolve(__dirname, 'app/src') ],
-        exclude: /node_modules/
+        exclude: [/node_modules/]
       },
       {
         test: /\.json$/,
@@ -105,7 +105,9 @@ let rendererConfig = {
     alias: {
       'components': path.join(__dirname, 'app/src/renderer/components'),
       'renderer': path.join(__dirname, 'app/src/renderer'),
-      'styles': path.join(__dirname, 'app/src/app/styles')
+      'styles': path.join(__dirname, 'app/src/app/styles'),
+      '~': path.join(__dirname, 'app/src/'),
+      'assets': path.join(__dirname, 'app/assets'),
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss'],
     modules: [
@@ -141,7 +143,7 @@ if (process.env.NODE_ENV !== 'production') {
  * Adjust rendererConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
-  rendererConfig.devtool = ''
+  // rendererConfig.devtool = ''
 
   rendererConfig.plugins.push(
     new webpack.DefinePlugin({

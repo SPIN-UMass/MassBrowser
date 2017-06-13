@@ -44,7 +44,7 @@
   import RelayService from '~/client/services/RelayService'
   import SyncService from '~/client/services/SyncService'
 
-  import { startClientSocks } from '~/core/client'
+  import { startClientSocks } from '~/client/net'
 
   export default {
     data () {

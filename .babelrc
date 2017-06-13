@@ -2,7 +2,7 @@
   "comments": false,
   "env": {
     "testing-unit": {
-      "presets": ["es2015", "stage-0"],
+      "presets": ["latest", "stage-0"],
       "plugins": ["istanbul"]
     },
     "core": {
@@ -14,19 +14,19 @@
       ]
     },
     "main": {
-      "presets": ["es2015", "stage-0"]
+      "presets": ["latest", "stage-0"]
     },
     "renderer": {
       "presets": [
-        ["es2015", { "modules": false }],
+        ["latest", { "modules": false }],
         "stage-0"
       ]
     }
   },
   "plugins": [
     "transform-runtime",
-    ["babel-plugin-root-import", {
-      "rootPathSuffix": "app/src/"
+    ["babel-plugin-transform-builtin-extend", {
+      "globals": ["Error"]
     }]
   ]
 }

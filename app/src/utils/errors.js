@@ -1,6 +1,10 @@
-class BaseError {
+import Raven from '~/utils/raven'
+
+export class BaseError extends Error {
   constructor(message) {
-    this.message = message
+    super(message)
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor)
   }
 
   toString() {
@@ -8,6 +12,10 @@ class BaseError {
       return this.message
     }
     return super.toString()
+  }
+
+  report() {
+    console.error("Report not implemented for this error")
   }
 }
 
@@ -37,8 +45,13 @@ export class AuthenticationError extends APIError {
 }
 
 export class RequestError extends APIError {
-  constructor(statusCode, message) {
-    super(statusCode || 400, message)
+  constructor(statusCode, reason, responseBody) {
+    super(statusCode || 400, reason)
+    this.responseBody = responseBody
+  }
+
+  report() {
+    Raven.captureException(this)
   }
 }
 

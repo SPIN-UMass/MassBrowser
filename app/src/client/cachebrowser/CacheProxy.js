@@ -17,8 +17,8 @@ class _CacheProxy {
         })
       },
       requestCert: false,
-      key: fs.readFileSync('./ia.key'),
-      cert: fs.readFileSync('./ia.crt'),
+      // key: fs.readFileSync('./ia.key'),
+      // cert: fs.readFileSync('./ia.crt'),
       rejectUnauthorized: false
 
     }

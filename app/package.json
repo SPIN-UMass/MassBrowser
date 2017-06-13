@@ -5,9 +5,12 @@
   "main": "./dist/main.js",
   "dependencies": {
     "babel-runtime": "^6.23.0",
+    "bluebird": "^3.5.0",
     "limiter": "^1.1.0",
     "nedb": "^1.8.0",
-    "node-schedule": "^1.2.1",    
+    "node-forge": "^0.7.1",
+    "node-schedule": "^1.2.1",
+    "raven-js": "^3.15.0",
     "throttle": "^1.0.3",
     "vs-stun": "0.0.7",
     "vue": "^2.1.10",
@@ -15,9 +18,7 @@
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.2",
     "vuetify": "^0.10.4",
-    "vuex": "^2.1.1",
-    "node-forge": "^0.7.1"
-
+    "vuex": "^2.1.1"
   },
   "devDependencies": {},
   "author": "ha-D <hadi@cs.umass.edu>"

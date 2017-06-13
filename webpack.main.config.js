@@ -8,8 +8,9 @@ const settings = require('./config.js')
 const webpack = require('webpack')
 
 let mainConfig = {
+  devtool: '#source-map',
   entry: {
-    main: path.join(__dirname, 'app/src/main/index.js')
+    main: path.join(__dirname, 'app/src/app/main/index.js')
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -44,9 +45,9 @@ let mainConfig = {
       'process.env.NODE_ENV': '"production"'
     }),
     new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
+      beautify: true,
+      sourceMap: true,
+      compress: false
     })
   ],
   resolve: {

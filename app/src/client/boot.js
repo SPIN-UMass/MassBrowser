@@ -12,6 +12,8 @@ import * as errors from '~/utils/errors'
 import Status from '~/utils/status'
 import SessionService from '~/client/services/SessionService'
 import CacheProxy from '~/client/cachebrowser/CacheProxy'
+
+
 export default function bootClient() {
   KVStore.get('client', null)
   .then(client => {
@@ -60,10 +62,14 @@ export default function bootClient() {
       Status.error("Server authentication failed")
     } else if (err instanceof errors.RequestError) {
       Status.error("Error occured in request to server " + err.message)
+      console.error(err)
+      err.report()     
     } else if (err instanceof errors.ServerError) {
       Status.error("There is a problem with the server, please try again later")
     } else {
       console.log("Unknown error occured: " + err.toString())
+      console.log(err.statusCode)
+      console.log(err)
     }
   })
 }
