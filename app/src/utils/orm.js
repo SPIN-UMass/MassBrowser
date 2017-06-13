@@ -2,7 +2,11 @@ import Datastore from 'nedb'
 import fs from 'fs'
 import path from 'path'
 
-const DATA_DIR = path.join(process.env.HOME, '.yaler')
+import { remote } from 'electron'
+import { getDataDir } from '~/utils'
+
+
+const DATA_DIR = getDataDir()
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR)

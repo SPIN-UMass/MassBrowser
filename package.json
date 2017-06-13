@@ -1,10 +1,11 @@
 {
   "name": "yaler",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "P2P Proxy",
   "scripts": {
     "build": "node tasks/build.js && build",
     "build:all": "node tasks/build.js && build -mwl",
+    "build:win": "node tasks/build.js && build -w",
     "build:help": "build -mwl",
     "build:dir": "node tasks/build.js && build --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node tasks/build.js",
@@ -19,8 +20,6 @@
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix && cd app && npm install",
     "release": "node tasks/release.js",
-    "release:sentry": "node tasks/sentry.js",
-    "release:github": "node tasks/pre-release.js && build -mwl -p always",
     "client": "node ./app/build/client/main.js",
     "relay": "node ./app/build/relay/main.js"
   },

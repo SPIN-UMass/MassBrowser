@@ -1,9 +1,19 @@
 {
   "name": "yaler",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "P2P Proxy",
   "main": "./dist/main.js",
+  "sentry": {
+    "version": "v0.0.1-4_d50dd",
+    "dev": {
+      "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
+    },
+    "prod": {
+      "dsn": ""
+    }
+  },
   "dependencies": {
+    "axios": "^0.16.2",
     "babel-runtime": "^6.23.0",
     "bluebird": "^3.5.0",
     "limiter": "^1.1.0",
@@ -20,6 +30,5 @@
     "vuetify": "^0.10.4",
     "vuex": "^2.1.1"
   },
-  "devDependencies": {},
   "author": "ha-D <hadi@cs.umass.edu>"
 }

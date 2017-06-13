@@ -12,7 +12,10 @@ import * as errors from '~/utils/errors'
 import Status from '~/utils/status'
 import SessionService from '~/client/services/SessionService'
 import CacheProxy from '~/client/cachebrowser/CacheProxy'
+import Raven from '~/utils/raven'
 
+// TODO: examine
+require('events').EventEmitter.prototype._maxListeners = 10000
 
 export default function bootClient() {
   KVStore.get('client', null)
@@ -29,6 +32,12 @@ export default function bootClient() {
         return {id: client.id, password: client.password}
       })
     }
+  })
+  .then(client => {
+    Raven.setUserContext({
+      id: client.id
+    })
+    return client
   })
   .then(client => {
     let status = Status.info("Authenticating Client")
@@ -56,20 +65,21 @@ export default function bootClient() {
   .catch(err => {
     Status.clearAll()
 
-    if (err instanceof errors.NetworkError) {
-      Status.error("Could not connect to the server")
-    } else if (err instanceof errors.AuthenticationError) {
-      Status.error("Server authentication failed")
-    } else if (err instanceof errors.RequestError) {
-      Status.error("Error occured in request to server " + err.message)
+    if (!err.smart) {
+      console.log("Unknown error occured:")
       console.error(err)
-      err.report()     
-    } else if (err instanceof errors.ServerError) {
+    } else if (err.is(errors.NetworkError)) {
+      Status.error("Could not connect to the server")
+      err.log()
+    } else if (err.is(errors.AuthenticationError)) {
+      Status.error("Server authentication failed")
+      err.log()
+    } else if (err.is(errors.RequestError)) {
+      Status.error("Error occured in request to server " + err.message)
+      err.logAndReport()     
+    } else if (err.is(errors.ServerError)) {
       Status.error("There is a problem with the server, please try again later")
-    } else {
-      console.log("Unknown error occured: " + err.toString())
-      console.log(err.statusCode)
-      console.log(err)
+      err.log()
     }
   })
 }

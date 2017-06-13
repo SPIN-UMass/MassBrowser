@@ -1,6 +1,8 @@
 /**
  * Created by milad on 5/2/17.
  */
+
+import Promise from 'bluebird'
 import ConnectionManager from '~/client/net/ConnectionManager'
 import RelayConnection from '~/client/net/RelayConnection'
 import httpAPI from '~/api/httpAPI'
@@ -75,18 +77,19 @@ class _SessionService extends EventEmitter {
       }
       categoryIDs = categories.map(c => (c instanceof Category ? c.id : c))
     }
-    console.log('I AM HERE CREATING SESSIONS', categoryIDs)
 
     return new Promise((resolve, reject) => {
       httpAPI.requestSession(categoryIDs)
         .then(session => {
-          console.log('accepting')
-
-          this.pendingSessions[session.id] = {resolve: resolve, reject: reject}
-          resolve()
+          if (!session) {
+            console.error("Could not find relay for session")
+          } else {
+            console.log("New session requested")
+            this.pendingSessions[session.id] = {resolve: resolve, reject: reject}
+          }
         })
         .catch(err => {
-          console.log('rejecting ')
+          console.error(err)
           reject(err)
         })
     })
@@ -123,7 +126,7 @@ class _SessionService extends EventEmitter {
   }
 
   _startSessionPoll () {
-    schedule.scheduleJob('*/1 * * * * *', () => {
+    schedule.scheduleJob('*/20 * * * * *', () => {
       httpAPI.getSessions()
         .then(ses => this._handleRetrievedSessions(ses))
     })

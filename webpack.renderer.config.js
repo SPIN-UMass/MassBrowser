@@ -4,7 +4,6 @@ process.env.BABEL_ENV = 'renderer'
 
 const path = require('path')
 const pkg = require('./app/package.json')
-const settings = require('./config.js')
 const webpack = require('webpack')
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -108,6 +107,7 @@ let rendererConfig = {
       'styles': path.join(__dirname, 'app/src/app/styles'),
       '~': path.join(__dirname, 'app/src/'),
       'assets': path.join(__dirname, 'app/assets'),
+      'package.json': path.join(__dirname, 'app/package.json')
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss'],
     modules: [
@@ -122,7 +122,7 @@ if (process.env.NODE_ENV !== 'production') {
   /**
    * Apply ESLint
    */
-  if (settings.eslint) {
+  if (false) {
     rendererConfig.module.rules.push(
       {
         test: /\.(js|vue)$/,

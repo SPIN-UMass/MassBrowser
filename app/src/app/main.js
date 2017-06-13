@@ -7,6 +7,7 @@ import App from './App'
 import routes from './routes'
 
 import { Raven, RavenVue } from '~/utils/raven'
+import Status from '~/utils/status'
 
 import 'assets/font-awesome/css/font-awesome.min.css'
 import 'assets/bootstrap/css/bootstrap.min.css'
@@ -17,13 +18,9 @@ Vue.use(Electron)
 Vue.use(Resource)
 Vue.use(Router)
 
-
 Vue.config.debug = true
 
-Raven
-  .config('https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3', {
-    release: 'f3e5bbe933ad663639235dafbd99b80aefeef4ab'
-  })
+Raven.smartConfig({'interface': 'gui'})
   .addPlugin(RavenVue, Vue)
   .install()
   
@@ -31,6 +28,11 @@ const router = new Router({
   scrollBehavior: () => ({ y: 0 }),
   routes
 })
+
+
+// Status.on('status-changed', function (status) {
+//   console.log(status.text)
+// })
 
 /* eslint-disable no-new */
 var options = Object.assign({router}, App)

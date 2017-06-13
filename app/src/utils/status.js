@@ -8,7 +8,7 @@ class StatusManager {
 
     this.bus.on('status-request', () => {
       if (this.statuses.length) {
-        Bus.$emit('status-changed', this.statuses[this.statuses.length - 1])
+        this.bus.emit('status-changed', this.statuses[this.statuses.length - 1])
       }
     })
   }
@@ -87,6 +87,8 @@ class _Status extends EventEmitter {
       message = arg1
       options = arg2
     } 
+
+    console.log(`Status: ${message}`)
 
     return this._statusManager.addStatus(key, message, options)
   }

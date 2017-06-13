@@ -10,6 +10,8 @@ var crypto = require('crypto')
 var mkdirp = require('mkdirp')
 var async = require('async')
 
+import { getDataDir } from '~/utils'
+
 var CAattrs = [{
   name: 'commonName',
   value: 'UOIS'
@@ -109,8 +111,8 @@ var ServerExtensions = [{
 
 class _CertificateManager {
   constructor () {
-    this.certspath = __dirname + '/certs'
-    this.keypath = this.certspath + '/keys'
+    this.certspath = path.join(getDataDir(), '/certs')
+    this.keypath = path.join(this.certspath, '/keys')
     this.CAcert = undefined
     this.CAkeys = {}
     this.certCache = {}
