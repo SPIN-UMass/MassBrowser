@@ -28,7 +28,8 @@
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.2",
     "vuetify": "^0.10.4",
-    "vuex": "^2.1.1"
+    "vuex": "^2.1.1",
+    "ws": "^3.0.0"
   },
   "author": "ha-D <hadi@cs.umass.edu>"
 }

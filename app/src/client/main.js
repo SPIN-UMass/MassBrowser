@@ -1,6 +1,6 @@
 import bootClient from './boot'
 import Status from '~/utils/status'
-import Raven fro '~/utils/raven'
+import Raven from '~/utils/raven'
 
 Raven
   .smartConfig({'interface': 'commandline', 'role': 'client'})

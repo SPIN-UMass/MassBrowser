@@ -9,7 +9,8 @@ const webpack = require('webpack')
 let mainConfig = {
   devtool: '#source-map',
   entry: {
-    main: path.join(__dirname, 'app/src/app/main/index.js')
+    client: path.join(__dirname, 'app/src/client/main.js'),
+    relay: path.join(__dirname, 'app/src/relay/main.js'),
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -43,13 +44,12 @@ let mainConfig = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"'
     })
-    // new webpack.optimize.UglifyJsPlugin({
-    //   compress: {
-    //     warning: false
-    //   }
-    // })
   ],
   resolve: {
+    alias: {
+      '~': path.join(__dirname, 'app/src/'),
+      'package.json': path.join(__dirname, 'app/package.json')
+    },
     extensions: ['.js', '.json', '.node'],
     modules: [
       path.join(__dirname, 'app/node_modules')

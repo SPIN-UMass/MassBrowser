@@ -1,7 +1,9 @@
 .sentry.json
 .release.json
 
+
 .DS_Store
+app/dist
 app/build
 app/dist/index.html
 app/dist/main.js

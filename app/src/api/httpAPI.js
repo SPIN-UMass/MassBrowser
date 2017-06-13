@@ -9,6 +9,7 @@ class API {
   constructor () {
     this.authToken = null
     this.clientID = null
+    this.sessionID = null
   }
 
   getSessionID () {
@@ -62,6 +63,7 @@ class API {
     .then(response => response.data)
     .then(body => {
       this.clientID = username
+      this.sessionID = body.session_key
       this.authToken = body.token
       http.setAuthToken(body.token)
     })
@@ -108,7 +110,7 @@ class API {
   getSessions () {
     return http.get(
       API_URL + CLIENT_URL + '/' + this.clientID + '/sessions?limit=50&status=1'
-    ).then(r => r.data)
+    ).then(r => r.data.results)
   }
 }
 

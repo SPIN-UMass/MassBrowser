@@ -14,14 +14,15 @@
     "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter app test",
     "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix app test",
     "pack": "npm run pack:main && npm run pack:renderer",
-    "pack:main": "cross-env NODE_ENV=production webpack -p --progress --colors --config webpack.main.config.js",
-    "pack:renderer": "cross-env NODE_ENV=production webpack -p --progress --colors --config webpack.renderer.config.js",
+    "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config webpack.main.config.js",
+    "pack:renderer": "cross-env NODE_ENV=production webpack  --progress --colors --config webpack.renderer.config.js",
     "test": "npm run unit",
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
     "postinstall": "npm run lint:fix && cd app && npm install",
     "release": "node tasks/release.js",
-    "client": "node ./app/build/client/main.js",
-    "relay": "node ./app/build/relay/main.js"
+    "watch": "webpack --progress --watch --config webpack.daemon.config.js",
+    "client": "node ./app/dist/client.js",
+    "relay": "node ./app/dist/relay.js"
   },
   "build": {
     "productName": "yaler",

@@ -105,8 +105,8 @@ let rendererConfig = {
       'components': path.join(__dirname, 'app/src/renderer/components'),
       'renderer': path.join(__dirname, 'app/src/renderer'),
       'styles': path.join(__dirname, 'app/src/app/styles'),
-      '~': path.join(__dirname, 'app/src/'),
       'assets': path.join(__dirname, 'app/assets'),
+      '~': path.join(__dirname, 'app/src/'),
       'package.json': path.join(__dirname, 'app/package.json')
     },
     extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss'],
@@ -151,12 +151,12 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
     })
+    // new webpack.optimize.UglifyJsPlugin({
+    //   compress: {
+    //     warnings: false
+    //   }
+    // })
   )
 }
 

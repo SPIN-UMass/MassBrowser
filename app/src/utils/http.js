@@ -20,7 +20,7 @@ class HttpClient {
     config = config || {}
     config.validateStatus = status => true
     this._setHeaders(config)
-    return axios.post(url, config)
+    return axios.get(url, config)
     .catch(r => this.handleNetworkError({url: url}, r))
     .then(r => this.handleResponse({url: url}, r))
   }
