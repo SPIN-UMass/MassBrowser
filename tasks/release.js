@@ -133,7 +133,7 @@ function releaseSentry() {
     
     if (sentryConfig.version == 'auto') {
       // sentryConfig.version = run(`sentry-cli releases propose-version`).stdout
-      var currentVersion = packageJson.sentry.version
+      var currentVersion = packageJson.config.sentry.version
       if (currentVersion.indexOf('-') === -1 || currentVersion.indexOf('_') === -1 || currentVersion.indexOf('-') > currentVersion.indexOf('_') ) {
         console.error("Unable to create auto version, invalid version in config.json")
         process.exit(1)
@@ -196,8 +196,9 @@ function releaseSentry() {
   .then(sentryConfig => {
     return fs.readJson('app/package.json')
     .then(packageJson => {
-      packageJson.sentry.version = sentryConfig.sentry.version
-      return fs.writeJson('app/package.json', packageJson)
+      packageJson.config.sentry.version = sentryConfig.version
+      console.log("Updating app/package.json")
+      return fs.writeJson('app/package.json', packageJson, {spaces: 2})
     })
   })
 }

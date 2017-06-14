@@ -8,11 +8,12 @@ import routes from './routes'
 
 import { Raven, RavenVue } from '~/utils/raven'
 import Status from '~/utils/status'
+import Config from '~/utils/config'
+import Log from '~/utils/log'
 
 import 'assets/font-awesome/css/font-awesome.min.css'
 import 'assets/bootstrap/css/bootstrap.min.css'
 import 'assets/nifty/nifty.min.css'
-
 
 Vue.use(Electron)
 Vue.use(Resource)
@@ -20,9 +21,13 @@ Vue.use(Router)
 
 Vue.config.debug = true
 
-Raven.smartConfig({'interface': 'gui'})
+if (Config.sentry.enabled) {
+  Raven.smartConfig()
   .addPlugin(RavenVue, Vue)
   .install()
+} else {
+  Log.warn("Sentry is disabled, not using sentry")
+}
   
 const router = new Router({
   scrollBehavior: () => ({ y: 0 }),

@@ -3,13 +3,26 @@
   "version": "0.0.1",
   "description": "P2P Proxy",
   "main": "./dist/main.js",
-  "sentry": {
-    "version": "v0.0.1-4_d50dd",
+  "config": {
+    "sentry": {
+      "version": "v0.0.1-6_5681c",
+      "enabled": false
+    },
     "dev": {
-      "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
+      "sentry": {
+        "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
+      },
+      "log": {
+        "level": "debug"
+      }
     },
     "prod": {
-      "dsn": ""
+      "sentry": {
+        "dsn": ""
+      },
+      "log": {
+        "level": "info"
+      }
     }
   },
   "dependencies": {

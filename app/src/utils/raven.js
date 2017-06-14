@@ -1,4 +1,5 @@
-import { sentry } from 'package.json'
+import Config from '~/utils/config'
+import Log from '~/utils/log'
 
 export const Raven = require('raven-js')
 export const RavenVue = require('raven-js/plugins/vue')
@@ -8,15 +9,18 @@ export default Raven
 
 Raven.smartConfig = function(options) {
   var options = options || {}
-
-  var dsn = process.env.NODE_ENV == 'development' ? sentry.dev.dsn : sentry.prod.dsn
   
-  if (options.interface !== 'commandline' && options.interface !== 'gui') {
-    throw new Error(`Invalid env ${env}`)
+  var appInterface = process.env.APP_INTERFACE
+  if (appInterface !== 'commandline' && appInterface !== 'electron') {
+    throw new Error(`Invalid application interface ${appInterface}, please set correct value for the APP_INTERFACE env variable`)
   }
 
+  if (!Config.sentry.dsn) {
+    Log.warn("sentry DSN not provided in config, will not be using sentry")
+  }
+  
   var config = {
-    release: sentry.version,
+    release: Config.sentry.version,
     environment: process.env.NODE_ENV,
     tags: {
       'app.interface': options.interface,
@@ -24,5 +28,5 @@ Raven.smartConfig = function(options) {
     }
   }
 
-  return Raven.config(dsn, config)
+  return Raven.config(Config.dsn, config)
 }

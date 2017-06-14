@@ -1,3 +1,5 @@
+process.env.APP_INTERFACE = 'commandline'
+
 import { runTLSserver } from './net/TLSReceiver'
 import { runOBFSserver } from './net/OBFSReceiver'
 import { pendMgr } from './net/PendingConnections'
