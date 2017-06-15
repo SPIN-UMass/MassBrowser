@@ -111,6 +111,19 @@ class API {
     return http.get(
       API_URL + CLIENT_URL + '/' + this.clientID + '/sessions?limit=50&status=1'
     ).then(r => r.data.results)
+    // .then(r => {
+    //   console.log(r)
+    //   return r
+    // })
+  }
+
+  updateSessionStatus(sessionID, status) {
+    return http.put(
+      API_URL + CLIENT_URL + '/' + this.clientID + '/session/' + sessionID + '/status',
+      {
+        status: status
+      }
+    ).then(r => r.data.results)
   }
 }
 

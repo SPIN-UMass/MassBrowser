@@ -1,6 +1,6 @@
 import packageJSON from 'package.json'
 
-const Config = {
+const config = {
   sentry: {
     enabled: true,
     version: '',
@@ -8,7 +8,8 @@ const Config = {
   },
   log: {
     level: 'info'
-  }
+  },
+  relayConnectionTimeout: 5000
 }
 
 var pConfig = packageJSON.config
@@ -29,12 +30,12 @@ function updateConfig(baseConfig, newConfig) {
   })
 }
 
-updateConfig(Config, pConfig)
+updateConfig(config, pConfig)
 
 if (process.env.NODE_ENV === 'development') {
-  updateConfig(Config, devConfig)
+  updateConfig(config, devConfig)
 } else {
-  updateConfig(Config, prodConfig)
+  updateConfig(config, prodConfig)
 }
 
-export default Config
+export default config

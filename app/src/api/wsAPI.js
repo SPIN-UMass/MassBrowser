@@ -39,6 +39,10 @@ class WSServerConnection extends EventEmitter {
           perMessageDeflate: false,
         })
 
+        this.ws.on('error', (err) => {
+          console.error(err)
+        })
+
         this.ws.on('open', () => {
           this.emit('connected')
         })
@@ -65,7 +69,7 @@ class WSServerConnection extends EventEmitter {
             resolve()
             this.emit("authenticated")
           } else {
-            reject(new errors.AuthenticationError())
+            reject(errors.AuthenticationError(new Error()))
           }
         }
       })
@@ -98,30 +102,37 @@ class WSServerConnection extends EventEmitter {
 
   acceptSession(client,sessionid) {
     return new Promise((resolve,reject) => {
-      var proto = {}
+      var proto = {
+        status: 'accepted'
+      }
 
-
-      this.sendJSON(SESSION_PATH+sessionid,'PUT', proto,resolve)
+      this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
 
     })
   }
 
   clientSessionConnected(client,sessionid) {
     return new Promise((resolve,reject) => {
-      var proto = {}
+      var proto = {
+        status: 'used'
+      }
 
-
-      this.sendJSON(SESSION_PATH+sessionid,'POST', proto,resolve)
+      this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
 
     })
   }
   clientSessionDisconnected(client,sessionid) {
     console.log('closing session')
     return new Promise((resolve,reject) => {
-      var proto = {}
+      // TODO
+
+      resolve()
+      // var proto = {
+        
+      // }
 
 
-      this.sendJSON(SESSION_PATH+sessionid,'DELETE', proto,resolve)
+      // this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
 
     })
   }

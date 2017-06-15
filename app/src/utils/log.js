@@ -1,6 +1,6 @@
 import winston from 'winston'
 
-import Config from '~/utils/config'
+import config from '~/utils/config'
 
 class BrowserConsoleTransport extends winston.Transport {
   constructor(options) {
@@ -8,7 +8,7 @@ class BrowserConsoleTransport extends winston.Transport {
     options = options || {}
     
     this.name = 'browserConsoleLogger'
-    this.level = options.level || 'info'
+    this.level = options.level
   }
 
   log (level, msg, meta, callback) {
@@ -30,9 +30,15 @@ if (process.env.APP_INTERFACE == 'electron') {
   transports.push(new BrowserConsoleTransport())
 }
 
-var Log = new (winston.Logger)({
-  level: Config.log.level,
+var logger = new (winston.Logger)({
+  level: config.log.level,
   transports: transports
 })
 
-export default Log
+export default logger
+
+export const log = logger.log
+export const info = logger.info
+export const warn = logger.warn
+export const debug = logger.debug
+export const error = logger.error

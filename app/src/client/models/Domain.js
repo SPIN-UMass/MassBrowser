@@ -83,6 +83,13 @@ class DomainSchema {
         return null
       })
   }
+
+  toString() {
+    if (this.subdomain) {
+      return `${this.subdomain}.${this.name}`
+    }
+    return this.name
+  }
 }
 
 const Domain = createModel('Domain', DomainSchema)

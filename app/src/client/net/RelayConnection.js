@@ -4,6 +4,9 @@
 import net from 'net'
 import { Crypto } from '~/utils/crypto'
 import { EventEmitter } from 'events'
+import { logger, debug, warn } from '~/utils/log'
+import config from '~/utils/config'
+import { RelayConnectionError } from '~/utils/errors'
 
 export default class RelayConnection extends EventEmitter {
   constructor (relayip, relayport, desc) {
@@ -20,19 +23,33 @@ export default class RelayConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      try {
+        var socket = net.connect(this.relayport, this.relayip)
 
-        var socket = net.connect(this.relayport, this.relayip, () => {
-          console.log('Connected')
+        const onFail = (err) => {
+          debug(`Relay ${this.id} connection error: ${err.messgage}`)
+          reject(RelayConnectionError(err))
+        }
+
+        const onSuccess = () => {
+          debug(`Relay ${this.id} connected`)
+
+          // Remove connection failure callback so it isn't called
+          // in case of a later error in the connection
+          socket.removeListener('error', onFail)
+
           resolve(socket)
-        })
-      } catch (err) {
-        console.log('error cannot connect', err.message)
-        reject(err)
-      }
+        }
+
+        socket.setTimeout(config.relayConnectionTimeout, () => {
+          socket.end()
+          onFail(new Error('Connection Timeout'))
+        });
+
+        socket.once('connect', onSuccess)
+        socket.once('error', onFail)
     })
-      .then((socket) => this._initSocket(socket))
-      .then((socket) => this._initRelay(socket))
+    .then((socket) => this._initSocket(socket))
+    .then((socket) => this._initRelay(socket))
   }
 
   _initSocket (socket) {

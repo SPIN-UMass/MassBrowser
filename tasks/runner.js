@@ -14,7 +14,7 @@ function format (command, data, color) {
   return color + command + END +
     '  ' + // Two space offset
     data.toString().trim().replace(/\n/g, '\n' + repeat(' ', command.length + 2)) +
-    '\n'
+    ''// '\n'
 }
 
 function repeat (str, times) {

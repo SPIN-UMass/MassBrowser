@@ -5,8 +5,10 @@ function sanitizeUrl(url) {
   return url.replace(regex, '$1[id]$2')
 }
 
-export function BaseError(message) {
-  const error = new Error(message)
+export function BaseError(error, message) {
+  // const error = new Error(message)
+  const errorMessage = error.message
+
   const subclassNames = []
 
   error.smart = true
@@ -31,28 +33,34 @@ export function BaseError(message) {
   error._addSubclass = function(name) {
     error.name = name
     subclassNames.push(name)
-    error.message = `${name}  ${message}`
+    if (message) {
+      error.message = `${name} - ${message}`
+    } else if (errorMessage && !errorMessage.startsWith('\n')) {
+      error.message = `${name} - ${errorMessage}`
+    } else if (errorMessage) {
+      error.message = `${name} ${errorMessage}`
+    } else {
+      error.message = `${name}`
+    }
   }
+
+  error._addSubclass('BaseError')
   
   return error
 }
 
-export function AppError(message) {
-  const error = BaseError(message)
+export function AppError(error, message) {
+  error = BaseError(error, message)
   error._addSubclass('AppError')
   return error
 }
 
-export function NetworkError(message) {
-  const error = BaseError(message)
-  error._addSubclass('NetworkError')
-  return error
-}
+/* ----------- API Errors --------- */
 
-export function APIError(statusCode, statusText, response, request) {
+export function APIError(error, statusCode, statusText, response, request) {
   var url = request ? `(${sanitizeUrl(request.url)})` : ''
 
-  const error = BaseError(`${statusCode} ${statusText} ${url}`)
+  error = BaseError(error, `${statusCode} ${statusText} ${url}`)
   error._addSubclass('APIError')
 
   error.statusCode = statusCode
@@ -76,20 +84,48 @@ export function APIError(statusCode, statusText, response, request) {
   return error
 }
 
-export function AuthenticationError(message) {
-  const error = APIError(401, message)
+export function AuthenticationError(error, message) {
+  error = APIError(error, 401, message)
   error._addSubclass('AuthenticationError')
   return error
 }
 
-export function RequestError(statusCode, statusText, response, request) {
-  const error = APIError(statusCode || 400, statusText, response, request)
+export function RequestError(error, statusCode, statusText, response, request) {
+  error = APIError(error, statusCode || 400, statusText, response, request)
   error._addSubclass('RequestError')
   return error
 }
 
-export function ServerError(statusCode, statusText, response, request) {
-  const error = APIError(statusCode || 500, statusText, response, request)
+export function ServerError(error, statusCode, statusText, response, request) {
+  error = APIError(error, statusCode || 500, statusText, response, request)
   error._addSubclass('ServerError')
+  return error
+}
+
+/* ---------- Network Errors -------- */
+
+export function NetworkError(error, message) {
+  error = BaseError(error, message)
+  error._addSubclass('NetworkError')
+  return error
+}
+
+export function RelayConnectionError(error, message) {
+  error = NetworkError(error, message)
+  error._addSubclass('RelayConnectionError')
+  return error
+}
+
+/* ----------- Other Errors ----------- */
+
+export function SessionRejectedError(error, message) {
+  error = AppError(error, message)
+  error._addSubclass('SessionRejectedError')
+  return error
+}
+
+export function NoRelayAvailableError(error, message) {
+  error = AppError(error, message)
+  error._addSubclass('NoRelayAvailableError')
   return error
 }

@@ -6,6 +6,15 @@ class HttpClient {
   constructor() {
     this.authToken = null
   }
+
+  put(url, data, config) {
+    config = config || {}
+    config.validateStatus = status => true
+    this._setHeaders(config)
+    return axios.put(url, data, config)
+    .catch(r => this.handleNetworkError({url: url, data: data}, r))
+    .then(r => this.handleResponse({url: url, data: data}, r))
+  }
   
   post(url, data, config) {
     config = config || {}
@@ -41,15 +50,14 @@ class HttpClient {
       return response
     } else if (response.status >= 500) {
 
-      throw errors.ServerError(response.status, response.statusText, response, request)
+      throw errors.ServerError(new Error(), response.status, response.statusText, response, request)
     } else {
-      throw errors.RequestError(response.status, response.statusText, response, request)
+      throw errors.RequestError(new Error(), response.status, response.statusText, response, request)
     }
   }
 
   handleNetworkError(request, err) {
-    console.log(err)
-    throw new errors.NetworkError(err)
+    throw errors.NetworkError(err)
   }
 }
 

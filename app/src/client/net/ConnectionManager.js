@@ -1,8 +1,12 @@
 /**
  * Created by milad on 4/12/17.
  */
-import RelayConnection from './RelayConnection';
-import crypto from 'crypto';
+import crypto from 'crypto'
+import Promise from 'bluebird'
+
+import RelayConnection from './RelayConnection'
+import * as errors from '~/utils/errors'
+import { debug } from '~/utils/log'
 
 class _ConnectionManager {
   constructor() {
@@ -128,44 +132,31 @@ class _ConnectionManager {
     this.Connectionmaps[conid].write(conid, 'D', data);
   }
 
-
-
-
-
-
-
-  assignRelay(ip,port) {
-    return this.relayConnections[Math.floor(Math.random() * this.relayConnections.length)];
-
-  }
-
-
   newClientConnection(connection, dstip, dstport,onConnect) {
     var conid = crypto.randomBytes(2).readUInt16BE();
 
-    console.log(conid, dstip, dstport);
+    debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
     
     if (!this.relayAssigner) {
-      throw "No Relay Assigner has been set for the ConnectionManager"
+      throw errors.AppError(new Error(), "No Relay Assigner has been set for the ConnectionManager")
     }
     
     this.ClientConnections[conid] = connection;
     this.ClientConnections[conid].relayConnected=()=>{onConnect()}
+
     return new Promise((resolve,reject)=> {
       this.relayAssigner.assignRelay(dstip, dstport)
         .then(relay => {
-
+          debug(`Relay ${relay} assigned for connection`)
           this.Connectionmaps[conid] = relay
           var cr = String(dstip) + ':' + String(dstport);
           console.log('sendsize:', cr.length,cr);
           this.Connectionmaps[conid].write(conid, 'N', Buffer(cr));
+
           connection.on('data', (data) => {
-
             this.writer(data, conid);
-
-
-
           })
+
           connection.on('close', () => {
             this.Connectionmaps[conid].write(conid, 'C', Buffer(0));
           })
