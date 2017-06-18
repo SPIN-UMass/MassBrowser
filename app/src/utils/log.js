@@ -3,10 +3,10 @@ import winston from 'winston'
 import config from '~/utils/config'
 
 class BrowserConsoleTransport extends winston.Transport {
-  constructor(options) {
+  constructor (options) {
     super(options)
     options = options || {}
-    
+
     this.name = 'browserConsoleLogger'
     this.level = options.level
   }

@@ -18,20 +18,17 @@ class WSServerConnection extends EventEmitter {
 
     })
     this.ws.on('message', (message) => {
-      resp=JSON.parse(message)
+      resp = JSON.parse(message)
       if (resp.relay) {
-        this.emit(resp.relay.respcmd,resp.relay)
+        this.emit(resp.relay.respcmd, resp.relay)
       }
-
     })
+  }
+  authenticate () {
 
   }
-  authenticate(){
 
-  }
-
-  sendJSON(proto)
-  {
+  sendJSON (proto) {
     var sproto = JSON.stringify(proto)
 
     this.ws.send(sproto)
@@ -39,49 +36,43 @@ class WSServerConnection extends EventEmitter {
 
   relayUp (ip, port, nattype) {
     return Promise((resolve, reject) => {
-        if (this.fingerprint === null) {
-          this.register(ip, port).then(() => {this.relayUp(ip, port).then(resolve, reject)})
+      if (this.fingerprint === null) {
+        this.register(ip, port).then(() => { this.relayUp(ip, port).then(resolve, reject) })
+      } else {
+        var proto = {
+          'cmd': 'updaterelay',
+          'ip': ip,
+          'port': port,
+          'fingerprint': this.fingerprint,
+          'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
+          'natType': nattype
         }
-        else {
-          var proto = {
-            'cmd': 'updaterelay',
-            'ip': ip,
-            'port': port,
-            'fingerprint':this.fingerprint,
-            'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-            'natType': nattype,
-          }
-          this.sendJSON(proto)
-
-
-        }
-
+        this.sendJSON(proto)
       }
+    }
     )
-
   }
 
-  register (ip, port,nattype) {
-    return Promise((resolve,reject) => {
+  register (ip, port, nattype) {
+    return Promise((resolve, reject) => {
       var proto = {
         'cmd': 'register',
         'ip': ip,
         'port': port,
         'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-        'natType': nattype,
+        'natType': nattype
       }
       var sproto = JSON.stringify(proto)
-      this.on('registered',(data)=>{
+      this.on('registered', (data) => {
         KVStore.set('fingerprint', data.fingerprint)
-        this.fingerprint=data.fingerprint;
-        resolve();
+        this.fingerprint = data.fingerprint
+        resolve()
       })
 
       this.sendJSON(proto)
-      }
+    }
 
     )
-
   }
 
 }

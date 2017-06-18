@@ -21,7 +21,7 @@
       RelayView,
       GraphWidget
     },
-    mounted() {
+    mounted () {
 
     }
   }

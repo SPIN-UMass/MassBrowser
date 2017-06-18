@@ -3,7 +3,7 @@ import { createModel, RelationField } from '~/utils/orm'
 const globalRegexCache = {}
 
 class DomainSchema {
-  constructor() {
+  constructor () {
     this.name = null
     this.subdomain = null
     this.blockedRegions = null
@@ -14,18 +14,18 @@ class DomainSchema {
     this._regex_cache = null
   }
 
-  get subdomainRegex() {
+  get subdomainRegex () {
     if (this._regex_cache) {
       return this._regex_cache
     }
-    
+
     let regex = globalRegexCache[this.subdomain]
     if (regex) {
       return regex
     }
 
-    regex = new RegExp('^' + (this.subdomain || '') + '$') 
-    
+    regex = new RegExp('^' + (this.subdomain || '') + '$')
+
     globalRegexCache[this.subdomain] = regex
     this._regex_cache = regex
 
@@ -34,9 +34,9 @@ class DomainSchema {
 
   /**
    * Find Domain object matching the domain name
-   * 
+   *
    */
-  static findDomain(domainName) {
+  static findDomain (domainName) {
     const trySubdomain = () => {
       // Extract subdomain
       let firstDot = domainName.indexOf('.')
@@ -54,7 +54,7 @@ class DomainSchema {
               return domains[i]
             }
           }
-          
+
           return null
         })
     }
@@ -84,7 +84,7 @@ class DomainSchema {
       })
   }
 
-  toString() {
+  toString () {
     if (this.subdomain) {
       return `${this.subdomain}.${this.name}`
     }

@@ -21,7 +21,6 @@
   import StatusWidget from './StatusWidget'
   import bootClient from '~/client/boot'
 
-  
   export default {
     data () {
       return {

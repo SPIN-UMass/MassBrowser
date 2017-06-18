@@ -2,25 +2,24 @@ export class RelayAssigner {
   /**
    * Assign a relay to a (ip, port)
    * Should return with a promise
-   * 
+   *
    * @return A RelayConnection instance
    */
-  assignRelay(ip, port) {
-    return null;
+  assignRelay (ip, port) {
+    return null
   }
 }
 
 export class RandomRelayAssigner extends RelayAssigner {
-  constructor() {
+  constructor () {
     super()
-
   }
-  
-  assignRelay(ip, port) {
+
+  assignRelay (ip, port) {
     // return new Promise((resolve, reject) => resolve(SessionManger.relays[Math.floor(Math.random() * SessionManger.relays.length)]));
   }
 
-  addRelay(relay) {
+  addRelay (relay) {
 
   }
 }

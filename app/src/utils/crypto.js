@@ -14,7 +14,7 @@ export class Crypto {
     this.datacarry = Buffer(0)
     this.decipher.on('readable', () => {
       var data = this.decipher.read()
-      //console.log('datatoread', data.length)
+      // console.log('datatoread', data.length)
       if (this.datacarry) {
         data = Buffer.concat([this.datacarry, data])
         this.datacarry = Buffer(0)

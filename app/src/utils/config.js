@@ -19,10 +19,9 @@ var prodConfig = pConfig.prod
 pConfig.dev = undefined
 pConfig.prod = undefined
 
-
-function updateConfig(baseConfig, newConfig) {
+function updateConfig (baseConfig, newConfig) {
   Object.keys(newConfig).forEach(key => {
-    if (key in baseConfig && (typeof(baseConfig[key]) === 'object' && typeof(newConfig[key]) === 'object')) {
+    if (key in baseConfig && (typeof (baseConfig[key]) === 'object' && typeof (newConfig[key]) === 'object')) {
       return updateConfig(baseConfig[key], newConfig[key])
     } else if (newConfig[key] !== undefined) {
       baseConfig[key] = newConfig[key]

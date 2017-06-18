@@ -1,30 +1,28 @@
 import { EventEmitter } from 'events'
 import { Domain } from '~/client/models'
 
-
 class _PolicyManager extends EventEmitter {
   constructor () {
     super()
 
-    this.POLICY_VANILLA_PROXY = "vanilla_proxy"
-    this.POLICY_YALER_PROXY = "yaler_proxy"
-    this.POLICY_CACHEBROWSE = "cachebrowse"
+    this.POLICY_VANILLA_PROXY = 'vanilla_proxy'
+    this.POLICY_YALER_PROXY = 'yaler_proxy'
+    this.POLICY_CACHEBROWSE = 'cachebrowse'
   }
 
   /**
    * Decide how to handle a given host
-   * 
-   * @return A promise which resolves with the policy which should be 
+   *
+   * @return A promise which resolves with the policy which should be
    * applied to the host
    */
-  getDomainPolicy(host,port) {
-    console.log(host,port)
+  getDomainPolicy (host, port) {
+    console.log(host, port)
     const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
     return new Promise((resolve, reject) => {
-
       if (ipRegex.test(host)) {
-        return reject("IP based filtering not supported")
+        return reject('IP based filtering not supported')
       }
       return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
@@ -57,10 +55,9 @@ class _PolicyManager extends EventEmitter {
         })
       })
     })
-   
   }
- 
+
 }
 
-var PolicyManager = new _PolicyManager();
+var PolicyManager = new _PolicyManager()
 export default PolicyManager

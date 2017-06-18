@@ -50,7 +50,6 @@ class _CacheProxy {
   registerConnection (clientport, addr, port, proxyReady) {
     this.connectionlist[clientport] = [addr, port]
     this.resovleURL(addr).then((data) => {
-
       this.connectionlist[clientport] = [data[0], port, data[1]]
       proxyReady()
     })
@@ -69,9 +68,7 @@ class _CacheProxy {
     delete this.connectionlist[socket.remotePort]
 
     let proxysocket = tls.connect(cachesocketoptions, () => {
-
       proxysocket.on('data', (d) => {
-
         socket.write(d)
       })
 
@@ -96,7 +93,6 @@ class _CacheProxy {
       proxysocket.write(d)
     })
     socket.on('error', (err) => {
-
       console.log('erroring', err, 'end of error', proxysocket.destroyed)
       socket.end()
       proxysocket.end()

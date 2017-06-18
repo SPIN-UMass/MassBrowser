@@ -32,12 +32,12 @@
           options[opt] = this.$props[opt]
         }
       }
-      
+  
       this.smoothie = new SmoothieChart(options)
       this.smoothie.streamTo(this.$refs.canvas, 500)
     },
     methods: {
-      createTimeSeries(options) {
+      createTimeSeries (options) {
         var timeSeries = new TimeSeries()
         this.smoothie.addTimeSeries(timeSeries, options)
         return timeSeries

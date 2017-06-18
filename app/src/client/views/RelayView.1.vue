@@ -39,7 +39,6 @@
       RelayService.on('relays-changed', relays => {
         this.relays = relays
       })
-      
     },
     methods: {
     }

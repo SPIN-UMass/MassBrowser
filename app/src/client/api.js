@@ -61,7 +61,7 @@ class MockAPI extends API {
       {_id: 1, ip: '127.0.0.1', port: 8087}
     ])
   }
-  
+
   getWebsites (modifiedSince) {
     return mock([
       {_id: 1, name: 'Facebook', category: 1},
@@ -75,8 +75,8 @@ class MockAPI extends API {
     return mock([
       {
         _id: 1,
-        name: "googlevideo.com",
-        subdomain: ".*",
+        name: 'googlevideo.com',
+        subdomain: '.*',
         blocked: {
           china: true,
           iran: true

@@ -31,28 +31,20 @@ export function startClientSocks (mhost, mport) {
         ConnectionManager.newClientConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
           regularProxy(socket, port, address, proxyReady)
         })
-
-      }
-      else if (proxyType === PolicyManager.POLICY_CACHEBROWSE) {
+      } else if (proxyType === PolicyManager.POLICY_CACHEBROWSE) {
         CacheManager.newCacheConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
           regularProxy(socket, port, address, proxyReady)
         })
-
-      }
-      else {
+      } else {
         regularProxy(socket, port, address, proxyReady)
-
       }
-
     })
-
   }
 
   function regularProxy (socket, port, address, proxyReady) {
     var proxy = net.createConnection({port: port, host: address}, proxyReady)
     var localAddress, localPort
     proxy.on('connect', () => {
-
       localPort = proxy.localPort
     })
     proxy.on('data', (d) => {
@@ -73,7 +65,7 @@ export function startClientSocks (mhost, mport) {
     socket.on('data', function (d) {
       // If the application tries to send data before the proxy is ready, then that is it's own problem.
       try {
-        //console.log('sending ' + d.length + ' bytes to proxy');
+        // console.log('sending ' + d.length + ' bytes to proxy');
         if (!proxy.write(d)) {
           socket.pause()
 
@@ -89,7 +81,7 @@ export function startClientSocks (mhost, mport) {
     })
 
     proxy.on('error', function (err) {
-      //console.log('Ignore proxy error');
+      // console.log('Ignore proxy error');
     })
     socket.on('error', (err) => {
 
@@ -97,19 +89,15 @@ export function startClientSocks (mhost, mport) {
 
     proxy.on('close', function (had_error) {
       try {
-        if (localAddress && localPort)
-          console.log('The proxy %s:%d closed', localAddress, localPort)
-        else
-          console.error('Connect to %s:%d failed', address, port)
+        if (localAddress && localPort) { console.log('The proxy %s:%d closed', localAddress, localPort) } else { console.error('Connect to %s:%d failed', address, port) }
         socket.close()
       } catch (err) {
       }
-    }.bind(this))
-
+    })
   }
 
   return new Promise((resolve, reject) => {
-    var userPass = undefined//process.argv[3] && process.argv[4] && {username: process.argv[3], password: process.argv[4]}
+    var userPass// process.argv[3] && process.argv[4] && {username: process.argv[3], password: process.argv[4]}
     var server = socks.createServer(onConnection, userPass, server => {
       resolve(server)
     })
@@ -128,5 +116,4 @@ export function startClientSocks (mhost, mport) {
 
     server.listen(PORT, HOST)
   })
-
 }

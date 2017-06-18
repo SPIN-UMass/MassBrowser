@@ -23,30 +23,30 @@ export default class RelayConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-        var socket = net.connect(this.relayport, this.relayip)
+      var socket = net.connect(this.relayport, this.relayip)
 
-        const onFail = (err) => {
-          debug(`Relay ${this.id} connection error: ${err.messgage}`)
-          reject(RelayConnectionError(err))
-        }
+      const onFail = (err) => {
+        debug(`Relay ${this.id} connection error: ${err.messgage}`)
+        reject(RelayConnectionError(err))
+      }
 
-        const onSuccess = () => {
-          debug(`Relay ${this.id} connected`)
+      const onSuccess = () => {
+        debug(`Relay ${this.id} connected`)
 
           // Remove connection failure callback so it isn't called
           // in case of a later error in the connection
-          socket.removeListener('error', onFail)
+        socket.removeListener('error', onFail)
 
-          resolve(socket)
-        }
+        resolve(socket)
+      }
 
-        socket.setTimeout(config.relayConnectionTimeout, () => {
-          socket.end()
-          onFail(new Error('Connection Timeout'))
-        });
+      socket.setTimeout(config.relayConnectionTimeout, () => {
+        socket.end()
+        onFail(new Error('Connection Timeout'))
+      })
 
-        socket.once('connect', onSuccess)
-        socket.once('error', onFail)
+      socket.once('connect', onSuccess)
+      socket.once('error', onFail)
     })
     .then((socket) => this._initSocket(socket))
     .then((socket) => this._initRelay(socket))
@@ -72,7 +72,7 @@ export default class RelayConnection extends EventEmitter {
   }
 
   _initRelay (socket) {
-    //console.log(this.relayip, this.relayport, 'SENDING DATA')
+    // console.log(this.relayip, this.relayport, 'SENDING DATA')
 
     var desc = this.desc
     var i = Math.random() * (100 - 1) + 1
@@ -81,8 +81,6 @@ export default class RelayConnection extends EventEmitter {
       padarr.push(this.cipher.encryptzero())
       i -= 1
     }
-
-
 
     socket.write(Buffer.concat(padarr))
 
@@ -95,12 +93,12 @@ export default class RelayConnection extends EventEmitter {
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendpacket, data])
-    //console.log('writing to the relay')
+    // console.log('writing to the relay')
     const enc = this.cipher.encrypt(b)
-    //console.log('writing to the relay enc', enc)
+    // console.log('writing to the relay enc', enc)
     this.emit('send', enc)
     this.socket.write(enc)
-    //console.log('written')
+    // console.log('written')
   }
 
 }

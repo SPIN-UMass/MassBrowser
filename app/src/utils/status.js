@@ -28,7 +28,7 @@ class StatusManager {
     }
   }
 
-  removeAll() {
+  removeAll () {
     this.statuses = []
     this.bus.emit('status-cleared')
   }
@@ -63,22 +63,22 @@ class _Status extends EventEmitter {
     this._statusManager = new StatusManager(this)
   }
 
-  setBus(bus) {
+  setBus (bus) {
     this._statusManager.bus = bus
   }
 
-  clear(key) {
+  clear (key) {
     this._statusManager.removeStatus(key)
   }
 
-  clearAll() {
+  clearAll () {
     this._statusManager.removeAll()
   }
 
-  status(level, arg1, arg2, arg3) {
+  status (level, arg1, arg2, arg3) {
     var key, message, options
 
-    if (typeof(arg1) == 'string' && typeof(arg2) == 'string') {
+    if (typeof (arg1) === 'string' && typeof (arg2) === 'string') {
       key = arg1
       message = arg2
       options = arg3
@@ -86,18 +86,18 @@ class _Status extends EventEmitter {
       key = null
       message = arg1
       options = arg2
-    } 
+    }
 
     console.log(`Status: ${message}`)
 
     return this._statusManager.addStatus(key, message, options)
   }
 
-  info(key, message, options) {
+  info (key, message, options) {
     return this.status('info', key, message, options)
   }
 
-  error(key, message, options) {
+  error (key, message, options) {
     return this.status('error', key, message, options)
   }
 }

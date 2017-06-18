@@ -1,7 +1,7 @@
 import { createModel, RelationField } from '~/utils/orm'
 
 class CDNSchema {
-  constructor() {
+  constructor () {
     this.name = null
     this.ipRanges = null
     this.cachebrowsable = null

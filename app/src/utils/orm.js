@@ -5,7 +5,6 @@ import path from 'path'
 import { remote } from 'electron'
 import { getDataDir } from '~/utils'
 
-
 const DATA_DIR = getDataDir()
 
 if (!fs.existsSync(DATA_DIR)) {
@@ -14,12 +13,11 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const createdModels = {}
 
-function _createModel(name, schemaModel, meta, datastore) {
+function _createModel (name, schemaModel, meta, datastore) {
   var schema = null
 
-
   const Model = class extends schemaModel {
-    constructor() {
+    constructor () {
       super()
 
       // Schema object has to be created in constructor rather than being a prototype variable
@@ -28,17 +26,16 @@ function _createModel(name, schemaModel, meta, datastore) {
       if (!schema) {
         schema = setSchema(this)
       }
-      
-     
+
       this._schema = schema
       this.model = Model
       this._new_instance = true
     }
 
-    static get name() {
+    static get name () {
       return name
     }
-    
+
     static _promisize (func, args) {
       return new Promise((resolve, reject) => {
         var eArgs = Array.from(args)
@@ -80,21 +77,21 @@ function _createModel(name, schemaModel, meta, datastore) {
       return this._promisize(datastore.update, arguments)
     }
 
-    static docToModel(doc) {
+    static docToModel (doc) {
       const obj = new Model()
       obj._new_instance = false
       Object.assign(obj, doc)
       return obj
     }
 
-    toObject() {
-      return this._schema.reduce((o, k) => { 
+    toObject () {
+      return this._schema.reduce((o, k) => {
         o[k] = this[k]
         return o
       }, {})
     }
 
-    save() {
+    save () {
       const insert = () => {
         return this.constructor.insert(this.toObject())
           .then(doc => {
@@ -105,7 +102,7 @@ function _createModel(name, schemaModel, meta, datastore) {
       }
 
       if (!this.id) {
-        return insert()  
+        return insert()
       }
 
       return this.constructor.findOne({id: this.id})
@@ -114,17 +111,17 @@ function _createModel(name, schemaModel, meta, datastore) {
             return insert()
           }
 
-          var changed = this._schema.reduce((r, k) =>  r || (doc[k] !== this[k]), false)
+          var changed = this._schema.reduce((r, k) => r || (doc[k] !== this[k]), false)
           if (changed) {
             return this.constructor.update({_id: this._id}, this.toObject())
           }
-          
+
           return this
         })
     }
   }
 
-  function setSchema(modelInstance) {
+  function setSchema (modelInstance) {
     schema = ['id'].concat(Object.keys(modelInstance).filter(k => !k.startsWith('_')))
 
     schema.forEach(k => {
@@ -134,13 +131,13 @@ function _createModel(name, schemaModel, meta, datastore) {
 
         if (typeof relatedModel === 'string') {
           relatedModel = createdModels[relatedModel]
-          
+
           if (relatedModel === undefined) {
             throw 'No model defined with name ' + relationField.relatedModel
           }
         }
 
-        Model.prototype['get' + k[0].toUpperCase() + k.substr(1)] = function() {
+        Model.prototype['get' + k[0].toUpperCase() + k.substr(1)] = function () {
           return relatedModel.findOne({id: this[k]})
         }
       }
@@ -152,10 +149,10 @@ function _createModel(name, schemaModel, meta, datastore) {
   return Model
 }
 
-export function createModel(name, schemaModel, meta, dataDir) {
+export function createModel (name, schemaModel, meta, dataDir) {
   meta = meta || {}
   dataDir = dataDir || DATA_DIR
-  
+
   const collectionName = meta.collection || name.toLowerCase()
 
   const datastore = new Datastore({
@@ -169,7 +166,7 @@ export function createModel(name, schemaModel, meta, dataDir) {
 }
 
 export class RelationField {
-  constructor(relatedModel) {
+  constructor (relatedModel) {
     this.relatedModel = relatedModel
   }
 }

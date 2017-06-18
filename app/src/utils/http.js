@@ -3,11 +3,11 @@ import axios from 'axios'
 import * as errors from '~/utils/errors'
 
 class HttpClient {
-  constructor() {
+  constructor () {
     this.authToken = null
   }
 
-  put(url, data, config) {
+  put (url, data, config) {
     config = config || {}
     config.validateStatus = status => true
     this._setHeaders(config)
@@ -15,8 +15,8 @@ class HttpClient {
     .catch(r => this.handleNetworkError({url: url, data: data}, r))
     .then(r => this.handleResponse({url: url, data: data}, r))
   }
-  
-  post(url, data, config) {
+
+  post (url, data, config) {
     config = config || {}
     config.validateStatus = status => true
     this._setHeaders(config)
@@ -25,7 +25,7 @@ class HttpClient {
     .then(r => this.handleResponse({url: url, data: data}, r))
   }
 
-  get(url, config) {
+  get (url, config) {
     config = config || {}
     config.validateStatus = status => true
     this._setHeaders(config)
@@ -34,29 +34,28 @@ class HttpClient {
     .then(r => this.handleResponse({url: url}, r))
   }
 
-  _setHeaders(config) {
+  _setHeaders (config) {
     if (this.authToken) {
       config.headers = config.headers || {}
       config.headers['Authorization'] = 'Token ' + this.authToken
     }
   }
 
-  setAuthToken(authToken) {
+  setAuthToken (authToken) {
     this.authToken = authToken
   }
 
-  handleResponse(request, response) {
+  handleResponse (request, response) {
     if (response.status >= 200 && response.status < 300) {
       return response
     } else if (response.status >= 500) {
-
       throw errors.ServerError(new Error(), response.status, response.statusText, response, request)
     } else {
       throw errors.RequestError(new Error(), response.status, response.statusText, response, request)
     }
   }
 
-  handleNetworkError(request, err) {
+  handleNetworkError (request, err) {
     throw errors.NetworkError(err)
   }
 }

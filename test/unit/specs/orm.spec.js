@@ -6,7 +6,6 @@ import tmp from 'tmp'
 
 import { createModel, RelationField } from '~/utils/orm'
 
-
 chai.use(sinonChai)
 var expect = chai.expect
 
@@ -18,9 +17,9 @@ describe('ORM and Models', () => {
   beforeEach(done => {
     tmp.dir((err, path) => {
       dataDir = path
-      
+
       class AuthorSchema {
-        constructor() {
+        constructor () {
           this.id = String
           this.firstName = null
           this.lastName = 'defaultValue'
@@ -32,19 +31,18 @@ describe('ORM and Models', () => {
       Author = createModel('Author', AuthorSchema, {}, dataDir)
 
       class BookSchema {
-        constructor() {
+        constructor () {
           this.id = String
           this.title = String
           this.author = new RelationField(Author)
         }
       }
-      
+
       Book = createModel('Book', BookSchema, {}, dataDir)
 
       done(err)
     })
   })
-
 
   it('should save properly without id', () => {
     var a = new Author()
@@ -83,7 +81,6 @@ describe('ORM and Models', () => {
     a.phoneNumber = '012345'
     a.age = 80
 
-    
     return a.save()
     .then(() => {
       var b = new Book()

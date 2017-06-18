@@ -26,14 +26,13 @@ if (Config.sentry.enabled) {
   .addPlugin(RavenVue, Vue)
   .install()
 } else {
-  Log.warn("Sentry is disabled, not using sentry")
+  Log.warn('Sentry is disabled, not using sentry')
 }
-  
+
 const router = new Router({
   scrollBehavior: () => ({ y: 0 }),
   routes
 })
-
 
 // Status.on('status-changed', function (status) {
 //   console.log(status.text)

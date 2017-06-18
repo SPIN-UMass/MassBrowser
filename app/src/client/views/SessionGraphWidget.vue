@@ -19,12 +19,12 @@
       var timeSeries = this.graph.createTimeSeries({
         fillStyle: 'rgba(20, 80, 180)'
       })
-      
+  
       const ACC = 100
       this.session.on('receive', dataSize => {
         var time = Math.trunc(new Date().getTime() / ACC) * ACC
         console.log(time + '   ' + dataSize)
-        timeSeries.append(time , dataSize)
+        timeSeries.append(time, dataSize)
       })
     },
     methods: {

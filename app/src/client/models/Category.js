@@ -1,7 +1,7 @@
 import { createModel, RelationField } from '~/utils/orm'
 
 class CategorySchema {
-  constructor() {
+  constructor () {
     this.name = null
     this.parent = new RelationField('Category')
   }

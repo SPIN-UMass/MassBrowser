@@ -1,7 +1,7 @@
 import Raven from '~/utils/raven'
 
 export class BaseError extends Error {
-  constructor(message) {
+  constructor (message) {
     super(message)
     // this.message = message
     // this.error = new Error(`${this.constructor.name}: ${message}`)
@@ -9,41 +9,41 @@ export class BaseError extends Error {
     this.name = this.constructor.name
   }
 
-  toString() {
+  toString () {
     if (this.message) {
       return this.message
     }
     return super.toString()
   }
 
-  report() {
+  report () {
     Raven.captureException(this.error)
   }
 
-  log() {
+  log () {
     console.error(this.error)
   }
 
-  logAndReport() {
+  logAndReport () {
     this.log()
     this.report()
   }
 }
 
-export class AppError extends BaseError{
-  constructor(message) {
+export class AppError extends BaseError {
+  constructor (message) {
     super(message)
   }
 }
 
 export class NetworkError extends BaseError {
-  constructor(message) {
+  constructor (message) {
     super(message)
   }
 }
 
 export class APIError extends BaseError {
-  constructor(statusCode, statusText, response, request) {
+  constructor (statusCode, statusText, response, request) {
     var url = request ? `(${request.url})` : ''
     super(`${statusCode} ${statusText} ${url}`)
     this.statusCode = statusCode
@@ -52,11 +52,11 @@ export class APIError extends BaseError {
     this.url = request.url
   }
 
-  log() {
+  log () {
     console.error(this.error)
   }
-  
-  report() {
+
+  report () {
     Raven.captureException(this.error, {
       extra: {
         'http:response:status': this.statusCode,
@@ -71,20 +71,20 @@ export class APIError extends BaseError {
 }
 
 export class AuthenticationError extends APIError {
-  constructor(message) {
+  constructor (message) {
     super(401, message)
   }
 }
 
 export class RequestError extends APIError {
-  constructor(statusCode, statusText, response, request) {
+  constructor (statusCode, statusText, response, request) {
     super(statusCode || 400, statusText, response, request)
   }
 
 }
 
 export class ServerError extends APIError {
-  constructor(statusCode, message, response, request) {
+  constructor (statusCode, message, response, request) {
     super(statusCode || 500, message, response, request)
   }
 }

@@ -16,7 +16,6 @@ class _CacheManager {
         resolve()
       }
       reject()
-
     })
   }
 
@@ -27,7 +26,6 @@ class _CacheManager {
     proxy.on('connect', () => {
       CacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
       console.log('resgistering')
-
     })
 
     proxy.on('data', (d) => {
@@ -86,7 +84,6 @@ class _CacheManager {
         .then(() => {
           this.interceptConnectiotn(connection, dstip, dstport, onConnect)
           resolve('Intercepted')
-
         }, (err) => {
           reject('Don\'t Cache Browser')
         })

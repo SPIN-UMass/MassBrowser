@@ -5,7 +5,6 @@ import bootClient from './boot'
 import Status from '~/utils/status'
 import Raven from '~/utils/raven'
 
-
 Raven
   .smartConfig({'role': 'client'})
   .install()

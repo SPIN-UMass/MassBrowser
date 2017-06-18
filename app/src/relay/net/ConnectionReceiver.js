@@ -82,7 +82,6 @@ export class ConnectionReceiver {
         console.log('ip', ip, 'port', port)
         this.connections[conid] = net.connect({host: ip, port: port}, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
-
         })
         this.connections[conid].on('data', (data) => {
           this.write(conid, 'D', data)
@@ -134,7 +133,6 @@ export class ConnectionReceiver {
       if (lastconid in this.connections) {
         this.connections[lastconid].end()
       }
-
     }
   }
 

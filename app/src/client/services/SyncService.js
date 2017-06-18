@@ -23,20 +23,20 @@ class _SyncService {
   syncWebsites () {
     return this._sync('websites', this._websiteSync)
   }
-  
+
   syncDomains () {
     return this._sync('domains', this._domainSync)
   }
 
-  syncCategories() {
+  syncCategories () {
     return this._sync('categories', this._categorySync)
   }
 
-  syncRegions() {
+  syncRegions () {
     return this._sync('regions', this._regionSync)
   }
-  
-  syncCDNs() {
+
+  syncCDNs () {
     return this._sync('cdns', this._cdnSync)
   }
 
@@ -59,13 +59,13 @@ class _SyncService {
       .then(([lastSyncTime, lastModifiedTime]) => {
         if (lastModifiedTime > lastSyncTime) {
           console.debug(entity + ' sync is required, fetching modified items')
-      
+
           return syncFunction.call(this, lastSyncTime)
             .then(() => {
               this._updateLastSyncTime(entity, lastModifiedTime)
             })
         }
-      
+
         console.debug(entity + ' database up-to-date')
       })
   }
@@ -100,7 +100,7 @@ class _SyncService {
       .then(items => console.log(items.length + ' CDNs synced'))
   }
 
-  _saveItems(Model, items) {
+  _saveItems (Model, items) {
     var savePromises = []
     items.forEach(itemInfo => {
       savePromises.push(Model.findOne({_id: itemInfo._id})
@@ -109,11 +109,10 @@ class _SyncService {
             var item = new Model()
           }
 
-          Object.assign(item, itemInfo)              
+          Object.assign(item, itemInfo)
           return item.save()
         })
       )
-      
     })
     return Promise.all(savePromises)
   }

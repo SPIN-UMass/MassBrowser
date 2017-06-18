@@ -43,7 +43,6 @@
       SessionService.on('sessions-changed', sessions => {
         this.sessions = sessions
       })
-      
     },
     methods: {
     }

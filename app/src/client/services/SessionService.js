@@ -19,6 +19,7 @@ import { Domain, Category } from '~/client/models'
 class _SessionService extends EventEmitter {
   constructor () {
     super()
+    this.waitingSessions = 0
 
     this.sessions = []
     this.processedSessions = {}
@@ -74,7 +75,7 @@ class _SessionService extends EventEmitter {
    */
   createSession (categories) {
     var categoryIDs = []
-
+    this.waitingSessions += 1
     if (categories !== undefined) {
       if (!Array.isArray(categories)) {
         categories = [categories]
@@ -86,41 +87,41 @@ class _SessionService extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       httpAPI.requestSession(categoryIDs)
-      .then(session => {
-        if (!session) {
-          warn("No relay was found for new session")
-          return reject(NoRelayAvailableError(new Error(), "No relay is available for the requested session"))
-        }
-
-        debug(`Session [${session.id}] created, waiting for relay to accept`)
-
-        this.pendingSessions[session.id] = {
-          accept: _session => { 
-            debug(`Session [${session.id}] accepted by relay`)
-            
-            this.sessions.push(_session)
-            this.emit('sessions-changed', this.sessions)
-            
-            debug(`Connecting session [${session.id}]`)
-            _session.connect()
-            .then(() => {
-              debug(`Session [${session.id}] connected`)
-              resolve(_session)
-            })
-            .catch(err => {
-              debug(`Session [${session.id}] connection to relay failed`)
-              reject(err)
-              
-              // Report session failure to server
-              httpAPI.updateSessionStatus(session.id, 'failed')
-            })
-          }, 
-          reject: s => {
-            warn(`Session [${session.id}] rejected by relay`)
-            reject(SessionRejectedError(new Error(), 'session was rejected by relay'))
+        .then(session => {
+          if (!session) {
+            warn('No relay was found for new session')
+            return reject(NoRelayAvailableError(new Error(), 'No relay is available for the requested session'))
           }
-        }
-      })
+
+          debug(`Session [${session.id}] created, waiting for relay to accept`)
+
+          this.pendingSessions[session.id] = {
+            accept: _session => {
+              debug(`Session [${session.id}] accepted by relay`)
+
+              this.sessions.push(_session)
+              this.emit('sessions-changed', this.sessions)
+
+              debug(`Connecting session [${session.id}]`)
+              _session.connect()
+                .then(() => {
+                  debug(`Session [${session.id}] connected`)
+                  resolve(_session)
+                })
+                .catch(err => {
+                  debug(`Session [${session.id}] connection to relay failed`)
+                  reject(err)
+
+                  // Report session failure to server
+                  httpAPI.updateSessionStatus(session.id, 'failed')
+                })
+            },
+            reject: s => {
+              warn(`Session [${session.id}] rejected by relay`)
+              reject(SessionRejectedError(new Error(), 'session was rejected by relay'))
+            }
+          }
+        })
     })
   }
 
@@ -133,24 +134,26 @@ class _SessionService extends EventEmitter {
           return false
         } else if (!(session.id in this.pendingSessions)) {
           staleCount++
-          
+
           // Report stale session to server
           httpAPI.updateSessionStatus(session.id, 'expired')
 
           return false
         }
+
         return true
       })
 
       debug(`Retrieved ${sessions.length} sessions (valid: ${validSessions.length}  stale: ${staleCount}  duplicate: ${duplicateCount})`)
 
       validSessions.forEach((session) => {
+        this.waitingSessions -= 1
         var desc = {
           'readkey': Buffer.from(session.read_key, 'base64'),
           'readiv': Buffer.from(session.read_iv, 'base64'),
           'writekey': Buffer.from(session.write_key, 'base64'),
           'writeiv': Buffer.from(session.write_iv, 'base64'),
-          'token': Buffer.from(session.token, 'base64'),
+          'token': Buffer.from(session.token, 'base64')
         }
 
         if (!(session.id in this.sessions)) {
@@ -171,10 +174,12 @@ class _SessionService extends EventEmitter {
 
   _startSessionPoll () {
     // httpAPI.getSessions()
-    //       .then(ses => this._handleRetrievedSessions(ses))  
+    //       .then(ses => this._handleRetrievedSessions(ses))
     schedule.scheduleJob('*/2 * * * * *', () => {
-      httpAPI.getSessions()
+      if (this.waitingSessions > 0) {
+        httpAPI.getSessions()
           .then(ses => this._handleRetrievedSessions(ses))
+      }
     })
   }
 }
