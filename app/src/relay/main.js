@@ -39,11 +39,12 @@ KVStore.get('relay', null)
   .then(data => {
     StatusReporter.startRoutine()
     console.log('Starting Relay')
-    StatusReporter.localport = data[0]
-    StatusReporter.remoteport = data[2]
-    StatusReporter.ip = data[1]
+    StatusReporter.localip = data[0]
+    StatusReporter.localport = data[1]
+    StatusReporter.remoteport = data[3]
+    StatusReporter.ip = data[2]
     console.log(data)
-    return runOBFSserver('0.0.0.0', StatusReporter.localport)
+    return runOBFSserver(StatusReporter.localip, StatusReporter.localport)
   })
   .then(() => {
     console.log('Connecting to WebSocket server')

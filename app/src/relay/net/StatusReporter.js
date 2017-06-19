@@ -9,7 +9,8 @@ class _StatusReporter {
   constructor () {
     this.localport = -1
     this.remoteport = -1
-    this.ip = ''
+    this.remoteip = ''
+    this.localip = ''
   }
 
   startRoutine () {

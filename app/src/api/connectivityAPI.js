@@ -39,7 +39,7 @@ class WSServerReachability extends EventEmitter {
         let port=data.split(':')[1]
         console.log(ip,port)
 
-        resolve([this.socket.localPort,ip,port])
+        resolve([this.localAddress,this.socket.localPort,ip,port])
 
       })
 
