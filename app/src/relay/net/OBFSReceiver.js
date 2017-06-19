@@ -29,7 +29,7 @@ export function runOBFSserver (publicIP, publicPort) {
       my_up.end()
     })
     socket.on('close', () => {
-      console.log('socket clossing',)
+      console.log('socket clossing')
       recver.closeConnections()
       socket.unpipe(my_up)
       my_down.unpipe(socket)
@@ -38,7 +38,7 @@ export function runOBFSserver (publicIP, publicPort) {
     })
   })
 
-  server.listen(publicPort,publicIP, () => {
+  server.listen(publicPort, publicIP, () => {
     console.log('relay bound')
   })
   console.log('test relay started on ', publicPort)
