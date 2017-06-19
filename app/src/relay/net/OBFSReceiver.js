@@ -38,7 +38,7 @@ export function runOBFSserver (publicIP, publicPort) {
     })
   })
 
-  server.listen(publicPort, publicIP, () => {
+  server.listen({port:publicPort, host:publicIP,exclusive:false}, () => {
     console.log('relay bound')
   })
   console.log('test relay started on ', publicPort)

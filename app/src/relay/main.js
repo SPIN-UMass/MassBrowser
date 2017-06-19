@@ -42,7 +42,7 @@ KVStore.get('relay', null)
     StatusReporter.localip = data[0]
     StatusReporter.localport = data[1]
     StatusReporter.remoteport = data[3]
-    StatusReporter.ip = data[2]
+    StatusReporter.remoteip = data[2]
     console.log(data)
     return runOBFSserver(StatusReporter.localip, StatusReporter.localport)
   })
@@ -52,7 +52,7 @@ KVStore.get('relay', null)
   })
   .then(() => {
     console.log('Server connection established')
-    return ServerConnection.relayUp(StatusReporter.ip,StatusReporter.remoteport)
+    return ServerConnection.relayUp(StatusReporter.remoteip, StatusReporter.remoteport)
   })
   .catch(err => {
     if (err instanceof errors.NetworkError) {

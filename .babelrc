@@ -22,11 +22,5 @@
         "stage-0"
       ]
     }
-  },
-  "plugins": [
-    "transform-runtime",
-    ["babel-plugin-transform-builtin-extend", {
-      "globals": ["Error"]
-    }]
-  ]
+  }
 }
