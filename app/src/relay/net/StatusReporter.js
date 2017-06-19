@@ -2,17 +2,20 @@
  * Created by milad on 6/11/17.
  */
 var schedule = require('node-schedule')
-import ServerConnection from '~/api/wsAPI'
+import   ConnectivityConnection from '~/api/connectivityAPI'
 
 class _StatusReporter {
 
-  startRoute () {
+  constructor () {
+    this.port = -1
+  }
+  startRoutine () {
     this._startKeepAlive()
   }
 
   _startKeepAlive () {
-    schedule.scheduleJob('1 */10 * * * *', () => {
-      ServerConnection.keepAlive()
+    schedule.scheduleJob('1 */1 * * * *', () => {
+      ConnectivityConnection.keepAlive()
     })
   }
 

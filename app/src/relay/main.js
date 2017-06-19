@@ -5,6 +5,7 @@ import { runOBFSserver } from './net/OBFSReceiver'
 import { pendMgr } from './net/PendingConnections'
 var stun = require('vs-stun')
 import ServerConnection from '~/api/wsAPI'
+import ConnectivityConnection from '~/api/connectivityAPI'
 import httpAPI from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
 import * as errors from '~/utils/errors'
@@ -32,29 +33,22 @@ KVStore.get('relay', null)
     return httpAPI.authenticate(relay.id, relay.password)
   })
   .then(() => {
-    console.log('Connecting to server')
+    console.log('Connecting to Connectivity server')
+    return ConnectivityConnection.connect(httpAPI.getSessionID())
+  })
+  .then(port => {
+    StatusReporter.startRoutine()
+    console.log('Starting Relay')
+    StatusReporter.port = port
+    return runOBFSserver('0.0.0.0', port)
+  })
+  .then(() => {
+    console.log('Connecting to WebSocket server')
     return ServerConnection.connect(httpAPI.getSessionID())
   })
   .then(() => {
-    return new Promise((resolve, reject) => {
-      console.log('Detecting Network Type')
-      stun.connect(stunserver, (error, socket) => {
-        if (error) {
-          reject(error)
-        }
-        console.log(socket.stun)
-        resolve(socket.stun)
-      }, {count: -1})
-    })
-  })
-  .then((stun) => {
     console.log('Server connection established')
-    return ServerConnection.relayUp(stun.public.host, '8087', 'PublicIP')
-  })
-  .then(data => {
-    StatusReporter.startRoute()
-    console.log('Starting Relay')
-    runOBFSserver('0.0.0.0', 8087)
+    return ConnectivityConnection.relayUp(StatusReporter.port)
   })
   .catch(err => {
     if (err instanceof errors.NetworkError) {

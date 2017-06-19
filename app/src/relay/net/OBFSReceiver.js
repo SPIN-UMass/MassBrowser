@@ -42,4 +42,7 @@ export function runOBFSserver (publicIP, publicPort) {
     console.log('relay bound')
   })
   console.log('test relay started on ', publicPort)
+  return new Promise((resolve, reject) => {
+    resolve(publicPort)
+  })
 }

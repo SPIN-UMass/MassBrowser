@@ -1,4 +1,7 @@
 /**
+ * Created by milad on 6/18/17.
+ */
+/**
  * Created by milad on 4/23/17.
  */
 import KVStore from '~/utils/kvstore'
@@ -10,14 +13,13 @@ import { pendMgr } from '~/relay/net/PendingConnections'
 import WebSocket from 'ws'
 import * as errors from '~/utils/errors'
 
-
 const SESSION_PATH='/api/session/'
 
 const RELAY_PATH= '/api/relays/'
 const CLIENT_PATH= '/api/client/'
 
 
-class WSServerConnection extends EventEmitter {
+class WSServerReachability extends EventEmitter {
   constructor () {
     super()
     this.messageID = 0
@@ -66,7 +68,7 @@ class WSServerConnection extends EventEmitter {
 
         const handleAuth = resp => {
           if (resp.status == 200) {
-            resolve()
+            resolve(this.ws._socket.localPort)
             this.emit("authenticated")
           } else {
             reject(errors.AuthenticationError(new Error()))
@@ -82,60 +84,7 @@ class WSServerConnection extends EventEmitter {
     }
   }
 
-  onNewSession(data) {
 
-    var desc = {
-      'writekey': (Buffer.from(data.read_key,'base64')),
-      'writeiv': (Buffer.from(data.read_iv,'base64')),
-      'readkey': (Buffer.from(data.write_key,'base64')),
-      'readiv': (Buffer.from(data.write_iv,'base64')),
-      'token': (Buffer.from(data.token,'base64')),
-      'client': data.client,
-      'sessionId': data.id
-
-    }
-    console.log('session',desc,desc.token.length,Buffer.from(data.token,'base64').length)
-
-    pendMgr.addPendingConnection((desc.token),desc)
-    this.acceptSession(data.client,data.id)
-  }
-
-  acceptSession(client,sessionid) {
-    return new Promise((resolve,reject) => {
-      var proto = {
-        status: 'accepted'
-      }
-
-      this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
-
-    })
-  }
-
-  clientSessionConnected(client,sessionid) {
-    return new Promise((resolve,reject) => {
-      var proto = {
-        status: 'used'
-      }
-
-      this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
-
-    })
-  }
-  clientSessionDisconnected(client,sessionid) {
-    console.log('closing session')
-    return new Promise((resolve,reject) => {
-      // TODO
-
-      resolve()
-      // var proto = {
-        
-      // }
-
-
-      // this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
-
-    })
-  }
 
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
@@ -172,28 +121,26 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto)
     resolve()
   }
-  //TO BE REMOVED
-  // relayUp (ip, port, nattype) {
-  //   return new Promise((resolve, reject) => {
-  //     var proto = {
-  //       'ip': ip,
-  //       'port': port,
-  //       'fingerprint': this.fingerprint,
-  //       'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-  //       'nat_type': nattype,
-  //     }
-  //     this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
-  //   })
-  // }
-  //
-  // keepAlive () {
-  //   return new Promise((resolve, reject) => {
-  //     var proto = {
-  //       'fingerprint': this.fingerprint,
-  //     }
-  //     this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
-  //   })
-  // }
+
+  relayUp (port) {
+    return new Promise((resolve, reject) => {
+
+      var proto = {
+
+        'port':port
+      }
+      this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
+  }
+
+  keepAlive () {
+    return new Promise((resolve, reject) => {
+      var proto = {
+      }
+      this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
+  }
+
 }
-var ServerConnection = new WSServerConnection()
-export default ServerConnection
+var ConnectivityConnection = new WSServerReachability()
+export default ConnectivityConnection
