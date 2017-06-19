@@ -44,7 +44,7 @@ KVStore.get('relay', null)
     StatusReporter.remoteport = data[3]
     StatusReporter.remoteip = data[2]
     console.log(data)
-    return runOBFSserver(StatusReporter.localip, StatusReporter.localport)
+    return runOBFSserver(StatusReporter.localip, 8089)
   })
   .then(() => {
     console.log('Connecting to WebSocket server')
@@ -52,7 +52,7 @@ KVStore.get('relay', null)
   })
   .then(() => {
     console.log('Server connection established')
-    return ServerConnection.relayUp(StatusReporter.remoteip, StatusReporter.remoteport)
+    return ServerConnection.relayUp(StatusReporter.remoteip,8089)
   })
   .catch(err => {
     if (err instanceof errors.NetworkError) {
