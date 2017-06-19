@@ -29,6 +29,7 @@ class WSServerReachability extends EventEmitter {
       this.socket=net.createConnection({port: ECHOPORT, host: ECHOSERVER},()=>{
         console.log('Connected to Echo Server')
         this.socket.write('TEST')
+        this.socket.setKeepAlive(true)
 
       })
       this.socket.on('data',(data)=>
