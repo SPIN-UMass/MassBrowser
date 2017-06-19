@@ -7,8 +7,11 @@ import   ConnectivityConnection from '~/api/connectivityAPI'
 class _StatusReporter {
 
   constructor () {
-    this.port = -1
+    this.localport = -1
+    this.remoteport = -1
+    this.ip = ''
   }
+
   startRoutine () {
     this._startKeepAlive()
   }

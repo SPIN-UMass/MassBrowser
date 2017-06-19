@@ -34,7 +34,7 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto)
   }
 
-  relayUp (ip, port, nattype) {
+  relayUp (ip, port) {
     return Promise((resolve, reject) => {
       if (this.fingerprint === null) {
         this.register(ip, port).then(() => { this.relayUp(ip, port).then(resolve, reject) })
@@ -45,7 +45,6 @@ class WSServerConnection extends EventEmitter {
           'port': port,
           'fingerprint': this.fingerprint,
           'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-          'natType': nattype
         }
         this.sendJSON(proto)
       }

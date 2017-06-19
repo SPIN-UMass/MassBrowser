@@ -34,13 +34,16 @@ KVStore.get('relay', null)
   })
   .then(() => {
     console.log('Connecting to Connectivity server')
-    return ConnectivityConnection.connect(httpAPI.getSessionID())
+    return ConnectivityConnection.connect()
   })
-  .then(port => {
+  .then(data => {
     StatusReporter.startRoutine()
     console.log('Starting Relay')
-    StatusReporter.port = port
-    return runOBFSserver('0.0.0.0', port)
+    StatusReporter.localport = data[0]
+    StatusReporter.remoteport = data[2]
+    StatusReporter.ip = data[1]
+    console.log(data)
+    return runOBFSserver('0.0.0.0', StatusReporter.localport)
   })
   .then(() => {
     console.log('Connecting to WebSocket server')
@@ -48,7 +51,7 @@ KVStore.get('relay', null)
   })
   .then(() => {
     console.log('Server connection established')
-    return ConnectivityConnection.relayUp(StatusReporter.port)
+    return ServerConnection.relayUp(StatusReporter.ip,StatusReporter.remoteport)
   })
   .catch(err => {
     if (err instanceof errors.NetworkError) {

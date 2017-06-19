@@ -172,28 +172,26 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto)
     resolve()
   }
-  //TO BE REMOVED
-  // relayUp (ip, port, nattype) {
-  //   return new Promise((resolve, reject) => {
-  //     var proto = {
-  //       'ip': ip,
-  //       'port': port,
-  //       'fingerprint': this.fingerprint,
-  //       'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
-  //       'nat_type': nattype,
-  //     }
-  //     this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
-  //   })
-  // }
-  //
-  // keepAlive () {
-  //   return new Promise((resolve, reject) => {
-  //     var proto = {
-  //       'fingerprint': this.fingerprint,
-  //     }
-  //     this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
-  //   })
-  // }
+  relayUp (ip, port) {
+    return new Promise((resolve, reject) => {
+      var proto = {
+        'ip': ip,
+        'port': port,
+        'fingerprint': this.fingerprint,
+        'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
+      }
+      this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
+  }
+
+  keepAlive () {
+    return new Promise((resolve, reject) => {
+      var proto = {
+        'fingerprint': this.fingerprint,
+      }
+      this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
+  }
 }
 var ServerConnection = new WSServerConnection()
 export default ServerConnection
