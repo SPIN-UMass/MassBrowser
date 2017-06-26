@@ -28,9 +28,7 @@ export function startClientSocks (mhost, mport) {
     // I plan to tunnel everything including SSH over an HTTP tunnel. For now, though, here is the plain proxy:
     PolicyManager.getDomainPolicy(address, port).then((proxyType) => {
       if (proxyType === PolicyManager.POLICY_YALER_PROXY) {
-        ConnectionManager.newClientConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
-          regularProxy(socket, port, address, proxyReady)
-        })
+        ConnectionManager.newClientConnection(socket, address, port, proxyReady).then(() => {})
       } else if (proxyType === PolicyManager.POLICY_CACHEBROWSE) {
         CacheManager.newCacheConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
           regularProxy(socket, port, address, proxyReady)

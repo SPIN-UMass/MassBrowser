@@ -13,6 +13,7 @@ import Status from '~/utils/status'
 import SessionService from '~/client/services/SessionService'
 import CacheProxy from '~/client/cachebrowser/CacheProxy'
 import Raven from '~/utils/raven'
+import config from '~/utils/config'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
@@ -59,7 +60,7 @@ export default function bootClient () {
   })
   .then(() => {
     let status = Status.info('Starting SOCKS server')
-    return startClientSocks()
+    return startClientSocks('127.0.0.1', config.socksPort)
     .then(() => { status.clear() })
   })
   .catch(err => {
