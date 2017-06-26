@@ -130,9 +130,8 @@ export class ConnectionReceiver {
       }
     }
     if (CMD === 'C') {
-      if (lastconid in this.connections) {
-        this.connections[lastconid].end()
-      }
+      console.log('command C received')
+      this.closeConnections()
     }
   }
 

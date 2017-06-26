@@ -28,8 +28,8 @@ export function runOBFSserver (publicIP, publicPort) {
       my_down.end()
       my_up.end()
     })
-    socket.on('close', () => {
-      console.log('socket clossing')
+    socket.on('end', () => {
+      console.log('socket ending')
       recver.closeConnections()
       socket.unpipe(my_up)
       my_down.unpipe(socket)

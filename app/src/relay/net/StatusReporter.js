@@ -3,7 +3,7 @@
  */
 var schedule = require('node-schedule')
 import   ConnectivityConnection from '~/api/connectivityAPI'
-
+import ServerConnection from '~/api/wsAPI'
 class _StatusReporter {
 
   constructor () {
@@ -18,8 +18,10 @@ class _StatusReporter {
   }
 
   _startKeepAlive () {
-    schedule.scheduleJob('1 */1 * * * *', () => {
+    schedule.scheduleJob('*/1 * * * * *', () => {
+      ServerConnection.keepAlive()
       ConnectivityConnection.keepAlive()
+
     })
   }
 
