@@ -40,10 +40,10 @@ export default class RelayConnection extends EventEmitter {
         resolve(socket)
       }
 
-      socket.setTimeout(config.relayConnectionTimeout, () => {
+      /* socket.setTimeout(config.relayConnectionTimeout, () => {
         socket.end()
         onFail(new Error('Connection Timeout'))
-      })
+      }) */
 
       socket.once('connect', onSuccess)
       socket.once('error', onFail)
