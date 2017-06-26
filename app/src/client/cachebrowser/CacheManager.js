@@ -6,6 +6,7 @@
  */
 import crypto from 'crypto'
 import CacheProxy from './CacheProxy'
+import config from '~/utils/config'
 var net = require('net')
 
 class _CacheManager {
@@ -22,7 +23,7 @@ class _CacheManager {
   interceptConnectiotn (socket, dst, dstport, onConnect) {
     console.log('intercepting')
 
-    let proxy = net.createConnection({port: 8000, host: 'localhost'})
+    let proxy = net.createConnection({port: config.cachebrowser.mitmPort, host: 'localhost'})
     proxy.on('connect', () => {
       CacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
       console.log('resgistering')

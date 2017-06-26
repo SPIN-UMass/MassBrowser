@@ -44,10 +44,10 @@ class DomainSchema {
         return null
       }
 
-      let subdomain = domainName.substring(0, firstdot)
+      let subdomain = domainName.substring(0, firstDot)
       let maindomain = domainName.substring(firstDot + 1)
 
-      return this.model.find({name: maindomain})
+      return Domain.find({name: maindomain})
         .then(domains => {
           for (let i = 0; i < domains.length; i++) {
             if (domains[i].subdomainRegex.test(subdomain)) {
@@ -59,7 +59,7 @@ class DomainSchema {
         })
     }
 
-    return this.model.find({name: domainName})
+    return Domain.find({name: domainName})
       .then(domains => {
         if (!domains.length) {
           return trySubdomain()

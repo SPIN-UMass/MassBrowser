@@ -39,24 +39,33 @@ class _SessionService extends EventEmitter {
   }
 
   assignRelay (host, port) {
-    return Domain.findDomain(host)
-      .then(domain => domain.getWebsite())
-      .then(website => website.getCategory())
-      .then(category => {
-        debug(`Assigning session for ${domain}`)
-
-        /* TODO optimization */
-        /* TODO is always returning the first one found */
-        for (var i = 0; i < this.sessions.length; i++) {
-          if (this.sessions[i].allowedCategories.has(category.id)) {
-            return this.sessions[i]
-          }
+    return new Promise((resolve, reject) => {
+        if (this.sessions.length) {
+          return resolve(this.sessions[0])
         }
-
         // No suitable session found
-        return this.createSession(category)
-      })
-      .then(session => session.connection)
+        return this.createSession([])
+    })
+    .then(session => session.connection)
+      
+    // return Domain.findDomain(host)
+    //   .then(domain => domain.getWebsite())
+    //   .then(website => website.getCategory())
+    //   .then(category => {
+    //     debug(`Assigning session for ${domain}`)
+
+    //     /* TODO optimization */
+    //     /* TODO is always returning the first one found */
+    //     for (var i = 0; i < this.sessions.length; i++) {
+    //       if (this.sessions[i].allowedCategories.has(category.id)) {
+    //         return this.sessions[i]
+    //       }
+    //     }
+
+    //     // No suitable session found
+    //     return this.createSession(category)
+    //   })
+    //   .then(session => session.connection)
 
     // return new Promise((resolve, reject) => {
     //   var session = this.sessions[Math.floor(Math.random() * this.sessions.length)]
@@ -207,7 +216,7 @@ export class Session extends EventEmitter {
 
   connect () {
     var relay = new RelayConnection(this.ip, this.port, this.desc)
-
+    relay.id = this.id
     relay.on('data', data => {
       ConnectionManager.listener(data)
       this.bytesReceived += data.length

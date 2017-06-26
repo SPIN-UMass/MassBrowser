@@ -12,14 +12,14 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 500,
+    width: 660,
     resizable: false
   })
 
   mainWindow.loadURL(winURL)
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', () => {
     mainWindow = null

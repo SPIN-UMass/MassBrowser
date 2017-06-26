@@ -5,6 +5,8 @@ let tls = require('tls')
 let dns = require('dns')
 let fs = require('fs')
 import CertificateManager from './CertManager'
+import config from '~/utils/config'
+
 class _CacheProxy {
 
   constructor () {
@@ -31,7 +33,7 @@ class _CacheProxy {
         this.handleCacheSocket(socket)
       })
 
-      this.proxyserver.listen(8000, () => {
+      this.proxyserver.listen(config.cachebrowser.mitmPort, () => {
         CertificateManager.initializeCA().then(() => {
           resolve()
         })
