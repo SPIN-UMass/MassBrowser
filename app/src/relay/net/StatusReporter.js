@@ -18,7 +18,7 @@ class _StatusReporter {
   }
 
   _startKeepAlive () {
-    schedule.scheduleJob('*/1 * * * * *', () => {
+    schedule.scheduleJob('*/30 * * * * *', () => {
       ServerConnection.keepAlive()
       ConnectivityConnection.keepAlive()
 

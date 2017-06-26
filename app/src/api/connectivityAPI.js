@@ -26,7 +26,7 @@ class WSServerReachability extends EventEmitter {
   }
   connect(){
     return new Promise((resolve,reject)=>{
-      this.socket=net.createConnection({port: ECHOPORT, host: ECHOSERVER},()=>{
+      this.socket=net.createConnection({port: ECHOPORT, host: ECHOSERVER,localPort:-1,exclusive:false},()=>{
         console.log('Connected to Echo Server')
         this.socket.write('TEST')
         this.socket.setKeepAlive(true)
@@ -51,9 +51,11 @@ class WSServerReachability extends EventEmitter {
 
 
   keepAlive () {
+
     return new Promise((resolve, reject) => {
+      console.log('sending keepalive')
       this.socket.write('OK')
-      this.socket.on('drain',resolve)
+      resolve()
     })
   }
 

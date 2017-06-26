@@ -185,13 +185,15 @@ class WSServerConnection extends EventEmitter {
   }
 
   keepAlive () {
-    return new Promise((resolve, reject) => {
-      var proto = {
-        'fingerprint': this.fingerprint,
-      }
-      this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
-    })
+      return new Promise((resolve, reject) => {
+        var proto = {
+          'fingerprint': this.fingerprint,
+        }
+        this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+      })
   }
+
+
 }
 var ServerConnection = new WSServerConnection()
 export default ServerConnection
