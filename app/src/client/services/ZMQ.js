@@ -25,3 +25,5 @@ class _ZMQListener {
   }
 
 }
+var ZMQListener = new _ZMQListener()
+export default ZMQListener

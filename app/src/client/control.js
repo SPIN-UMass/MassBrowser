@@ -4,10 +4,9 @@
 
 import Status from '~/utils/status'
 import { startClientSocks } from './net/ClientSocks'
+import ZMQListener from './services/ZMQ'
 
-let status = Status.info('Starting ZEROMQ CLIENT')
-startClientSocks('127.0.0.1', config.socksPort).then(() => { status.clear() })
-
+ZMQListener.connect()
 
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
