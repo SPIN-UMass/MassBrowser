@@ -35,10 +35,10 @@ class WSServerReachability extends EventEmitter {
       this.socket.on('data',(data)=>
       {
         data=data.toString()
-        console.log(data)
+        //console.log(data)
         let ip=data.split(':')[0]
         let port=data.split(':')[1]
-        console.log(ip,port)
+        //console.log(ip,port)
 
         resolve([this.socket.localAddress,this.socket.localPort,ip,port])
 
@@ -53,7 +53,7 @@ class WSServerReachability extends EventEmitter {
   keepAlive () {
 
     return new Promise((resolve, reject) => {
-      console.log('sending keepalive')
+      //console.log('sending keepalive')
       this.socket.write('OK')
       resolve()
     })

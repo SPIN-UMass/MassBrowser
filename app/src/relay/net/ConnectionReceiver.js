@@ -52,16 +52,13 @@ export class ConnectionReceiver {
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
         }, () => {
-          console.log('I am here 3')
           this.socket.end()
         })
-        console.log('I am here')
         this.crypt.decrypt(data.slice(this.headersize, data.length))
-        console.log('I am here 2')
         this.isAuthenticated = true
         console.log('Authenticated')
       } else {
-        console.log('I am here 4')
+        console.log('Not Authenticated')
         this.socket.end()
       }
     }
@@ -133,6 +130,8 @@ export class ConnectionReceiver {
       console.log('command C received')
       this.closeConnections()
     }
+    console.log('UNKOWN command received')
+    this.closeConnections()
   }
 
   closeConnections () {

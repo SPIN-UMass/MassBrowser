@@ -25,7 +25,7 @@ export default function bootClient () {
       return client
     } else {
       let status = Status.info('Registering Client')
-      return httpAPI.registerClient()
+      return httpAPI.registerClient('mmn')
       .then(client => {
         status.clear()
 

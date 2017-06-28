@@ -92,13 +92,23 @@ class API {
     })
   }
 
-  registerClient (ip) {
+  registerClient (invitationCode) {
     return http.post(
       API_URL + '/clients', 
       {
-        'ip': ip
+        ip:undefined,
+        'invitation_code':invitationCode
       }
-    ).then(r => r.data)
+    ).then(r => {
+      if (r.status==201) {
+        return r.data
+      }
+      return null
+
+    }).catch((err)=>{
+      console.error(err)
+
+    })
   }
 
   registerRelay () {

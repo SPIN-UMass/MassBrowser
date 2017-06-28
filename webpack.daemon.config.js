@@ -11,6 +11,7 @@ let mainConfig = {
   entry: {
     client: path.join(__dirname, 'app/src/client/main.js'),
     relay: path.join(__dirname, 'app/src/relay/main.js'),
+    control: path.join(__dirname, 'app/src/relay/control.js')
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
