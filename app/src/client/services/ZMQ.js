@@ -3,12 +3,12 @@
  */
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5557'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
-import {zmq} from 'zeromq'
+import {zeromq} from 'zeromq'
 
 class _ZMQListener {
   constructor () {
-    this.requests = zmq.socket('pull')
-    this.results = zmq.socket('push')
+    this.requests = zeromq.socket('pull')
+    this.results = zeromq.socket('push')
   }
 
   connect () {
