@@ -22,7 +22,8 @@
     "release": "node tasks/release.js",
     "watch": "webpack --progress --watch --config webpack.daemon.config.js",
     "client": "node ./app/dist/client.js",
-    "relay": "node ./app/dist/relay.js"
+    "relay": "node ./app/dist/relay.js",
+    "control": "node ./app/dist/control.js"
   },
   "build": {
     "productName": "yaler",
