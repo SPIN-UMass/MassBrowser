@@ -3,7 +3,7 @@
  */
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5557'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
-var zmq = require('zeromq')
+import {zmq} from 'zeromq'
 
 class _ZMQListener {
   constructor () {
