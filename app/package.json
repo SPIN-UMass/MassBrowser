@@ -50,7 +50,10 @@
     "vuex": "^2.1.1",
     "winston": "^2.3.1",
     "ws": "^3.0.0",
-    "zeromq":"^4.4.1"
+    "zeromq":"^4.4.1",
+    "raven":"^2.1.0",
+    "mkdirp": "^0.5.1",
+    "async": "^2.5.0"
   },
   "author": "ha-D <hadi@cs.umass.edu>"
 }

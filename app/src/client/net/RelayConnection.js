@@ -53,11 +53,10 @@ export default class RelayConnection extends EventEmitter {
   }
 
   _initSocket (socket) {
-    socket.on('data', (data) => {
-      this.cipher.decrypt(data)
-    })
+
 
     var desc = this.desc
+    console.log('log',desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
     }, () => {
@@ -67,6 +66,9 @@ export default class RelayConnection extends EventEmitter {
 
     this.socket = socket
     this.cipher = cipher
+    socket.on('data', (data) => {
+      this.cipher.decrypt(data)
+    })
 
     return socket
   }
