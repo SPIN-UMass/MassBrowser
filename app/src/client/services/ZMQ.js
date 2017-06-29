@@ -35,11 +35,10 @@ class _ZMQListener {
 
     var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
     ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
-      this.onResponse(session)
+      this.onConnect(session)
     }, () => {
       this.onDisconnect(session)
     })
-
   }
 
   onDisconnect (session) {
@@ -48,7 +47,6 @@ class _ZMQListener {
 
   onConnect (session) {
     console.log(session, 'is reachable')
-
   }
 
 }
