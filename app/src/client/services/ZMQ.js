@@ -11,8 +11,8 @@ class _ZMQListener {
   constructor () {
     this.requests = zeromq.socket('pull')
     this.results = zeromq.socket('push')
-    this.validSessions=new Set()
-
+    this.validSessions = new Set()
+  }
 
   connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
