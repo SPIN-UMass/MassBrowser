@@ -34,10 +34,13 @@ class _ZMQListener {
     }
 
     var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
-    ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
-      this.onConnect(session)
-    }, () => {
-      this.onDisconnect(session)
+    _session.connect().then(() => {
+      console.log('Session Connected')
+      ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
+        this.onConnect(session)
+      }, () => {
+        this.onDisconnect(session)
+      })
     })
   }
 
