@@ -1,8 +1,13 @@
 export default [
   {
     path: '/',
-    name: 'home',
-    component: require('./views/Home')
+    name: 'index',
+    component: require('./views/Index')
+  },
+  {
+    path: '/start',
+    name: 'start',
+    component: require('./views/Start')
   },
   {
     path: '/roleselect',
@@ -15,10 +20,15 @@ export default [
     component: require('~/client/views/Index'),
     children: [
       {
-        path: 'home',
+        path: '/',
         component: require('~/client/views/Home')
       }
     ]
+  },
+  {
+    path: '/client-splash',
+    name: 'client-splash',
+    component: require('~/client/views/Splash')
   },
   {
     path: '*',

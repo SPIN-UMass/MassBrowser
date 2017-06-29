@@ -15,10 +15,18 @@ class _KVStore {
     return this.model.update({_id: key}, {_id: key, value: value}, {upsert: true})
   }
 
-  get (key) {
+  get (key, deflt) {
+    if (deflt == undefined) {
+      deflt = null
+    }
+
     return this.model.findOne({_id: key})
-      .then(doc => { return doc ? doc.value : null })
+      .then(doc => { return doc ? doc.value : deflt })
   }
+
+  /**
+   * @deprecated
+   */
   getWithDefault (key, def) {
     return this.model.findOne({_id: key})
       .then(doc => { return doc ? doc.value : def })

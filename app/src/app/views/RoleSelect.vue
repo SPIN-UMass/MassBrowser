@@ -11,21 +11,33 @@
                 h2 Relay Volunteer
                 p.description 
                   | You live in an uncensoring region and would like to volunteer to provide full internet access to restricted users.
-                a.relay.btn.btn-rounded.btn-lg I Volunteer
+                .relay.btn.btn-rounded.btn-lg(v-on:click='selectRelayRole') I Volunteer
         .col-xs-6
           .role.panel.panel-colorful.panel-success.text-center
             .panel-body
               h2 Proxy User
               p.description 
                 | You live in censoring region and your access to the Internet is restricted.
-              a.client.btn.btn-rounded.btn-lg(href='#/client/home') Take me to the Internet
+              .client.btn.btn-rounded.btn-lg(v-on:click='selectClientRole') Take me to the Internet
 </template>
 
 <script>
+  import KVStore from '~/utils/kvstore'
+  
   export default {
     data () {
       return {
   
+      }
+    },
+    methods: {
+      selectClientRole() {
+        KVStore.set('role', 'client')
+        this.$router.push('client-splash')
+      },
+      selectRelayRole() {
+        KVStore.set('role', 'relay')
+        this.$router.push('relay')
       }
     }
   }

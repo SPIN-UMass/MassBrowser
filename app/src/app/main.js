@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Electron from 'vue-electron'
 import Resource from 'vue-resource'
 import Router from 'vue-router'
+import VueMask from 'v-mask'
 
 import App from './App'
 import routes from './routes'
@@ -18,6 +19,7 @@ import 'assets/nifty/nifty.min.css'
 Vue.use(Electron)
 Vue.use(Resource)
 Vue.use(Router)
+Vue.use(VueMask)
 
 Vue.config.debug = true
 

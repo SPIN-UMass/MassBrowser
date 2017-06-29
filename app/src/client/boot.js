@@ -18,20 +18,27 @@ import config from '~/utils/config'
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
 
-export default function bootClient () {
+/**
+ * @param registrationCallback is called if the client requires registration, the callback is
+ * expected to return a promise which provides an invitation code used for registration
+ */
+export default function bootClient (registrationCallback) {
   KVStore.get('client', null)
   .then(client => {
     if (client) {
       return client
     } else {
-      let status = Status.info('Registering Client')
-      return httpAPI.registerClient('mmn')
-      .then(client => {
-        status.clear()
-
-        KVStore.set('client', {id: client.id, password: client.password})
-        return {id: client.id, password: client.password}
+      return registrationCallback()
+      .then(invitationCode => {
+        let status = Status.info('Registering Client')
+        return httpAPI.registerClient(invitationCode)
+        .then(client => {
+          status.clear()
+          KVStore.set('client', {id: client.id, password: client.password})
+          return {id: client.id, password: client.password}
+        })
       })
+      
     }
   })
   .then(client => {
@@ -76,7 +83,7 @@ export default function bootClient () {
       Status.error('Server authentication failed')
       err.log()
     } else if (err.is(errors.RequestError)) {
-      Status.error('Error occured in request to server ' + err.message)
+      Status.error('Error occured in request to server')
       err.logAndReport()
     } else if (err.is(errors.ServerError)) {
       Status.error('There is a problem with the server, please try again later')

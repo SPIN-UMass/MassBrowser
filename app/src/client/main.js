@@ -13,7 +13,7 @@ Raven
 //   console.log(status.text)
 // })
 
-bootClient()
+bootClient(() => new Promise((resolve, reject) => resolve('mmn')))
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
 })
