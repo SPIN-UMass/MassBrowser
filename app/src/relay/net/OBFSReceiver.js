@@ -15,7 +15,10 @@ export function runOBFSserver (publicIP, publicPort) {
       socket.authorized ? 'authorized' : 'unauthorized')
     // var dd=socket.pipe(tg.throttle())
     var my_up = up_limit.throttle()
+    my_up.on('error',(err)=>{})
     var my_down = down_limit.throttle()
+    my_down.on('error',(err)=>{})
+
     socket.pipe(my_up)
     my_down.pipe(socket)
 
