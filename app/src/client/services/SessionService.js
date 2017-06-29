@@ -32,6 +32,10 @@ class _SessionService extends EventEmitter {
     this._startSessionPoll()
 
     this.createSession()
+    .then(() => {debug("First session created")})
+    .catch(NoRelayAvailableError, err => {
+      warn("No relay available for first session")
+    })
   }
 
   getSessions () {
@@ -99,7 +103,7 @@ class _SessionService extends EventEmitter {
         .then(session => {
           if (!session) {
             warn('No relay was found for new session')
-            return reject(NoRelayAvailableError(new Error(), 'No relay is available for the requested session'))
+            return reject(new NoRelayAvailableError('No relay is available for the requested session'))
           }
 
           debug(`Session [${session.id}] created, waiting for relay to accept`)
@@ -127,7 +131,7 @@ class _SessionService extends EventEmitter {
             },
             reject: s => {
               warn(`Session [${session.id}] rejected by relay`)
-              reject(SessionRejectedError(new Error(), 'session was rejected by relay'))
+              reject(new SessionRejectedError('session was rejected by relay'))
             }
           }
         })

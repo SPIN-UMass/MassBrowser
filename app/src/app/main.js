@@ -3,6 +3,7 @@ import Electron from 'vue-electron'
 import Resource from 'vue-resource'
 import Router from 'vue-router'
 import VueMask from 'v-mask'
+import Promise from 'bluebird'
 
 import App from './App'
 import routes from './routes'
@@ -15,6 +16,9 @@ import Log from '~/utils/log'
 import 'assets/font-awesome/css/font-awesome.min.css'
 import 'assets/bootstrap/css/bootstrap.min.css'
 import 'assets/nifty/nifty.min.css'
+
+// Overwrite native Promise implementation with Bluebird's
+window.Promise = Promise;
 
 Vue.use(Electron)
 Vue.use(Resource)

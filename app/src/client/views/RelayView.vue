@@ -21,7 +21,7 @@
 
 <script>
   import SessionService from '~/client/services/SessionService'
-  import { Session } from '~/client/services/SessionService'
+  import { Session } from '~/client/net/Session'
 
   import SessionGraphWidget from '~/client/views/SessionGraphWidget'
 

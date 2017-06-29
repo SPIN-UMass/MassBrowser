@@ -50,6 +50,8 @@ class HttpClient {
       return response
     } else if (response.status >= 500) {
       throw new errors.ServerError(response.status, response.statusText, response, request)
+    } else if (response.status == 401 || response.status == 403) {
+      throw new errors.PermissionDeniedError(response.status, response.statusText, response, request)
     } else {
       throw new errors.RequestError(response.status, response.statusText, response, request)
     }

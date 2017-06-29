@@ -95,6 +95,12 @@ export class ServerError extends APIError {
   }
 }
 
+export class PermissionDeniedError extends RequestError {
+  constructor(statusCode, statusText, response, request) {
+    super(statusCode || 401, statusText, response, request)
+  }
+}
+
 /* ---------- Network Errors -------- */
 
 export class NetworkError extends BaseError {
@@ -111,20 +117,18 @@ export class RelayConnectionError extends NetworkError {
 
 /* ----------- Other Errors ----------- */
 
-export class SessionRejectedError extends AppError {
-  constructor(message) {
+export class ApplicationBootError extends AppError {
+  /**
+   * @param retriable if error is retriable then user can try to boot application again
+   */
+  constructor(message, retriable) {
     super(message)
+    this.retriable = retriable
   }
 }
 
-export class NoRelayAvailableError extends AppError {
-  constructor(message) {
-    super(message)
-  }
-}
+export class SessionRejectedError extends AppError {}
+export class NoRelayAvailableError extends AppError {}
+export class InvalidInvitationCodeError extends AppError {}
+export class CacheBrowserError extends AppError {}
 
-export class InvalidInvitationCodeError extends AppError {
-  constructor(message) {
-    super(message)
-  }
-}

@@ -16,7 +16,7 @@ export default [
   },
   {
     path: '/client',
-    name: 'client-index',
+    name: 'client',
     component: require('~/client/views/Index'),
     children: [
       {

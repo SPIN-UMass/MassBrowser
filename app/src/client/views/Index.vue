@@ -7,19 +7,18 @@
           li.active 
             a(href="#") home
           li
-            a(href="#") websites
+            a() websites
           li
-            a(href="#") settings
+            a() settings
     .y-content
       router-view
     .y-footer
       StatusWidget.status-bar
-      button.btn.btn-sm.btn-success Open Browser
+      button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" disabled) Open Browser
 </template>
 
 <script>
   import StatusWidget from './StatusWidget'
-  import bootClient from '~/client/boot'
 
   export default {
     data () {
@@ -30,7 +29,6 @@
       StatusWidget
     },
     created () {
-      bootClient()
     }
   }
 </script>

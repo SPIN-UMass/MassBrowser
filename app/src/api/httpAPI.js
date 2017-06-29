@@ -1,5 +1,6 @@
 import Promise from 'bluebird'
 import http from '~/utils/http'
+import { PermissionDeniedError, InvalidInvitationCodeError } from '~/utils/errors'
 
 const API_URL = 'https://yaler.co/api'
 const SESSION_URL = '/sessions'
@@ -99,15 +100,10 @@ class API {
         ip:undefined,
         'invitation_code':invitationCode
       }
-    ).then(r => {
-      if (r.status==201) {
-        return r.data
-      }
-      return null
-
-    }).catch((err)=>{
-      console.error(err)
-
+    )
+    .then(r => r.data)
+    .catch(PermissionDeniedError, err => {
+      throw new InvalidInvitationCodeError('Invalid Invitation Code')
     })
   }
 
