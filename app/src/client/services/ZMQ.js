@@ -54,7 +54,6 @@ class _ZMQListener {
     }).catch((err) => {
       if (this.validSessions.has(session)) {
         this.validSessions.delete(session)
-        _session.connection.end()
         this.onDisconnect(session)
 
       }
