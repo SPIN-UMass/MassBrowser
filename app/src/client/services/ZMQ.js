@@ -1,7 +1,7 @@
 /**
  * Created by milad on 6/28/17.
  */
-import Session from './SessionService'
+import { Session } from '~/client/net/Session'
 import ConnectionManager from '../net/ConnectionManager'
 
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5560'

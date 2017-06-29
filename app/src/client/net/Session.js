@@ -1,0 +1,54 @@
+/**
+ * Created by milad on 6/29/17.
+ */
+import { EventEmitter } from 'events'
+import Promise from 'bluebird'
+import ConnectionManager from '~/client/net/ConnectionManager'
+import RelayConnection from '~/client/net/RelayConnection'
+
+export class Session extends EventEmitter {
+  constructor (id, ip, port, desc, allowedCategories) {
+    super()
+
+    this.id = id
+    this.ip = ip
+    this.port = port
+    this.desc = desc
+    this.allowedCategories = new Set(allowedCategories)
+    this.connection = null
+
+    this.connected = false
+    this.connecting = false
+
+    this.bytesSent = 0
+    this.bytesReceived = 0
+  }
+
+  connect () {
+    var relay = new RelayConnection(this.ip, this.port, this.desc)
+    relay.id = this.id
+    relay.on('data', data => {
+      ConnectionManager.listener(data)
+      this.bytesReceived += data.length
+      this.emit('receive', data.length)
+    })
+
+    relay.on('send', data => {
+      this.bytesSent += data.length
+      this.emit('send', data.length)
+    })
+
+    relay.on('close', () => {
+      ConnectionManager.connection_close()
+    })
+
+    this.connected = true
+    return relay.connect()
+      .then(() => {
+        this.connection = relay
+        this.connected = true
+        this.connecting = false
+      })
+      .then(() => relay)
+  }
+}
