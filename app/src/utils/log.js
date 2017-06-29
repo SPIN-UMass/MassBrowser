@@ -13,7 +13,6 @@ class BrowserConsoleTransport extends winston.Transport {
 
   log (level, msg, meta, callback) {
     var handler = console[level]
-
     if (handler === undefined) {
       console.log(`${level}: ${msg}`)
     } else {

@@ -37,10 +37,4 @@
 </script>
 
 <style scoped>
-  .map-view {
-    margin-top: 30px;
-  }
-  .relay-view {
-    margin-top: 80px;
-  }
 </style>

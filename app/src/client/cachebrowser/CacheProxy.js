@@ -1,11 +1,14 @@
 /**
  * Created by milad on 5/29/17.
  */
-let tls = require('tls')
-let dns = require('dns')
-let fs = require('fs')
+import tls from 'tls'
+import dns from 'dns'
+import fs from 'fs'
+
 import CertificateManager from './CertManager'
 import config from '~/utils/config'
+import { debug, info, warn } from '~/utils/log'
+import { CacheBrowserError } from '~/utils/errors'
 
 class _CacheProxy {
 
@@ -28,15 +31,29 @@ class _CacheProxy {
 
   startCacheProxy () {
     return new Promise((resolve, reject) => {
+      if (this.proxyserver) {
+        warn("Cachebrowser proxy server already running")
+        resolve()
+      }
+      
+      let started = false
+      
       this.proxyserver = tls.createServer(this.proxyoptions, (socket) => {
         console.log('new Connection')
         this.handleCacheSocket(socket)
       })
 
       this.proxyserver.listen(config.cachebrowser.mitmPort, () => {
+        started = true
         CertificateManager.initializeCA().then(() => {
           resolve()
         })
+      })
+
+      this.proxyserver.on('error', e => {
+        if (!started) {
+          reject(new CacheBrowserError("Could not start CacheBrowser proxy server"))
+        }
       })
     })
   }

@@ -1,9 +1,16 @@
 // Should be before importing anything
 process.env.APP_INTERFACE = 'commandline'
 
+import Raven from '~/utils/raven'
+import Promise from 'bluebird'
+
 import bootClient from './boot'
 import Status from '~/utils/status'
-import Raven from '~/utils/raven'
+
+import { InvalidInvitationCodeError } from '~/utils/errors'
+import { error } from '~/utils/log'
+
+global.Promise = Promise
 
 Raven
   .smartConfig({'role': 'client'})
@@ -14,7 +21,12 @@ Raven
 // })
 
 const invitationToken = 'mmn'
+
 bootClient(() => new Promise((resolve, reject) => resolve(invitationToken)))
+.catch(InvalidInvitationCodeError, err => {
+  error("Invalid invitation code")
+  process.exit(1)
+})
 
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)

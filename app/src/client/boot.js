@@ -1,19 +1,27 @@
 /**
  * Created by milad on 4/11/17.
  */
+
+import crypto from 'crypto'
+
+import Raven from '~/utils/raven'
+import httpAPI from '~/api/httpAPI'
+import KVStore from '~/utils/kvstore'
+import Status from '~/utils/status'
+import config from '~/utils/config'
+import { error } from '~/utils/log'
+
+import SessionService from '~/client/services/SessionService'
+import CacheProxy from '~/client/cachebrowser/CacheProxy'
+
 import { startClientSocks } from './net/ClientSocks'
 import ConnectionManager from './net/ConnectionManager'
 import RelayConnection from './net/RelayConnection'
 import { RandomRelayAssigner } from './net/RelayAssigner'
-const crypto = require('crypto')
-import httpAPI from '~/api/httpAPI'
-import KVStore from '~/utils/kvstore'
-import * as errors from '~/utils/errors'
-import Status from '~/utils/status'
-import SessionService from '~/client/services/SessionService'
-import CacheProxy from '~/client/cachebrowser/CacheProxy'
-import Raven from '~/utils/raven'
-import config from '~/utils/config'
+
+import { AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
+         ServerError, CacheBrowserError, ApplicationBootError } from '~/utils/errors'
+
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
@@ -21,16 +29,21 @@ require('events').EventEmitter.prototype._maxListeners = 10000
 /**
  * @param registrationCallback is called if the client requires registration, the callback is
  * expected to return a promise which provides an invitation code used for registration
+ * 
+ * @throws ApplicationBootError
+ * @throws InvalidInvitationCodeError
  */
 export default function bootClient (registrationCallback) {
-  KVStore.get('client', null)
+  Status.clearAll()
+
+  return KVStore.get('client', null)
   .then(client => {
     if (client) {
       return client
     } else {
       return registrationCallback()
       .then(invitationCode => {
-        let status = Status.info(`Registering Client with invitation token ${invitationCode}`)
+        let status = Status.info(`Registering Client`)
         return httpAPI.registerClient(invitationCode)
         .then(client => {
           status.clear()
@@ -61,33 +74,47 @@ export default function bootClient (registrationCallback) {
     return SessionService.start()
   })
   .then(() => {
-    let status = Status.info('Starting CacheBrowser server')
+    let status = Status.info('Starting cachebrowser server')
     return CacheProxy.startCacheProxy()
       .then(() => { status.clear() })
   })
   .then(() => {
     let status = Status.info('Starting SOCKS server')
     return startClientSocks('127.0.0.1', config.socksPort)
-    .then(() => { status.clear() })
+      .then(() => { status.clear() })
   })
-  .catch(err => {
-    Status.clearAll()
-
-    if (!err.smart) {
-      console.log('Unknown error occured:')
-      console.error(err)
-    } else if (err.is(errors.NetworkError)) {
-      Status.error('Could not connect to the server')
-      err.log()
-    } else if (err.is(errors.AuthenticationError)) {
-      Status.error('Server authentication failed')
-      err.log()
-    } else if (err.is(errors.RequestError)) {
-      Status.error('Error occured in request to server')
+  .catch(AuthenticationError, err => {
+    err.logAndReport()
+    throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
+  })
+  .catch(NetworkError, err => {
+    err.log()
+    throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
+  })
+  .catch(RequestError, err => {
+    err.logAndReport()
+    throw new ApplicationBootError('Error occured while booting application', true)
+  })
+  .catch(CacheBrowserError, err => {
+    err.logAndReport()
+    throw new ApplicationBootError('Failed to start the CacheBrowser proxy server', true)
+  })
+  .catch(ServerError, err => {
+    err.log()
+    throw new ApplicationBootError('There is a problem with the server, please try again later', true)
+  })
+  .catch(err => !(err instanceof ApplicationBootError), err => {
+    // console.warn(handledErrors.reduce((o, a) => o || err instanceof a, false))
+    if (err.smart) {
       err.logAndReport()
-    } else if (err.is(errors.ServerError)) {
-      Status.error('There is a problem with the server, please try again later')
-      err.log()
+    } else {
+      error(err)
+      Raven.captureException(err)
     }
+
+    throw new ApplicationBootError('Failed to start Application')
   })
 }
+
+const handledErrors = [ApplicationBootError, -AuthenticationError, NetworkError, RequestError, CacheBrowserError, 
+                       ServerError, InvalidInvitationCodeError]
