@@ -125,7 +125,7 @@ class _ConnectionManager {
     debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
 
     if (!this.relayAssigner) {
-      throw errors.AppError(new Error(), 'No Relay Assigner has been set for the ConnectionManager')
+      throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
     }
 
     this.ClientConnections[conid] = connection

@@ -1,5 +1,5 @@
 import config from '~/utils/config'
-import { warn } from '~/utils/log'
+import { warn, info } from '~/utils/log'
 
 export const Raven = require('raven-js')
 export const RavenVue = require('raven-js/plugins/vue')
@@ -27,5 +27,7 @@ Raven.smartConfig = function (options) {
     }
   }
 
-  return Raven.config(config.dsn, options)
+  info(`Using sentry with dsn '${config.sentry.dsn}'`)
+
+  return Raven.config(config.sentry.dsn, options)
 }

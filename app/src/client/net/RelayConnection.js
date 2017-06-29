@@ -26,8 +26,8 @@ export default class RelayConnection extends EventEmitter {
       var socket = net.connect(this.relayport, this.relayip)
 
       const onFail = (err) => {
-        debug(`Relay ${this.id} connection error: ${err.messgage}`)
-        reject(RelayConnectionError(err))
+        warn(`Relay ${this.id} connection error: ${err.message}`)
+        reject(new RelayConnectionError(err))
       }
 
       const onSuccess = () => {

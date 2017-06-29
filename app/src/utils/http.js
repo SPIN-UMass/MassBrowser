@@ -49,14 +49,14 @@ class HttpClient {
     if (response.status >= 200 && response.status < 300) {
       return response
     } else if (response.status >= 500) {
-      throw errors.ServerError(new Error(), response.status, response.statusText, response, request)
+      throw new errors.ServerError(response.status, response.statusText, response, request)
     } else {
-      throw errors.RequestError(new Error(), response.status, response.statusText, response, request)
+      throw new errors.RequestError(response.status, response.statusText, response, request)
     }
   }
 
   handleNetworkError (request, err) {
-    throw errors.NetworkError(err)
+    throw new errors.NetworkError(err)
   }
 }
 

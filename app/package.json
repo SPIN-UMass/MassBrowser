@@ -10,7 +10,7 @@
     },
     "sentry": {
       "version": "v0.0.1-6_5681c",
-      "enabled": false
+      "enabled": true
     },
     "dev": {
       "sentry": {
@@ -39,11 +39,13 @@
     "node-schedule": "^1.2.1",
     "raven-js": "^3.15.0",
     "throttle": "^1.0.3",
+    "v-mask": "^1.2.0",
     "vs-stun": "0.0.7",
     "vue": "^2.1.10",
     "vue-electron": "^1.0.6",
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.2",
+    "vue-spinner": "^1.0.2",
     "vuetify": "^0.10.4",
     "vuex": "^2.1.1",
     "winston": "^2.3.1",

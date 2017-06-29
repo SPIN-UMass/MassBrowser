@@ -1,4 +1,4 @@
-.sentry.json
+I.sentry.json
 .release.json
 
 
@@ -19,5 +19,8 @@ thumbs.db
 !.gitkeep
 .vscode
 .idea
+
+yarn.lock
+package-lock.json
 
 db.json

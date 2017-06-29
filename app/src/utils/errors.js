@@ -5,127 +5,126 @@ function sanitizeUrl (url) {
   return url.replace(regex, '$1[id]$2')
 }
 
-export function BaseError (error, message) {
-  // const error = new Error(message)
-  const errorMessage = error.message
+/**
+ * Note: All function definitions for errors must go in the constructor not in the prototype
+ */
 
-  const subclassNames = []
-
-  error.smart = true
-
-  error.log = function () {
-    console.error(error)
-  }
-
-  error.report = function () {
-    // Raven.captureException(error)
-  }
-
-  error.logAndReport = function () {
-    error.log()
-    error.report()
-  }
-
-  error.is = function (cls) {
-    return subclassNames.indexOf(cls.name) !== -1
-  }
-
-  error._addSubclass = function (name) {
-    error.name = name
-    subclassNames.push(name)
-    if (message) {
-      error.message = `${name} - ${message}`
-    } else if (errorMessage && !errorMessage.startsWith('\n')) {
-      error.message = `${name} - ${errorMessage}`
-    } else if (errorMessage) {
-      error.message = `${name} ${errorMessage}`
-    } else {
-      error.message = `${name}`
+export class BaseError {
+  constructor(message) {
+    this.message = message
+    this.smart = true
+    this.name = this.constructor.name
+    
+    var err = new Error(message)
+    // This messes up the stack trace file locations in the console output, but 
+    // doesn't effect sentry logs
+    // err.name = this.constructor.name
+    this.stack = err.stack
+    
+    this.log = function() {
+      console.error(this.stack)
     }
-  }
 
-  error._addSubclass('BaseError')
+    this.report = function() {
+      Raven.captureException(this)
+    }
 
-  return error
+    this.logAndReport = function() {
+      this.log()
+      this.report()
+    }
+
+    this.is = function (cls) {
+      return this instanceof cls
+    }
+  }  
 }
+// Inherit from Error, this is important both for Raven and bluebird error filtering
+BaseError.prototype = Object.create(Error.prototype)
 
-export function AppError (error, message) {
-  error = BaseError(error, message)
-  error._addSubclass('AppError')
-  return error
+export class AppError extends BaseError {
+  constructor(message) {
+    super(message)
+  }
 }
 
 /* ----------- API Errors --------- */
 
-export function APIError (error, statusCode, statusText, response, request) {
-  var url = request ? `(${sanitizeUrl(request.url)})` : ''
+export class APIError extends BaseError {
+  constructor(statusCode, statusText, response, request) {
+    var url = request ? `(${sanitizeUrl(request.url)})` : ''
+    super(`${statusCode} ${statusText} ${url}`)
+    
+    this.statusCode = statusCode
+    this.statusText = statusText
+    this.response = response
+    this.request = request
+    this.url = request.url
 
-  error = BaseError(error, `${statusCode} ${statusText} ${url}`)
-  error._addSubclass('APIError')
-
-  error.statusCode = statusCode
-  error.statusText = statusText
-  error.response = response
-  error.url = request.url
-
-  error.report = function () {
-    Raven.captureException(this.error, {
-      extra: {
-        'http:response:status': this.statusCode,
-        'http:response:statusText': this.message,
-        'http:response:data': this.response.data,
-        'http:response:headers': this.response.headers,
-        'http:request:url': this.request.url,
-        'http:request:data': this.request.data
-      }
-    })
+    this.report = function() {
+      
+      Raven.captureException(this, {
+        extra: {
+          'http:response:status': this.statusCode,
+          'http:response:statusText': this.message,
+          'http:response:data': this.response.data,
+          'http:response:headers': this.response.headers,
+          'http:request:url': this.url,
+          'http:request:data': this.request.data
+        }
+      })
+    }
   }
-
-  return error
 }
 
-export function AuthenticationError (error, message) {
-  error = APIError(error, 401, message)
-  error._addSubclass('AuthenticationError')
-  return error
+export class AuthenticationError extends APIError {
+  constructor(message) {
+    super(401, message)
+  }
 }
 
-export function RequestError (error, statusCode, statusText, response, request) {
-  error = APIError(error, statusCode || 400, statusText, response, request)
-  error._addSubclass('RequestError')
-  return error
+export class RequestError extends APIError {
+  constructor(statusCode, statusText, response, request) {
+    super(statusCode || 400, statusText, response, request)
+  }
 }
 
-export function ServerError (error, statusCode, statusText, response, request) {
-  error = APIError(error, statusCode || 500, statusText, response, request)
-  error._addSubclass('ServerError')
-  return error
+export class ServerError extends APIError {
+  constructor(statusCode, statusText, response, request) {
+    super(statusCode || 500, statusText, response, request)
+  }
 }
 
 /* ---------- Network Errors -------- */
 
-export function NetworkError (error, message) {
-  error = BaseError(error, message)
-  error._addSubclass('NetworkError')
-  return error
+export class NetworkError extends BaseError {
+  constructor(message) {
+    super(message)
+  }
 }
 
-export function RelayConnectionError (error, message) {
-  error = NetworkError(error, message)
-  error._addSubclass('RelayConnectionError')
-  return error
+export class RelayConnectionError extends NetworkError {
+  constructor(message) {
+    super(message)
+  }
 }
 
 /* ----------- Other Errors ----------- */
 
-export function SessionRejectedError (error, message) {
-  error = AppError(error, message)
-  error._addSubclass('SessionRejectedError')
-  return error
+export class SessionRejectedError extends AppError {
+  constructor(message) {
+    super(message)
+  }
 }
 
-export function NoRelayAvailableError (error, message) {
-  error = AppError(error, message)
-  error._addSubclass('NoRelayAvailableError')
-  return error
+export class NoRelayAvailableError extends AppError {
+  constructor(message) {
+    super(message)
+  }
+}
+
+export class InvalidInvitationCodeError extends APPError {
+  constructor(message) {
+    super(message)
+  }
 }
