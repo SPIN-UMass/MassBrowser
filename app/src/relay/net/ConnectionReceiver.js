@@ -123,20 +123,19 @@ export class ConnectionReceiver {
           this.newConnection(ip, port, lastconid)
         }
       }
-    }
-    if (CMD === 'D') {
+    } else if (CMD === 'D') {
       if (lastconid in this.connections) {
         this.connections[lastconid].write(data)
       }
-    }
-    if (CMD === 'C') {
+    } else if (CMD === 'C') {
       if (lastconid in this.connections) {
         this.connections[lastconid].end()
       }
-    }
-    console.log('UNKOWN command received')
-    if (lastconid in this.connections) {
-      this.connections[lastconid].end()
+    } else {
+      console.log('UNKOWN command received')
+      if (lastconid in this.connections) {
+        this.connections[lastconid].end()
+      }
     }
   }
 
