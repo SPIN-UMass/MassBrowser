@@ -24,6 +24,7 @@ class _ZMQListener {
 
   onRequest (data) {
     let session = JSON.parse(data.toString())
+    console.log(session)
     var desc = {
       'readkey': Buffer.from(session.read_key, 'base64'),
       'readiv': Buffer.from(session.read_iv, 'base64'),
@@ -31,6 +32,7 @@ class _ZMQListener {
       'writeiv': Buffer.from(session.write_iv, 'base64'),
       'token': Buffer.from(session.token, 'base64')
     }
+
     var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
     ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
       this.onResponse(session)
