@@ -61,11 +61,16 @@ class _ZMQListener {
   }
 
   onDisconnect (session) {
+    session['is_reachable'] = false
+
     console.log(session, 'is not reachable')
+    this.results.send(session)
   }
 
   onConnect (session) {
+    session['is_reachable'] = true
     console.log(session, 'is reachable')
+    this.results.send(session)
   }
 
 }
