@@ -38,20 +38,26 @@ class _ZMQListener {
     _session.connect().then(() => {
       console.log('Session Connected')
       ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
-        if (this.validSessions.has(session))
-        {this.validSessions.delete(session)
-        _session.connection.end()
-        this.onConnect(session)
+        if (this.validSessions.has(session)) {
+          this.validSessions.delete(session)
+          _session.connection.end()
+          this.onConnect(session)
         }
       }, () => {
-        if (this.validSessions.has(session))
-        {
+        if (this.validSessions.has(session)) {
           this.validSessions.delete(session)
           _session.connection.end()
           this.onDisconnect(session)
 
         }
       })
+    }).catch((err) => {
+      if (this.validSessions.has(session)) {
+        this.validSessions.delete(session)
+        _session.connection.end()
+        this.onDisconnect(session)
+
+      }
     })
   }
 
