@@ -123,7 +123,7 @@ export class NoRelayAvailableError extends AppError {
   }
 }
 
-export class InvalidInvitationCodeError extends APPError {
+export class InvalidInvitationCodeError extends AppError {
   constructor(message) {
     super(message)
   }

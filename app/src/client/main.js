@@ -13,7 +13,9 @@ Raven
 //   console.log(status.text)
 // })
 
-bootClient(() => new Promise((resolve, reject) => resolve('mmn')))
+const invitationToken = 'mmn'
+bootClient(() => new Promise((resolve, reject) => resolve(invitationToken)))
+
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
 })

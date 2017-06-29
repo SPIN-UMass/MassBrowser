@@ -30,7 +30,7 @@ export default function bootClient (registrationCallback) {
     } else {
       return registrationCallback()
       .then(invitationCode => {
-        let status = Status.info('Registering Client')
+        let status = Status.info(`Registering Client with invitation token ${invitationCode}`)
         return httpAPI.registerClient(invitationCode)
         .then(client => {
           status.clear()
