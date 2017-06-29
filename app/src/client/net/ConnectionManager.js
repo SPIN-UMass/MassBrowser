@@ -114,6 +114,14 @@ class _ConnectionManager {
     console.log('closed')
   }
 
+  onRelayClose (relay) {
+    Object.keys(this.Connectionmaps).forEach((key) => {
+      if (this.Connectionmaps[key] === relay) {
+        this.ClientConnections[key].end()
+      }
+    })
+  }
+
   writer (data, conid) {
     // console.log('DATA SEND', data, conid);
     this.Connectionmaps[conid].write(conid, 'D', data)

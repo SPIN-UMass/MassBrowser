@@ -11,7 +11,8 @@ class _ZMQListener {
   constructor () {
     this.requests = zeromq.socket('pull')
     this.results = zeromq.socket('push')
-  }
+    this.validSessions=new Set()
+
 
   connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
@@ -32,14 +33,24 @@ class _ZMQListener {
       'writeiv': Buffer.from(session.write_iv, 'base64'),
       'token': Buffer.from(session.token, 'base64')
     }
-
+    this.validSessions.add(session)
     var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
     _session.connect().then(() => {
       console.log('Session Connected')
       ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
+        if (this.validSessions.has(session))
+        {this.validSessions.delete(session)
+        _session.connection.end()
         this.onConnect(session)
+        }
       }, () => {
-        this.onDisconnect(session)
+        if (this.validSessions.has(session))
+        {
+          this.validSessions.delete(session)
+          _session.connection.end()
+          this.onDisconnect(session)
+
+        }
       })
     })
   }

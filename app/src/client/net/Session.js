@@ -39,7 +39,8 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      ConnectionManager.connection_close()
+      ConnectionManager.onRelayClose(relay)
+
     })
 
     this.connected = true
