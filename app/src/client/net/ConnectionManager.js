@@ -158,18 +158,15 @@ class _ConnectionManager {
     })
   }
 
-  testConnect (dstip, dstport, relay, onConnect,onDisconnect) {
+  testConnect (dstip, dstport, relay, onConnect, onDisconnect) {
+    console.log('I AM HEREB')
     var conid = crypto.randomBytes(2).readUInt16BE()
-
+    console.log('I AM HERE')
     debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
-
-    if (!this.relayAssigner) {
-      throw errors.AppError(new Error(), 'No Relay Assigner has been set for the ConnectionManager')
-    }
-
+    this.ClientConnections[conid] = {}
     this.ClientConnections[conid].relayConnected = () => { onConnect() }
     this.ClientConnections[conid].end = () => { onDisconnect() }
-
+    console.log('I AM GERE')
     return new Promise((resolve, reject) => {
       debug(`Relay ${relay} assigned for connection`)
       this.Connectionmaps[conid] = relay
