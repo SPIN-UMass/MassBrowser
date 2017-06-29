@@ -1,7 +1,7 @@
 /**
  * Created by milad on 6/28/17.
  */
-let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5557'
+let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5560'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
 const zeromq= require('zeromq')
 class _ZMQListener {
