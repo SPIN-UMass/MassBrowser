@@ -33,23 +33,23 @@ export default class RelayConnection extends EventEmitter {
       const onSuccess = () => {
         debug(`Relay ${this.id} connected`)
 
-          // Remove connection failure callback so it isn't called
-          // in case of a later error in the connection
+        // Remove connection failure callback so it isn't called
+        // in case of a later error in the connection
         socket.removeListener('error', onFail)
 
         resolve(socket)
       }
 
       /* socket.setTimeout(config.relayConnectionTimeout, () => {
-        socket.end()
-        onFail(new Error('Connection Timeout'))
-      }) */
+       socket.end()
+       onFail(new Error('Connection Timeout'))
+       }) */
 
       socket.once('connect', onSuccess)
       socket.once('error', onFail)
     })
-    .then((socket) => this._initSocket(socket))
-    .then((socket) => this._initRelay(socket))
+      .then((socket) => this._initSocket(socket))
+      .then((socket) => this._initRelay(socket))
   }
 
   _initSocket (socket) {
@@ -85,6 +85,10 @@ export default class RelayConnection extends EventEmitter {
     socket.write(Buffer.concat(padarr))
 
     return socket
+  }
+
+  end () {
+    this.socket.end()
   }
 
   write (conid, command, data) {
