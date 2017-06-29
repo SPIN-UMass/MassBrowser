@@ -20,7 +20,7 @@ class _ZMQListener {
   }
 
   onRequest (data) {
-    console.log(data)
+    console.log(data.toString())
   }
 
 }
