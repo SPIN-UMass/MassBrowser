@@ -61,10 +61,12 @@ class _ConnectionManager {
       this.cleanClose(lastconid)
     }
   }
+
   cleanClose (conid) {
     this.ClientConnections[conid].end()
     // delete this.ClientConnections[conid]
   }
+
   listener (data) {
     // console.log('DATA RECEIVED', data);
     while (data) {
@@ -151,11 +153,33 @@ class _ConnectionManager {
           resolve('Assigned')
         }, (err) => {
           delete this.ClientConnections[conid]
-          reject("Don't Proxy")
+          reject('Don\'t Proxy')
         })
     })
   }
 
+  testConnect (dstip, dstport, relay, onConnect,onDisconnect) {
+    var conid = crypto.randomBytes(2).readUInt16BE()
+
+    debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
+
+    if (!this.relayAssigner) {
+      throw errors.AppError(new Error(), 'No Relay Assigner has been set for the ConnectionManager')
+    }
+
+    this.ClientConnections[conid].relayConnected = () => { onConnect() }
+    this.ClientConnections[conid].end = () => { onDisconnect() }
+
+    return new Promise((resolve, reject) => {
+      debug(`Relay ${relay} assigned for connection`)
+      this.Connectionmaps[conid] = relay
+      var cr = String(dstip) + ':' + String(dstport)
+      console.log('sendsize:', cr.length, cr)
+      this.Connectionmaps[conid].write(conid, 'N', Buffer(cr))
+
+      resolve('Assigned')
+    })
+  }
 }
 
 var ConnectionManager = new _ConnectionManager()

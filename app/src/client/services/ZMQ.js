@@ -1,9 +1,12 @@
 /**
  * Created by milad on 6/28/17.
  */
+import Session from './SessionService'
+import ConnectionManager from '../net/ConnectionManager'
+
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5560'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
-const zeromq= require('zeromq')
+const zeromq = require('zeromq')
 class _ZMQListener {
   constructor () {
     this.requests = zeromq.socket('pull')
@@ -20,7 +23,30 @@ class _ZMQListener {
   }
 
   onRequest (data) {
-    console.log(data.toString())
+    let session = JSON.parse(data.toString())
+    var desc = {
+      'readkey': Buffer.from(session.read_key, 'base64'),
+      'readiv': Buffer.from(session.read_iv, 'base64'),
+      'writekey': Buffer.from(session.write_key, 'base64'),
+      'writeiv': Buffer.from(session.write_iv, 'base64'),
+      'token': Buffer.from(session.token, 'base64')
+    }
+    var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
+    ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
+      this.onResponse(session)
+    }, () => {
+      this.onDisconnect(session)
+    })
+
+  }
+
+  onDisconnect (session) {
+    console.log(session, 'is not reachable')
+  }
+
+  onConnect (session) {
+    console.log(session, 'is reachable')
+
   }
 
 }
