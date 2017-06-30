@@ -6,6 +6,7 @@ const API_URL = 'https://yaler.co/api'
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
 
+
 class API {
   constructor () {
     this.authToken = null
@@ -24,31 +25,31 @@ class API {
   }
 
   getWebsites (modifiedSince) {
-    return http.get(API_URL + '/websites?modified_since=' + modifiedSince)
+    return http.get(API_URL + '/websites?modified_since=' + modifiedSince.toISOString())
       .then(response => response.data)
       .then(json => json.results)
   }
 
   getDomains (modifiedSince) {
-    return http.get(API_URL + '/domains?modified_since=' + modifiedSince)
+    return http.get(API_URL + '/domains?modified_since=' + modifiedSince.toISOString())
       .then(response => response.data)
       .then(json => json.results)
   }
 
   getCategories (modifiedSince) {
-    return http.get(API_URL + '/categories?modified_since=' + modifiedSince)
+    return http.get(API_URL + '/categories?modified_since=' + modifiedSince.toISOString())
       .then(response => response.data)
       .then(json => json.results)
   }
 
   getRegions (modifiedSince) {
-    return http.get(API_URL + '/regions?modified_since=' + modifiedSince)
+    return http.get(API_URL + '/regions?modified_since=' + modifiedSince.toISOString())
       .then(response => response.data)
       .then(json => json.results)
   }
 
   getCDNs (modifiedSince) {
-    return http.get(API_URL + '/cdns?modified_since=' + modifiedSince)
+    return http.get(API_URL + '/cdns?modified_since=' + modifiedSince.toISOString())
       .then(response => response.data)
       .then(json => json.results)
   }

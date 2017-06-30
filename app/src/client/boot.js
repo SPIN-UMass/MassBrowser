@@ -64,12 +64,12 @@ export default function bootClient (registrationCallback) {
   .then(client => {
     let status = Status.info('Authenticating Client')
     return httpAPI.authenticate(client.id, client.password)
-    .then(() => { status.clear() })
+    .then(status.clear)
   })
   .then(() => {
     let status = Status.info('Server connection established')
     return httpAPI.clientUp()
-    .then(() => { status.clear() })
+    .then(status.clear)
   })
   .then(() => {
     return SessionService.start()
@@ -77,12 +77,12 @@ export default function bootClient (registrationCallback) {
   .then(() => {
     let status = Status.info('Starting cachebrowser server')
     return CacheProxy.startCacheProxy()
-      .then(() => { status.clear() })
+      .then(status.clear)
   })
   .then(() => {
     let status = Status.info('Starting SOCKS server')
     return startClientSocks('127.0.0.1', config.socksPort)
-      .then(() => { status.clear() })
+      .then(status.clear)
   })
   .then(() => {
     /// Only sync database in boot if it is the first time booting
@@ -94,6 +94,7 @@ export default function bootClient (registrationCallback) {
         debug("It is first boot, syncing database")
         let status = Status.info('Syncing database')
         return SyncService.syncAll()
+        .then(status.clear)
       }
     })
   })
