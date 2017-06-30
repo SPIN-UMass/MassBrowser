@@ -4,17 +4,18 @@
       h1 Yaler
       .y-nav
         ul
-          li.active 
-            a(href="#") home
-          li
-            a() websites
-          li
+          li(:class="{active: currentTab==='client-home'}")
+            router-link(to='/client') home
+          li(:class="{active: currentTab==='client-websites'}")
+            router-link(to='/client/websites') websites
+            //- .span(v-on:click="$router.push('client-websites')") websites
+          li(:class="{active: currentTab==='client-settings'}")
             a() settings
     .y-content
       router-view
     .y-footer
       StatusWidget.status-bar
-      button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" disabled) Open Browser
+      button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
 </template>
 
 <script>
@@ -23,12 +24,17 @@
   export default {
     data () {
       return {
+        currentTab: ''
       }
     },
     components: {
       StatusWidget
     },
     created () {
+      this.currentTab = this.$router.currentRoute.name
+      this.$router.afterEach((to, from) => {
+        this.currentTab = to.name
+      })
     }
   }
 </script>

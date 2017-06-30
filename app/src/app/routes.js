@@ -21,7 +21,13 @@ export default [
     children: [
       {
         path: '/',
-        component: require('~/client/views/Home')
+        component: require('~/client/views/Home'),
+        name: 'client-home'
+      },
+      {
+        path: '/client/websites',
+        component: require('~/client/views/WebsitesView'),
+        name: 'client-websites'
       }
     ]
   },

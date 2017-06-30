@@ -9,9 +9,10 @@ import httpAPI from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
 import Status from '~/utils/status'
 import config from '~/utils/config'
-import { error } from '~/utils/log'
+import { debug, error } from '~/utils/log'
 
 import SessionService from '~/client/services/SessionService'
+import SyncService from '~/client/services/SyncService'
 import CacheProxy from '~/client/cachebrowser/CacheProxy'
 
 import { startClientSocks } from './net/ClientSocks'
@@ -82,6 +83,19 @@ export default function bootClient (registrationCallback) {
     let status = Status.info('Starting SOCKS server')
     return startClientSocks('127.0.0.1', config.socksPort)
       .then(() => { status.clear() })
+  })
+  .then(() => {
+    /// Only sync database in boot if it is the first time booting
+    /// otherwise sync will after the client has started to avoid
+    /// having delay on each run
+    SyncService.isFirstSync()
+    .then(firstSync => {
+      if (firstSync) {
+        debug("It is first boot, syncing database")
+        let status = Status.info('Syncing database')
+        return SyncService.syncAll()
+      }
+    })
   })
   .catch(AuthenticationError, err => {
     err.logAndReport()

@@ -40,9 +40,18 @@ class _SyncService {
     return this._sync('cdns', this._cdnSync)
   }
 
+  /**
+   * @returns a Promise which will resolve with a boolean, which is true
+   * if the local database is empty
+   */
+  isFirstSync() {
+    return Website.find()
+    .then(websites => websites.length === 0)
+  }
+
   _getLastSyncTime (entity) {
     return KVStore.get('last-sync-' + entity)
-      .then(value => value ? new Date(value) : new Date())
+      .then(value => value ? new Date(value) : new Date("1993"))
   }
 
   _updateLastSyncTime (entity, syncTime) {
@@ -54,15 +63,16 @@ class _SyncService {
       this._getLastSyncTime(entity),
       API.getLastModificationTime(entity)
     ])
-
+    
     return getTimes
       .then(([lastSyncTime, lastModifiedTime]) => {
+        console.log([lastSyncTime, lastModifiedTime])
         if (lastModifiedTime > lastSyncTime) {
           console.debug(entity + ' sync is required, fetching modified items')
 
           return syncFunction.call(this, lastSyncTime)
             .then(() => {
-              this._updateLastSyncTime(entity, lastModifiedTime)
+              return this._updateLastSyncTime(entity, lastModifiedTime)
             })
         }
 

@@ -45,7 +45,6 @@
     },
     created () {
       this.invitationCodeMask = 'N'.repeat(INVITATION_CODE_LENGTH/2) + DELIM + 'N'.repeat(INVITATION_CODE_LENGTH/2)
-
       this.bootClient()
     },
     watch: {
@@ -74,7 +73,7 @@
 
         bootClient(promptInvitationCode).
         then(() => {
-          this.$router.push('client')
+          this.$router.push({path: '/client'})
         })
         .catch(InvalidInvitationCodeError, err => {
           this.errorMessage = "Invalid invitation code"
