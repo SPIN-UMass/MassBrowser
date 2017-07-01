@@ -88,7 +88,7 @@ export default function bootClient (registrationCallback) {
     /// Only sync database in boot if it is the first time booting
     /// otherwise sync will after the client has started to avoid
     /// having delay on each run
-    SyncService.isFirstSync()
+    return SyncService.isFirstSync()
     .then(firstSync => {
       if (firstSync) {
         debug("It is first boot, syncing database")

@@ -19,7 +19,6 @@ import { Domain, Category } from '~/client/models'
 class _SessionService extends EventEmitter {
   constructor () {
     super()
-    this.waitingSessions = 0
 
     this.sessions = []
     this.processedSessions = {}
@@ -31,7 +30,7 @@ class _SessionService extends EventEmitter {
     console.log('Starting Session Services')
     this._startSessionPoll()
 
-    this.createSession()
+    return this.createSession()
     .then(() => {debug("First session created")})
     .catch(NoRelayAvailableError, err => {
       warn("No relay available for first session")
@@ -88,7 +87,6 @@ class _SessionService extends EventEmitter {
    */
   createSession (categories) {
     var categoryIDs = []
-    this.waitingSessions += 1
     if (categories !== undefined) {
       if (!Array.isArray(categories)) {
         categories = [categories]
@@ -125,7 +123,7 @@ class _SessionService extends EventEmitter {
                   debug(`Session [${session.id}] connection to relay failed`)
                   reject(err)
 
-                  // Report session failure to server
+                  // // Report session failure to server
                   httpAPI.updateSessionStatus(session.id, 'failed')
                 })
             },
@@ -160,7 +158,6 @@ class _SessionService extends EventEmitter {
       debug(`Retrieved ${sessions.length} sessions (valid: ${validSessions.length}  stale: ${staleCount}  duplicate: ${duplicateCount})`)
 
       validSessions.forEach((session) => {
-        this.waitingSessions -= 1
         var desc = {
           'readkey': Buffer.from(session.read_key, 'base64'),
           'readiv': Buffer.from(session.read_iv, 'base64'),
@@ -189,7 +186,7 @@ class _SessionService extends EventEmitter {
     // httpAPI.getSessions()
     //       .then(ses => this._handleRetrievedSessions(ses))
     schedule.scheduleJob('*/2 * * * * *', () => {
-      if (this.waitingSessions > 0) {
+      if (Object.keys(this.pendingSessions).length > 0) {
         httpAPI.getSessions()
           .then(ses => this._handleRetrievedSessions(ses))
       }
