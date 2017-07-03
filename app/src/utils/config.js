@@ -1,6 +1,16 @@
 import packageJSON from 'package.json'
 
 const config = {
+  client: {
+    socksPort: 7080,
+    cachebrowser: {
+      mitmPort: 6425
+    }
+  },
+  relay: {
+    natEnabled: true,
+    port: 8040   /* Only used if natEnabled is false */
+  },
   sentry: {
     enabled: true,
     version: '',

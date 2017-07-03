@@ -81,7 +81,7 @@ export default function bootClient (registrationCallback) {
   })
   .then(() => {
     let status = Status.info('Starting SOCKS server')
-    return startClientSocks('127.0.0.1', config.socksPort)
+    return startClientSocks('127.0.0.1', config.client.socksPort)
       .then(status.clear)
   })
   .then(() => {

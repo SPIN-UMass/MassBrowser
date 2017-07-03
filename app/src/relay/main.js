@@ -10,6 +10,8 @@ import httpAPI from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
 import * as errors from '~/utils/errors'
 import StatusReporter from './net/StatusReporter'
+import config from '~/utils/config'
+
 var stunserver = {
   host: 'stun.l.google.com',
   port: 19302
@@ -29,30 +31,49 @@ KVStore.get('relay', null)
     }
   })
   .then(relay => {
-    console.log('Authenticating Relay')
+    console.log(`Authenticating Relay ${relay.id}`)
     return httpAPI.authenticate(relay.id, relay.password)
   })
   .then(() => {
-    console.log('Connecting to Connectivity server')
-    return ConnectivityConnection.connect()
+      console.log('Connecting to Connectivity server')
+      return ConnectivityConnection.connect()
+      .then(data => {
+        StatusReporter.startRoutine()
+        StatusReporter.localip = data[0]
+        StatusReporter.localport = data[1]
+        StatusReporter.remoteport = data[3]
+        StatusReporter.remoteip = data[2]
+
+        if (config.relay.natEnabled) {
+          return {
+            localIP: StatusReporter.localip,
+            localPort: StatusReporter.localport,
+            remoteIP: StatusReporter.remoteip,
+            remotePort: StatusReporter.remoteport
+          }
+        } else {
+          return {
+            localIP: '0.0.0.0', 
+            localPort: config.relay.port, 
+            remoteIP: StatusReporter.remoteip, 
+            remotePort: config.relay.port}
+        }
+      })
   })
-  .then(data => {
-    StatusReporter.startRoutine()
+  .then(address => {
     console.log('Starting Relay')
-    StatusReporter.localip = data[0]
-    StatusReporter.localport = data[1]
-    StatusReporter.remoteport = data[3]
-    StatusReporter.remoteip = data[2]
-    console.log(data)
-    return runOBFSserver(StatusReporter.localip, StatusReporter.localport)
+    return runOBFSserver(address.localIP, address.localPort)
+    .then(() => address)
   })
-  .then(() => {
+  .then(address => {
     console.log('Connecting to WebSocket server')
     return ServerConnection.connect(httpAPI.getSessionID())
+    .then(() => address)
   })
-  .then(() => {
+  .then(address => {
     console.log('Server connection established')
-    return ServerConnection.relayUp(StatusReporter.remoteip,StatusReporter.remoteport)
+    console.log(`Reporting address to server: IP=${address.remoteIP} Port: ${address.remotePort}`)
+    return ServerConnection.relayUp(address.remoteIP, address.remotePort)
   })
   .catch(err => {
     if (err instanceof errors.NetworkError) {

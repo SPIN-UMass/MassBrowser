@@ -43,7 +43,7 @@ class _CacheProxy {
         this.handleCacheSocket(socket)
       })
 
-      this.proxyserver.listen(config.cachebrowser.mitmPort, () => {
+      this.proxyserver.listen(config.client.cachebrowser.mitmPort, () => {
         started = true
         CertificateManager.initializeCA().then(() => {
           resolve()

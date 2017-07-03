@@ -23,7 +23,7 @@ class _CacheManager {
   interceptConnectiotn (socket, dst, dstport, onConnect) {
     console.log('intercepting')
 
-    let proxy = net.createConnection({port: config.cachebrowser.mitmPort, host: 'localhost'})
+    let proxy = net.createConnection({port: config.client.cachebrowser.mitmPort, host: 'localhost'})
     proxy.on('connect', () => {
       CacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
       console.log('resgistering')

@@ -4,9 +4,15 @@
   "description": "P2P Proxy",
   "main": "./dist/main.js",
   "config": {
-    "socksPort": 7080,
-    "cachebrowser": {
-      "mitmPort": 6425
+    "client": {
+      "socksPort": 7080,
+      "cachebrowser": {
+        "mitmPort": 6425
+      }
+    },
+    "relay": {
+      "natEnabled": false,
+      "port": 8040
     },
     "sentry": {
       "version": "v0.0.1-6_5681c",
@@ -30,18 +36,22 @@
     }
   },
   "dependencies": {
+    "async": "^2.5.0",
     "axios": "^0.16.2",
     "babel-runtime": "^6.23.0",
     "bluebird": "^3.5.0",
+    "electron": "^1.6.11",
     "limiter": "^1.1.0",
+    "mkdirp": "^0.5.1",
     "nedb": "^1.8.0",
     "node-forge": "^0.7.1",
     "node-schedule": "^1.2.1",
+    "raven": "^2.1.0",
     "raven-js": "^3.15.0",
     "throttle": "^1.0.3",
     "v-mask": "^1.2.0",
     "vs-stun": "0.0.7",
-    "vue": "^2.1.10",
+    "vue": "^2.3.4",
     "vue-electron": "^1.0.6",
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.2",
@@ -50,11 +60,7 @@
     "vuex": "^2.1.1",
     "winston": "^2.3.1",
     "ws": "^3.0.0",
-    "zeromq":"^4.4.1",
-    "raven":"^2.1.0",
-    "mkdirp": "^0.5.1",
-    "async": "^2.5.0",
-    "vue":"^2.3.4"
+    "zeromq": "^4.4.1"
   },
   "author": "ha-D <hadi@cs.umass.edu>"
 }

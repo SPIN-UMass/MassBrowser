@@ -23,7 +23,8 @@
     "watch": "webpack --progress --watch --config webpack.daemon.config.js",
     "client": "node ./app/dist/client.js",
     "relay": "node ./app/dist/relay.js",
-    "control": "node ./app/dist/control.js"
+    "control": "node ./app/dist/control.js",
+    "docker": "node ./tasks/docker_build.js"
   },
   "build": {
     "productName": "yaler",
