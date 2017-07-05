@@ -10,7 +10,7 @@ export default class CDNScoketMeek extends EventEmitter {
     super()
     this.socket = socket
     this.connection = new ConnectionReceiver(this, this, this)
-    this.responses = Buffer()
+    this.responses = Buffer(0)
     this.needresponse = false
     this.response = undefined
     this.laststate = true
