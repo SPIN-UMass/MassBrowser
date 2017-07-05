@@ -26,12 +26,13 @@ export default class CDNScoketMeek extends EventEmitter {
 
   newRequest (req, res) {
     console.log('New Request', req)
+    this.response = res
+
     req.on('data', (data) => {
       this.emit('data', data)
     })
     req.on('end', () => {
       this.needresponse = true
-      this.response = res
       this.laststate = true
       if (this.poolingMode) {
         this.respond()
