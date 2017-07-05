@@ -70,7 +70,7 @@ KVStore.get('relay', null)
       .then(() => address)
   }).then((address) => {
     console.log('Starting HTTP Server')
-    return runHTTPListener(8083).then(() => { address })
+    return runHTTPListener(8083).then(() => address)
   })
   .then(address => {
     console.log('Connecting to WebSocket server')

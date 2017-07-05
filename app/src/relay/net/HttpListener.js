@@ -9,9 +9,11 @@ export function runHTTPListener (port) {
   let proxy = http.createServer((req, res) => {
     CDNManager.handleIncommingConnection(req, res)
   })
-
-  proxy.listen(port, '0.0.0.0', () => {
-    console.log('HTTP SERVER STARTED')
-    // make a request to a tunneling proxy
+  return new Promise((resolve,reject)=>{
+    proxy.listen(port, '0.0.0.0', () => {
+      console.log('HTTP SERVER STARTED')
+      resolve()
+      // make a request to a tunneling proxy
+    })
   })
 }
