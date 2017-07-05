@@ -12,7 +12,10 @@
     },
     "relay": {
       "natEnabled": false,
-      "port": 8040
+      "port": 8040,
+      "domainfrontable":false,
+      "domainfrontPort":8083,
+      "domain_name":"d2td5r0tz3q2r2.cloudfront.net"
     },
     "sentry": {
       "version": "v0.0.1-6_5681c",

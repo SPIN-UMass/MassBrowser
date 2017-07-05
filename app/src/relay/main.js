@@ -72,9 +72,6 @@ KVStore.get('relay', null)
     console.log('Starting Relay')
     return runOBFSserver(address.localIP, address.localPort)
       .then(() => address)
-  }).then((address) => {
-    console.log('Starting HTTP Server')
-    return runHTTPListener(8083).then(() => address)
   })
   .then(address => {
     console.log('Connecting to WebSocket server')
@@ -85,6 +82,14 @@ KVStore.get('relay', null)
     console.log('Server connection established')
     console.log(`Reporting address to server: IP=${address.remoteIP} Port: ${address.remotePort}`)
     return ServerConnection.relayUp(address.remoteIP, address.remotePort)
+  }).then((address) => {
+    if (config.relay.domainfrontable) {
+      console.log('Starting HTTP Server')
+      return runHTTPListener(config.relay.domainfrontPort).then(() => address).then(()=>{
+        console.log('Reporting DomainFront to server')
+        return ServerConnection.relayDomainFrontUp(config.relay.domain_name,config.relay.domainfrontPort)
+      })
+    }
   })
   .catch(err => {
     if (err instanceof errors.NetworkError) {

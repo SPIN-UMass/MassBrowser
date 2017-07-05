@@ -183,6 +183,16 @@ class WSServerConnection extends EventEmitter {
       this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
     })
   }
+  relayDomainFrontUp (domain, domain_port) {
+    return new Promise((resolve, reject) => {
+      var proto = {
+        'domainfrontable':true,
+        'domainfront_port':domain_port,
+        'domain_name':domain
+      }
+      this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
+  }
 
   keepAlive () {
       return new Promise((resolve, reject) => {
