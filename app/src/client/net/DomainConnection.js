@@ -43,7 +43,7 @@ export default class DomainConnection extends EventEmitter {
       console.log('Connecting to CDN')
       var httpsRequest = https.request(this.option, (res) => {
         this.httpsResponse = res
-        setInterval(this.keepalive, 500)
+        setInterval(() => {this.keepalive}, 500)
         this.httpsResponse.on('data', (data) => {
           this.cipher.decrypt(data)
         })
