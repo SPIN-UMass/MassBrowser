@@ -42,8 +42,11 @@ export default class CDNScoketMeek extends EventEmitter {
   }
 
   write (data) {
+    /*
     this.responses = Buffer.concat([this.responses, data])
     this.respond()
+    */
+    this.response.write(data)
   }
 
   respond () {
