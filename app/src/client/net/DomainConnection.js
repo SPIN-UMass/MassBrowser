@@ -23,14 +23,14 @@ export default class DomainConnection extends EventEmitter {
     this.agent = new https.Agent({keepAlive: true})
     this.cipher = null
     this.option = {
-      hostname: relayip,
-      port: relayport,
+      hostname: 'd2td5r0tz3q2r2.cloudfront.net',
+      port: 443,
       path: '/',
       method: 'POST',
       agent: this.agent
     }
     this.httpsRequest = null
-    this.httpsResponse= null
+    this.httpsResponse = null
   }
 
   connect () {
@@ -61,11 +61,11 @@ export default class DomainConnection extends EventEmitter {
 
       httpsRequest.once('clientError', onFail)
     })
-      .then((httpsRequest,response) => this._initSocket(httpsRequest,response))
-      .then((httpsRequest,response) => this._initRelay())
+      .then((httpsRequest, response) => this._initSocket(httpsRequest, response))
+      .then((httpsRequest, response) => this._initRelay())
   }
 
-  _initSocket (httpsRequest,response) {
+  _initSocket (httpsRequest, response) {
     var desc = this.desc
     console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {

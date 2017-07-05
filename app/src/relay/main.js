@@ -2,7 +2,10 @@ process.env.APP_INTERFACE = 'commandline'
 
 import { runTLSserver } from './net/TLSReceiver'
 import { runOBFSserver } from './net/OBFSReceiver'
+import { runHTTPListener } from './net/HttpListeners'
+
 import { pendMgr } from './net/PendingConnections'
+
 var stun = require('vs-stun')
 import ServerConnection from '~/api/wsAPI'
 import ConnectivityConnection from '~/api/connectivityAPI'
@@ -35,8 +38,8 @@ KVStore.get('relay', null)
     return httpAPI.authenticate(relay.id, relay.password)
   })
   .then(() => {
-      console.log('Connecting to Connectivity server')
-      return ConnectivityConnection.connect()
+    console.log('Connecting to Connectivity server')
+    return ConnectivityConnection.connect()
       .then(data => {
         StatusReporter.startRoutine()
         StatusReporter.localip = data[0]
@@ -53,22 +56,26 @@ KVStore.get('relay', null)
           }
         } else {
           return {
-            localIP: '0.0.0.0', 
-            localPort: config.relay.port, 
-            remoteIP: StatusReporter.remoteip, 
-            remotePort: config.relay.port}
+            localIP: '0.0.0.0',
+            localPort: config.relay.port,
+            remoteIP: StatusReporter.remoteip,
+            remotePort: config.relay.port
+          }
         }
       })
   })
   .then(address => {
     console.log('Starting Relay')
     return runOBFSserver(address.localIP, address.localPort)
-    .then(() => address)
+      .then(() => address)
+  }).then((address) => {
+    console.log('Starting HTTP Server')
+    return runHTTPListener(8083).then(() => { address })
   })
   .then(address => {
     console.log('Connecting to WebSocket server')
     return ServerConnection.connect(httpAPI.getSessionID())
-    .then(() => address)
+      .then(() => address)
   })
   .then(address => {
     console.log('Server connection established')
