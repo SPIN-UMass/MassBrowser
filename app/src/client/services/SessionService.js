@@ -155,7 +155,7 @@ class _SessionService extends EventEmitter {
         return true
       })
 
-      debug(`Retrieved ${sessions.length} sessions (valid: ${validSessions.length}  stale: ${staleCount}  duplicate: ${duplicateCount})`)
+      debug(`Retrieved ${sessions.length} sessions (valid: ${validSessions.length}  stale: ${staleCount}  duplicate: ${duplicateCount}) `)
 
       validSessions.forEach((session) => {
         var desc = {
@@ -165,10 +165,11 @@ class _SessionService extends EventEmitter {
           'writeiv': Buffer.from(session.write_iv, 'base64'),
           'token': Buffer.from(session.token, 'base64'),
         }
+        debug(`sessions ${session.is_cdn}`)
 
         if (!(session.id in this.sessions)) {
           this.processedSessions[session.id] = desc
-          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'],session.isCDN)
+          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'],session.is_cdn,session.relay.domain_name)
 
           if (session.id in this.pendingSessions) {
             let resolve = this.pendingSessions[session.id].accept

@@ -13,17 +13,16 @@ import { RelayConnectionError } from '~/utils/errors'
 import https from 'https'
 
 export default class DomainConnection extends EventEmitter {
-  constructor (relayip, relayport, desc) {
+  constructor (domainName, desc) {
     super()
 
     this.id = ''
-    this.relayip = relayip
-    this.relayport = relayport
+    this.domainName = domainName
     this.desc = desc
     this.agent = new https.Agent({keepAlive: true})
     this.cipher = null
     this.option = {
-      hostname: 'd2td5r0tz3q2r2.cloudfront.net',
+      hostname: this.domainName,
       port: 443,
       path: '/',
       method: 'POST',
