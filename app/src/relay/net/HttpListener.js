@@ -4,7 +4,7 @@
 const http = require('http')
 const net = require('net')
 const url = require('url')
-import { CDNManager } from './CDNManager'
+import  CDNManager  from './CDNManager'
 export function runHTTPListener (port) {
   let proxy = http.createServer((req, res) => {
     CDNManager.handleIncommingConnection(req, res)
