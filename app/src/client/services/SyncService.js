@@ -23,23 +23,23 @@ class _SyncService {
   }
 
   syncWebsites () {
-    return this._sync('websites', this._websiteSync)
+    return this._sync('websites', Website)
   }
 
   syncDomains () {
-    return this._sync('domains', this._domainSync)
+    return this._sync('domains', Domain)
   }
 
   syncCategories () {
-    return this._sync('categories', this._categorySync)
+    return this._sync('categories', Category)
   }
 
   syncRegions () {
-    return this._sync('regions', this._regionSync)
+    return this._sync('regions', Region)
   }
 
   syncCDNs () {
-    return this._sync('cdns', this._cdnSync)
+    return this._sync('cdns', CDN)
   }
 
   /**
@@ -60,55 +60,43 @@ class _SyncService {
     return KVStore.set('last-sync-' + entity, new Date(syncTime))
   }
 
-  _sync (entity, syncFunction) {
+  _sync (entity, model) {
     const getTimes = Promise.all([
       this._getLastSyncTime(entity),
       API.getLastModificationTime(entity)
     ])
     
+    var itemCount = 0
+    const ITEMS_PER_SYNC = 100
+    const savePromises = []
+
+    const requestItems = (lastSyncTime, limit, offset) => {
+      return API.syncDatabase(entity, lastSyncTime, limit, offset)
+      .then(response => {
+        savePromises.push(this._saveItems(model, response.results))
+
+        itemCount += response.results.length
+        if (itemCount >= response.count || response.results.length === 0) {
+          return itemCount
+        } else {
+          return requestItems(lastSyncTime, limit, offset + limit)
+        }
+      })
+    }
+
     return getTimes
       .then(([lastSyncTime, lastModifiedTime]) => {
         if (lastModifiedTime > lastSyncTime) {
           info(entity + ' sync is required, fetching modified items')
 
-          return syncFunction.call(this, lastSyncTime)
-            .then(() => {
-              return this._updateLastSyncTime(entity, lastModifiedTime)
-            })
+          return requestItems(lastSyncTime, ITEMS_PER_SYNC, 0)
+            .then(itemCount => info(`${itemCount} ${entity} synced`))
+            .then(() => this._updateLastSyncTime(entity, lastModifiedTime))
+            .then(() => Promise.all(savePromises))
         }
 
         debug(entity + ' database up-to-date')
       })
-  }
-
-  _websiteSync (lastSyncTime) {
-    return API.getWebsites(lastSyncTime)
-      .then(items => this._saveItems(Website, items))
-      .then(items => info(items.length + ' websites synced'))
-  }
-
-  _domainSync (lastSyncTime) {
-    return API.getDomains(lastSyncTime)
-      .then(items => this._saveItems(Domain, items))
-      .then(items => info(items.length + ' domains synced'))
-  }
-
-  _categorySync (lastSyncTime) {
-    return API.getCategories(lastSyncTime)
-      .then(items => this._saveItems(Category, items))
-      .then(items => info(items.length + ' categories synced'))
-  }
-
-  _regionSync (lastSyncTime) {
-    return API.getRegions(lastSyncTime)
-      .then(items => this._saveItems(Region, items))
-      .then(items => info(items.length + ' regions synced'))
-  }
-
-  _cdnSync (lastSyncTime) {
-    return API.getCDNs(lastSyncTime)
-      .then(items => this._saveItems(CDN, items))
-      .then(items => info(items.length + ' CDNs synced'))
   }
 
   _saveItems (Model, items) {
@@ -119,8 +107,8 @@ class _SyncService {
           if (!item) {
             var item = new Model()
           }
-
-          Object.assign(item, itemInfo)
+          
+          item.assignJson(itemInfo)
           return item.save()
         })
       )
