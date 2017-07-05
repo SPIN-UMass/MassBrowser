@@ -10,8 +10,8 @@ import routes from './routes'
 
 import { Raven, RavenVue } from '~/utils/raven'
 import Status from '~/utils/status'
-import Config from '~/utils/config'
-import Log from '~/utils/log'
+import config from '~/utils/config'
+import {initializeLogging, warn} from '~/utils/log'
 
 import 'assets/font-awesome/css/font-awesome.min.css'
 import 'assets/bootstrap/css/bootstrap.min.css'
@@ -27,12 +27,15 @@ Vue.use(VueMask)
 
 Vue.config.debug = true
 
-if (Config.sentry.enabled) {
+config.applicationInterface = 'electron'
+initializeLogging()
+
+if (config.sentry.enabled) {
   Raven.smartConfig()
   .addPlugin(RavenVue, Vue)
   .install()
 } else {
-  Log.warn('Sentry is disabled, not using sentry')
+  warn('Sentry is disabled, not using sentry')
 }
 
 const router = new Router({

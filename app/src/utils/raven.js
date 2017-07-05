@@ -9,7 +9,7 @@ export default Raven
 Raven.smartConfig = function (options) {
   var options = options || {}
 
-  var appInterface = process.env.APP_INTERFACE
+  var appInterface = config.applicationInterface
   if (appInterface !== 'commandline' && appInterface !== 'electron') {
     throw new Error(`Invalid application interface ${appInterface}, please set correct value for the APP_INTERFACE env variable`)
   }

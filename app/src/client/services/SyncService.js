@@ -1,5 +1,7 @@
 import API from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
+import { debug, info } from '~/utils/log'
+
 import { Website, Domain, CDN, Region, Category } from '~/client/models'
 
 class _SyncService {
@@ -66,9 +68,8 @@ class _SyncService {
     
     return getTimes
       .then(([lastSyncTime, lastModifiedTime]) => {
-        console.log([lastSyncTime, lastModifiedTime])
         if (lastModifiedTime > lastSyncTime) {
-          console.debug(entity + ' sync is required, fetching modified items')
+          info(entity + ' sync is required, fetching modified items')
 
           return syncFunction.call(this, lastSyncTime)
             .then(() => {
@@ -76,38 +77,38 @@ class _SyncService {
             })
         }
 
-        console.debug(entity + ' database up-to-date')
+        debug(entity + ' database up-to-date')
       })
   }
 
   _websiteSync (lastSyncTime) {
     return API.getWebsites(lastSyncTime)
       .then(items => this._saveItems(Website, items))
-      .then(items => console.log(items.length + ' websites synced'))
+      .then(items => info(items.length + ' websites synced'))
   }
 
   _domainSync (lastSyncTime) {
     return API.getDomains(lastSyncTime)
       .then(items => this._saveItems(Domain, items))
-      .then(items => console.log(items.length + ' domains synced'))
+      .then(items => info(items.length + ' domains synced'))
   }
 
   _categorySync (lastSyncTime) {
     return API.getCategories(lastSyncTime)
       .then(items => this._saveItems(Category, items))
-      .then(items => console.log(items.length + ' categories synced'))
+      .then(items => info(items.length + ' categories synced'))
   }
 
   _regionSync (lastSyncTime) {
     return API.getRegions(lastSyncTime)
       .then(items => this._saveItems(Region, items))
-      .then(items => console.log(items.length + ' regions synced'))
+      .then(items => info(items.length + ' regions synced'))
   }
 
   _cdnSync (lastSyncTime) {
     return API.getCDNs(lastSyncTime)
       .then(items => this._saveItems(CDN, items))
-      .then(items => console.log(items.length + ' CDNs synced'))
+      .then(items => info(items.length + ' CDNs synced'))
   }
 
   _saveItems (Model, items) {

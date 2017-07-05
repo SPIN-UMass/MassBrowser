@@ -14,11 +14,15 @@ import KVStore from '~/utils/kvstore'
 import * as errors from '~/utils/errors'
 import StatusReporter from './net/StatusReporter'
 import config from '~/utils/config'
+import {initializeLogging} from '~/utils/log'
 
 var stunserver = {
   host: 'stun.l.google.com',
   port: 19302
 }
+
+config.applicationInterface = 'commandline'
+initializeLogging()
 
 KVStore.get('relay', null)
   .then(relay => {

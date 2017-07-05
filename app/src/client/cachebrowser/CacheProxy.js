@@ -45,7 +45,9 @@ class _CacheProxy {
 
       this.proxyserver.listen(config.client.cachebrowser.mitmPort, () => {
         started = true
+        debug('Initializing certificate manager')
         CertificateManager.initializeCA().then(() => {
+          debug('Initializeeeeeeeeeeeed')
           resolve()
         })
       })
@@ -53,6 +55,8 @@ class _CacheProxy {
       this.proxyserver.on('error', e => {
         if (!started) {
           reject(new CacheBrowserError("Could not start CacheBrowser proxy server"))
+        } else {
+          console.error(e)
         }
       })
     })

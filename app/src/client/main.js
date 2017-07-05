@@ -1,6 +1,3 @@
-// Should be before importing anything
-process.env.APP_INTERFACE = 'commandline'
-
 import Raven from '~/utils/raven'
 import Promise from 'bluebird'
 
@@ -9,8 +6,13 @@ import Status from '~/utils/status'
 
 import { InvalidInvitationCodeError } from '~/utils/errors'
 import { error } from '~/utils/log'
+import config from '~/utils/config'
+import {initializeLogging} from '~/utils/log'
 
 global.Promise = Promise
+
+config.applicationInterface = 'commandline'
+initializeLogging()
 
 Raven
   .smartConfig({'role': 'client'})

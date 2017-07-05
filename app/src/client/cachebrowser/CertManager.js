@@ -2,15 +2,17 @@
  * Created by milad on 5/30/17.
  */
 
-var fs = require('fs')
-var path = require('path')
-var Forge = require('node-forge')
-var pki = Forge.pki
-var crypto = require('crypto')
-var mkdirp = require('mkdirp')
-var async = require('async')
+import fs from 'fs-extra'
+import path from 'path'
+import Forge from 'node-forge'
+import crypto from 'crypto'
+import async from 'async'
 
 import { getDataDir } from '~/utils'
+import { debug, warn } from '~/utils/log'
+import { CacheBrowserError } from '~/utils/errors'
+
+var pki = Forge.pki
 
 var CAattrs = [{
   name: 'commonName',
@@ -119,16 +121,15 @@ class _CertificateManager {
   }
 
   initializeCA () {
-    return new Promise((resolve, reject) => {
-      fs.exists(path.join(this.certspath, 'ca.pem'), (exists) => {
-        if (exists) {
-          console.log('loading CA')
-          this.loadCA(resolve)
-        } else {
-          console.log('generating CA')
-          this.generateCA(resolve)
-        }
-      })
+    return fs.pathExists(path.join(this.certspath, 'ca.pem'))
+    .then(exists => {
+      if (exists) {
+        debug('loading CA')
+        return this.loadCA()
+      } else {
+        debug('generating CA')
+        return this.generateCA()
+      }
     })
   }
 
@@ -139,7 +140,7 @@ class _CertificateManager {
       }
 
       this.generateServerCerts(host).then((data) => {
-        console.log('certs generated')
+        debug('certs generated')
         this.certCache[host] = {
           cert: data[0],
           key: data[1]
@@ -197,32 +198,33 @@ class _CertificateManager {
   }
 
   generateCA () {
-    pki.rsa.generateKeyPair({bits: 2048}, (err, keys) => {
-      if (err) {
-        console.log('error generating CA', err)
-        return
-      }
-      let cert = pki.createCertificate()
-      cert.publicKey = keys.publicKey
-      cert.serialNumber = this.randomSerialNumber()
-      cert.validity.notBefore = new Date()
-      cert.validity.notBefore.setDate(cert.validity.notBefore.getDate() - 1)
-      cert.validity.notAfter = new Date()
-      cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10)
-      cert.setSubject(CAattrs)
-      cert.setIssuer(CAattrs)
-      cert.setExtensions(CAextensions)
-      cert.sign(keys.privateKey, Forge.md.sha256.create())
-      this.CAcert = cert
-      this.CAkeys = keys
-      console.log('CA generated', path.join(this.certspath, 'ca.pem'))
-      mkdirp(this.keypath, (err) => {
-        if (err) console.log(err)
-        fs.writeFile(path.join(this.certspath, 'ca.pem'), pki.certificateToPem(cert))
-        fs.writeFile(path.join(this.keypath, 'ca.private.key'), pki.privateKeyToPem(keys.privateKey))
-        fs.writeFile(path.join(this.keypath, 'ca.public.key'), pki.publicKeyToPem(keys.publicKey))
+    return new Promise((resolve, reject) => {
+      pki.rsa.generateKeyPair({bits: 2048}, (err, keys) => {
+        if (err) {
+          return reject(err)
+        }
+
+        let cert = pki.createCertificate()
+        cert.publicKey = keys.publicKey
+        cert.serialNumber = this.randomSerialNumber()
+        cert.validity.notBefore = new Date()
+        cert.validity.notBefore.setDate(cert.validity.notBefore.getDate() - 1)
+        cert.validity.notAfter = new Date()
+        cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10)
+        cert.setSubject(CAattrs)
+        cert.setIssuer(CAattrs)
+        cert.setExtensions(CAextensions)
+        cert.sign(keys.privateKey, Forge.md.sha256.create())
+        this.CAcert = cert
+        this.CAkeys = keys
+        resolve()
       })
     })
+    .then(() => fs.ensureDir(this.keypath))
+    .then(() => fs.writeFile(path.join(this.certspath, 'ca.pem'), pki.certificateToPem(this.CAcert)))
+    .then(() => fs.writeFile(path.join(this.keypath, 'ca.private.key'), pki.privateKeyToPem(this.CAkeys.privateKey)))
+    .then(() => fs.writeFile(path.join(this.keypath, 'ca.public.key'), pki.publicKeyToPem(this.CAkeys.publicKey)))
+    .catch(err => { throw new CacheBrowserError("error creating keypath directory " + err.message) })
   }
 
   randomSerialNumber () {
@@ -233,15 +235,15 @@ class _CertificateManager {
     return sn
   }
 
-  loadCA (onload) {
-    this.CAcert = pki.certificateFromPem(fs.readFileSync(path.join(this.certspath, 'ca.pem'), 'utf-8'))
-    this.CAkeys = {
-      privateKey: pki.privateKeyFromPem(fs.readFileSync(path.join(this.keypath, 'ca.private.key'), 'utf-8')),
-      publicKey: pki.publicKeyFromPem(fs.readFileSync(path.join(this.keypath, 'ca.public.key'), 'utf-8'))
-
-    }
-    console.log('CA LOADED')
-    onload()
+  loadCA () {
+    return new Promise((resolve, reject) => {
+      this.CAcert = pki.certificateFromPem(fs.readFileSync(path.join(this.certspath, 'ca.pem'), 'utf-8'))
+      this.CAkeys = {
+        privateKey: pki.privateKeyFromPem(fs.readFileSync(path.join(this.keypath, 'ca.private.key'), 'utf-8')),
+        publicKey: pki.publicKeyFromPem(fs.readFileSync(path.join(this.keypath, 'ca.public.key'), 'utf-8'))
+      }
+      resolve()
+    })
   }
 }
 

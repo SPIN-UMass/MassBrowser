@@ -21,18 +21,22 @@ class BrowserConsoleTransport extends winston.Transport {
   }
 }
 
-var transports = [
-  new (winston.transports.Console)()
-]
+export function initializeLogging() {
+  var transports = [
+    new (winston.transports.Console)()
+  ]
 
-if (process.env.APP_INTERFACE == 'electron') {
-  transports.push(new BrowserConsoleTransport())
+  if (config.applicationInterface == 'electron') {
+    transports.push(new BrowserConsoleTransport())
+  }
+
+  logger.configure({
+    level: config.log.level,
+    transports: transports
+  })
 }
 
-var logger = new (winston.Logger)({
-  level: config.log.level,
-  transports: transports
-})
+var logger = new (winston.Logger)()  
 
 export default logger
 

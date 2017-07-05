@@ -118,7 +118,7 @@ export default function bootClient (registrationCallback) {
     err.log()
     throw new ApplicationBootError('There is a problem with the server, please try again later', true)
   })
-  .catch(err => !(err instanceof ApplicationBootError), err => {
+  .catch(err => !(err instanceof ApplicationBootError || err instanceof InvalidInvitationCodeError), err => {
     // console.warn(handledErrors.reduce((o, a) => o || err instanceof a, false))
     if (err.smart) {
       err.logAndReport()
@@ -130,6 +130,3 @@ export default function bootClient (registrationCallback) {
     throw new ApplicationBootError('Failed to start Application')
   })
 }
-
-const handledErrors = [ApplicationBootError, -AuthenticationError, NetworkError, RequestError, CacheBrowserError, 
-                       ServerError, InvalidInvitationCodeError]

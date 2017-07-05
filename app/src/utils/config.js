@@ -47,4 +47,6 @@ if (process.env.NODE_ENV === 'development') {
   updateConfig(config, prodConfig)
 }
 
+config.applicationInterface = null
+
 export default config

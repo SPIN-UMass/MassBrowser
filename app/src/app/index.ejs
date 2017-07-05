@@ -24,8 +24,6 @@
     <% if (htmlWebpackPlugin.options.appModules) { %>
       <!-- Add `app/node_modules` to global paths so `require` works properly in development -->
       <script>
-        process.env.APP_INTERFACE = 'electron'
-        
         require('module').globalPaths.push('<%= htmlWebpackPlugin.options.appModules.replace(/\\/g, '\\\\') %>')
       </script>
     <% } %>
