@@ -5,9 +5,10 @@ import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import ConnectionManager from '~/client/net/ConnectionManager'
 import RelayConnection from '~/client/net/RelayConnection'
+import DomainConnection from './DomainConnection'
 
 export class Session extends EventEmitter {
-  constructor (id, ip, port, desc, allowedCategories) {
+  constructor (id, ip, port, desc, allowedCategories, isCDN) {
     super()
 
     this.id = id
@@ -16,7 +17,7 @@ export class Session extends EventEmitter {
     this.desc = desc
     this.allowedCategories = new Set(allowedCategories)
     this.connection = null
-
+    this.isCDN = isCDN || false
     this.connected = false
     this.connecting = false
 
@@ -25,7 +26,11 @@ export class Session extends EventEmitter {
   }
 
   connect () {
-    var relay = new RelayConnection(this.ip, this.port, this.desc)
+    if (this.isCDN) {
+      var relay = new DomainConnection(this.ip, this.port, this.desc)
+    } else {
+      var relay = new RelayConnection(this.ip, this.port, this.desc)
+    }
     relay.id = this.id
     relay.on('data', data => {
       ConnectionManager.listener(data)

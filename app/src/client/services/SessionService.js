@@ -10,7 +10,7 @@ import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '~/utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '~/utils/errors'
 var schedule = require('node-schedule')
-import {Session} from '~/client/net/Session'
+import { Session } from '~/client/net/Session'
 import { Domain, Category } from '~/client/models'
 
 /**
@@ -31,10 +31,10 @@ class _SessionService extends EventEmitter {
     this._startSessionPoll()
 
     return this.createSession()
-    .then(() => {debug("First session created")})
-    .catch(NoRelayAvailableError, err => {
-      warn("No relay available for first session")
-    })
+      .then(() => {debug('First session created')})
+      .catch(NoRelayAvailableError, err => {
+        warn('No relay available for first session')
+      })
   }
 
   getSessions () {
@@ -43,14 +43,14 @@ class _SessionService extends EventEmitter {
 
   assignRelay (host, port) {
     return new Promise((resolve, reject) => {
-        if (this.sessions.length) {
-          return resolve(this.sessions[0])
-        }
-        // No suitable session found
-        return this.createSession([])
+      if (this.sessions.length) {
+        return resolve(this.sessions[0])
+      }
+      // No suitable session found
+      return this.createSession([])
     })
-    .then(session => session.connection)
-      
+      .then(session => session.connection)
+
     // return Domain.findDomain(host)
     //   .then(domain => domain.getWebsite())
     //   .then(website => website.getCategory())
@@ -163,12 +163,12 @@ class _SessionService extends EventEmitter {
           'readiv': Buffer.from(session.read_iv, 'base64'),
           'writekey': Buffer.from(session.write_key, 'base64'),
           'writeiv': Buffer.from(session.write_iv, 'base64'),
-          'token': Buffer.from(session.token, 'base64')
+          'token': Buffer.from(session.token, 'base64'),
         }
 
         if (!(session.id in this.sessions)) {
           this.processedSessions[session.id] = desc
-          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
+          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'],session.isCDN)
 
           if (session.id in this.pendingSessions) {
             let resolve = this.pendingSessions[session.id].accept

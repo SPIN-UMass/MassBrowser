@@ -1,4 +1,7 @@
 /**
+ * Created by milad on 7/5/17.
+ */
+/**
  * Created by milad on 4/11/17.
  */
 import net from 'net'
@@ -8,7 +11,7 @@ import { logger, debug, warn } from '~/utils/log'
 import config from '~/utils/config'
 import { RelayConnectionError } from '~/utils/errors'
 
-export default class RelayConnection extends EventEmitter {
+export default class DomainConnection extends EventEmitter {
   constructor (relayip, relayport, desc) {
     super()
 

@@ -1,23 +1,43 @@
 /**
- * Created by milad on 4/16/17.
+ * Created by milad on 7/3/17.
  */
-var shortenSTUN = true // set to true if your STUN server disconnects too early
-var localIP = '0.0.0.0' // You can try 0.0.0.0
+const http = require('http')
+const net = require('net')
+const url = require('url')
 
-var net = require('net')
-var stun = require('vs-stun')
-var events = require('events')
-var server = {
-  host: 'yaler.co',
-  port: 19302
-}
-var sk= net.connect(server, () => {
-})
-sk.on('connect',()=>{
-  var sock = net.createServer((s) => {
-    s.pipe(s)
+let proxy = http.createServer((req, res) => {
+  console.log(req.socket.remotePort)
+  req.on('data', (data) => {
+    console.log(data)
+    res.write(data)
   })
-  sock.listen(sk.localAddress, sk.localport)
-  console.log('Local listening socket:')
-  console.log(sock.address())
+  req.on('end', () => {
+    res.end()
+  })
 })
+
+proxy.listen(5454, '0.0.0.0', () => {
+  console.log('HTTP SERVER STARTED')
+  // make a request to a tunneling proxy
+  let keepaliveagent = new http.Agent({keepAlive: true})
+  let options = {
+    hostname: 'localhost',
+    port: 5454,
+    path: '/',
+    method: 'POST',
+    agent: keepaliveagent
+  }
+
+  var req = http.request(options, (res) => {
+    res.on('data', (data) => {
+      console.log('resp data', data)
+    })
+  })
+  req.write('test')
+  req.write('dafasf')
+  setTimeout(() => {
+    req.write('test2')
+  }, 20)
+
+})
+
