@@ -116,7 +116,7 @@ class WSServerConnection extends EventEmitter {
       var proto = {
         status: 'used'
       }
-
+      console.log("USED CONNECTION")
       this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
 
     })
