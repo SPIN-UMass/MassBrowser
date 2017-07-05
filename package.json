@@ -21,8 +21,10 @@
     "postinstall": "cd app && npm install",
     "release": "node tasks/release.js",
     "watch": "webpack --progress --watch --config webpack.daemon.config.js",
-    "client": "node ./app/dist/client.js",
-    "relay": "node ./app/dist/relay.js",
+    "client": "cross-env NODE_ENV=production node ./app/dist/client.js",
+    "relay": "cross-env NODE_ENV=production node ./app/dist/relay.js",
+    "client-dev": "cross-env NODE_ENV=development node ./app/dist/client.js",
+    "relay-dev": "cross-env NODE_ENV=development node ./app/dist/relay.js",
     "control": "node ./app/dist/control.js",
     "docker": "node ./tasks/docker_build.js"
   },
