@@ -21,7 +21,7 @@ export default class CDNScoketMeek extends EventEmitter {
 
   end () {
     console.log('I am ending connection')
-    this.socket.end()
+    this.response.end()
   }
 
   newRequest (req, res) {
@@ -35,8 +35,7 @@ export default class CDNScoketMeek extends EventEmitter {
       this.laststate = true
       if (this.poolingMode) {
         this.respond()
-      }
-      else {
+      } else {
         setTimeout(this.respond, this.timeout)
       }
     })
@@ -53,15 +52,15 @@ export default class CDNScoketMeek extends EventEmitter {
         this.response.write(this.responses)
         this.laststate = true
       }
-      else {
-        this.laststate = false
-      }
-      if (this.laststate === false) {
-        this.response.end()
-        this.needresponse = false
-      } else {
-        setTimeout(this.respond, this.rtt)
-      }
+      // else {
+      //   this.laststate = false
+      // }
+      // if (this.laststate === false) {
+      //   this.response.end()
+      //   this.needresponse = false
+      // } else {
+      //   setTimeout(this.respond, this.rtt)
+      // }
     }
   }
 

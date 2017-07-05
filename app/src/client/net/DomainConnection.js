@@ -10,6 +10,7 @@ import { EventEmitter } from 'events'
 import { logger, debug, warn } from '~/utils/log'
 import config from '~/utils/config'
 import { RelayConnectionError } from '~/utils/errors'
+import https from 'https'
 
 export default class DomainConnection extends EventEmitter {
   constructor (relayip, relayport, desc) {
@@ -19,28 +20,38 @@ export default class DomainConnection extends EventEmitter {
     this.relayip = relayip
     this.relayport = relayport
     this.desc = desc
-
+    this.agent = new https.Agent({keepAlive: true})
     this.cipher = null
-    this.socket = null
+    this.option = {
+      hostname: relayip,
+      port: relayport,
+      path: '/',
+      method: 'POST',
+      agent: this.agent
+    }
+    this.httpsRequest = null
+    this.httpsResponse= null
   }
 
   connect () {
     return new Promise((resolve, reject) => {
-      var socket = net.connect(this.relayport, this.relayip)
+      var httpsRequest = https.request(this.options, (res) => {
+        onSuccess(res)
+      })
 
       const onFail = (err) => {
         warn(`Relay ${this.id} connection error: ${err.message}`)
         reject(new RelayConnectionError(err))
       }
 
-      const onSuccess = () => {
+      const onSuccess = (res) => {
         debug(`Relay ${this.id} connected`)
 
         // Remove connection failure callback so it isn't called
         // in case of a later error in the connection
-        socket.removeListener('error', onFail)
+        httpsRequest.socket.removeListener('error', onFail)
 
-        resolve(socket)
+        resolve(httpsRequest, res)
       }
 
       /* socket.setTimeout(config.relayConnectionTimeout, () => {
@@ -48,33 +59,33 @@ export default class DomainConnection extends EventEmitter {
        onFail(new Error('Connection Timeout'))
        }) */
 
-      socket.once('connect', onSuccess)
-      socket.once('error', onFail)
+      httpsRequest.once('clientError', onFail)
     })
-      .then((socket) => this._initSocket(socket))
-      .then((socket) => this._initRelay(socket))
+      .then((httpsRequest,response) => this._initSocket(httpsRequest,response))
+      .then((httpsRequest,response) => this._initRelay())
   }
 
-  _initSocket (socket) {
+  _initSocket (httpsRequest,response) {
     var desc = this.desc
     console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
     }, () => {
       this.emit('close')
-      this.socket.end()
+      this.httpsRequest.end()
     })
 
-    this.socket = socket
+    this.httpsRequest = httpsRequest
+    this.httpsResponse = response
     this.cipher = cipher
-    socket.on('data', (data) => {
+    this.httpsResponse.on('data', (data) => {
       this.cipher.decrypt(data)
     })
 
-    return socket
+    return httpsRequest
   }
 
-  _initRelay (socket) {
+  _initRelay () {
     // console.log(this.relayip, this.relayport, 'SENDING DATA')
 
     var desc = this.desc
@@ -85,13 +96,11 @@ export default class DomainConnection extends EventEmitter {
       i -= 1
     }
 
-    socket.write(Buffer.concat(padarr))
-
-    return socket
+    this.httpsRequest.write(Buffer.concat(padarr))
   }
 
   end () {
-    this.socket.end()
+    this.httpsRequest.end()
   }
 
   write (conid, command, data) {
@@ -104,7 +113,7 @@ export default class DomainConnection extends EventEmitter {
     const enc = this.cipher.encrypt(b)
     // console.log('writing to the relay enc', enc)
     this.emit('send', enc)
-    this.socket.write(enc)
+    this.httpsRequest.write(enc)
     // console.log('written')
   }
 
