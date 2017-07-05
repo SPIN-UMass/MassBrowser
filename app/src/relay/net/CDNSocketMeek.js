@@ -1,7 +1,7 @@
 /**
  * Created by milad on 7/3/17.
  */
-import ConnectionReceiver from './ConnectionReceiver'
+import {ConnectionReceiver}  from './ConnectionReceiver'
 import { EventEmitter } from 'events'
 
 export default class CDNScoketMeek extends EventEmitter {
