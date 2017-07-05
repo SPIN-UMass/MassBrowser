@@ -2,7 +2,7 @@ process.env.APP_INTERFACE = 'commandline'
 
 import { runTLSserver } from './net/TLSReceiver'
 import { runOBFSserver } from './net/OBFSReceiver'
-import { runHTTPListener } from './net/HttpListeners'
+import { runHTTPListener } from './net/HttpListener'
 
 import { pendMgr } from './net/PendingConnections'
 
