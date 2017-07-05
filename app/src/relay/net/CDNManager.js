@@ -9,7 +9,7 @@ class _CDNManger {
 
   handleIncommingConnection (req, res) {
     if (!(req.socket in this.connectionmap)) {
-      this.connectionmap[req.socket] = new CDNSocketMeek(req.socket, this.req.headers.isPooling || false, this.req.headers.rtt || 40, this.req.headers.timeout || 500)
+      this.connectionmap[req.socket] = new CDNSocketMeek(req.socket, req.headers.isPooling || false, req.headers.rtt || 40, req.headers.timeout || 500)
     }
     this.connectionmap[req.socket].newRequest(req, res)
   }
