@@ -17,12 +17,13 @@ export class Session extends EventEmitter {
     this.desc = desc
     this.allowedCategories = new Set(allowedCategories)
     this.connection = null
-    this.isCDN = isCDN || false
+    this.isCDN = isCDN || true
     this.connected = false
     this.connecting = false
 
     this.bytesSent = 0
     this.bytesReceived = 0
+
   }
 
   connect () {

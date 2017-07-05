@@ -29,14 +29,19 @@ export default class DomainConnection extends EventEmitter {
       method: 'POST',
       agent: this.agent
     }
+    console.log('New Domain Session', this.option)
     this.httpsRequest = null
     this.httpsResponse = null
   }
 
   connect () {
     return new Promise((resolve, reject) => {
-      var httpsRequest = https.request(this.options, (res) => {
-        onSuccess(res)
+      console.log('Connecting to CDN')
+      var httpsRequest = https.request(this.option, (res) => {
+        this.httpsResponse = res
+        this.httpsResponse.on('data', (data) => {
+          this.cipher.decrypt(data)
+        })
       })
 
       const onFail = (err) => {
@@ -44,28 +49,28 @@ export default class DomainConnection extends EventEmitter {
         reject(new RelayConnectionError(err))
       }
 
-      const onSuccess = (res) => {
+      const onSuccess = () => {
         debug(`Relay ${this.id} connected`)
 
         // Remove connection failure callback so it isn't called
         // in case of a later error in the connection
         httpsRequest.socket.removeListener('error', onFail)
 
-        resolve(httpsRequest, res)
+        resolve(httpsRequest)
       }
 
       /* socket.setTimeout(config.relayConnectionTimeout, () => {
        socket.end()
        onFail(new Error('Connection Timeout'))
        }) */
-
+      httpsRequest.once('socket',onSuccess)
       httpsRequest.once('clientError', onFail)
     })
       .then((httpsRequest, response) => this._initSocket(httpsRequest, response))
       .then((httpsRequest, response) => this._initRelay())
   }
 
-  _initSocket (httpsRequest, response) {
+  _initSocket (httpsRequest ) {
     var desc = this.desc
     console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
@@ -76,11 +81,7 @@ export default class DomainConnection extends EventEmitter {
     })
 
     this.httpsRequest = httpsRequest
-    this.httpsResponse = response
     this.cipher = cipher
-    this.httpsResponse.on('data', (data) => {
-      this.cipher.decrypt(data)
-    })
 
     return httpsRequest
   }

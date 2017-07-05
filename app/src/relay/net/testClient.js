@@ -13,8 +13,7 @@ let options = {
   hostname: 'd2td5r0tz3q2r2.cloudfront.net',
   port: 443,
   path: '/',
-  method: 'POST',
-  agent: keepaliveagent
+  method: 'POST'
 }
 
 var req = https.request(options, (res) => {
