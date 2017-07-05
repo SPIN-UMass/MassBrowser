@@ -131,6 +131,7 @@ export class ConnectionReceiver {
       if (lastconid in this.connections) {
         this.connections[lastconid].end()
       }
+    } else if (CMD === 'K') {
     } else {
       console.log('UNKOWN command received')
       if (lastconid in this.connections) {

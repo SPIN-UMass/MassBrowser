@@ -34,11 +34,16 @@ export default class DomainConnection extends EventEmitter {
     this.httpsResponse = null
   }
 
+  keepalive () {
+    this.write(0, 'K', Buffer(0))
+  }
+
   connect () {
     return new Promise((resolve, reject) => {
       console.log('Connecting to CDN')
       var httpsRequest = https.request(this.option, (res) => {
         this.httpsResponse = res
+        setInterval(this.keepalive, 500)
         this.httpsResponse.on('data', (data) => {
           this.cipher.decrypt(data)
         })
@@ -63,14 +68,14 @@ export default class DomainConnection extends EventEmitter {
        socket.end()
        onFail(new Error('Connection Timeout'))
        }) */
-      httpsRequest.once('socket',onSuccess)
+      httpsRequest.once('socket', onSuccess)
       httpsRequest.once('clientError', onFail)
     })
       .then((httpsRequest, response) => this._initSocket(httpsRequest, response))
       .then((httpsRequest, response) => this._initRelay())
   }
 
-  _initSocket (httpsRequest ) {
+  _initSocket (httpsRequest) {
     var desc = this.desc
     console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
