@@ -6,6 +6,13 @@ class WebsiteSchema {
     this.category = new RelationField('Category')
     this.blocked = null
     this.enabled = true
+    this.thirdParty = false
+  }
+
+  get transform() {
+    return {
+      'third_party': 'thirdParty'
+    }
   }
 }
 

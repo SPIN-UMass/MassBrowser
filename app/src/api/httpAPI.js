@@ -24,34 +24,9 @@ class API {
       .then(text => new Date(text))
   }
 
-  getWebsites (modifiedSince) {
-    return http.get(API_URL + '/websites?modified_since=' + modifiedSince.toISOString())
+  syncDatabase (entity, modifiedSince, limit = 10, offset = 0) {
+    return http.get(API_URL + `/${entity}?limit=${limit}&offset=${offset}&modified_since=${modifiedSince.toISOString()}`)
       .then(response => response.data)
-      .then(json => json.results)
-  }
-
-  getDomains (modifiedSince) {
-    return http.get(API_URL + '/domains?modified_since=' + modifiedSince.toISOString())
-      .then(response => response.data)
-      .then(json => json.results)
-  }
-
-  getCategories (modifiedSince) {
-    return http.get(API_URL + '/categories?modified_since=' + modifiedSince.toISOString())
-      .then(response => response.data)
-      .then(json => json.results)
-  }
-
-  getRegions (modifiedSince) {
-    return http.get(API_URL + '/regions?modified_since=' + modifiedSince.toISOString())
-      .then(response => response.data)
-      .then(json => json.results)
-  }
-
-  getCDNs (modifiedSince) {
-    return http.get(API_URL + '/cdns?modified_since=' + modifiedSince.toISOString())
-      .then(response => response.data)
-      .then(json => json.results)
   }
 
   authenticate (username, password) {

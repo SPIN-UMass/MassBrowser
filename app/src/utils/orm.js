@@ -4,6 +4,8 @@ import path from 'path'
 
 import { remote } from 'electron'
 import { getDataDir } from '~/utils'
+import { error } from '~/utils/log'
+
 
 const DATA_DIR = getDataDir()
 
@@ -30,6 +32,7 @@ function _createModel (name, schemaModel, meta, datastore) {
       this._schema = schema
       this.model = Model
       this._new_instance = true
+      this._cached_transformer = null
     }
 
     static get name () {
@@ -82,6 +85,43 @@ function _createModel (name, schemaModel, meta, datastore) {
       obj._new_instance = false
       Object.assign(obj, doc)
       return obj
+    }
+
+    /**
+     * Assigns the values in a JSON object to the model while applying field name transformations
+     * You can define JSON field name transformations in your model by implementing a getter named
+     * 'transform' which returns an object
+     * 
+     * ```
+     * get transform() {
+     *  return {
+     *    'some_field': 'someField'
+     *  }
+     * }
+     * ```
+     */
+    assignJson(json) {
+      var transform = this._cached_transformer || this.transform
+
+      if (transform) {
+        for (let key in json) {
+          if (typeof transform[key] === 'undefined') {
+            this[key] = json[key]
+          } else if (typeof transform[key] === 'string') {
+            this[transform[key]] = json[key]
+          } else if (typeof transform[key] === 'function') {
+            // Not implemented
+            // obj[transform[key]] = json[key]
+          } else {
+            error(`Invalid transformation defined in model ${name} for field ${key}`) 
+            this[key] = json[key]
+          }
+        }
+      } else {
+        Object.assign(this, json)
+      }
+
+      return this
     }
 
     toObject () {
