@@ -37,7 +37,7 @@ class _ConnectionManager {
         const sp = data.split(':')
         const ip = sp[0]
         const port = sp[1]
-        console.log('CREATE CONNECTION', ip, port)
+        // console.log('CREATE CONNECTION', ip, port)
         this.newconcarry = ''
         this.newConnection(ip, port, lastconid)
       } else {
@@ -46,7 +46,7 @@ class _ConnectionManager {
           const sp = this.newconcarry.split(':')
           const ip = sp[0]
           const port = sp[1]
-          console.log('CREATE CONNECTION', ip, port)
+          // console.log('CREATE CONNECTION', ip, port)
           this.newConnection(ip, port, lastconid)
         }
       }
@@ -130,7 +130,7 @@ class _ConnectionManager {
   newClientConnection (connection, dstip, dstport, onConnect) {
     var conid = crypto.randomBytes(2).readUInt16BE()
 
-    debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
+    // debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
 
     if (!this.relayAssigner) {
       throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
@@ -145,7 +145,7 @@ class _ConnectionManager {
           debug(`Relay ${relay} assigned for connection`)
           this.Connectionmaps[conid] = relay
           var cr = String(dstip) + ':' + String(dstport)
-          console.log('sendsize:', cr.length, cr)
+          // console.log('sendsize:', cr.length, cr)
           this.Connectionmaps[conid].write(conid, 'N', Buffer(cr))
 
           connection.on('data', (data) => {
@@ -159,10 +159,14 @@ class _ConnectionManager {
             this.Connectionmaps[conid].write(conid, 'C', Buffer(0))
           })
           resolve('Assigned')
-        }, (err) => {
-          delete this.ClientConnections[conid]
-          reject('Don\'t Proxy')
         })
+        .catch(err => reject(err))
+        // TODO: //   delete this.ClientConnections[conid]
+
+        // , (err) => {
+        //   delete this.ClientConnections[conid]
+        //   reject('Don\'t Proxy')
+        // })
     })
   }
 
@@ -176,7 +180,7 @@ class _ConnectionManager {
       debug(`Relay ${relay} assigned for connection`)
       this.Connectionmaps[conid] = relay
       var cr = String(dstip) + ':' + String(dstport)
-      console.log('sendsize:', cr.length, cr)
+      // console.log('sendsize:', cr.length, cr)
       this.Connectionmaps[conid].write(conid, 'N', Buffer(cr))
 
       resolve('Assigned')

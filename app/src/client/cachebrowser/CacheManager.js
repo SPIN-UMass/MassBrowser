@@ -9,24 +9,13 @@ import CacheProxy from './CacheProxy'
 import config from '~/utils/config'
 var net = require('net')
 
+import { NotCacheBrowsableError } from '~/utils/errors'
+
 class _CacheManager {
-  sslHandler (dstip, dstport) {
-    console.log(dstip)
-    return new Promise((resolve, reject) => {
-      if (dstport === 443) {
-        resolve()
-      }
-      reject()
-    })
-  }
-
-  interceptConnectiotn (socket, dst, dstport, onConnect) {
-    console.log('intercepting')
-
+  interceptConnection (socket, dst, dstport, onConnect) {
     let proxy = net.createConnection({port: config.client.cachebrowser.mitmPort, host: 'localhost'})
     proxy.on('connect', () => {
       CacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
-      console.log('resgistering')
     })
 
     proxy.on('data', (d) => {
@@ -44,6 +33,7 @@ class _CacheManager {
       } catch (err) {
       }
     })
+
     socket.on('data', function (d) {
       // If the application tries to send data before the proxy is ready, then that is it's own problem.
       try {
@@ -60,6 +50,7 @@ class _CacheManager {
       } catch (err) {
       }
     })
+    
     socket.on('error', (err) => {
       console.log('error3', err)
       if (proxy.destroyed === false) {
@@ -81,13 +72,12 @@ class _CacheManager {
 
   newCacheConnection (connection, dstip, dstport, onConnect) {
     return new Promise((resolve, reject) => {
-      this.sslHandler(dstip, dstport)
-        .then(() => {
-          this.interceptConnectiotn(connection, dstip, dstport, onConnect)
-          resolve('Intercepted')
-        }, (err) => {
-          reject('Don\'t Cache Browser')
-        })
+      if (dstport !== 443) {
+        return reject(new NotCacheBrowsableError("Domain is not cachebrowsable"))
+      }
+
+      this.interceptConnection(connection, dstip, dstport, onConnect)
+      resolve('Intercepted')
     })
   }
 

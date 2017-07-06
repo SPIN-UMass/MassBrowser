@@ -16,7 +16,13 @@ class BrowserConsoleTransport extends winston.Transport {
     if (handler === undefined) {
       console.log(`${level}: ${msg}`)
     } else {
-      handler(msg)
+      /* Errors are passed in as the meta object instead of the msg, so
+         a simple hack to print errors correctly */
+      if (level === 'error' && !msg) {
+        handler(meta)
+      } else {
+        handler(msg)
+      }
     }
   }
 }

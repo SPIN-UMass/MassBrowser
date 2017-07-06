@@ -177,7 +177,7 @@ function _createModel (name, schemaModel, meta, datastore) {
           }
         }
 
-        Model.prototype['get' + k[0].toUpperCase() + k.substr(1)] = function () {
+        Model.prototype['get' + relatedModel.name] = function () {
           return relatedModel.findOne({id: this[k]})
         }
       }

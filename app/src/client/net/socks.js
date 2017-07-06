@@ -118,6 +118,11 @@ function initSocksConnection (on_accept) {
    }); */
 
   this.on('error', function (e) {
+    // Supress 'connection ended by other side' errors
+    if (e.code === 'EPIPE') {
+      return
+    }
+
     errorLog('my error %j', e)
   })
 

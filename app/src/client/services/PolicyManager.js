@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { Domain } from '~/client/models'
+import * as errors from '~/utils/errors'
 
 class _PolicyManager extends EventEmitter {
   constructor () {
@@ -17,14 +18,13 @@ class _PolicyManager extends EventEmitter {
    * applied to the host
    */
   getDomainPolicy (host, port) {
-    console.log(host, port)
     const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
     return new Promise((resolve, reject) => {
       if (ipRegex.test(host)) {
-        return reject('IP based filtering not supported')
+        return reject(new errors.InvalidHostError('IP based filtering not supported'))
       }
-      return resolve(this.POLICY_YALER_PROXY)
+      // return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
       .then(domain => {
         if (!domain) {
@@ -44,6 +44,10 @@ class _PolicyManager extends EventEmitter {
             return resolve(this.POLICY_VANILLA_PROXY)
           }
 
+          if (!domain.ssl) {
+            return resolve(this.POLICY_YALER_PROXY)
+          }
+          
           domain.getCDN()
           .then(cdn => {
             if (cdn == null || !cdn.cachebrowsable) {
