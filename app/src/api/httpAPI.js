@@ -58,7 +58,7 @@ class API {
   requestSession () {
     return http.post(
       API_URL + CLIENT_URL + '/' + this.clientID + SESSION_URL,{
-        'cdn_session':false
+        'cdn_session':true
       }
     )
     .then(r => {

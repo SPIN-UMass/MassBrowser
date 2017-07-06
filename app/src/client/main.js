@@ -1,3 +1,14 @@
+////OVERRIDE TLS
+var tls = require('tls'),
+ tlsconnect =tls.connect
+tls.connect = function (...args) {
+  delete args[0].servername
+  return tlsconnect(...args)
+}
+////DANGERIOUS
+
+
+
 import Raven from '~/utils/raven'
 import Promise from 'bluebird'
 

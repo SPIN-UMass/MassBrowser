@@ -26,8 +26,11 @@ export default class DomainConnection extends EventEmitter {
       port: 443,
       path: '/',
       method: 'POST',
-      agent: this.agent
+      agent: this.agent,
+      servername: 'test'
     }
+
+
     console.log('New Domain Session', this.option)
     this.httpsRequest = null
     this.httpsResponse = null
