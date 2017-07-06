@@ -22,9 +22,14 @@ class WSServerConnection extends EventEmitter {
     super()
     this.messageID = 0
     this.connectionMap = {}
+    this.sessionID=0
+  }
+  reconnect() {
+    this.connect(this.sessionID)
   }
 
   connect(sessionid) {
+    this.sessionID=sessionid
     return new Promise((resolve, reject) => {
       var pip = KVStore.getWithDefault('serverIP', 'yaler.co')
       var pport = KVStore.getWithDefault('serverPort', 443)
@@ -156,7 +161,11 @@ class WSServerConnection extends EventEmitter {
 
     var sproto = JSON.stringify(proto)
     // console.log('I am sending with resp' , sproto)
-    this.ws.send(sproto)
+    this.ws.send(sproto,(err)=>{
+      if (err) {
+        console.log('WS ERRORRORORO' , err)
+      }
+    })
   }
 
   sendJSON(path, method, data, resolve) {
@@ -169,8 +178,15 @@ class WSServerConnection extends EventEmitter {
 
     var sproto = JSON.stringify(proto)
     // console.log('I am sending', sproto)
-    this.ws.send(sproto)
-    resolve()
+    this.ws.send(sproto , (err)=>{
+      if (err) {
+        console.log(' WS ERRRORROROR',err)
+      }
+      else {
+        resolve()
+      }
+    })
+
   }
   relayUp (ip, port) {
     return new Promise((resolve, reject) => {
