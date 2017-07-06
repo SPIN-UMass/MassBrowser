@@ -163,8 +163,7 @@ class WSServerConnection extends EventEmitter {
     // console.log('I am sending with resp' , sproto)
     this.ws.send(sproto,(err)=>{
       if (err) {
-        console.log(this.ws.readyState,this.ws.isAlive)
-        if (!this.ws.isAlive){
+        if (this.ws.readyState===WebSocket.CLOSED){
           this.reconnect()
           this.sendReceiveJSON(path,method,data,resolve)
 
@@ -187,8 +186,7 @@ class WSServerConnection extends EventEmitter {
     // console.log('I am sending', sproto)
     this.ws.send(sproto , (err)=>{
       if (err) {
-        console.log(this.ws.readyState,this.ws.isAlive)
-        if (!this.ws.isAlive){
+        if (this.ws.readyState===WebSocket.CLOSED){
           this.reconnect()
           this.sendJSON(path,method,data,resolve)
 
