@@ -166,11 +166,14 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto,(err)=>{
       if (err) {
         if (this.ws.readyState===WebSocket.CLOSED){
-          debug('reconnecting')
-          this.reconnect().then(()=>{
-            debug('reconnected')
-            this.sendReceiveJSON(path,method,data,resolve)
-          })
+
+          setTimeout(()=>{
+            debug('reconnecting')
+            this.reconnect().then(()=>{
+              debug('reconnected')
+              this.sendReceiveJSON(path,method,data,resolve)
+            })
+          },60)
 
 
         }else{
@@ -192,10 +195,15 @@ class WSServerConnection extends EventEmitter {
     // console.log('I am sending', sproto)
     this.ws.send(sproto , (err)=>{
       if (err) {
-        debug('reconneting')
         if (this.ws.readyState===WebSocket.CLOSED){
-          debug('reconnected')
-          this.reconnect().then(()=>{this.sendJSON(path,method,data,resolve)})
+
+          setTimeout(()=>{
+            debug('reconneting')
+            this.reconnect().then(()=>{
+              debug('reconnected')
+              this.sendJSON(path,method,data,resolve)})
+
+          },30)
 
 
         }else{
