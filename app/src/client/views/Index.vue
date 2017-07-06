@@ -20,6 +20,7 @@
 
 <script>
   import StatusWidget from './StatusWidget'
+  import SyncService from '~/client/services/SyncService'
 
   export default {
     data () {
@@ -35,6 +36,8 @@
       this.$router.afterEach((to, from) => {
         this.currentTab = to.name
       })
+
+      SyncService.syncAll()
     }
   }
 </script>

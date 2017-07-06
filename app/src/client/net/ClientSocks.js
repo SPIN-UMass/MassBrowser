@@ -5,13 +5,16 @@
  * Created by milad on 4/12/17.
  */
 var net = require('net'),
-  socks = require('./socks.js'),
-  info = console.log.bind(console)
+  socks = require('./socks.js')
+
 import ConnectionManager from './ConnectionManager'
 import CacheManager from '~/client/cachebrowser/CacheManager'
 import PolicyManager from '~/client/services/PolicyManager'
 // Create server
 // The relay accepts SOCKS connections. This particular relay acts as a proxy.
+
+import { debug, info, warn, error } from '~/utils/log'
+import * as errors from '~/utils/errors'
 
 export function startClientSocks (mhost, mport) {
   var HOST = mhost,
@@ -24,22 +27,43 @@ export function startClientSocks (mhost, mport) {
   }
 
   function onConnection (socket, port, address, proxyReady) {
-    // Implement your own proxy here! Do encryption, tunnelling, whatever! Go flippin' mental!
-    // I plan to tunnel everything including SSH over an HTTP tunnel. For now, though, here is the plain proxy:
-    PolicyManager.getDomainPolicy(address, port).then((proxyType) => {
+    PolicyManager.getDomainPolicy(address, port)
+    .then((proxyType) => {
+      debug(`New socks connection to ${address}:${port} using policy '${proxyType}'`)
+      
       if (proxyType === PolicyManager.POLICY_YALER_PROXY) {
-        ConnectionManager.newClientConnection(socket, address, port, proxyReady).then(() => {})
+        return yalerProxy(socket, address, port, proxyReady)
       } else if (proxyType === PolicyManager.POLICY_CACHEBROWSE) {
-        CacheManager.newCacheConnection(socket, address, port, proxyReady).then(() => {}, (error) => {
-          regularProxy(socket, port, address, proxyReady)
-        })
+        return cachebrowse(socket, address, port, proxyReady)
       } else {
-        regularProxy(socket, port, address, proxyReady)
+        return regularProxy(socket, address, port, proxyReady)
       }
+    })
+    .catch(errors.InvalidHostError, e => {
+      error(e.message)
+      /* TODO report to sentry to keep track of how often this happens */
+    })
+    .catch(err => {
+      warn("Connection failed")
+      error(err)
+      
+      /* TODO atleast report errors which are not smart to sentry (errors which are we are sure aren't handled) */
     })
   }
 
-  function regularProxy (socket, port, address, proxyReady) {
+  function yalerProxy(socket, address, port, proxyReady) {
+    return ConnectionManager.newClientConnection(socket, address, port, proxyReady)
+  }
+
+  function cachebrowse(socket, address, port, proxyReady) {
+    return CacheManager.newCacheConnection(socket, address, port, proxyReady)
+    .catch(errors.NotCacheBrowsableError, err => {
+      warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
+      return yalerProxy(socket, address, port, proxyReady)
+    })
+  }
+
+  function regularProxy (socket, address, port, proxyReady) {
     var proxy = net.createConnection({port: port, host: address}, proxyReady)
     var localAddress, localPort
     proxy.on('connect', () => {

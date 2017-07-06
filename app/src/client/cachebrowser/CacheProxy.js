@@ -39,7 +39,7 @@ class _CacheProxy {
       let started = false
       
       this.proxyserver = tls.createServer(this.proxyoptions, (socket) => {
-        console.log('new Connection')
+        // console.log('new Connection')
         this.handleCacheSocket(socket)
       })
 
@@ -78,7 +78,7 @@ class _CacheProxy {
   }
 
   handleCacheSocket (socket) {
-    console.log('I am creating connection', this.connectionlist)
+    // console.log('I am creating connection', this.connectionlist)
 
     let cachesocketoptions = {
       host: this.connectionlist[socket.remotePort][0],
@@ -86,7 +86,7 @@ class _CacheProxy {
       servername: this.connectionlist[socket.remotePort][2],
       rejectUnauthorized: false
     }
-    console.log(this.connectionlist)
+    // console.log(this.connectionlist)
     delete this.connectionlist[socket.remotePort]
 
     let proxysocket = tls.connect(cachesocketoptions, () => {

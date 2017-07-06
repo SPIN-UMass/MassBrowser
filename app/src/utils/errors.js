@@ -130,5 +130,7 @@ export class ApplicationBootError extends AppError {
 export class SessionRejectedError extends AppError {}
 export class NoRelayAvailableError extends AppError {}
 export class InvalidInvitationCodeError extends AppError {}
-export class CacheBrowserError extends AppError {}
+export class InvalidHostError extends AppError {}
 
+export class CacheBrowserError extends AppError {}
+export class NotCacheBrowsableError extends CacheBrowserError {}
