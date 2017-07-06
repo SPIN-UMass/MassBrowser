@@ -16,6 +16,8 @@ const SESSION_PATH='/api/session/'
 const RELAY_PATH= '/api/relays/'
 const CLIENT_PATH= '/api/client/'
 
+import { debug, error } from '~/utils/log'
+
 
 class WSServerConnection extends EventEmitter {
   constructor () {
@@ -45,7 +47,7 @@ class WSServerConnection extends EventEmitter {
         })
 
         this.ws.on('error', (err) => {
-          console.error(err)
+          error(err)
         })
 
         this.ws.on('open', () => {
@@ -63,7 +65,7 @@ class WSServerConnection extends EventEmitter {
           var handler = messageHandlers[resp.type]
           if (handler === undefined) {
 
-            console.error("Invalid message type received from server")
+            error("Invalid message type received from server")
             return
           }
           handler(resp)
@@ -99,7 +101,7 @@ class WSServerConnection extends EventEmitter {
       'sessionId': data.id
 
     }
-    console.log('session',desc,desc.token.length,Buffer.from(data.token,'base64').length)
+    debug('session',desc,desc.token.length,Buffer.from(data.token,'base64').length)
 
     pendMgr.addPendingConnection((desc.token),desc)
     this.acceptSession(data.client,data.id)
@@ -121,13 +123,13 @@ class WSServerConnection extends EventEmitter {
       var proto = {
         status: 'used'
       }
-      console.log("USED CONNECTION")
+      debug("USED CONNECTION")
       this.sendJSON(SESSION_PATH+sessionid+'/status','PUT', proto,resolve)
 
     })
   }
   clientSessionDisconnected(client,sessionid) {
-    console.log('closing session')
+    debug('closing session')
     return new Promise((resolve,reject) => {
       // TODO
 
@@ -144,7 +146,7 @@ class WSServerConnection extends EventEmitter {
 
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
-      console.log('I am HERE',this.connectionMap[resp['message_id']])
+      debug('I am HERE',this.connectionMap[resp['message_id']])
       this.connectionMap[resp['message_id']](resp['data'])
     }
   }
@@ -164,11 +166,15 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto,(err)=>{
       if (err) {
         if (this.ws.readyState===WebSocket.CLOSED){
-          this.reconnect().then(()=>{this.sendReceiveJSON(path,method,data,resolve)})
+          debug('reconnecting')
+          this.reconnect().then(()=>{
+            debug('reconnected')
+            this.sendReceiveJSON(path,method,data,resolve)
+          })
 
 
         }else{
-          console.log("WS ERROR",err)
+          error("WS ERROR",err)
         }
       }
     })
@@ -186,12 +192,14 @@ class WSServerConnection extends EventEmitter {
     // console.log('I am sending', sproto)
     this.ws.send(sproto , (err)=>{
       if (err) {
+        debug('reconneting')
         if (this.ws.readyState===WebSocket.CLOSED){
+          debug('reconnected')
           this.reconnect().then(()=>{this.sendJSON(path,method,data,resolve)})
 
 
         }else{
-          console.log("WS ERROR",err)
+          error("WS ERROR",err)
         }
       }
       else {
