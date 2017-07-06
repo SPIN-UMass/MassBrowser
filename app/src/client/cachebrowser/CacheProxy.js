@@ -47,7 +47,6 @@ class _CacheProxy {
         started = true
         debug('Initializing certificate manager')
         CertificateManager.initializeCA().then(() => {
-          debug('Initializeeeeeeeeeeeed')
           resolve()
         })
       })

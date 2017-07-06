@@ -130,6 +130,7 @@
       font-weight: bold;
       padding: 9px 0px;
       letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
     .btn {
