@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import Electron from 'vue-electron'
 import Resource from 'vue-resource'
-import Router from 'vue-router'
+import VueRouter from 'vue-router'
 import VueMask from 'v-mask'
 import Promise from 'bluebird'
+import ToggleButton from 'vue-js-toggle-button'
 
-import App from './App'
+
 import routes from './routes'
 
 import { Raven, RavenVue } from '~/utils/raven'
@@ -22,8 +23,9 @@ window.Promise = Promise;
 
 Vue.use(Electron)
 Vue.use(Resource)
-Vue.use(Router)
+Vue.use(VueRouter)
 Vue.use(VueMask)
+Vue.use(ToggleButton)
 
 Vue.config.debug = true
 
@@ -38,7 +40,7 @@ if (config.sentry.enabled) {
   warn('Sentry is disabled, not using sentry')
 }
 
-const router = new Router({
+const router = new VueRouter({
   scrollBehavior: () => ({ y: 0 }),
   routes
 })
@@ -47,6 +49,11 @@ const router = new Router({
 //   console.log(status.text)
 // })
 
+import App from './App'
 /* eslint-disable no-new */
-var options = Object.assign({router}, App)
+// var options = Object.assign({router}, App)
+var options = {
+  router,
+  render: h => h(App)
+}
 new Vue(options).$mount('#app')

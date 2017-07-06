@@ -54,6 +54,7 @@
     "throttle": "^1.0.3",
     "v-mask": "^1.2.0",
     "vs-stun": "0.0.7",
+    "vue-js-toggle-button": "^1.1.0",
     "vue": "^2.3.4",
     "vue-electron": "^1.0.6",
     "vue-resource": "^1.0.3",
