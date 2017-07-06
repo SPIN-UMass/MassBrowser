@@ -25,7 +25,7 @@ class WSServerConnection extends EventEmitter {
     this.sessionID=0
   }
   reconnect() {
-    this.connect(this.sessionID)
+    return this.connect(this.sessionID)
   }
 
   connect(sessionid) {
@@ -164,8 +164,8 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto,(err)=>{
       if (err) {
         if (this.ws.readyState===WebSocket.CLOSED){
-          this.reconnect()
-          this.sendReceiveJSON(path,method,data,resolve)
+          this.reconnect().then(()=>{this.sendReceiveJSON(path,method,data,resolve)})
+
 
         }else{
           console.log("WS ERROR",err)
@@ -187,8 +187,8 @@ class WSServerConnection extends EventEmitter {
     this.ws.send(sproto , (err)=>{
       if (err) {
         if (this.ws.readyState===WebSocket.CLOSED){
-          this.reconnect()
-          this.sendJSON(path,method,data,resolve)
+          this.reconnect().then(()=>{this.sendJSON(path,method,data,resolve)})
+
 
         }else{
           console.log("WS ERROR",err)
