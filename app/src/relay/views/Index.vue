@@ -1,0 +1,155 @@
+<template lang="pug">
+    .y-container
+        .y-header
+            h1 Yaler
+            .y-nav
+                ul
+                    li(:class="{active: currentTab==='client-home'}")
+                        router-link(to='/client') home
+                    li(:class="{active: currentTab==='client-websites'}")
+                        router-link(to='/client/websites') websites
+                        //- .span(v-on:click="$router.push('client-websites')") websites
+                    li(:class="{active: currentTab==='client-settings'}")
+                        a() settings
+        .y-content
+            router-view
+        .y-footer
+            StatusWidget.status-bar
+            button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
+</template>
+
+<script>
+  import StatusWidget from './StatusWidget'
+  import SyncService from '~/client/services/SyncService'
+
+  export default {
+    data () {
+      return {
+        currentTab: ''
+      }
+    },
+    components: {
+      StatusWidget
+    },
+    created () {
+      this.currentTab = this.$router.currentRoute.name
+      this.$router.afterEach((to, from) => {
+        this.currentTab = to.name
+      })
+
+      SyncService.syncAll()
+    }
+  }
+</script>
+
+
+<style scoped lang='scss'>
+    @import '~styles/settings.scss';
+
+    $border_radius: 0px;
+    $header_height: 75px;
+    $middle_height: 250px;
+    $bottom_height: 255px;
+    $footer_height: 60px;
+
+    .y-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .y-header {
+        border-radius: $border_radius $border_radius 0 0;
+        background: $color_main;
+        height: $header_height;
+        // box-shadow: 0 2px 0 rgba(0,0,0,0.075);
+
+        flex-grow: 0;
+        h1 {
+            margin: 0px;
+            margin-top: 22px;
+            padding: 5px 30px;
+            float: left;
+
+            color: #999;
+            font-weight: bold;
+            font-family: $font_title;
+        }
+    }
+
+    .y-nav {
+        font-family: $font-menu;
+        overflow: auto;
+        margin-top: 35px;
+        margin-right: 15px;
+        float: right;
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            // float: left;
+            display: inline-block;
+
+            a {
+                display: block;
+                text-align: center;
+                padding: 5px 16px;
+                text-decoration: none;
+
+                color: #bbb;
+                font-size: 16px;
+
+                &:hover {
+                    color: #111;
+                }
+            }
+
+
+
+            &.active {
+                a{
+                    color: black;
+                    font-size: 19px;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+
+    .y-content {
+        clear: both;
+        background: #f1f4f7;
+        box-shadow: 0 -1px 0 0 rgba(0,0,0,0.1);
+        flex-grow: 1;
+    }
+
+    .y-footer {
+        height: $footer_height;
+        flex-grow: 0;
+
+        clear: both;
+
+        border-radius: 0 0 $border_radius $border_radius;
+        background: $color-main;
+        box-shadow: 0px -1px 0 0 rgba(0, 0, 0, 0.1);
+
+        .btn {
+            float: right;
+            margin-top: 15px;
+            margin-right: 20px;
+        }
+
+        .status-bar {
+            float: left;
+            margin-top: 20px;
+            margin-left: 30px;
+
+            color: #aaa;
+        }
+    }
+
+
+</style>

@@ -8,6 +8,7 @@ export default class CDNScoketMeek extends EventEmitter {
 
   constructor (socket, poolingMode, rtt, timeout) {
     super()
+
     this.socket = socket
     this.connection = new ConnectionReceiver(this, this, this)
     this.responses = Buffer(0)
@@ -25,7 +26,7 @@ export default class CDNScoketMeek extends EventEmitter {
   }
 
   newRequest (req, res) {
-    console.log('New Request', req)
+    console.log('New Request')
     this.response = res
 
     req.on('data', (data) => {

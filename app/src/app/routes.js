@@ -37,6 +37,11 @@ export default [
     component: require('~/client/views/Splash')
   },
   {
+    path: '/relay',
+    name: 'relay',
+    component: require('~/client/views/Index')
+  },
+  {
     path: '*',
     redirect: '/'
   }
