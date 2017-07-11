@@ -17,7 +17,7 @@ class _StatusReporter extends EventEmitter {
     this.localip = ''
     this.reachable = false
     this.WSconnected = false
-    this.isOpen=false
+    this.isOpen = false
   }
 
   startRoutine () {
@@ -49,7 +49,7 @@ class _StatusReporter extends EventEmitter {
   }
 
   relayUP () {
-    this.isOpen=true
+    this.isOpen = true
     if (config.relay.natEnabled && this.WSconnected) {
 
       console.log('REPORTING RELAY UP')
@@ -58,7 +58,7 @@ class _StatusReporter extends EventEmitter {
   }
 
   relayDown () {
-    this.isOpen=false
+    this.isOpen = false
     if (this.WSconnected) {
 
       console.log('REPORTING RELAY DOWN')

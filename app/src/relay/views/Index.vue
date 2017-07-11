@@ -16,10 +16,10 @@
         .y-footer
             StatusWidget.status-bar
 
-            toggle-button.toggle( :v-on:change="onChange" width=95  value="accessStatus" labels= {
+            toggle-button.toggle( v-on:change="onChange", value="accessStatus", :labels= {
               checked: 'Open Access',
               unchecked: 'Offline'
-            }  )
+            }  width=95 )
             span.relaytext Status:
 </template>
 
@@ -33,7 +33,7 @@
     data () {
       return {
         currentTab: '',
-        accessStatus : StatusReporter.isOpen
+        accessStatus: StatusReporter.isOpen
       }
     },
     components: {
@@ -50,7 +50,7 @@
           StatusReporter.relayUP()
         }
         else {
-            StatusReporter.relayDown()
+          StatusReporter.relayDown()
         }
       }
     }
