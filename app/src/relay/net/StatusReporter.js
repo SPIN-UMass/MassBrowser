@@ -5,6 +5,7 @@ var schedule = require('node-schedule')
 import   ConnectivityConnection from '~/api/connectivityAPI'
 import ServerConnection from '~/api/wsAPI'
 import { EventEmitter } from 'events'
+import config from '~/utils/config'
 
 class _StatusReporter extends EventEmitter {
 
@@ -20,23 +21,38 @@ class _StatusReporter extends EventEmitter {
 
   startRoutine () {
     this._startKeepAlive()
+    this.sendKeepAlive()
   }
 
   _startKeepAlive () {
     schedule.scheduleJob('*/30 * * * * *', () => {
-      ServerConnection.keepAlive().then((res) => {
-        this.WSconnected = true
-        this.reachable = res.reachable
-        this.emit('status-updated')
-
-      }).catch((err) => {
-        this.reachable = false
-        this.WSconnected = false
-        this.emit('status-updated')
-      })
-      ConnectivityConnection.keepAlive()
-
+      this.sendKeepAlive()
     })
+  }
+
+  sendKeepAlive () {
+    ServerConnection.keepAlive().then((res) => {
+      this.WSconnected = true
+      this.reachable = res.reachable
+      this.emit('status-updated')
+    }).catch((err) => {
+      this.reachable = false
+      this.WSconnected = false
+      this.emit('status-updated')
+    })
+    ConnectivityConnection.keepAlive()
+  }
+
+  relayUP () {
+    if (config.relay.natEnabled && this.WSconnected) {
+      ServerConnection.relayUp(this.remoteip, this.remoteport)
+    }
+  }
+
+  relayDown () {
+    if (config.relay.WSconnected) {
+      ServerConnection.relayDown()
+    }
   }
 
 }

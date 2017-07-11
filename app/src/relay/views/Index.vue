@@ -16,15 +16,15 @@
         .y-footer
             StatusWidget.status-bar
 
-            toggle-button.toggle(width=95, :labels= {checked:'Open Access', unchecked:'Offline'}  )
+            toggle-button.toggle(width=95, v-on:change="", :labels= {checked: 'Open Access', unchecked: 'Offline'}  )
             span.relaytext Status:
 </template>
 
 <script>
   import StatusWidget from './StatusWidget'
 
-  import {bootRelay} from '~/relay/boot'
-
+  import { bootRelay } from '~/relay/boot'
+  import StatusReporter from '~/relay/net/StatusReporter'
 
   export default {
     data () {
@@ -38,7 +38,14 @@
     created () {
       console.log(" I AM HERE ")
       bootRelay()
-
+    },
+    methods: {
+      onChange: function (e) {
+        if (e.value) {
+          StatusReporter.relayUP()
+        }
+        StatusReporter.relayDown()
+      }
     }
 //    created () {
 //      this.currentTab = this.$router.currentRoute.name
@@ -156,13 +163,13 @@
             color: #aaa;
         }
         .relaytext {
-            float:right;
-            margin-top: 22px ;
+            float: right;
+            margin-top: 22px;
             margin-right: 5px;
         }
         .toggle {
-            float:right;
-            margin-top: 20px ;
+            float: right;
+            margin-top: 20px;
             margin-right: 10px;
 
         }

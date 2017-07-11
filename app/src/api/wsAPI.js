@@ -182,6 +182,15 @@ class WSServerConnection extends EventEmitter {
       }
     })
   }
+  relayDown() {
+    return new Promise((resolve, reject) => {
+      var proto = {
+        'status':'down'
+      }
+      this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+    })
+
+  }
 
   sendJSON(path, method, data, resolve) {
     var proto = {}
@@ -220,6 +229,7 @@ class WSServerConnection extends EventEmitter {
     return new Promise((resolve, reject) => {
       var proto = {
         'ip': ip,
+        'status': 'up',
         'port': port,
         'fingerprint': this.fingerprint,
         'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
