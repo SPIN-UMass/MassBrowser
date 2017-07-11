@@ -18,8 +18,8 @@
       return {
         text: '',
         show: false,
-        reachable: false,
-        WSconnected: false,
+        reachable: StatusReporter.reachable,
+        WSconnected: StatusReporter.WSconnected,
         closable: false,
         level: ''
       }

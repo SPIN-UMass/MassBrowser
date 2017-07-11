@@ -16,7 +16,7 @@
         .y-footer
             StatusWidget.status-bar
 
-            toggle-button.toggle(width=95, v-on:change="onChange", :labels= {
+            toggle-button.toggle( :v-on:change="onChange" width=95  value="accessStatus" labels= {
               checked: 'Open Access',
               unchecked: 'Offline'
             }  )
@@ -32,7 +32,8 @@
   export default {
     data () {
       return {
-        currentTab: ''
+        currentTab: '',
+        accessStatus : StatusReporter.isOpen
       }
     },
     components: {
