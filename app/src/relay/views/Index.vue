@@ -4,23 +4,27 @@
             h1 Yaler
             .y-nav
                 ul
-                    li(:class="{active: currentTab==='client-home'}")
-                        router-link(to='/client') home
-                    li(:class="{active: currentTab==='client-websites'}")
-                        router-link(to='/client/websites') websites
+                    li(:class="{active: currentTab==='relay-home'}")
+                        router-link(to='/relay') home
+                    li(:class="{active: currentTab==='relay-categories'}")
+                        router-link(to='/relay/categories') ACL
                         //- .span(v-on:click="$router.push('client-websites')") websites
-                    li(:class="{active: currentTab==='client-settings'}")
-                        a() settings
+                    li(:class="{active: currentTab==='relay-settings'}")
+                        router-link(to='/relay/settings') settings
         .y-content
             router-view
         .y-footer
             StatusWidget.status-bar
-            button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
+
+            toggle-button.toggle(width=95, :labels= {checked:'Open Access', unchecked:'Offline'}  )
+            span.relaytext Status:
 </template>
 
 <script>
   import StatusWidget from './StatusWidget'
-  import SyncService from '~/client/services/SyncService'
+
+  import {bootRelay} from '~/relay/boot'
+
 
   export default {
     data () {
@@ -32,13 +36,17 @@
       StatusWidget
     },
     created () {
-      this.currentTab = this.$router.currentRoute.name
-      this.$router.afterEach((to, from) => {
-        this.currentTab = to.name
-      })
+      console.log(" I AM HERE ")
+      bootRelay()
 
-      SyncService.syncAll()
     }
+//    created () {
+//      this.currentTab = this.$router.currentRoute.name
+//      this.$router.afterEach((to, from) => {
+//        this.currentTab = to.name
+//      })
+//        SyncService.syncAll()
+//    }
   }
 </script>
 
@@ -107,10 +115,8 @@
                 }
             }
 
-
-
             &.active {
-                a{
+                a {
                     color: black;
                     font-size: 19px;
                     font-weight: bold;
@@ -122,7 +128,7 @@
     .y-content {
         clear: both;
         background: #f1f4f7;
-        box-shadow: 0 -1px 0 0 rgba(0,0,0,0.1);
+        box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.1);
         flex-grow: 1;
     }
 
@@ -148,6 +154,17 @@
             margin-left: 30px;
 
             color: #aaa;
+        }
+        .relaytext {
+            float:right;
+            margin-top: 22px ;
+            margin-right: 5px;
+        }
+        .toggle {
+            float:right;
+            margin-top: 20px ;
+            margin-right: 10px;
+
         }
     }
 

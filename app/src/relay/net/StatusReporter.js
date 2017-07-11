@@ -4,13 +4,18 @@
 var schedule = require('node-schedule')
 import   ConnectivityConnection from '~/api/connectivityAPI'
 import ServerConnection from '~/api/wsAPI'
-class _StatusReporter {
+import { EventEmitter } from 'events'
+
+class _StatusReporter extends EventEmitter {
 
   constructor () {
+    super()
     this.localport = -1
     this.remoteport = -1
     this.remoteip = ''
     this.localip = ''
+    this.reachable = false
+    this.WSconnected = false
   }
 
   startRoutine () {
@@ -19,7 +24,16 @@ class _StatusReporter {
 
   _startKeepAlive () {
     schedule.scheduleJob('*/30 * * * * *', () => {
-      ServerConnection.keepAlive()
+      ServerConnection.keepAlive().then((res) => {
+        this.WSconnected = true
+        this.reachable = res.reachable
+        this.emit('status-updated')
+
+      }).catch((err) => {
+        this.reachable = false
+        this.WSconnected = false
+        this.emit('status-updated')
+      })
       ConnectivityConnection.keepAlive()
 
     })

@@ -37,9 +37,18 @@ export default [
     component: require('~/client/views/Splash')
   },
   {
-    path: '/relay',
+    path: '/relay',//
     name: 'relay',
-    component: require('~/client/views/Index')
+    component: require('~/relay/views/Index'),
+    children: [
+      {
+        path: '/relay/settings',
+        component: require('~/relay/views/SettingsView'),
+        name: 'relay-settings'
+
+      }
+    ]
+
   },
   {
     path: '*',

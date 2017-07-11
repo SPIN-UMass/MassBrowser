@@ -243,7 +243,7 @@ class WSServerConnection extends EventEmitter {
         var proto = {
           'fingerprint': this.fingerprint,
         }
-        this.sendJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
+        this.sendReceiveJSON(RELAY_PATH + this.relayid, 'POST', proto, resolve)
       })
   }
 

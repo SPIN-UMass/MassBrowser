@@ -11,7 +11,7 @@
       }
     },
     "relay": {
-      "natEnabled": false,
+      "natEnabled": true,
       "port": 8040,
       "domainfrontable":false,
       "domainfrontPort":8083,
