@@ -76,6 +76,11 @@ export function bootRelay () {
         })
     })
     .then(address => {
+      console.log('Starting Relay')
+      return runOBFSserver(address.localIP, address.localPort)
+        .then(() => address)
+    })
+    .then(address => {
       console.log('Connecting to WebSocket server')
       return ServerConnection.connect(httpAPI.getSessionID())
         .then(() => address)
