@@ -46,6 +46,12 @@ export default [
         component: require('~/relay/views/SettingsView'),
         name: 'relay-settings'
 
+      },
+      {
+        path: '/relay/categories',
+        component: require('~/relay/views/CategoriesView'),
+        name: 'relay-categories'
+
       }
     ]
 

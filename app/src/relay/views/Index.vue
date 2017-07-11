@@ -19,7 +19,7 @@
             toggle-button.toggle( v-on:change="onChange", :labels= {
               checked: 'Open Access',
               unchecked: 'Offline'
-            }  width=95  v-bind:value="accessStatus")
+            }   v-bind:value="accessStatus" v-bind:width="togglesize" )
             span.relaytext Status:
 </template>
 
@@ -28,12 +28,14 @@
 
   import { bootRelay } from '~/relay/boot'
   import StatusReporter from '~/relay/net/StatusReporter'
+  import SyncService from '~/client/services/SyncService'
 
   export default {
     data () {
       return {
         currentTab: '',
-        accessStatus: StatusReporter.isOpen
+        accessStatus: StatusReporter.isOpen,
+        togglesize: 95
       }
     },
     components: {
@@ -42,6 +44,8 @@
     created () {
       console.log(" I AM HERE ")
       bootRelay()
+      SyncService.syncAll()
+
     },
     methods: {
       onChange: function (e) {

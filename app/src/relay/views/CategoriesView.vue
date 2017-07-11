@@ -4,7 +4,7 @@
             ul.list-group
                 li.categories-item.list-group-item(v-for="item in categories")
                     span {{item.name}}
-                    website-toggle.toggle(:website="item")
+                    website-toggle.toggle(:category="item")
 </template>
 
 <script>
@@ -46,8 +46,11 @@
       'categories-toggle': CategoryToggle
     },
     created () {
-      Category.find({thirdParty: false})
+      console.log('finding categories')
+      Category.find()
         .then(categories => {
+          console.log('founded categories')
+          console.log(categories)
           this.categoies = categories
         })
     },
