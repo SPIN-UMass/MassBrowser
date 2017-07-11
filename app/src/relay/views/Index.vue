@@ -16,10 +16,10 @@
         .y-footer
             StatusWidget.status-bar
 
-            toggle-button.toggle( v-on:change="onChange", value="accessStatus", :labels= {
+            toggle-button.toggle( v-on:change="onChange", :labels= {
               checked: 'Open Access',
               unchecked: 'Offline'
-            }  width=95 )
+            }  width=95  v-bind:value="accessStatus")
             span.relaytext Status:
 </template>
 
