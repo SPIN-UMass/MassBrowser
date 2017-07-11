@@ -45,8 +45,14 @@ console.log(process.env.NODE_ENV)
 if (process.env.NODE_ENV === 'development') {
   console.log("Running in development mode")
   updateConfig(config, devConfig)
+  config.environment == 'development'
+  config.isDevelopment = true
+  config.isProduction = false
 } else if (process.env.NODE_ENV === 'production') {
   updateConfig(config, prodConfig)
+  config.environment == 'production'
+  config.isDevelopment = false
+  config.isProduction = true
 } else {
   console.error("Environement variable NODE_ENV should be set to 'development' or 'production'")
   process.exit(1)

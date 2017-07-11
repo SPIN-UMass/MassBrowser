@@ -10,7 +10,6 @@ import ToggleButton from 'vue-js-toggle-button'
 import routes from './routes'
 
 import { Raven, RavenVue } from '~/utils/raven'
-import Status from '~/utils/status'
 import config from '~/utils/config'
 import {initializeLogging, warn} from '~/utils/log'
 
@@ -45,9 +44,6 @@ const router = new VueRouter({
   routes
 })
 
-// Status.on('status-changed', function (status) {
-//   console.log(status.text)
-// })
 
 import App from './App'
 /* eslint-disable no-new */

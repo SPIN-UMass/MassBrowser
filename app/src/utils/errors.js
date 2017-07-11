@@ -11,15 +11,23 @@ function sanitizeUrl (url) {
 
 export class BaseError {
   constructor(message) {
-    this.message = message
     this.smart = true
     this.name = this.constructor.name
     
-    var err = new Error(message)
-    // This messes up the stack trace file locations in the console output, but 
-    // doesn't effect sentry logs
-    // err.name = this.constructor.name
-    this.stack = err.stack
+    var err = null
+    if (message instanceof Error) {
+      this.message = message.message
+      err = message
+      this.stack = err.stack
+    } else {
+      this.message = message
+      err = new Error(message)
+
+      // This messes up the stack trace file locations in the console output, but 
+      // doesn't effect sentry logs
+      // err.name = this.constructor.name
+      this.stack = err.stack
+    }
     
     this.log = function() {
       console.error(this.stack)
@@ -131,6 +139,7 @@ export class SessionRejectedError extends AppError {}
 export class NoRelayAvailableError extends AppError {}
 export class InvalidInvitationCodeError extends AppError {}
 export class InvalidHostError extends AppError {}
+export class AutoUpdateError extends AppError {}
 
 export class CacheBrowserError extends AppError {}
 export class NotCacheBrowsableError extends CacheBrowserError {}

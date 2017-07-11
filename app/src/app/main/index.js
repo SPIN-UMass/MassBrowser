@@ -1,6 +1,8 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
+import { initAutoUpdater } from './auto_updater'
+
 
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
@@ -17,6 +19,8 @@ function createWindow () {
     resizable: false
   })
 
+  initAutoUpdater(mainWindow)
+  
   mainWindow.loadURL(winURL)
 
   // mainWindow.webContents.openDevTools()

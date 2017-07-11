@@ -1,13 +1,56 @@
-<template>
-  <div id="app" data-app='true'>
-    <router-view></router-view>
-  </div>
+<template lang='pug'>
+  #app(data-app='true')
+    
+    router-view
+    modal-manager
+    
 </template>
 
 <script>
-  // import store from 'renderer/vuex/store'
+  import AutoUpdater from '~/services/AutoUpdater'
+  import ModalManager from '~/app/widgets/ModalManager'
+  import { showConfirmDialog } from '~/app/utils'
+
   export default {
-    // store
+    data() {
+      return {
+      }
+    },
+    components: {
+      ModalManager
+    },
+    created () {
+      
+    },
+    mounted () {
+      this.checkForUpdate()
+    },
+    methods: {
+      checkForUpdate () {
+        AutoUpdater.checkForUpdates()
+        .then(updateAvailable => {
+          if (!updateAvailable) {
+            return false
+          }
+
+          return showConfirmDialog(
+            'Update Available',
+            'An update is available, would you like to update?',
+            { yesText: 'Update', noText: 'No'}
+          )
+        })
+        .then(shouldUpdate => shouldUpdate ? this.downloadUpdate() : null)
+      },
+      downloadUpdate () {
+        AutoUpdater.downloadUpdate()
+        .then(() => showConfirmDialog(
+          'Application Restart Needed',
+          'Application will now restart for update to take effect',
+          { yesText: 'OK', noText: 'Cancel'}
+        ))
+        .then(() => AutoUpdater.quitAndInstall())
+      }
+    }
   }
 </script>
 

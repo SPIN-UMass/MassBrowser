@@ -3,8 +3,7 @@
     h1 MassProxy
     .loading-container(v-if="status=='loading'")
       GridLoader.spinner(color="#aaa")
-      .status-container
-        StatusWidget
+      .status-container  {{ statusMessage }}
     .invitation-container(v-if="status=='prompt'")
       h4 Please enter your invitation code
       input(v-mask="invitationCodeMask" v-model='invitationCode' placeholder='')
@@ -17,7 +16,8 @@
 </template>
 
 <script>
-  import StatusWidget from './StatusWidget'
+  // import StatusWidget from './StatusWidget'
+  import Status from '~/utils/status'
   import GridLoader from 'vue-spinner/src/GridLoader.vue'
 
   import bootClient from '~/client/boot'
@@ -36,16 +36,24 @@
         invitationCodeMask: null,
         invitationCodeValid: false,
         errorMessage: '',
-        canRetry: false
+        canRetry: false,
+        statusMessage: ''
       }
     },
     components: {
-      StatusWidget,
       GridLoader
     },
     created () {
       this.invitationCodeMask = 'N'.repeat(INVITATION_CODE_LENGTH/2) + DELIM + 'N'.repeat(INVITATION_CODE_LENGTH/2)
+
+      Status.on('status-changed', this.onStatusChanged)
+      Status.on('status-cleared', this.onStatusCleared)
+
       this.bootClient()
+    },
+    beforeDestroy () {
+      Status.removeListener('status-changed', this.onStatusChanged)
+      Status.removeListener('status-cleared', this.onStatusCleared)
     },
     watch: {
       /**
@@ -57,6 +65,14 @@
       }
     },
     methods: {
+      onStatusChanged: function(status) {
+        if (status.statusType === Status.STATUS_LOG) {
+          this.statusMessage = status.message
+        }
+      },
+      onStatusCleared: function () {
+        this.statusMessage = ''
+      },
       submitInvitationCode: function () {
         this.status = 'loading'
         invitationCodePromiseResolve(this.invitationCode.replace(/\s/g, ''))

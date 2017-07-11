@@ -42,12 +42,13 @@ export function initializeLogging() {
   })
 }
 
-var logger = new (winston.Logger)()  
-
-export default logger
-
+export const logger = new (winston.Logger)()  
 export const log = logger.log
 export const info = logger.info
 export const warn = logger.warn
 export const debug = logger.debug
 export const error = logger.error
+
+export default logger
+
+

@@ -69,6 +69,15 @@ function run(command, options) {
 
 
 /* ------- Github -------- */
+
+/**
+ * Steps:
+ * 1: Check package.json version match
+ * 2: Confirm version
+ * 3: Get config
+ *    3.1: GH_TOKEN (https://github.com/settings/tokens)
+ */
+
 function releaseGithub() {
   return Promise.all([fs.readJson('package.json'), fs.readJson('app/package.json')])
   .then(package => {
@@ -82,13 +91,16 @@ function releaseGithub() {
     {
       type: 'confirm',
       name: 'confirm',
-      message: `Using version ${version} for release, it this ok?`,
+      message: `Using version ${version} for release, is this ok?`,
       default: true
     }
   ]))
   .then(answer => answer.confirm ? getGithubConfig() : process.exit(0))
   .then(config => {
-    run(`cross-env GH_TOKEN=${config.authToken} build -l -p always`)
+    run(`cross-env GH_TOKEN=${config.authToken} build -mw -p always`)
+  })
+  .then(() => {
+    console.log(chalk.yellow.bold('Release draft published, you will need to visit Github releases page to finalize the release'))
   })
 }
 
@@ -103,7 +115,7 @@ function createGithubConfig() {
     authToken: null
   }
 
-  var questions = [+
+  var questions = [
     {
       name: 'authToken',
       message: 'Enter your github API Token',
@@ -122,9 +134,20 @@ function createGithubConfig() {
   })
 }
 
-/* -------------- -------- */
-
 /* ------- Sentry -------- */
+
+/**
+ * Steps:
+ * 1: Get config
+*    1.1: authToken: sentry auth token
+ *   1.2: sentryUrl: sentry url (e.g. https://sentry.yaler.co) 
+ *   1.3: sentryOrg: sentry organization name (e.g. sentry)
+ *   1.4: repoName: github repo name (e.g. srxzr/UOIS)
+ *   1.5: project: sentry project names space seperated (e.g. client-dev)
+ *   1.6: version: release version identifier (can be auto)
+ *   1.7: commit: release commit ID (can be auto)
+ * 2: 
+ */
 
 function releaseSentry() {
   Promise.all([getSentryConfig(), fs.readJson('app/package.json')])
@@ -251,7 +274,7 @@ function createSentryConfig() {
     },
     {
       name: 'repoName',
-      message: 'Whats the repository name? (e.g. someon/someproject)',
+      message: 'Whats the repository name? (e.g. someone/someproject)',
       default: config.repoName
     },
     {

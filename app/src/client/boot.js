@@ -32,11 +32,14 @@ require('events').EventEmitter.prototype._maxListeners = 10000
 /**
  * @param registrationCallback is called if the client requires registration, the callback is
  * expected to return a promise which provides an invitation code used for registration
+ * 
+ * * @param registrationCallback is called if the client requires registration, the callback is
+ * expected to return a promise which provides an invitation code used for registration
  *
  * @throws ApplicationBootError
  * @throws InvalidInvitationCodeError
  */
-export default function bootClient (registrationCallback) {
+export default function bootClient (registrationCallback, updateAvailableCallback) {
   Status.clearAll()
 
   return KVStore.get('client', null)
@@ -66,25 +69,27 @@ export default function bootClient (registrationCallback) {
     .then(client => {
       let status = Status.info('Authenticating Client')
       return httpAPI.authenticate(client.id, client.password)
-        .then(status.clear)
+        .then(() => status.clear())
     })
     .then(() => {
       let status = Status.info('Server connection established')
       return httpAPI.clientUp()
-        .then(status.clear)
+        .then(() => status.clear())
     })
     .then(() => {
+      let status = Status.info('Connecting to relay')
       return SessionService.start()
+        .then(() => status.clear())
     })
     .then(() => {
       let status = Status.info('Starting cachebrowser server')
       return CacheProxy.startCacheProxy()
-        .then(status.clear)
+        .then(() => status.clear())
     })
     .then(() => {
       let status = Status.info('Starting SOCKS server')
       return startClientSocks('127.0.0.1', config.client.socksPort)
-        .then(status.clear)
+        .then(() => status.clear())
     })
     .then(() => {
       /// Only sync database in boot if it is the first time booting
@@ -96,7 +101,7 @@ export default function bootClient (registrationCallback) {
             debug('It is first boot, syncing database')
             let status = Status.info('Syncing database')
             return SyncService.syncAll()
-              .then(status.clear)
+              .then(() => status.clear())
           }
         })
     })

@@ -16,17 +16,36 @@
       }
     },
     created () {
-      const showStatus = (status) => {
-        this.text = status.text
-        this.show = true
-        this.level = status.options.level ? status.options.level : ''
-        this.closable = status.options.closable
+      var currentStatus = null
+
+      const progressListener = (status) => {
+        this.text = status.message
       }
+
+      const removePreviousStatus = () => {
+        if (status.statusType === Status.STATUS_PROGRESS) {
+          currentStatus.removeListener('update', progressListener)
+        }
+        currentStatus = null
+      }
+
+      const showStatus = (status) => {
+        currentStatus = status
+        if (status.statusType === Status.STATUS_LOG) {
+          this.text = status.message
+          this.show = true
+          this.level = status.level
+        } else if (status.statusType === Status.STATUS_PROGRESS) {
+          this.text = status.message
+          status.on('update', progressListener)
+          this.show = true
+        }
+      }
+      
       const clearStatus = () => {
         this.text = ''
         this.show = false
         this.level = false
-        this.closable = false
       }
       Status.on('status-changed', showStatus)
       Status.on('status-cleared', clearStatus)
