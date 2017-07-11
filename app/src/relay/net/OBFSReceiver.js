@@ -15,9 +15,9 @@ export function runOBFSserver (publicIP, publicPort) {
       socket.authorized ? 'authorized' : 'unauthorized')
     // var dd=socket.pipe(tg.throttle())
     var my_up = up_limit.throttle()
-    my_up.on('error',(err)=>{})
+    my_up.on('error', (err) => {})
     var my_down = down_limit.throttle()
-    my_down.on('error',(err)=>{})
+    my_down.on('error', (err) => {})
 
     socket.pipe(my_up)
     my_down.pipe(socket)
@@ -41,10 +41,20 @@ export function runOBFSserver (publicIP, publicPort) {
     })
   })
 
-  server.listen({port:publicPort, host:publicIP,exclusive:false}, () => {
+  server.listen({port: publicPort, host: publicIP, exclusive: false}, () => {
     console.log('relay bound')
   })
   console.log('test relay started on ', publicPort)
+  server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+      console.log('Address in use, retrying...')
+      setTimeout(() => {
+        server.close()
+        server.listen({port: publicPort, host: publicIP, exclusive: false})
+      }, 1000)
+    }
+  })
+
   return new Promise((resolve, reject) => {
     resolve(publicPort)
   })

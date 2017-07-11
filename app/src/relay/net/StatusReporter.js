@@ -20,8 +20,9 @@ class _StatusReporter extends EventEmitter {
   }
 
   startRoutine () {
-    this._startKeepAlive()
     this.sendKeepAlive()
+
+    this._startKeepAlive()
   }
 
   _startKeepAlive () {
@@ -31,6 +32,7 @@ class _StatusReporter extends EventEmitter {
   }
 
   sendKeepAlive () {
+    console.log("sessnign keepalive")
     ServerConnection.keepAlive().then((res) => {
       this.WSconnected = true
       this.reachable = res.reachable
@@ -45,12 +47,13 @@ class _StatusReporter extends EventEmitter {
 
   relayUP () {
     if (config.relay.natEnabled && this.WSconnected) {
+      console.log('REPORTING RELAY UP')
       ServerConnection.relayUp(this.remoteip, this.remoteport)
     }
   }
-
   relayDown () {
-    if (config.relay.WSconnected) {
+    if (this.WSconnected) {
+      console.log('REPORTING RELAY DOWN')
       ServerConnection.relayDown()
     }
   }

@@ -16,7 +16,10 @@
         .y-footer
             StatusWidget.status-bar
 
-            toggle-button.toggle(width=95, v-on:change="", :labels= {checked: 'Open Access', unchecked: 'Offline'}  )
+            toggle-button.toggle(width=95, v-on:change="onChange", :labels= {
+              checked: 'Open Access',
+              unchecked: 'Offline'
+            }  )
             span.relaytext Status:
 </template>
 
@@ -41,10 +44,13 @@
     },
     methods: {
       onChange: function (e) {
+        console.log(e.value)
         if (e.value) {
           StatusReporter.relayUP()
         }
-        StatusReporter.relayDown()
+        else {
+            StatusReporter.relayDown()
+        }
       }
     }
 //    created () {
