@@ -28,7 +28,7 @@
 
   import { bootRelay } from '~/relay/boot'
   import StatusReporter from '~/relay/net/StatusReporter'
-  import SyncService from '~/client/services/SyncService'
+  import SyncService from '~/relay/services/SyncService'
 
   export default {
     data () {
