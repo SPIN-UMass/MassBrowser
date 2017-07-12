@@ -2,9 +2,9 @@
     .categories-container
         .categories-list
             ul.list-group
-                li.categories-item.list-group-item(v-for="item in categories")
+                li.category-item.list-group-item(v-for="item in categories")
                     span {{item.name}}
-                    website-toggle.toggle(:category="item")
+                    category-toggle.toggle(:category="item")
 </template>
 
 <script>
@@ -43,7 +43,7 @@
       }
     },
     components: {
-      'categories-toggle': CategoryToggle
+      'category-toggle': CategoryToggle
     },
     created () {
       console.log('finding categories')
@@ -51,7 +51,7 @@
         .then(categories => {
           console.log('founded categories')
           console.log(categories)
-          this.categoies = categories
+          this.categories = categories
         })
     },
     methods: {}
@@ -59,7 +59,8 @@
 </script>
 
 <style scoped lang='scss'>
-    .website-item {
+
+    .category-item {
         .toggle {
             float: right;
         }
