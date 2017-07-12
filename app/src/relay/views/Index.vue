@@ -26,7 +26,7 @@
 <script>
   import StatusWidget from './StatusWidget'
 
-  import { bootRelay } from '~/relay/boot'
+  import bootRelay from '~/relay/boot'
   import StatusReporter from '~/relay/net/StatusReporter'
   import SyncService from '~/relay/services/SyncService'
 

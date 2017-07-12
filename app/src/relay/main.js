@@ -17,6 +17,7 @@ import { InvalidInvitationCodeError } from '~/utils/errors'
 import { error } from '~/utils/log'
 import config from '~/utils/config'
 import {initializeLogging} from '~/utils/log'
+import StatusReporter from '~/relay/net/StatusReporter'
 
 global.Promise = Promise
 
@@ -28,6 +29,9 @@ Raven
   .install()
 
 bootClient()
+.then(() => {
+  StatusReporter.relayUP()
+})
 
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
