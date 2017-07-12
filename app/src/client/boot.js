@@ -6,11 +6,13 @@
 import crypto from 'crypto'
 
 import Raven from '~/utils/raven'
-import httpAPI from '~/api/httpAPI'
 import KVStore from '~/utils/kvstore'
 import Status from '~/utils/status'
 import config from '~/utils/config'
 import { debug, error } from '~/utils/log'
+import { HttpTransport } from '~/utils/transport'
+
+import API from '~/client/api'
 
 import SessionService from '~/client/services/SessionService'
 import SyncService from '~/client/services/SyncService'
@@ -50,7 +52,7 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
         return registrationCallback()
           .then(invitationCode => {
             let status = Status.info(`Registering Client`)
-            return httpAPI.registerClient(invitationCode)
+            return API.registerClient(invitationCode)
               .then(client => {
                 status.clear()
                 KVStore.set('client', {id: client.id, password: client.password})
@@ -68,12 +70,13 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
     })
     .then(client => {
       let status = Status.info('Authenticating Client')
-      return httpAPI.authenticate(client.id, client.password)
+      return API.authenticate(client.id, client.password)
+        .then(auth => API.setTransport(new HttpTransport(auth.token)))
         .then(() => status.clear())
     })
     .then(() => {
       let status = Status.info('Server connection established')
-      return httpAPI.clientUp()
+      return API.clientUp()
         .then(() => status.clear())
     })
     .then(() => {

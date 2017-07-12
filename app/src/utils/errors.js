@@ -135,6 +135,7 @@ export class ApplicationBootError extends AppError {
   }
 }
 
+export class NotImplementedError extends BaseError {}
 export class SessionRejectedError extends AppError {}
 export class NoRelayAvailableError extends AppError {}
 export class InvalidInvitationCodeError extends AppError {}

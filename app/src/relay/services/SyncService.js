@@ -1,4 +1,4 @@
-import API from '~/api/httpAPI'
+import API from '~/relay/api'
 import KVStore from '~/utils/kvstore'
 import { debug, info } from '~/utils/log'
 

@@ -5,7 +5,7 @@
 import Promise from 'bluebird'
 import ConnectionManager from '~/client/net/ConnectionManager'
 import RelayConnection from '~/client/net/RelayConnection'
-import httpAPI from '~/api/httpAPI'
+import API from '~/client/api'
 import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '~/utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '~/utils/errors'
@@ -104,7 +104,7 @@ class _SessionService extends EventEmitter {
     debug('Creating new session')
 
     return new Promise((resolve, reject) => {
-      httpAPI.requestSession(categoryIDs)
+      API.requestSession(categoryIDs)
         .then(session => {
           if (!session) {
             warn('No relay was found for new session')
@@ -131,7 +131,7 @@ class _SessionService extends EventEmitter {
                   reject(err)
 
                   // // Report session failure to server
-                  httpAPI.updateSessionStatus(session.id, 'failed')
+                  API.updateSessionStatus(session.id, 'failed')
                 })
             },
             reject: s => {
@@ -154,7 +154,7 @@ class _SessionService extends EventEmitter {
           staleCount++
 
           // Report stale session to server
-          httpAPI.updateSessionStatus(session.id, 'expired')
+          API.updateSessionStatus(session.id, 'expired')
 
           return false
         }
@@ -191,11 +191,11 @@ class _SessionService extends EventEmitter {
   }
 
   _startSessionPoll () {
-    // httpAPI.getSessions()
+    // API.getSessions()
     //       .then(ses => this._handleRetrievedSessions(ses))
     schedule.scheduleJob('*/2 * * * * *', () => {
       if (Object.keys(this.pendingSessions).length > 0) {
-        httpAPI.getSessions()
+        API.getSessions()
           .then(ses => this._handleRetrievedSessions(ses))
       }
     })

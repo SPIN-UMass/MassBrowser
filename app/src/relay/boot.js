@@ -1,8 +1,3 @@
-/**
- * Created by milad on 7/11/17.
- */
-process.env.APP_INTERFACE = 'commandline'
-
 import { runTLSserver } from './net/TLSReceiver'
 import { runOBFSserver } from './net/OBFSReceiver'
 import { runHTTPListener } from './net/HttpListener'
@@ -10,35 +5,39 @@ import { runHTTPListener } from './net/HttpListener'
 import { pendMgr } from './net/PendingConnections'
 
 var stun = require('vs-stun')
-import ServerConnection from '~/api/wsAPI'
 import ConnectivityConnection from '~/api/connectivityAPI'
-import httpAPI from '~/api/httpAPI'
+import API from '~/relay/api'
 import KVStore from '~/utils/kvstore'
 import * as errors from '~/utils/errors'
 import StatusReporter from './net/StatusReporter'
 import config from '~/utils/config'
 import { initializeLogging } from '~/utils/log'
 
+import { WebSocketTransport } from '~/utils/transport'
+import { eventHandler } from '~/relay/events'
+
+
 var stunserver = {
   host: 'stun.l.google.com',
   port: 19302
 }
 
-config.applicationInterface = 'commandline'
-initializeLogging()
-var isCalledbefore=false
-export function bootRelay () {
+var isCalledbefore = false
+
+export default function bootRelay () {
   if (isCalledbefore) {
-    return {}
+    return new Promise((resolve, reject) => resolve())
   }
-  isCalledbefore=true
-  KVStore.get('relay', null)
+
+  isCalledbefore = true
+
+  return KVStore.get('relay', null)
     .then(relay => {
       if (relay) {
         return relay
       } else {
         console.log('Registering Relay')
-        return httpAPI.registerRelay()
+        return API.registerRelay()
           .then(relay => {
             KVStore.set('relay', {id: relay.id, password: relay.password})
             return {id: relay.id, password: relay.password}
@@ -47,7 +46,16 @@ export function bootRelay () {
     })
     .then(relay => {
       console.log(`Authenticating Relay ${relay.id}`)
-      return httpAPI.authenticate(relay.id, relay.password)
+      return API.authenticate(relay.id, relay.password)
+    })
+    .then(auth => {
+      console.log('Connecting to WebSocket server')
+      let transport = new WebSocketTransport(`${config.websocketURL}/api/?session_key=${auth.session_key}`)
+      transport.setEventHandler(eventHandler)
+      return transport.connect()
+      .then(() => {
+        API.setTransport(transport)
+      })
     })
     .then(() => {
       console.log('Connecting to Connectivity server')
@@ -78,11 +86,6 @@ export function bootRelay () {
     .then(address => {
       console.log('Starting Relay')
       return runOBFSserver(address.localIP, address.localPort)
-        .then(() => address)
-    })
-    .then(address => {
-      console.log('Connecting to WebSocket server')
-      return ServerConnection.connect(httpAPI.getSessionID())
         .then(() => address)
     })
     .then((address) => {

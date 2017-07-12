@@ -6,8 +6,9 @@ const net = require('net')
 
 import { Crypto } from '~/utils/crypto'
 
-import ServerConnection from '~/api/wsAPI'
+import API from '~/relay/api'
 import { pendMgr } from './PendingConnections'
+
 
 export class ConnectionReceiver {
   constructor (socketup, socketdown, socket) {
@@ -46,7 +47,7 @@ export class ConnectionReceiver {
       const desc = pendMgr.getPendingConnection(sessiontoken)
       console.log('Conid', sessiontoken)
       if (desc) {
-        ServerConnection.clientSessionConnected(desc.client, desc.sessionId)
+        API.clientSessionConnected(desc.client, desc.sessionId)
         this.desciber = desc
         console.log('clientID', sessiontoken)
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
@@ -142,7 +143,7 @@ export class ConnectionReceiver {
 
   closeConnections () {
     if (this.isAuthenticated) {
-      ServerConnection.clientSessionDisconnected(this.desciber.client, this.desciber.sessionId)
+      API.clientSessionDisconnected(this.desciber.client, this.desciber.sessionId)
     }
 
     Object.keys(this.connections).forEach((key) => {

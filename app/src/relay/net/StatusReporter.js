@@ -3,7 +3,7 @@
  */
 var schedule = require('node-schedule')
 import   ConnectivityConnection from '~/api/connectivityAPI'
-import ServerConnection from '~/api/wsAPI'
+import API from '~/relay/api'
 import { EventEmitter } from 'events'
 import config from '~/utils/config'
 
@@ -36,7 +36,7 @@ class _StatusReporter extends EventEmitter {
 
   sendKeepAlive () {
     console.log('sessnign keepalive')
-    ServerConnection.keepAlive().then((res) => {
+    API.keepAlive().then((res) => {
       this.WSconnected = true
       this.reachable = res.reachable
       this.emit('status-updated')
@@ -53,7 +53,7 @@ class _StatusReporter extends EventEmitter {
     if (config.relay.natEnabled && this.WSconnected) {
 
       console.log('REPORTING RELAY UP')
-      ServerConnection.relayUp(this.remoteip, this.remoteport)
+      API.relayUp(this.remoteip, this.remoteport)
     }
   }
 
@@ -62,7 +62,7 @@ class _StatusReporter extends EventEmitter {
     if (this.WSconnected) {
 
       console.log('REPORTING RELAY DOWN')
-      ServerConnection.relayDown()
+      API.relayDown()
     }
   }
 
