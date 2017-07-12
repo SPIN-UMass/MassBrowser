@@ -7,5 +7,5 @@ class RegionSchema {
   }
 }
 
-const Region = createModel('Region', RegionSchema)
+const Region = createModel('Region', RegionSchema, { collection: 'client-region' })
 export default Region

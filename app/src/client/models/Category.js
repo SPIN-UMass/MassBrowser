@@ -7,5 +7,5 @@ class CategorySchema {
   }
 }
 
-const Category = createModel('Category', CategorySchema)
+const Category = createModel('Category', CategorySchema, { collection: 'client-category' })
 export default Category

@@ -15,7 +15,7 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const createdModels = {}
 
-function _createModel (name, schemaModel, meta, datastore) {
+function _createModel (name, schemaModel, datastore) {
   var schema = null
 
   const Model = class extends schemaModel {
@@ -189,18 +189,18 @@ function _createModel (name, schemaModel, meta, datastore) {
   return Model
 }
 
-export function createModel (name, schemaModel, meta, dataDir) {
-  meta = meta || {}
-  dataDir = dataDir || DATA_DIR
+export function createModel (name, schemaModel, options) {
+  options = options || {}
+  let dataDir = options.dataDir || DATA_DIR
 
-  const collectionName = meta.collection || name.toLowerCase()
+  const collectionName = options.collection || name.toLowerCase()
 
   const datastore = new Datastore({
     filename: path.join(dataDir, collectionName + '.db'),
     autoload: true
   })
 
-  var model = _createModel(name, schemaModel, meta, datastore)
+  var model = _createModel(name, schemaModel, datastore)
   createdModels[name] = model
   return model
 }

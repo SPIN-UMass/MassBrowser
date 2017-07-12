@@ -92,5 +92,5 @@ class DomainSchema {
   }
 }
 
-const Domain = createModel('Domain', DomainSchema)
+const Domain = createModel('Domain', DomainSchema, { collection: 'client-domain' })
 export default Domain

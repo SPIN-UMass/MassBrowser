@@ -55,13 +55,13 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "app/assets/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "app/assets/icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "app/assets/icons"
     }
   },
   "author": "Hadi Zolfaghari <hadi@cs.umass.edu>",

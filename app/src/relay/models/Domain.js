@@ -92,5 +92,5 @@ class DomainSchema {
   }
 }
 
-const Domain = createModel('Domain', DomainSchema)
+const Domain = createModel('Domain', DomainSchema, { collection: 'relay-domain' })
 export default Domain

@@ -8,5 +8,5 @@ class CategorySchema {
   }
 }
 
-const Category = createModel('Category', CategorySchema)
+const Category = createModel('Category', CategorySchema, { collection: 'relay-category' })
 export default Category

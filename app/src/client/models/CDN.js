@@ -9,5 +9,5 @@ class CDNSchema {
   }
 }
 
-const CDN = createModel('CDN', CDNSchema)
+const CDN = createModel('CDN', CDNSchema, { collection: 'client-cdn' })
 export default CDN
