@@ -1,5 +1,10 @@
 import { CommonAPI } from '~/api/common'
 
+const API_URL = config.serverURL + '/api'
+const SESSION_URL = '/sessions'
+const CLIENT_URL = '/client'
+
+
 class ClientAPI extends CommonAPI {
   registerClient (invitationCode) {
     return this.transport.post(
