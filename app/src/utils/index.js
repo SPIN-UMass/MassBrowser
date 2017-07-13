@@ -1,9 +1,9 @@
 import path from 'path'
 
 export function getDataDir () {
-  return path.join(process.env.HOME, '.yaler')
+  const DATA_ROOT = process.platform === 'win32' ? process.env.LOCALAPPDATA : process.env.HOME
+  return path.join(DATA_ROOT, '.yaler')
 }
-
 
 // https://github.com/sindresorhus/pretty-bytes
 const UNITS = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
