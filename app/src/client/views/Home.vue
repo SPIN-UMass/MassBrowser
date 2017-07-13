@@ -10,7 +10,6 @@
 
 <script>
   import RelayView from './RelayView'
-  import GraphWidget from './GraphWidget'
 
   export default {
     data () {
@@ -18,8 +17,7 @@
       }
     },
     components: {
-      RelayView,
-      GraphWidget
+      RelayView
     },
     mounted () {
 

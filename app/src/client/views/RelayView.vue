@@ -12,18 +12,11 @@
             td {{ item.ip }}
             td {{ item.bytesSent }}
             td {{ item.bytesReceived }}
-            td 
-              //- SessionGraphWidget(
-              //-   v-bind:session="item"
-              //-   width="100" height="100"
-              //- )
 </template>
 
 <script>
   import SessionService from '~/client/services/SessionService'
   import { Session } from '~/client/net/Session'
-
-  import SessionGraphWidget from '~/client/views/SessionGraphWidget'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 
@@ -35,7 +28,6 @@
       }
     },
     components: {
-      SessionGraphWidget
     },
     created () {
       this.sessions = SessionService.getSessions()
