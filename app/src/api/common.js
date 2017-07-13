@@ -1,6 +1,5 @@
 import Promise from 'bluebird'
 import { HttpTransport } from '~/utils/transport'
-import { PermissionDeniedError, InvalidInvitationCodeError } from '~/utils/errors'
 import config from '~/utils/config'
 
 
