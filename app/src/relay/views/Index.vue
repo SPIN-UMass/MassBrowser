@@ -34,7 +34,7 @@
     data () {
       return {
         currentTab: '',
-        accessStatus: StatusReporter.isOpen,
+        accessStatus: HealthManager.openAccess,
         togglesize: 95
       }
     },
