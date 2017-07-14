@@ -145,7 +145,7 @@ export class WebSocketTransport extends Transport {
       let handler = this.connectionMap[resp['message_id']]
 
       if (handler) {
-        handler(resp['data'])
+        handler(resp)
       } else {
         warn("Websocket reply received for a request which doesn't exit")
       }
@@ -153,12 +153,14 @@ export class WebSocketTransport extends Transport {
   }
 
   request(method, path, data) {
+    path = this.basePath + path
+
     return new Promise((resolve, reject) => {
       var proto = {}
       proto['id'] = randomstring.generate(8)
       proto['data'] = data
       proto['method'] = method
-      proto['path'] = this.basePath + path
+      proto['path'] = path
 
       this.connectionMap[proto['id']] = resolve
 
@@ -172,7 +174,7 @@ export class WebSocketTransport extends Transport {
               this.reconnect()
               .then(() => {
                 debug('reconnected')
-                this.request(method, url, data)
+                this.request(method, path, data)
               })
             }, 60)
           } else {

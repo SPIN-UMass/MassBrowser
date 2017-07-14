@@ -38,8 +38,7 @@ class RelayAPI extends CommonAPI {
       'ip': ip,
       'status': 'up',
       'port': port,
-      'fingerprint': this.fingerprint,
-      'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
+      'fingerprint': this.fingerprint
     }
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
