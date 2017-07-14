@@ -96,7 +96,7 @@ class _HealthManager {
 
   stopOBFSServer () {
     if (this.isOBFSServerRunning) {
-      this.OBFSServer.end()
+      this.OBFSServer.close()
     }
   }
 

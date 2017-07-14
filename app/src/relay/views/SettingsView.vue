@@ -15,11 +15,13 @@
                     label.bandwidth-limit.bandwidth-limit-label KB
                     input.bandwidth-limit()
                 li.setting-nat.list-group-item
-                    div Nat Enabled
-                        toggle-button.toggle.to-right(v-on:change='onNatChange' v-bind:value="!natDisable"  v-bind:labels= "{unchecked: 'Nat IP', checked: 'Public IP'}" v-bind:width="80" v-bind:color="{ checked: '#7DCE94',unchecked: '#FF877B'}")
-                li.bandwidth-nat-group.list-group-item(v-bind:class="{'disable': natDisable, 'enable': !natDisable}"  )
+                    div IP Type
+                        toggle-button.toggle.to-right(v-on:change='onNatChange' v-bind:value="natDisable"  v-bind:labels= "{unchecked: 'Nat IP', checked: 'Public IP'}" v-bind:width="80" v-bind:color="{ checked: '#7DCE94',unchecked: '#FF877B'}")
+                li.bandwidth-nat-group.list-group-item(v-bind:class="{'disable': !natDisable, 'enable': natDisable}"  )
                     span Port Number
-                    input.to-right()
+                    button.btn.btn-rounded.btn-vsm.btn-success.to-right() Save
+                    input.to-right(v-bind:value="portNumber")
+
 
 
 </template>
@@ -31,7 +33,8 @@
     data () {
       return {
         bandwidthLimited: false,
-        natDisable: !HealthManager.natEnabled
+        natDisable: !HealthManager.natEnabled,
+        portNumber: HealthManager.OBFSPortNumber
 
       }
     },
@@ -41,7 +44,7 @@
         this.bandwidthLimited = e.value
       },
       onNatChange: function (e) {
-        this.natDisable = !e.value
+        this.natDisable = e.value
         HealthManager.changeNatStatus(!this.natDisable)
       }
 
@@ -74,8 +77,16 @@
         }
     }
 
+    .btn-vsm {
+        height: 20px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        font-size: 8pt;
+    }
+
     .to-right {
         float: right;
+        margin-left: 5px;
     }
 
     .disable {
