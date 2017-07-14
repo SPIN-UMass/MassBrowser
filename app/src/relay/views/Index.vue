@@ -27,7 +27,7 @@
   import StatusWidget from './StatusWidget'
 
   import bootRelay from '~/relay/boot'
-  import StatusReporter from '~/relay/net/StatusReporter'
+  import HealthManager from '~/relay/net/HealthManager'
   import SyncService from '~/relay/services/SyncService'
 
   export default {
@@ -53,10 +53,10 @@
       onChange: function (e) {
         console.log(e.value)
         if (e.value) {
-          StatusReporter.relayUP()
+          HealthManager.changeAccess(e.value)
         }
         else {
-          StatusReporter.relayDown()
+          HealthManager.changeAccess(e.value)
         }
       }
     }
