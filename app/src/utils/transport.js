@@ -181,6 +181,7 @@ export class WebSocketTransport extends Transport {
         }
       })
     })
+    .then(r => this.handleResponse({url: path, data: data}, r))
   }
 }
 
