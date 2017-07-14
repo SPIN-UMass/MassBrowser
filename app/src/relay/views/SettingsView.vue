@@ -17,7 +17,7 @@
                 li.setting-nat.list-group-item
                     div Nat Enabled
                         toggle-button.toggle.to-right(v-on:change='onNatChange' v-bind:value="!natDisable"  v-bind:labels= "{unchecked: 'Nat IP', checked: 'Public IP'}" v-bind:width="80" v-bind:color="{ checked: '#7DCE94',unchecked: '#FF877B'}")
-                li.bandwidth-nat-group.list-group-item(v-bind:class="{'disable': natEnabled, 'enable': !natEnabled}"  )
+                li.bandwidth-nat-group.list-group-item(v-bind:class="{'disable': natDisable, 'enable': !natDisable}"  )
                     span Port Number
                     input.to-right()
 
