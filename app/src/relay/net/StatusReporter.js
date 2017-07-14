@@ -6,6 +6,7 @@ import   ConnectivityConnection from '~/api/connectivityAPI'
 import API from '~/relay/api'
 import { EventEmitter } from 'events'
 import config from '~/utils/config'
+import HealthManager from '~/relay/net/HealthManager'
 
 class _StatusReporter extends EventEmitter {
 
@@ -48,22 +49,8 @@ class _StatusReporter extends EventEmitter {
     ConnectivityConnection.keepAlive()
   }
 
-  relayUP () {
-    this.isOpen = true
-    if (config.relay.natEnabled && this.WSconnected) {
-
-      console.log('REPORTING RELAY UP')
-      API.relayUp(this.remoteip, this.remoteport)
-    }
-  }
-
-  relayDown () {
-    this.isOpen = false
-    if (this.WSconnected) {
-
-      console.log('REPORTING RELAY DOWN')
-      API.relayDown()
-    }
+  getPublicAddress () {
+    return {ip: this.remoteip, port: this.remoteport}
   }
 
 }

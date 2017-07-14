@@ -6,10 +6,8 @@ const fs = require('fs')
 import { ConnectionReceiver } from './ConnectionReceiver'
 var ThrottleGroup = require('./throttle').ThrottleGroup
 
-export function runOBFSserver (publicIP, publicPort) {
-  var up_limit = ThrottleGroup({rate: 100000000})
+export function runOBFSserver (publicIP, publicPort,up_limit,down_limit) {
 
-  var down_limit = ThrottleGroup({rate: 100000000})
   const server = net.createServer((socket) => {
     console.log('relay connected',
       socket.authorized ? 'authorized' : 'unauthorized')
@@ -40,22 +38,23 @@ export function runOBFSserver (publicIP, publicPort) {
       my_up.end()
     })
   })
-
-  server.listen({port: publicPort, host: publicIP, exclusive: false}, () => {
-    console.log('relay bound')
-  })
-  console.log('test relay started on ', publicPort)
-  server.on('error', (e) => {
-    if (e.code === 'EADDRINUSE') {
-      console.log('Address in use, retrying...')
-      setTimeout(() => {
-        server.close()
-        server.listen({port: publicPort, host: publicIP, exclusive: false})
-      }, 1000)
-    }
-  })
-
   return new Promise((resolve, reject) => {
-    resolve(publicPort)
+    server.listen({port: publicPort, host: publicIP, exclusive: false}, () => {
+      console.log('relay bound')
+      resolve()
+    })
+    console.log('test relay started on ', publicPort)
+    server.on('error', (e) => {
+      if (e.code === 'EADDRINUSE') {
+        console.log('Address in use, retrying...')
+        setTimeout(() => {
+          server.close()
+          server.listen({port: publicPort, host: publicIP, exclusive: false},()=>{
+            console.log('relay bound')
+            resolve()
+          })
+        }, 1000)
+      }
+    })
   })
 }

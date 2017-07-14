@@ -67,6 +67,10 @@ function ThrottleGroup (opts) {
 ThrottleGroup.prototype.throttle = function (opts) {
   return new Throttle(opts, this)
 }
+ThrottleGroup.prototype.resetRate = function (opts) {
+  this.rate = opts.rate
+  this.bucket = new TokenBucket(this.rate, this.rate, 'second', null)
+}
 
 module.exports = {
   Throttle: Throttle,

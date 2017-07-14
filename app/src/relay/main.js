@@ -19,6 +19,8 @@ import config from '~/utils/config'
 import {initializeLogging} from '~/utils/log'
 import StatusReporter from '~/relay/net/StatusReporter'
 
+import HealthManager from '~/relay/net/HealthManager'
+
 global.Promise = Promise
 
 config.applicationInterface = 'commandline'
@@ -28,9 +30,9 @@ Raven
   .smartConfig({'role': 'relay'})
   .install()
 
-bootClient()
+bootClient(false)
 .then(() => {
-  StatusReporter.relayUP()
+  HealthManager.changeAccess(true)
 })
 
 process.on('uncaughtException', function (err) {

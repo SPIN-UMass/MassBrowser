@@ -16,6 +16,7 @@ import { initializeLogging } from '~/utils/log'
 import { WebSocketTransport } from '~/utils/transport'
 import { eventHandler } from '~/relay/events'
 
+import HealthManager from '~/relay/net/HealthManager'
 
 var stunserver = {
   host: 'stun.l.google.com',
@@ -24,7 +25,7 @@ var stunserver = {
 
 var isCalledbefore = false
 
-export default function bootRelay () {
+export default function bootRelay (gui) {
   if (isCalledbefore) {
     return new Promise((resolve, reject) => resolve())
   }
@@ -66,34 +67,18 @@ export default function bootRelay () {
           StatusReporter.localport = data[1]
           StatusReporter.remoteport = data[3]
           StatusReporter.remoteip = data[2]
-          if (config.relay.natEnabled) {
-            return {
-              localIP: StatusReporter.localip,
-              localPort: StatusReporter.localport,
-              remoteIP: StatusReporter.remoteip,
-              remotePort: StatusReporter.remoteport
-            }
-          } else {
-            return {
-              localIP: '0.0.0.0',
-              localPort: config.relay.port,
-              remoteIP: StatusReporter.remoteip,
-              remotePort: config.relay.port
-            }
-          }
         })
     })
-    .then(address => {
+    .then(() => {
       console.log('Starting Relay')
-      return runOBFSserver(address.localIP, address.localPort)
-        .then(() => address)
+      HealthManager.startMonitor(gui)
     })
-    .then((address) => {
+    .then(() => {
       if (config.relay.domainfrontable) {
         console.log('Starting HTTP Server')
-        return runHTTPListener(config.relay.domainfrontPort).then(() => address).then(() => {
+        return runHTTPListener(HealthManager.HTTPPortNumber).then(() => {
           console.log('Reporting DomainFront to server')
-          return ServerConnection.relayDomainFrontUp(config.relay.domain_name, config.relay.domainfrontPort)
+          return API.relayDomainFrontUp(config.relay.domain_name, config.relay.domainfrontPort)
         })
       }
     })
