@@ -12,6 +12,10 @@ import * as errors from '~/utils/errors'
 import StatusReporter from './net/StatusReporter'
 import config from '~/utils/config'
 import { initializeLogging } from '~/utils/log'
+import {
+  AuthenticationError, NetworkError, RequestError,
+  ServerError, ApplicationBootError
+} from '~/utils/errors'
 
 import { WebSocketTransport } from '~/utils/transport'
 import { eventHandler } from '~/relay/events'
@@ -85,18 +89,32 @@ export default function bootRelay (gui) {
         })
       }
     })
-    .catch(err => {
-      if (err instanceof errors.NetworkError) {
-        console.error('Could not connect to the server')
-      } else if (err instanceof errors.AuthenticationError) {
-        console.error('Authentication failed with server')
-      } else if (err instanceof errors.RequestError) {
-        console.error('Error occured in request to server ' + err.message)
-      } else if (err instanceof errors.ServerError) {
-        console.error('There is a problem with the server, please try again later')
+    .catch(AuthenticationError, err => {
+      err.logAndReport()
+      throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
+    })
+    .catch(NetworkError, err => {
+      err.log()
+      throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
+    })
+    .catch(RequestError, err => {
+      err.logAndReport()
+      throw new ApplicationBootError('Error occured while booting application', true)
+    })
+    .catch(ServerError, err => {
+      err.log()
+      throw new ApplicationBootError('There is a problem with the server, please try again later', true)
+    })
+    .catch(err => !(err instanceof ApplicationBootError ), err => {
+      // console.warn(handledErrors.reduce((o, a) => o || err instanceof a, false))
+      if (err.smart) {
+        err.logAndReport()
       } else {
-        console.log('Unknown error occured: ' + err.toString())
+        error(err)
+        Raven.captureException(err)
       }
+
+      throw new ApplicationBootError('Failed to start Application')
     })
 }
 
