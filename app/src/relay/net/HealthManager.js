@@ -3,8 +3,8 @@
  */
 import KVStore from '~/utils/kvstore'
 var ThrottleGroup = require('./throttle').ThrottleGroup
-import { runOBFSserver } from './net/OBFSReceiver'
-import StatusReporter from './net/StatusReporter'
+import { runOBFSserver } from './OBFSReceiver'
+import StatusReporter from './StatusReporter'
 import { error, debug } from '~/utils/log'
 import API from '~/relay/api'
 
