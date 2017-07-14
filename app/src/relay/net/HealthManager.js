@@ -101,7 +101,7 @@ class _HealthManager {
 
   restartOBFSServer () {
     this.stopOBFSServer()
-    if (this.OBFSServer.address().port != this.getReachableOBFSAddress().port) {
+    if (!this.isOBFSServerRunning || this.OBFSServer.address().port != this.getReachableOBFSAddress().port) {
       runOBFSserver('0.0.0.0', this.getReachableOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
         this.isOBFSServerRunning = true
         this.OBFSServer = server

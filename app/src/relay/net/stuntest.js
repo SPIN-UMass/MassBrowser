@@ -17,7 +17,7 @@ let proxy = net.createServer((req, res) => {
 })
 
 proxy.listen(5454, '0.0.0.0', () => {
-  console.log('HTTP SERVER STARTED',proxy)
+  console.log('HTTP SERVER STARTED',proxy.address().port)
   // make a request to a tunneling proxy
 
   let keepaliveagent = new http.Agent({keepAlive: true})
