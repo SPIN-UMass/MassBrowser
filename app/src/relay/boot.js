@@ -51,7 +51,10 @@ export default function bootRelay (gui) {
     })
     .then(auth => {
       console.log('Connecting to WebSocket server')
-      let transport = new WebSocketTransport(`${config.websocketURL}/api/?session_key=${auth.session_key}`)
+      let transport = new WebSocketTransport(
+        `${config.websocketURL}/api/?session_key=${auth.session_key}`,
+        '/api'
+      )
       transport.setEventHandler(eventHandler)
       return transport.connect()
       .then(() => {

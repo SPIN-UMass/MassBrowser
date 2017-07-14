@@ -16,6 +16,8 @@ Raven.smartConfig = function (options) {
 
   if (!config.sentry.dsn) {
     warn('sentry DSN not provided in config, will not be using sentry')
+  } else {
+    info(`Using sentry with dsn '${config.sentry.dsn}'`)
   }
 
   var options = {
@@ -26,8 +28,6 @@ Raven.smartConfig = function (options) {
       'app.role': options.role
     }
   }
-
-  info(`Using sentry with dsn '${config.sentry.dsn}'`)
 
   return Raven.config(config.sentry.dsn, options)
 }

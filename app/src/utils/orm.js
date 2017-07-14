@@ -2,7 +2,6 @@ import Datastore from 'nedb'
 import fs from 'fs'
 import path from 'path'
 
-import { remote } from 'electron'
 import { getDataDir } from '~/utils'
 import { error } from '~/utils/log'
 

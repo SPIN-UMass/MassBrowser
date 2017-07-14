@@ -82,11 +82,12 @@ export class HttpTransport extends Transport {
 
 
 export class WebSocketTransport extends Transport {
-  constructor (url) {
+  constructor (url, basePath) {
     super()
 
     this.connectionMap = {}
     this.url = url
+    this.basePath = basePath || ''
     this.eventHandler = null
   }
 
@@ -157,7 +158,7 @@ export class WebSocketTransport extends Transport {
       proto['id'] = randomstring.generate(8)
       proto['data'] = data
       proto['method'] = method
-      proto['path'] = path
+      proto['path'] = this.basePath + path
 
       this.connectionMap[proto['id']] = resolve
 
