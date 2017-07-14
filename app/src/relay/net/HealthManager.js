@@ -73,10 +73,11 @@ class _HealthManager {
       if (this.openAccess) {
         let publicaddress = this.getReachableOBFSAddress()
         API.relayUp(publicaddress.ip, publicaddress.port)
-
+        this.restartOBFSServer()
       }
       else {
         API.relayDown()
+        this.stopOBFSServer()
       }
 
     }
@@ -92,16 +93,22 @@ class _HealthManager {
 
   }
 
-  restartOBFSServer () {
+  stopOBFSServer () {
     if (this.isOBFSServerRunning) {
       this.OBFSServer.end()
     }
+  }
 
-    this.OBFSServer = runOBFSserver('0.0.0.0', this.getReachableOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then(() => {
-      this.isOBFSServerRunning = true
-    }).catch((err) => {
-      this.errorHandler(err)
-    })
+  restartOBFSServer () {
+    this.stopOBFSServer()
+    if (this.OBFSServer.address().port != this.getReachableOBFSAddress().port) {
+      runOBFSserver('0.0.0.0', this.getReachableOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
+        this.isOBFSServerRunning = true
+        this.OBFSServer = server
+      }).catch((err) => {
+        this.errorHandler(err)
+      })
+    }
 
   }
 

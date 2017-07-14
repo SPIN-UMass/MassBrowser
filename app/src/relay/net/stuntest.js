@@ -5,7 +5,7 @@ const http = require('http')
 const net = require('net')
 const url = require('url')
 
-let proxy = http.createServer((req, res) => {
+let proxy = net.createServer((req, res) => {
   console.log(req.socket.remotePort)
   req.on('data', (data) => {
     console.log(data)
@@ -17,8 +17,9 @@ let proxy = http.createServer((req, res) => {
 })
 
 proxy.listen(5454, '0.0.0.0', () => {
-  console.log('HTTP SERVER STARTED')
+  console.log('HTTP SERVER STARTED',proxy)
   // make a request to a tunneling proxy
+
   let keepaliveagent = new http.Agent({keepAlive: true})
   let options = {
     hostname: 'localhost',

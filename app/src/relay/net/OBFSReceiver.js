@@ -41,7 +41,7 @@ export function runOBFSserver (publicIP, publicPort,up_limit,down_limit) {
   return new Promise((resolve, reject) => {
     server.listen({port: publicPort, host: publicIP, exclusive: false}, () => {
       console.log('relay bound')
-      resolve()
+      resolve(server)
     })
     console.log('test relay started on ', publicPort)
     server.on('error', (e) => {
@@ -51,7 +51,7 @@ export function runOBFSserver (publicIP, publicPort,up_limit,down_limit) {
           server.close()
           server.listen({port: publicPort, host: publicIP, exclusive: false},()=>{
             console.log('relay bound')
-            resolve()
+            resolve(server)
           })
         }, 1000)
       }
