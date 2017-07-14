@@ -16,7 +16,7 @@
                     input.bandwidth-limit()
                 li.setting-nat.list-group-item
                     div Nat Enabled
-                        toggle-button.toggle.to-right(v-on:change='onNatChange' v-bind:value="!natEnabled"  v-bind:labels= "{unchecked: 'Nat IP', checked: 'Public IP'}" v-bind:width="80" v-bind:color="{ checked: '#7DCE94',unchecked: '#FF877B'}")
+                        toggle-button.toggle.to-right(v-on:change='onNatChange' v-bind:value="!natDisable"  v-bind:labels= "{unchecked: 'Nat IP', checked: 'Public IP'}" v-bind:width="80" v-bind:color="{ checked: '#7DCE94',unchecked: '#FF877B'}")
                 li.bandwidth-nat-group.list-group-item(v-bind:class="{'disable': natEnabled, 'enable': !natEnabled}"  )
                     span Port Number
                     input.to-right()
@@ -25,12 +25,13 @@
 </template>
 
 <script>
+  import HealthManager from '~/relay/net/HealthManager'
 
   export default {
     data () {
       return {
         bandwidthLimited: false,
-        natEnabled: true
+        natDisable: !HealthManager.natEnabled
 
       }
     },
@@ -40,7 +41,8 @@
         this.bandwidthLimited = e.value
       },
       onNatChange: function (e) {
-        this.natEnabled= !e.value
+        this.natDisable = !e.value
+        HealthManager.changeNatStatus(!this.natDisable)
       }
 
     }
@@ -57,9 +59,8 @@
             float: right;
         }
 
-
-
     }
+
     .bandwidth-limit-group {
         .bandwidth-limit {
             float: right;
@@ -72,6 +73,7 @@
 
         }
     }
+
     .to-right {
         float: right;
     }
@@ -79,6 +81,7 @@
     .disable {
         display: none;
     }
+
     .enable {
         display: block;
     }

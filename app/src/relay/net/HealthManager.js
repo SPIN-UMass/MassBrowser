@@ -18,7 +18,7 @@ class _HealthManager {
     this.isHTTPServerRunning = false
     this.uploadLimit = 1000000000
     this.downloadLimit = 1000000000
-    this.OBFSPortNumber = -1
+    this.OBFSPortNumber = 8040
     this.HTTPPortNumber = 8083
     this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit})
     this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit})
@@ -27,6 +27,7 @@ class _HealthManager {
     //
     KVStore.get('natEnabled', false).then((naten) => {
       this.natEnabled = naten
+      debug('NAT STATUS',this.natEnabled)
       if (!naten) {
         KVStore.get('OBFSport', 8040).then((portnum) => {
           this.OBFSPortNumber = portnum
@@ -102,7 +103,7 @@ class _HealthManager {
   restartOBFSServer () {
     this.stopOBFSServer()
     if (!this.isOBFSServerRunning || this.OBFSServer.address().port != this.getReachableOBFSAddress().port) {
-      runOBFSserver('0.0.0.0', this.getReachableOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
+      runOBFSserver(this.getReachableOBFSAddress().ip, this.getReachableOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
         this.isOBFSServerRunning = true
         this.OBFSServer = server
       }).catch((err) => {

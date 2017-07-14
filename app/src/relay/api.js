@@ -2,6 +2,7 @@ import { CommonAPI } from '~/api/common'
 import config from '~/utils/config'
 import KVStore from '~/utils/kvstore'
 
+import { error, debug } from '~/utils/log'
 
 const SESSION_PATH = '/session/'
 const RELAY_PATH = '/relays/'
