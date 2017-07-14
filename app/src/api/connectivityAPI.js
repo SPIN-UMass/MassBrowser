@@ -17,7 +17,6 @@ import { error, debug } from '~/utils/log'
 import * as net from 'net'
 const ECHOSERVER = 'yaler.co'
 const ECHOPORT = 8823
-var portastic = require('portastic')
 
 class WSServerReachability extends EventEmitter {
   constructor () {

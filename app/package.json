@@ -52,7 +52,6 @@
     "nedb": "^1.8.0",
     "node-forge": "^0.7.1",
     "node-schedule": "^1.2.1",
-    "portastic": "^1.0.1",
     "randomstring": "^1.1.5",
     "raven": "^2.1.0",
     "raven-js": "^3.15.0",
