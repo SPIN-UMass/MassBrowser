@@ -33,7 +33,7 @@ class _PolicyManager extends EventEmitter {
 
         domain.getWebsite()
         .then(website => {
-          if (!website.enabled) {
+          if (website && !website.enabled) {
             return resolve(this.POLICY_VANILLA_PROXY)
           }
 

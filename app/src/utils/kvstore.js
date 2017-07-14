@@ -8,7 +8,7 @@ class KeyValSchema {
 
 class _KVStore {
   constructor () {
-    this.model = createModel('KeyVal', KeyValSchema, {collection: 'keyval'})
+    this.model = createModel('KeyVal', KeyValSchema, { collection: 'keyval' })
   }
 
   set (key, value) {

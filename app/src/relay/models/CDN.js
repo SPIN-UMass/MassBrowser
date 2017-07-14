@@ -9,5 +9,5 @@ class CDNSchema {
   }
 }
 
-const CDN = createModel('CDN', CDNSchema, { collection: 'relay-cdn' })
+const CDN = createModel('CDN', CDNSchema, { database: 'relay' })
 export default CDN

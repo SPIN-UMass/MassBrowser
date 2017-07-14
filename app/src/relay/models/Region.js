@@ -7,5 +7,5 @@ class RegionSchema {
   }
 }
 
-const Region = createModel('Region', RegionSchema, { collection: 'relay-region' })
+const Region = createModel('Region', RegionSchema, { database: 'relay' })
 export default Region

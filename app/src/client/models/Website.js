@@ -16,5 +16,5 @@ class WebsiteSchema {
   }
 }
 
-const Website = createModel('Website', WebsiteSchema, { collection: 'client-website' })
+const Website = createModel('Website', WebsiteSchema, { database: 'client' })
 export default Website

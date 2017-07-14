@@ -15,7 +15,22 @@ if (!fs.existsSync(DATA_DIR)) {
 
 const createdModels = {}
 
-function _createModel (name, schemaModel, datastore) {
+function addModel(database, name, model) {
+  if (!createdModels[database]) {
+    createdModels[database] = {}
+  }
+  createdModels[database][name] = model
+}
+
+function getModel(database, name) {
+  if (!createdModels[database]) {
+    return null
+  }
+  return createdModels[database][name]
+}
+
+
+function _createModel (name, schemaModel, datastore, options) {
   var schema = null
 
   const Model = class extends schemaModel {
@@ -37,6 +52,10 @@ function _createModel (name, schemaModel, datastore) {
 
     static get name () {
       return name
+    }
+
+    static get options() {
+      return options
     }
 
     static _promisize (func, args) {
@@ -170,7 +189,7 @@ function _createModel (name, schemaModel, datastore) {
         var relatedModel = relationField.relatedModel
 
         if (typeof relatedModel === 'string') {
-          relatedModel = createdModels[relatedModel]
+          relatedModel = getModel(options.database, relatedModel)
 
           if (relatedModel === undefined) {
             throw 'No model defined with name ' + relationField.relatedModel
@@ -190,18 +209,21 @@ function _createModel (name, schemaModel, datastore) {
 }
 
 export function createModel (name, schemaModel, options) {
-  options = options || {}
+  options = options || { collection: null, database: ''}
   let dataDir = options.dataDir || DATA_DIR
 
   const collectionName = options.collection || name.toLowerCase()
+  const dbDir = options.database ? path.join(dataDir, options.database) : dataDir
 
   const datastore = new Datastore({
-    filename: path.join(dataDir, collectionName + '.db'),
+    filename: path.join(dbDir, collectionName + '.db'),
     autoload: true
   })
 
-  var model = _createModel(name, schemaModel, datastore)
-  createdModels[name] = model
+  var model = _createModel(name, schemaModel, datastore, options)
+
+  addModel(options.database, name, model)
+
   return model
 }
 

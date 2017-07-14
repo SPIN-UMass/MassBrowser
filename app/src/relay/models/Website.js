@@ -16,5 +16,5 @@ class WebsiteSchema {
   }
 }
 
-const Website = createModel('Website', WebsiteSchema, { collection: 'relay-website' })
+const Website = createModel('Website', WebsiteSchema, { database: 'relay' })
 export default Website
