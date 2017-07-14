@@ -2,7 +2,6 @@ import { CommonAPI } from '~/api/common'
 import { PermissionDeniedError, InvalidInvitationCodeError } from '~/utils/errors'
 import config from '~/utils/config'
 
-const API_URL = config.serverURL + '/api'
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
 
@@ -10,7 +9,7 @@ const CLIENT_URL = '/client'
 class ClientAPI extends CommonAPI {
   registerClient (invitationCode) {
     return this.transport.post(
-      API_URL + '/clients', 
+      '/clients', 
       {
         ip:undefined,
         'invitation_code':invitationCode
@@ -24,7 +23,7 @@ class ClientAPI extends CommonAPI {
 
   clientUp () {
     return this.transport.post(
-      API_URL + CLIENT_URL + '/' + this.userID, 
+      CLIENT_URL + '/' + this.userID, 
       {
         'categoie': 'TBD'
       }
@@ -33,7 +32,7 @@ class ClientAPI extends CommonAPI {
 
   requestSession () {
     return this.transport.post(
-      API_URL + CLIENT_URL + '/' + this.userID + SESSION_URL,{
+      CLIENT_URL + '/' + this.userID + SESSION_URL,{
         'cdn_session':true
       }
     )

@@ -1,7 +1,7 @@
 import { CommonAPI } from '~/api/common'
 import config from '~/utils/config'
+import KVStore from '~/utils/kvstore'
 
-const API_URL = config.serverURL + '/api'
 
 const SESSION_PATH = '/session/'
 const RELAY_PATH = '/relays/'
@@ -9,17 +9,15 @@ const CLIENT_PATH = '/client/'
 
 class RelayAPI extends CommonAPI {
   registerRelay () {
-    return this.transport.post(
-      API_URL + '/relays'
-    ).then(r => r.data)
+    return this.transport.post('/relays').then(r => r.data)
   }
 
   acceptSession(client, sessionid) {
-    return this.transport.put(API_URL + SESSION_PATH + sessionid + '/status', { status: 'accepted' })
+    return this.transport.put(SESSION_PATH + sessionid + '/status', { status: 'accepted' })
   }
 
   clientSessionConnected(client,sessionid) {
-    return this.transport.put(API_URL + SESSION_PATH + sessionid + '/status', { status: 'used' })
+    return this.transport.put(SESSION_PATH + sessionid + '/status', { status: 'used' })
   }
 
   clientSessionDisconnected(client,sessionid) {
@@ -31,7 +29,7 @@ class RelayAPI extends CommonAPI {
   }
 
   relayDown() {
-    return this.transport.post(API_URL + RELAY_PATH + this.userID, { status: 'down' })
+    return this.transport.post(RELAY_PATH + this.userID, { status: 'down' })
   }
 
   relayUp (ip, port) {
@@ -42,7 +40,7 @@ class RelayAPI extends CommonAPI {
       'fingerprint': this.fingerprint,
       'bandwidthlimit': KVStore.getWithDefault('bandwidth-limit', -1),
     }
-    return this.transport.post(API_URL + RELAY_PATH + this.userID, data)
+    return this.transport.post(RELAY_PATH + this.userID, data)
   }
 
   relayDomainFrontUp (domain, domain_port) {
@@ -51,14 +49,14 @@ class RelayAPI extends CommonAPI {
       'domainfront_port':domain_port,
       'domain_name':domain
     }
-    return this.transport.post(API_URL + RELAY_PATH + this.userID, data)
+    return this.transport.post(RELAY_PATH + this.userID, data)
   }
 
   keepAlive () {
     var data = {
       'fingerprint': this.fingerprint,
     }
-    return this.transport.post(API_URL + RELAY_PATH + this.userID, data)
+    return this.transport.post(RELAY_PATH + this.userID, data)
   }
 }
 

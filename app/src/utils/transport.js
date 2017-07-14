@@ -21,7 +21,7 @@ export class Transport {
    *  statusText: 'OK'
    * }
    */
-  request(method, url, data) {
+  request(method, path, data) {
     // Implemented by subclasses
     throw new errors.NotImplementedError()
   }
@@ -41,24 +41,31 @@ export class Transport {
 
 
 export class HttpTransport extends Transport {
-  constructor (authToken) {
+  constructor (baseURL) {
     super()
+    this.baseURL = baseURL
+    this.authToken = null
+  }
+
+  setAuthToken(authToken) {
     this.authToken = authToken
   }
 
-  request(method, url, data, config) {
+  request(method, path, data, config) {
     let options = {
-      url: url,
+      url: path,
       method: method,
-      data: data
+      data: data,
+      baseURL: this.baseURL
     }
+
     Object.assign(options, config)
     options.validateStatus = status => true
     this._setHeaders(options)
-    console.log(`AUTH ${this.authToken}`)
+
     return axios.request(options)
-    .catch(r => this.handleNetworkError({url: url, data: data}, r))
-    .then(r => this.handleResponse({url: url, data: data}, r))
+    .catch(r => this.handleNetworkError({url: path, data: data}, r))
+    .then(r => this.handleResponse({url: path, data: data}, r))
   }
 
   _setHeaders (config) {
@@ -93,7 +100,6 @@ export class WebSocketTransport extends Transport {
 
   connect() {
     return new Promise((resolve, reject) => {
-      console.log(this.url)
       this.ws = new WebSocket(this.url, {
         perMessageDeflate: false,
       })
@@ -134,7 +140,7 @@ export class WebSocketTransport extends Transport {
 
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
-      debug('I am HERE',this.connectionMap[resp['message_id']])
+      // debug('I am HERE',this.connectionMap[resp['message_id']])
       let handler = this.connectionMap[resp['message_id']]
 
       if (handler) {
@@ -145,7 +151,7 @@ export class WebSocketTransport extends Transport {
     }
   }
 
-  request(method, url, data) {
+  request(method, path, data) {
     return new Promise((resolve, reject) => {
       var proto = {}
       proto['id'] = randomstring.generate(8)

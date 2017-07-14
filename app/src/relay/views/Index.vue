@@ -43,8 +43,10 @@
     },
     created () {
       console.log(" I AM HERE ")
-      bootRelay()
-      SyncService.syncAll()
+      bootRelay().then(() => {
+        SyncService.syncAll()
+      })
+      
 
     },
     methods: {

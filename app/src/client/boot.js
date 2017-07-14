@@ -71,7 +71,7 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
     .then(client => {
       let status = Status.info('Authenticating Client')
       return API.authenticate(client.id, client.password)
-        .then(auth => API.setTransport(new HttpTransport(auth.token)))
+        .then(auth => API.transport.setAuthToken(auth.token))
         .then(() => status.clear())
     })
     .then(() => {
