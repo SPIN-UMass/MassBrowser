@@ -33,7 +33,7 @@ class ClientAPI extends CommonAPI {
   requestSession () {
     return this.transport.post(
       CLIENT_URL + '/' + this.userID + SESSION_URL,{
-        'cdn_session':true
+        'cdn_session': false
       }
     )
     .then(r => {

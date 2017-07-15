@@ -39,17 +39,17 @@ export function runOBFSserver (publicIP, publicPort,up_limit,down_limit) {
     })
   })
   return new Promise((resolve, reject) => {
-    server.listen({port: publicPort, host: publicIP, exclusive: false}, () => {
+    server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
       console.log('relay bound')
       resolve(server)
     })
-    console.log('test relay started on ', publicPort)
+    console.log('relay started on ', publicPort)
     server.on('error', (e) => {
       if (e.code === 'EADDRINUSE') {
         console.log('Address in use, retrying...')
         setTimeout(() => {
           server.close()
-          server.listen({port: publicPort, host: publicIP, exclusive: false},()=>{
+          server.listen({port: publicPort, host: '0.0.0.0', exclusive: false},()=>{
             console.log('relay bound')
             resolve(server)
           })
