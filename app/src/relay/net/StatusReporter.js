@@ -37,7 +37,7 @@ class _StatusReporter extends EventEmitter {
 
   sendKeepAlive () {
     console.log('sessnign keepalive')
-    API.keepAlive().then((res) => {
+    API.keepAlive(HealthManager.openAccess).then((res) => {
       this.WSconnected = true
       console.log(res.data)
       this.reachable = res.data.reachable
@@ -47,7 +47,7 @@ class _StatusReporter extends EventEmitter {
       this.WSconnected = false
       this.emit('status-updated')
     })
-    ConnectivityConnection.keepAlive(HealthManager.openAccess)
+    ConnectivityConnection.keepAlive()
   }
 
   getPublicAddress () {
