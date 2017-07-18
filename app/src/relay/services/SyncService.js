@@ -78,7 +78,7 @@ class _SyncService {
         if (itemCount >= response.count || response.results.length === 0) {
           return itemCount
         } else {
-          return requestItems(lastSyncTime, limit, offset + limit)
+          return requestItems(lastSyncTime, limit, offset + response.results.length)
         }
       })
     }

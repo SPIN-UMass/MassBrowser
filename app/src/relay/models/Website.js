@@ -11,7 +11,11 @@ class WebsiteSchema {
 
   get transform() {
     return {
-      'third_party': 'thirdParty'
+      'third_party': 'thirdParty',
+      'categories': {
+        name: 'category',
+        value: categories => categories[0]
+      }
     }
   }
 }

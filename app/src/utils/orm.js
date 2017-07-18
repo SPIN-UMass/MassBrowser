@@ -128,8 +128,9 @@ function _createModel (name, schemaModel, datastore, options) {
           } else if (typeof transform[key] === 'string') {
             this[transform[key]] = json[key]
           } else if (typeof transform[key] === 'function') {
-            // Not implemented
-            // obj[transform[key]] = json[key]
+            this[key] = transform[key](json[key])
+          } else if (typeof transform[key] === 'object') {
+            this[transform[key].name] = transform[key].value(json[key])
           } else {
             error(`Invalid transformation defined in model ${name} for field ${key}`) 
             this[key] = json[key]
