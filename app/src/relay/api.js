@@ -13,24 +13,24 @@ class RelayAPI extends CommonAPI {
     return this.transport.post('/relays').then(r => r.data)
   }
 
-  acceptSession(client, sessionid) {
-    return this.transport.put(SESSION_PATH + sessionid + '/status', { status: 'accepted' })
+  acceptSession (client, sessionid) {
+    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'accepted'})
   }
 
-  clientSessionConnected(client,sessionid) {
-    return this.transport.put(SESSION_PATH + sessionid + '/status', { status: 'used' })
+  clientSessionConnected (client, sessionid) {
+    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'used'})
   }
 
-  clientSessionDisconnected(client,sessionid) {
+  clientSessionDisconnected (client, sessionid) {
     debug('closing session')
     // TODO
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
       resolve()
     })
   }
 
-  relayDown() {
-    return this.transport.post(RELAY_PATH + this.userID, { status: 'down' })
+  relayDown () {
+    return this.transport.post(RELAY_PATH + this.userID, {status: 'down'})
   }
 
   relayUp (ip, port) {
@@ -45,16 +45,17 @@ class RelayAPI extends CommonAPI {
 
   relayDomainFrontUp (domain, domain_port) {
     var data = {
-      'domainfrontable':true,
-      'domainfront_port':domain_port,
-      'domain_name':domain
+      'domainfrontable': true,
+      'domainfront_port': domain_port,
+      'domain_name': domain
     }
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
 
-  keepAlive () {
+  keepAlive (isUP) {
     var data = {
       'fingerprint': this.fingerprint,
+      'status': isUP ? 'up' : 'down'
     }
     return this.transport.post(RELAY_PATH + this.userID, data)
   }

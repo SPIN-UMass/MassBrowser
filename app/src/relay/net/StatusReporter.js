@@ -47,7 +47,7 @@ class _StatusReporter extends EventEmitter {
       this.WSconnected = false
       this.emit('status-updated')
     })
-    ConnectivityConnection.keepAlive()
+    ConnectivityConnection.keepAlive(HealthManager.openAccess)
   }
 
   getPublicAddress () {
