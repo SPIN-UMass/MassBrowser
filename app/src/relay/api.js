@@ -53,10 +53,12 @@ class RelayAPI extends CommonAPI {
   }
 
   keepAlive (isUP) {
+    debug('is up',isUP)
     var data = {
       'fingerprint': this.fingerprint,
       'status': isUP ? 'up' : 'down'
     }
+
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
 }
