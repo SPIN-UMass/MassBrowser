@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { Domain } from '~/client/models'
+import { Domain } from '~/relay/models'
 import * as errors from '~/utils/errors'
 
 class _PolicyManager extends EventEmitter {
