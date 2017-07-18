@@ -8,10 +8,12 @@
                             toggle-button.toggle(v-on:change='onBandwidthChange' v-bind:value="bandwidthLimited"  v-bind:labels= "{checked: 'Limited', unchecked: 'Unlimited'}" v-bind:width="80" v-bind:color="{ unchecked: '#7DCE94',checked: '#FF877B'}")
                 li.bandwidth-limit-group.list-group-item(v-bind:class="{'disable': !bandwidthLimited, 'enable': bandwidthLimited}"  )
                     span Download Limit
+                    button.btn.btn-rounded.btn-vsm.btn-success.to-right(v-on:click="onDownloadLimitSave") Save
                     label.bandwidth-limit.bandwidth-limit-label KB
                     input.bandwidth-limit()
                 li.bandwidth-limit-group.list-group-item(v-bind:class="{'disable': !bandwidthLimited, 'enable': bandwidthLimited}"  )
                     span Upload Limit
+                    button.btn.btn-rounded.btn-vsm.btn-success.to-right(v-on:click="onUploadLimitSave") Save
                     label.bandwidth-limit.bandwidth-limit-label KB
                     input.bandwidth-limit()
                 li.setting-nat.list-group-item
@@ -19,9 +21,8 @@
                         toggle-button.toggle.to-right(v-on:change='onNatChange' v-bind:value="natDisable"  v-bind:labels= "{unchecked: 'Nat IP', checked: 'Public IP'}" v-bind:width="80" v-bind:color="{ checked: '#7DCE94',unchecked: '#FF877B'}")
                 li.bandwidth-nat-group.list-group-item(v-bind:class="{'disable': !natDisable, 'enable': natDisable}"  )
                     span Port Number
-                    button.btn.btn-rounded.btn-vsm.btn-success.to-right() Save
+                    button.btn.btn-rounded.btn-vsm.btn-success.to-right(v-on:click="onPortnumberSave") Save
                     input.to-right(v-bind:value="portNumber")
-
 
 
 </template>
@@ -32,7 +33,9 @@
   export default {
     data () {
       return {
-        bandwidthLimited: false,
+        bandwidthLimited: HealthManager.bandwidthLimited,
+        uploadLimit: HealthManager.uploadLimit / 8000,
+        downloadLimit: HealthManager.downloadLimit / 8000,
         natDisable: !HealthManager.natEnabled,
         portNumber: HealthManager.OBFSPortNumber
 
@@ -46,8 +49,16 @@
       onNatChange: function (e) {
         this.natDisable = e.value
         HealthManager.changeNatStatus(!this.natDisable)
-      }
+      },
+      onUploadLimitSave: function (e) {
 
+      },
+      onDownloadLimitSave: function (e) {
+
+      },
+      onPortnumberSave: function (e) {
+
+      }
     }
   }
 

@@ -39,7 +39,8 @@ class _StatusReporter extends EventEmitter {
     console.log('sessnign keepalive')
     API.keepAlive().then((res) => {
       this.WSconnected = true
-      this.reachable = res.reachable
+      console.log(res.data)
+      this.reachable = res.data.reachable
       this.emit('status-updated')
     }).catch((err) => {
       this.reachable = false
@@ -51,6 +52,9 @@ class _StatusReporter extends EventEmitter {
 
   getPublicAddress () {
     return {ip: this.remoteip, port: this.remoteport}
+  }
+  getPrivateAddress () {
+    return {ip: this.localip, port: this.localport}
   }
 
 }

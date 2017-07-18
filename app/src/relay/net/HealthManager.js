@@ -7,7 +7,7 @@ import { runOBFSserver } from './OBFSReceiver'
 import StatusReporter from './StatusReporter'
 import { error, debug } from '~/utils/log'
 import API from '~/relay/api'
-
+let UNLIMIT=1000000000
 class _HealthManager {
   constructor () {
     this.isRunningFromGUI = false
@@ -16,10 +16,13 @@ class _HealthManager {
     this.HTTPServer = {}
     this.isOBFSServerRunning = false
     this.isHTTPServerRunning = false
-    this.uploadLimit = 1000000000
-    this.downloadLimit = 1000000000
+    this.uploadLimit = UNLIMIT
+    this.downloadLimit = UNLIMIT
+    this.bandwidthLimited = false
+
     this.OBFSPortNumber = 8040
     this.HTTPPortNumber = 8083
+
     this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit})
     this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit})
     this.openAccess = false
@@ -27,20 +30,26 @@ class _HealthManager {
     //
     KVStore.get('natEnabled', false).then((naten) => {
       this.natEnabled = naten
-      debug('NAT STATUS',this.natEnabled)
+      debug('NAT STATUS', this.natEnabled)
       if (!naten) {
         KVStore.get('OBFSport', 8040).then((portnum) => {
           this.OBFSPortNumber = portnum
         })
       }
     }).then(() => {
-      KVStore.get('uploadLimit', 1000000000).then((uplimit) => {
+      KVStore.get('uploadLimit', UNLIMIT).then((uplimit) => {
         this.uploadLimit = uplimit
+        if (UNLIMIT !== uplimit) {
+          this.bandwidthLimited = true
+        }
         this.uploadLimiter.resetRate({rate: this.uploadLimit})
       })
     }).then(() => {
-      KVStore.get('downloadLimit', 1000000000).then((downlimit) => {
+      KVStore.get('downloadLimit', UNLIMIT).then((downlimit) => {
         this.downloadLimit = downlimit
+        if (UNLIMIT !== downlimit) {
+          this.bandwidthLimited = true
+        }
         this.downloadLimiter.resetRate({rate: this.downloadLimit})
       })
     })
@@ -69,14 +78,13 @@ class _HealthManager {
   }
 
   changeAccess (access) {
-    if (access != this.openAccess) {
+    if (access !== this.openAccess) {
       this.openAccess = access
       if (this.openAccess) {
         let publicaddress = this.getReachableOBFSAddress()
         API.relayUp(publicaddress.ip, publicaddress.port)
         this.restartOBFSServer()
-      }
-      else {
+      } else {
         API.relayDown()
         this.stopOBFSServer()
       }
@@ -91,26 +99,44 @@ class _HealthManager {
       return {ip: publicAddress.ip, port: publicAddress.port}
     }
     return {ip: publicAddress.ip, port: this.OBFSPortNumber}
+  }
 
+  getLocalOBFSAddress () {
+    let privateAddress = StatusReporter.getPrivateAddress()
+
+    if (this.natEnabled) {
+      return {ip: privateAddress.ip, port: privateAddress.port}
+    }
+    return {ip: '0.0.0.0', port: this.OBFSPortNumber}
   }
 
   stopOBFSServer () {
     if (this.isOBFSServerRunning) {
-      this.OBFSServer.close()
+      this.OBFSServer.close(() => {
+        this.isOBFSServerRunning = false
+        this.OBFSServer = {}
+      })
+
     }
   }
 
   restartOBFSServer () {
-    this.stopOBFSServer()
-    if (!this.isOBFSServerRunning || this.OBFSServer.address().port != this.getReachableOBFSAddress().port) {
-      runOBFSserver(this.getReachableOBFSAddress().ip, this.getReachableOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
+    if (!this.isOBFSServerRunning) {
+      runOBFSserver(this.getLocalOBFSAddress().ip, this.getLocalOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
+        this.isOBFSServerRunning = true
+        this.OBFSServer = server
+      }).catch((err) => {
+        this.errorHandler(err)
+      })
+    } else if (this.OBFSServer.address().port !== this.getLocalOBFSAddress().port) {
+      this.stopOBFSServer()
+      runOBFSserver(this.getLocalOBFSAddress().ip, this.getLocalOBFSAddress().port, this.uploadLimiter, this.downloadLimiter).then((server) => {
         this.isOBFSServerRunning = true
         this.OBFSServer = server
       }).catch((err) => {
         this.errorHandler(err)
       })
     }
-
   }
 
   errorHandler (err) {

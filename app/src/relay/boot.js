@@ -70,6 +70,7 @@ export default function bootRelay (gui) {
       return ConnectivityConnection.connect()
         .then(data => {
           StatusReporter.startRoutine()
+          console.log('Connectivity', data)
           StatusReporter.localip = data[0]
           StatusReporter.localport = data[1]
           StatusReporter.remoteport = data[3]
