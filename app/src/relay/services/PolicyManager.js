@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { Domain } from '~/relay/models'
 import * as errors from '~/utils/errors'
+import { error, debug } from '~/utils/log'
 
 class _PolicyManager extends EventEmitter {
   constructor () {
@@ -34,7 +35,9 @@ class _PolicyManager extends EventEmitter {
               }
               website.getCategory()
                 .then(category => {
+
                   if (category === null || !category.enabled) {
+                    debug(category)
                     return reject(new errors.InvalidHostError('Category is not allowed'))
                   } else {
                     return resolve()
