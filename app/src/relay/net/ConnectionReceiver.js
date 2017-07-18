@@ -1,14 +1,14 @@
 /**
  * Created by milad on 4/12/17.
  */
-import { policy } from './Policer'
+import PolicyManager from '~/relay/services/PolicyManager'
 const net = require('net')
+import { error, debug } from '~/utils/log'
 
 import { Crypto } from '~/utils/crypto'
 
 import API from '~/relay/api'
 import { pendMgr } from './PendingConnections'
-
 
 export class ConnectionReceiver {
   constructor (socketup, socketdown, socket) {
@@ -78,8 +78,8 @@ export class ConnectionReceiver {
   }
 
   newConnection (ip, port, conid) {
-    try {
-      if (policy.checkDestination(ip, port)) {
+    PolicyManager.getDomainPolicy(ip, port).then(() => {
+      try {
         console.log('ip', ip, 'port', port)
         this.connections[conid] = net.connect({host: ip, port: port}, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
@@ -96,10 +96,14 @@ export class ConnectionReceiver {
           delete this.connections[conid]
         })
       }
-    } catch (err) {
+      catch (err) {
+        this.write(conid, 'C', Buffer(ip + ':' + String(port)))
+        console.log(err)
+      }
+    }).catch((err) => {
       this.write(conid, 'C', Buffer(ip + ':' + String(port)))
-      console.log(err)
-    }
+      debug(err)
+    })
   }
 
   commandParser (lastconid, CMD, size, data) {
