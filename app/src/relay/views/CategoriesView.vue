@@ -9,6 +9,8 @@
 
 <script>
   import Category from '~/relay/models/Category'
+  import SyncService from '~/relay/services/SyncService'
+
   const CategoryToggle = {
     render: function (h) {
       return h('toggle-button', {
@@ -32,6 +34,9 @@
       onChange: function (e) {
         this.category.enabled = e.value
         this.category.save()
+        SyncService.syncServerAllowedCategories()
+
+
       }
     }
   }

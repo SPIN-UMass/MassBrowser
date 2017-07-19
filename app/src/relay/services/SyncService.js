@@ -17,7 +17,8 @@ class _SyncService {
       this.syncWebsites(),
       this.syncDomains(),
       this.syncCategories(),
-      this.syncCDNs()
+      this.syncCDNs(),
+      this.syncAllowedCategories()
     ])
   }
 
@@ -37,6 +38,43 @@ class _SyncService {
     return this._sync('regions', Region)
   }
 
+  syncAllowedCategories () {
+    API.getAllowedCategories().then((allowedCategories) => {
+      var allowedIDs = []
+      allowedCategories.forEach((cat) => {
+        allowedIDs.push(cat.id)
+      })
+      Category.find()
+        .then(categories => {
+
+          categories.forEach((category) => {
+            console.log('allowedIDS', allowedIDs, category.id, allowedIDs.indexOf(category.id) > -1)
+
+            if (allowedIDs.indexOf(category.id) > -1) {
+              category.enabled = true
+            } else {
+              category.enabled = false
+            }
+            category.save()
+          })
+        })
+
+    })
+  }
+
+  syncServerAllowedCategories () {
+    Category.find({enabled: true})
+      .then(categories => {
+        var allowedIDs = []
+        categories.forEach((cat) => {
+          allowedIDs.push(cat.id)
+        })
+        API.setAllowedCategories(allowedIDs).then((d) => {
+          debug('Categories saved')
+        })
+      })
+  }
+
   syncCDNs () {
     return this._sync('cdns', CDN)
   }
@@ -45,14 +83,14 @@ class _SyncService {
    * @returns a Promise which will resolve with a boolean, which is true
    * if the local database is empty
    */
-  isFirstSync() {
+  isFirstSync () {
     return Website.find()
-    .then(websites => websites.length === 0)
+      .then(websites => websites.length === 0)
   }
 
   _getLastSyncTime (entity) {
     return KVStore.get('last-sync-' + entity)
-      .then(value => value ? new Date(value) : new Date("1993"))
+      .then(value => value ? new Date(value) : new Date('1993'))
   }
 
   _updateLastSyncTime (entity, syncTime) {
@@ -64,23 +102,23 @@ class _SyncService {
       this._getLastSyncTime(entity),
       API.getLastModificationTime(entity)
     ])
-    
+
     var itemCount = 0
     const ITEMS_PER_SYNC = 100
     const savePromises = []
 
     const requestItems = (lastSyncTime, limit, offset) => {
       return API.syncDatabase(entity, lastSyncTime, limit, offset)
-      .then(response => {
-        savePromises.push(this._saveItems(model, response.results))
+        .then(response => {
+          savePromises.push(this._saveItems(model, response.results))
 
-        itemCount += response.results.length
-        if (itemCount >= response.count || response.results.length === 0) {
-          return itemCount
-        } else {
-          return requestItems(lastSyncTime, limit, offset + response.results.length)
-        }
-      })
+          itemCount += response.results.length
+          if (itemCount >= response.count || response.results.length === 0) {
+            return itemCount
+          } else {
+            return requestItems(lastSyncTime, limit, offset + response.results.length)
+          }
+        })
     }
 
     return getTimes
@@ -106,7 +144,7 @@ class _SyncService {
           if (!item) {
             var item = new Model()
           }
-          
+
           item.assignJson(itemInfo)
           return item.save()
         })

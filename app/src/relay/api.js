@@ -53,13 +53,23 @@ class RelayAPI extends CommonAPI {
   }
 
   keepAlive (isUP) {
-    debug('is up',isUP)
+    debug('is up', isUP)
     var data = {
       'fingerprint': this.fingerprint,
       'status': isUP ? 'up' : 'down'
     }
 
     return this.transport.post(RELAY_PATH + this.userID, data)
+  }
+
+  getAllowedCategories () {
+    var data = {}
+    return this.transport.get('/relay/categories', data).then(r => r.data.allowed_categories)
+  }
+
+  setAllowedCategories (categories) {
+    var data = {'allowed_categories': categories}
+    return this.transport.post('/relay/categories', data).then(r => r.data.allowed_categories)
   }
 }
 
