@@ -33,10 +33,9 @@
     methods: {
       onChange: function (e) {
         this.category.enabled = e.value
-        this.category.save()
-        SyncService.syncServerAllowedCategories()
-
-
+        this.category.save().then(() => {
+          SyncService.syncServerAllowedCategories()
+        })
       }
     }
   }
