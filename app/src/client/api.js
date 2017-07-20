@@ -1,6 +1,7 @@
 import { CommonAPI } from '~/api/common'
 import { PermissionDeniedError, InvalidInvitationCodeError } from '~/utils/errors'
 import config from '~/utils/config'
+import { error, debug } from '~/utils/log'
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
@@ -31,6 +32,7 @@ class ClientAPI extends CommonAPI {
   }
 
   requestSession (categories) {
+    console.log('categories',categories)
     return this.transport.post(
       CLIENT_URL + '/' + this.userID + SESSION_URL,{
         'cdn_session': false,

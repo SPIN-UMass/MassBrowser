@@ -8,19 +8,23 @@ import RelayConnection from '~/client/net/RelayConnection'
 import DomainConnection from './DomainConnection'
 
 export class Session extends EventEmitter {
-  constructor (id, ip, port, desc, allowedCategories, isCDN,domainName) {
+  constructor (id, ip, port, desc, allowedCategories, isCDN, domainName) {
     super()
 
     this.id = id
     this.ip = ip
     this.port = port
     this.desc = desc
-    this.allowedCategories = new Set(allowedCategories)
+    var allowedcats = []
+    allowedCategories.forEach(cat => {
+      allowedcats.push(cat.id)
+    })
+    this.allowedCategories = new Set(allowedcats)
     this.connection = null
     this.isCDN = isCDN || false
     this.connected = false
     this.connecting = false
-    this.domainName= domainName
+    this.domainName = domainName
 
     this.bytesSent = 0
     this.bytesReceived = 0

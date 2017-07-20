@@ -29,12 +29,13 @@ class _SessionService extends EventEmitter {
     ConnectionManager.setRelayAssigner(this)
     console.log('Starting Session Services')
     this._startSessionPoll()
+    return new Promise((resolve, reject) => {resolve()})
 
-    return this.createSession()
-      .then(() => {debug('First session created')})
-      .catch(NoRelayAvailableError, err => {
-        warn('No relay available for first session')
-      })
+    /*return this.createSession()
+     .then(() => {debug('First session created')})
+     .catch(NoRelayAvailableError, err => {
+     warn('No relay available for first session')
+     })*/
   }
 
   getSessions () {
@@ -52,30 +53,29 @@ class _SessionService extends EventEmitter {
     //   .then(session => session.connection)
 
     return Domain.findDomain(host)
-    .then(domain => {
-      debug(`Assigning session for ${domain}`)
-      return domain
-    })
-    .then(domain => domain.getWebsite())
-    .then(website => website.getCategory())
-    .then(category => {
-      
+      .then(domain => {
+        debug(`Assigning session for ${domain}`)
+        return domain
+      })
+      .then(domain => domain.getWebsite())
+      .then(website => website.getCategory())
+      .then(category => {
 
-      /* TODO optimization */
-      /* TODO is always returning the first one found */
-      for (var i = 0; i < this.sessions.length; i++) {
-        /* TODO Allowing all categories for now */
-        return this.sessions[i]
+        /* TODO optimization */
+        /* TODO is always returning the first one found */
+        for (var i = 0; i < this.sessions.length; i++) {
+          /* TODO Allowing all categories for now */
+          //return this.sessions[i]
+          console.log('allowed',this.sessions[i].allowedCategories)
+          if (this.sessions[i].allowedCategories.has(category.id)) {
+            return this.sessions[i]
+          }
+        }
 
-        // if (this.sessions[i].allowedCategories.has(category.id)) {
-        //   return this.sessions[i]
-        // }
-      }
-
-      // No suitable session found
-      return this.createSession(category)
-    })
-    .then(session => session.connection)
+        // No suitable session found
+        return this.createSession(category)
+      })
+      .then(session => session.connection)
 
     // return new Promise((resolve, reject) => {
     //   var session = this.sessions[Math.floor(Math.random() * this.sessions.length)]
@@ -93,18 +93,30 @@ class _SessionService extends EventEmitter {
    * the corresponding Relay
    */
   createSession (categories) {
-    var categoryIDs = []
-    if (categories !== undefined) {
+    var catIDs = []
+    debug(catIDs)
+    info(catIDs)
+    console.log(catIDs)
+    if (categories) {
+      debug('i am here')
       if (!Array.isArray(categories)) {
         categories = [categories]
       }
-      categoryIDs = categories.map(c => (c instanceof Category ? c.id : c))
+      for (let i = 0; i < categories.length; i++) {
+        let cat = categories[i]
+        catIDs.push(cat.id)
+      }
+      // categories.forEach((cat) => {
+      //   debug(cat, cat.id, catIDs)
+      //   catIDs.push('00')
+      //   debug(cat, cat.id, catIDs)
+      //   debug(catIDs)
+      // })
     }
-
-    debug('Creating new session')
+    console.log('Creating new session', categories, 'ids', catIDs)
 
     return new Promise((resolve, reject) => {
-      API.requestSession(categoryIDs)
+      API.requestSession(catIDs)
         .then(session => {
           if (!session) {
             warn('No relay was found for new session')
@@ -176,7 +188,7 @@ class _SessionService extends EventEmitter {
 
         if (!(session.id in this.sessions)) {
           this.processedSessions[session.id] = desc
-          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'],session.is_cdn,session.relay.domain_name)
+          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'], session.is_cdn, session.relay.domain_name)
 
           if (session.id in this.pendingSessions) {
             let resolve = this.pendingSessions[session.id].accept
