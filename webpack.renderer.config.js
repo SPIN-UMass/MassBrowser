@@ -160,4 +160,5 @@ if (process.env.NODE_ENV === 'production') {
   )
 }
 
-module.exports = rendererConfig
+const webConfig = require('./webpack.web.config')
+module.exports = [rendererConfig, webConfig]

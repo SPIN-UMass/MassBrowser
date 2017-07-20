@@ -16,9 +16,13 @@ export class Session extends EventEmitter {
     this.port = port
     this.desc = desc
     var allowedcats = []
-    allowedCategories.forEach(cat => {
-      allowedcats.push(cat.id)
-    })
+    
+    if (allowedCategories) {
+      allowedCategories.forEach(cat => {
+        allowedcats.push(cat.id)
+      })
+    }
+    
     this.allowedCategories = new Set(allowedcats)
     this.connection = null
     this.isCDN = isCDN || false

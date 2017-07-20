@@ -18,7 +18,7 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack  --progress --colors --config webpack.renderer.config.js",
     "test": "npm run unit",
     "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
-    "postinstall": "cd app && npm install",
+    "postinstall": "cd app && yarn",
     "release": "node tasks/release.js",
     "watch": "webpack --progress --watch --config webpack.daemon.config.js",
     "client": "cross-env NODE_ENV=production node ./app/dist/client.js",
@@ -128,11 +128,12 @@
     "vue-html-loader": "^1.2.2",
     "vue-loader": "^10.0.2",
     "vue-style-loader": "^1.0.0",
-    "vue-template-compiler": "^2.1.10",
+    "vue-template-compiler": "^2.3.4",
     "vuetify": "^0.13.1",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
     "webpack-hot-middleware": "^2.18.0",
-    "webpack-merge": "^2.4.0"
+    "webpack-merge": "^2.4.0",
+    "pug-loader": "^2.3.0"
   }
 }

@@ -21,6 +21,11 @@
         ["latest", { "modules": false }],
         "stage-0"
       ]
+    },
+    "web": {
+      "presets": [
+        ["es2015"]
+      ]
     }
   }
 }

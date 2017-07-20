@@ -15,6 +15,9 @@ import PolicyManager from '~/client/services/PolicyManager'
 
 import { debug, info, warn, error } from '~/utils/log'
 import * as errors from '~/utils/errors'
+import config from '~/utils/config'
+
+const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
 export function startClientSocks (mhost, mport) {
   var HOST = mhost,
@@ -27,6 +30,14 @@ export function startClientSocks (mhost, mport) {
   }
 
   function onConnection (socket, port, address, proxyReady) {
+    if (ipRegex.test(address)) {
+      return sendToNoHostHandler(socket, address, port, proxyReady)
+    }
+
+    if (address === config.client.web.domain) {
+      return sendToWebPanel(socket, address, port, proxyReady)
+    }
+
     PolicyManager.getDomainPolicy(address, port)
     .then((proxyType) => {
       debug(`New socks connection to ${address}:${port} using policy '${proxyType}'`)
@@ -51,73 +62,6 @@ export function startClientSocks (mhost, mport) {
     })
   }
 
-  function yalerProxy(socket, address, port, proxyReady) {
-    return ConnectionManager.newClientConnection(socket, address, port, proxyReady)
-  }
-
-  function cachebrowse(socket, address, port, proxyReady) {
-    return CacheManager.newCacheConnection(socket, address, port, proxyReady)
-    .catch(errors.NotCacheBrowsableError, err => {
-      warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
-      return yalerProxy(socket, address, port, proxyReady)
-    })
-  }
-
-  function regularProxy (socket, address, port, proxyReady) {
-    var proxy = net.createConnection({port: port, host: address}, proxyReady)
-    var localAddress, localPort
-    proxy.on('connect', () => {
-      localPort = proxy.localPort
-    })
-    proxy.on('data', (d) => {
-      try {
-        if (!socket.write(d)) {
-          proxy.pause()
-
-          socket.on('drain', function () {
-            proxy.resume()
-          })
-          setTimeout(function () {
-            proxy.resume()
-          }, 100)
-        }
-      } catch (err) {
-      }
-    })
-    socket.on('data', function (d) {
-      // If the application tries to send data before the proxy is ready, then that is it's own problem.
-      try {
-        // console.log('sending ' + d.length + ' bytes to proxy');
-        if (!proxy.write(d)) {
-          socket.pause()
-
-          proxy.on('drain', function () {
-            socket.resume()
-          })
-          setTimeout(function () {
-            socket.resume()
-          }, 100)
-        }
-      } catch (err) {
-      }
-    })
-
-    proxy.on('error', function (err) {
-      // console.log('Ignore proxy error');
-    })
-    socket.on('error', (err) => {
-
-    })
-
-    proxy.on('close', function (had_error) {
-      try {
-        if (localAddress && localPort) { console.log('The proxy %s:%d closed', localAddress, localPort) } else { console.error('Connect to %s:%d failed', address, port) }
-        socket.close()
-      } catch (err) {
-      }
-    })
-  }
-
   return new Promise((resolve, reject) => {
     var userPass// process.argv[3] && process.argv[4] && {username: process.argv[3], password: process.argv[4]}
     var server = socks.createServer(onConnection, userPass, server => {
@@ -138,4 +82,84 @@ export function startClientSocks (mhost, mport) {
 
     server.listen(PORT, HOST)
   })
+}
+
+function yalerProxy(socket, address, port, proxyReady) {
+  return ConnectionManager.newClientConnection(socket, address, port, proxyReady)
+}
+
+function cachebrowse(socket, address, port, proxyReady) {
+  return CacheManager.newCacheConnection(socket, address, port, proxyReady)
+  .catch(errors.NotCacheBrowsableError, err => {
+    warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
+    return yalerProxy(socket, address, port, proxyReady)
+  })
+}
+
+function regularProxy (socket, address, port, proxyReady) {
+  var proxy = net.createConnection({port: port, host: address}, proxyReady)
+  var localAddress, localPort
+  proxy.on('connect', () => {
+    localPort = proxy.localPort
+  })
+  proxy.on('data', (d) => {
+    try {
+      if (!socket.write(d)) {
+        proxy.pause()
+
+        socket.on('drain', function () {
+          proxy.resume()
+        })
+        setTimeout(function () {
+          proxy.resume()
+        }, 100)
+      }
+    } catch (err) {
+    }
+  })
+  socket.on('data', function (d) {
+    // If the application tries to send data before the proxy is ready, then that is it's own problem.
+    try {
+      // console.log('sending ' + d.length + ' bytes to proxy');
+      if (!proxy.write(d)) {
+        socket.pause()
+
+        proxy.on('drain', function () {
+          socket.resume()
+        })
+        setTimeout(function () {
+          socket.resume()
+        }, 100)
+      }
+    } catch (err) {
+    }
+  })
+
+  proxy.on('error', function (err) {
+    // console.log('Ignore proxy error');
+  })
+  socket.on('error', (err) => {
+
+  })
+
+  proxy.on('close', function (had_error) {
+    try {
+      if (localAddress && localPort) { console.log('The proxy %s:%d closed', localAddress, localPort) } else { console.error('Connect to %s:%d failed', address, port) }
+      socket.close()
+    } catch (err) {
+    }
+  })
+}
+
+
+function sendToWebPanel(socket, address, port, proxyReady) {
+  if (port === 443) {
+    return cachebrowse(socket, 'yaler.co', port, proxyReady)  
+  } else {
+    return regularProxy(socket, '127.0.0.1', config.client.web.port, proxyReady)
+  }
+}
+
+function sendToNoHostHandler(socket, address, port, proxyReady) {
+  return regularProxy(socket, '127.0.0.1', config.client.noHostHandlerPort, proxyReady)
 }

@@ -5,7 +5,12 @@ const config = {
     socksPort: 7080,
     cachebrowser: {
       mitmPort: 6425
-    }
+    },
+    web: {
+      port: 6423,
+      domain: null
+    },
+    noHostHandlerPort: 6422
   },
   relay: {
     natEnabled: true,

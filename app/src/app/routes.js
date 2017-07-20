@@ -37,6 +37,11 @@ export default [
     component: require('~/client/views/Splash')
   },
   {
+    path: '/client-browser-integration',
+    name: 'client-browser-integration',
+    component: require('~/client/views/BrowserIntegration')
+  },
+  {
     path: '/relay',//
     name: 'relay',
     component: require('~/relay/views/Index'),

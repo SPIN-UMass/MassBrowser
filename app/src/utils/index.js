@@ -1,8 +1,16 @@
 import path from 'path'
 
 export function getDataDir () {
-  const DATA_ROOT = process.platform === 'win32' ? process.env.LOCALAPPDATA : process.env.HOME
-  return path.join(DATA_ROOT, '.yaler')
+  return process.platform === 'win32' ? 
+    path.join(process.env.LOCALAPPDATA, 'Yaler') : path.join(process.env.HOME, '.yaler')
+}
+
+export const WINDOWS = 'win32'
+export const LINUX = 'linux'
+export const OSX = 'darwin'
+
+export function isPlatform(platform) {
+  return process.platform === platform
 }
 
 // https://github.com/sindresorhus/pretty-bytes

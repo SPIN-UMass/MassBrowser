@@ -57,7 +57,9 @@ let mainConfig = {
       path.join(__dirname, 'app/node_modules')
     ]
   },
-  target: 'electron-main'
+  target: 'node'
 }
 
-module.exports = mainConfig
+const webConfig = require('./webpack.web.config')
+
+module.exports = [mainConfig, webConfig]

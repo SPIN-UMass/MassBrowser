@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events'
+
 import { createModel } from './orm'
 
 class KeyValSchema {
@@ -6,13 +8,16 @@ class KeyValSchema {
   }
 }
 
-class _KVStore {
+class _KVStore extends EventEmitter {
   constructor () {
+    super()
     this.model = createModel('KeyVal', KeyValSchema, { collection: 'keyval' })
   }
 
   set (key, value) {
     return this.model.update({_id: key}, {_id: key, value: value}, {upsert: true})
+    .then(() => setImmediate(() => this.emit(key, value)))
+    .then(() => value)
   }
 
   get (key, deflt) {

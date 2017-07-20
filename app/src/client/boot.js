@@ -16,6 +16,8 @@ import API from '~/client/api'
 
 import SessionService from '~/client/services/SessionService'
 import SyncService from '~/client/services/SyncService'
+import WebPanelService from '~/client/services/WebPanelService'
+import NoHostHandlerService from '~/client/services/NoHostHandlerService'
 import CacheProxy from '~/client/cachebrowser/CacheProxy'
 
 import { startClientSocks } from './net/ClientSocks'
@@ -92,6 +94,11 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
     .then(() => {
       let status = Status.info('Starting SOCKS server')
       return startClientSocks('127.0.0.1', config.client.socksPort)
+        .then(() => status.clear())
+    })
+    .then(() => {
+      let status = Status.info('Starting remaining services')
+      return Promise.all([WebPanelService.start(), NoHostHandlerService.start()])
         .then(() => status.clear())
     })
     .then(() => {
