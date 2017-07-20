@@ -144,7 +144,9 @@ function regularProxy (socket, address, port, proxyReady) {
 
   proxy.on('close', function (had_error) {
     try {
-      if (localAddress && localPort) { console.log('The proxy %s:%d closed', localAddress, localPort) } else { console.error('Connect to %s:%d failed', address, port) }
+      if (hadError) { 
+        error(`socks connection close unexpectedly ${address} ${port}`) 
+      }
       socket.close()
     } catch (err) {
     }

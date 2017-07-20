@@ -113,8 +113,9 @@
     "karma-webpack": "^2.0.1",
     "mocha": "^3.0.2",
     "multispinner": "^0.2.1",
-    "node-sass": "^4.5.2",
+    "node-sass": "^4.5.3",
     "pug": "^2.0.0-rc.1",
+    "pug-loader": "^2.3.0",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "sass-loader": "^6.0.3",
@@ -133,7 +134,6 @@
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
     "webpack-hot-middleware": "^2.18.0",
-    "webpack-merge": "^2.4.0",
-    "pug-loader": "^2.3.0"
+    "webpack-merge": "^2.4.0"
   }
 }
