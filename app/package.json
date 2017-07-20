@@ -1,6 +1,6 @@
 {
   "name": "yaler",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "P2P Proxy",
   "main": "./dist/main.js",
   "config": {

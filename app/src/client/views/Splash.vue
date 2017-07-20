@@ -24,6 +24,7 @@
   import bootClient from '~/client/boot'
   import { InvalidInvitationCodeError, ApplicationBootError } from '~/utils/errors'
   import KVStore from '~/utils/kvstore'
+  import config from '~/utils/config'
 
   const INVITATION_CODE_LENGTH = 10
   const DELIM = '  '
@@ -94,7 +95,7 @@
         .then(complete => {
           // If browser integration step hasn't been performed, redirect to the
           // browser integration page
-          if (!complete) {
+          if (config.isProduction && !complete) {
             this.$router.push('/client-browser-integration')
           } else {
             this.$router.push({path: '/client'})
