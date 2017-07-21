@@ -12,8 +12,9 @@
 
 <script>
   import { getBrowser } from '../utils'
+  import { SUPPORTED_BROWSERS } from '../config'
 
-  const supportedBrowsers = ['firefox', 'chrome']
+  const supportedBrowsers = SUPPORTED_BROWSERS
 
   export default {
     data() {
@@ -23,7 +24,7 @@
       }
     },
     created() {
-      this.browser = 'firefox'
+      this.browser = getBrowser()
       this.supported = supportedBrowsers.indexOf(this.browser) !== -1
     },
     methods: {

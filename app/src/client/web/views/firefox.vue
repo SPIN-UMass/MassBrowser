@@ -5,11 +5,11 @@
         a(v-on:click="tab='proxy'") Proxy Settings
           i.step-status.text-danger.fa.fa-times-circle(v-if="!proxy.success")
           i.step-status.text-success.fa.fa-check-circle(v-if="proxy.success")
-      li(:class="{active: tab==='cert'}")
+      li(:class="{active: tab==='cert', disabled: !proxy.success}")
         a(v-on:click="tab='cert'") Trust CA Certificate
           i.step-status.text-danger.fa.fa-times-circle(v-if="!cert.success")
           i.step-status.text-success.fa.fa-check-circle(v-if="cert.success")
-      li(:class="{active: tab==='dnsCache'}")
+      li( :class="{active: tab==='dnsCache', disabled: !proxy.success}")
         a(v-on:click="tab='dnsCache'") Disable DNS Cache
           i.step-status.text-danger.fa.fa-times-circle(v-if="!dnsCache.success")
           i.step-status.text-success.fa.fa-check-circle(v-if="dnsCache.success")
@@ -138,8 +138,17 @@
       })
     },
     methods: {
-      onFinish() {
-        return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
+      onFinishTab() {
+        
+      },
+      onTabChange() {
+        if (this.tab === 'finish') {
+          return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
+        } else if (tab === 'cert') {
+          this.checkCert()
+        } else if (tab === 'dnsCache') {
+          this.checkDNSCache()
+        }
       },
       checkProxySettings(showError=true) {
         return axios.get(`http://${ONBOARDING_DOMAIN}/check-proxy`)
@@ -242,10 +251,7 @@
           return this.nextStep()
         }
 
-        if (this.tab == 'finish') {
-          this.onFinish()
-        }
-        
+        this.onTabChange(this.tab)
       }
     }
   }
@@ -325,8 +331,15 @@
 
     .nav.nav-tabs {
       width: 200px;
-      a {
-        cursor: pointer;
+
+      li {
+        a {
+          cursor: pointer;
+        }
+      }
+      
+      li.disabled {
+        pointer-events:none;
       }
     }
   }

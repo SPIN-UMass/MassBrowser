@@ -1,6 +1,6 @@
 {
   "name": "yaler",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "P2P Proxy",
   "main": "./dist/main.js",
   "config": {
@@ -13,7 +13,7 @@
       },
       "web": {
         "port": 6423,
-        "domain": "yaler.it"
+        "domain": "start.yaler.co"
       },
       "noHostHandlerPort": 6422
     },
