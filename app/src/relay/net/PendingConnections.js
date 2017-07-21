@@ -15,9 +15,10 @@ class PendingConnections {
     if (token in this.connections) {
       const desc = this.connections[token]
       delete (this.connections[token])
+      console.log('connection after:', this.connections)
       return desc
     }
-    console.log('connection after:', this.connections)
+
     return false
   }
 
