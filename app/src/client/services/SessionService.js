@@ -93,7 +93,7 @@ class _SessionService extends EventEmitter {
          * Check category waitlists to see if the category already has
          * a pending session
          */
-        if (this.categoryWaitLists[category.id]) {
+        if (category && this.categoryWaitLists[category.id]) {
           return new Promise((resolve, reject) => {
             this.categoryWaitLists[category.id].push(session => {
               resolve(session)
