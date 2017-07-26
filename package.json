@@ -1,9 +1,9 @@
 {
   "name": "yaler",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "P2P Proxy",
   "scripts": {
-    "build": "node tasks/build.js && build",
+    "build": "node tasks/build.js && build --config.productName=massbrowser",
     "build:all": "node tasks/build.js && build -mwl",
     "build:win": "node tasks/build.js && build -w",
     "build:help": "build -mwl",
@@ -39,6 +39,12 @@
       "dist/",
       "package.json"
     ],
+    "publish": {
+      "package": "Yaler",
+      "repo": "testrepo",
+      "owner": "ha-d",
+      "provider": "bintray"
+    },
     "dmg": {
       "contents": [
         {
