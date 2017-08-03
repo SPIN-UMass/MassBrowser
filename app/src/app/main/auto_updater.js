@@ -1,10 +1,16 @@
 import { autoUpdater } from 'electron-updater'
 import { CancellationToken } from 'electron-builder-http'
 import { ipcMain } from 'electron'
+import { GitHubProvider } from './github'
 
 export function initAutoUpdater(remote) {
   autoUpdater.autoDownload = false
   autoUpdater.allowPrerelease = false
+  autoUpdater.loadUpdateConfig().then(options => {
+    console.log("OPTIONS")
+    console.log(options)
+    autoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, autoUpdater, autoUpdater.httpExecutor)))
+  })
   
   let downloadCancelationToken = null
 
@@ -13,6 +19,10 @@ export function initAutoUpdater(remote) {
   })
 
   autoUpdater.on('update-available', (info) => {
+    console.log("UPDATE AVAILABLE")
+    console.log(info)
+    console.log(autoUpdater.versionInfo)
+    console.log(autoUpdater.fileInfo)
     remote.send('autoupdate-update-available', info)
   })
 

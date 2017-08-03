@@ -1,31 +1,18 @@
 {
   "name": "yaler",
-  "version": "0.0.7",
   "description": "P2P Proxy",
   "scripts": {
-    "build": "node tasks/build.js && build --config.productName=massbrowser",
-    "build:all": "node tasks/build.js && build -mwl",
-    "build:win": "node tasks/build.js && build -w",
-    "build:help": "build -mwl",
-    "build:dir": "node tasks/build.js && build --dir",
+    "postinstall": "cd app && yarn",
+    "build": "node --no-deprecation tasks/build.js",
     "build:clean": "cross-env BUILD_TARGET=clean node tasks/build.js",
     "dev": "node tasks/runner.js",
-    "dev2": "node tasks/dev-runner.js",
-    "lint": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter app test",
-    "lint:fix": "eslint --ext .js,.vue -f ./node_modules/eslint-friendly-formatter --fix app test",
-    "pack": "npm run pack:main && npm run pack:renderer",
-    "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config webpack.main.config.js",
-    "pack:renderer": "cross-env NODE_ENV=production webpack  --progress --colors --config webpack.renderer.config.js",
-    "test": "npm run unit",
-    "unit": "cross-env BABEL_ENV=testing-unit karma start test/unit/karma.conf.js",
-    "postinstall": "cd app && yarn",
     "release": "node tasks/release.js",
-    "watch": "webpack --progress --watch --config webpack.daemon.config.js",
-    "client": "cross-env NODE_ENV=production node ./app/dist/client.js",
-    "relay": "cross-env NODE_ENV=production node ./app/dist/relay.js",
-    "client-dev": "cross-env NODE_ENV=development node ./app/dist/client.js",
-    "relay-dev": "cross-env NODE_ENV=development node ./app/dist/relay.js",
-    "control": "node ./app/dist/control.js",
+    "watch": "webpack --progress --watch --config tasks/webpack/webpack.console.js",
+    "client": "cross-env NODE_ENV=production node ./app/dist/client/client.js",
+    "relay": "cross-env NODE_ENV=production node ./app/dist/relay/relay.js",
+    "client:dev": "cross-env NODE_ENV=development node ./app/dist/client/client.js",
+    "relay:dev": "cross-env NODE_ENV=development node ./app/dist/relay/relay.js",
+    "client:control": "node ./app/dist/client/control.js",
     "docker": "node ./tasks/docker_build.js"
   },
   "build": {
@@ -40,10 +27,10 @@
       "package.json"
     ],
     "publish": {
-      "package": "Yaler",
-      "repo": "testrepo",
-      "owner": "ha-d",
-      "provider": "bintray"
+      "provider": "github",
+      "repo": "UOIS",
+      "owner": "srxzr",
+      "protocol": "https"
     },
     "dmg": {
       "contents": [
@@ -103,8 +90,6 @@
     "extract-text-webpack-plugin": "^2.0.0-beta.4",
     "file-loader": "^0.9.0",
     "fs-extra": "^3.0.1",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^6.1.2",
     "html-webpack-plugin": "^2.16.1",
     "inject-loader": "^2.0.1",
     "inquirer": "^3.1.0",
@@ -141,5 +126,10 @@
     "webpack-dev-server": "^2.3.0",
     "webpack-hot-middleware": "^2.18.0",
     "webpack-merge": "^2.4.0"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.23.0",
+    "bluebird": "^3.5.0",
+    "js-yaml": "^3.9.1"
   }
 }

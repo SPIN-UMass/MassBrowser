@@ -1,70 +1,93 @@
 process.env.NODE_ENV = 'production'
 
-const { say } = require('cfonts')
+const Promise = require('bluebird')
+
 const chalk = require('chalk')
 const del = require('del')
-const { spawn } = require('child_process')
+
 const webpack = require('webpack')
 const Multispinner = require('multispinner')
+const inquirer = require('inquirer')
+const fs = require('fs-extra')
+
+const { YELLOW, BLUE, LABEL_DONE, greeting, run, format } = require('./utils')
 
 
-const mainConfig = require('../webpack.main.config')
-const rendererConfig = require('../webpack.renderer.config')
+const targets = {
+  relay: {
+    config: require('./webpack/webpack.relay.electron'),
+    del: ['app/dist/relay/*', '!.gitkeep', '!assets/']
+  },
+  client: {
+    config: require('./webpack/webpack.client.electron'),
+    del: ['app/dist/client/*', 'app/dist/web/*', '!.gitkeep', '!assets/']
+  }
+}
 
+main()
 
-const doneLog = chalk.bgGreen.white(' DONE ') + ' '
-const errorLog = chalk.bgRed.white(' ERROR ') + ' '
-const okayLog = chalk.bgBlue.white(' OKAY ') + ' '
-const isCI = process.env.CI || false
+function main() {
+  greeting('lets-build', 'lets-|build')
 
-if (process.env.BUILD_TARGET === 'clean') clean()
-else build()
+  if (process.env.BUILD_TARGET === 'clean') {
+    clean()
+  } else if (process.env.BUILD_TARGET) {
+    build(process.env.BUILD_TARGET)
+  } else {
+    askTargets()
+  }
+}
 
 function clean () {
   del.sync(['build/*', '!build/icons', '!build/icons/icon.*'])
-  console.log(`\n${doneLog}\n`)
+  console.log(`\n${LABEL_DONE}\n`)
   process.exit()
 }
 
-function build () {
-  greeting()
-
-  del.sync(['app/dist/*', '!.gitkeep', '!assets/'])
-
-  const tasks = ['main', 'renderer']
-  const m = new Multispinner(tasks, {
-    preText: 'building',
-    postText: 'process'
+function askTargets() {
+  inquirer.prompt([
+    {
+      type: 'checkbox',
+      name: 'targets',
+      message: 'Select targets',
+      choices: ['relay', 'client']
+    }
+  ])
+  .then(answers => answers.targets)
+  .then(targets => {
+    var p = new Promise((r, _) => r())
+    targets.forEach(target => {
+      p = p.then(() => {
+        console.log(format(target, 'Packing...', BLUE))
+        return build(target)
+        .then(() => console.log(format(target, 'Building...', BLUE)))
+        .then(() => run(`build -mw --em.main=./dist/${target}/electron.main.js --config.productName=${target}`, YELLOW, `${target}`))
+      })
+      .then(() => {
+        console.log(format(target, 'Renaming release files...', BLUE))
+        return Promise.all([
+          fs.move('build/latest.yml', `build/${target}.yml`, { overwrite: true }),
+          fs.move('build/latest-mac.yml', `build/${target}-mac.yml`, { overwrite: true })
+        ])
+      }) 
+    })
   })
+}
 
-  let results = ''
 
-  m.on('success', () => {
-    process.stdout.write('\x1B[2J\x1B[0f')
-    console.log(`\n\n${results}`)
-    console.log(`${okayLog}take it away ${chalk.yellow('`electron-builder`')}\n`)
+function singleBuild(target) {
+  build(target)
+  .then(() => {
     process.exit()
   })
-
-  pack(mainConfig).then(result => {
-    results += result + '\n\n'
-    m.success('main')
-  }).catch(err => {
-    m.error('main')
-    console.log(`\n  ${errorLog}failed to build main process`)
-    console.error(`\n${err}\n`)
-    process.exit(1)
+  .catch(() => {
+    console.error("Build failed")
   })
+}
 
-  pack(rendererConfig).then(result => {
-    results += result + '\n\n'
-    m.success('renderer')
-  }).catch(err => {
-    m.error('renderer')
-    console.log(`\n  ${errorLog}failed to build renderer process`)
-    console.error(`\n${err}\n`)
-    process.exit(1)
-  })
+function build (target) {
+  del.sync(targets[target].del)
+  return Promise.all(pack(targets[target].config))
 }
 
 function pack (config) {
@@ -95,20 +118,3 @@ function pack (config) {
 }
 
 
-function greeting () {
-  const cols = process.stdout.columns
-  let text = ''
-
-  if (cols > 85) text = 'lets-build'
-  else if (cols > 60) text = 'lets-|build'
-  else text = false
-
-  if (text && !isCI) {
-    say(text, {
-      colors: ['yellow'],
-      font: 'simple3d',
-      space: false
-    })
-  } else console.log(chalk.yellow.bold('\n  lets-build'))
-  console.log()
-}

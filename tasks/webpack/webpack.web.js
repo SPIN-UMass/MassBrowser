@@ -7,8 +7,9 @@ const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const rootPath = path.join(__dirname, './app/src/client/web')
+const common = require('./common')
 
+const rootPath = path.join(common.rootDir, 'app/src/client/web')
 const pkg = require(path.join(rootPath, 'package.json'))
 
 let webConfig = {
@@ -93,13 +94,13 @@ let webConfig = {
   output: {
     filename: '[name].js',
     libraryTarget: 'umd',
-    path: path.join(__dirname, 'app/dist/web')
+    path: path.join(common.rootDir, 'app/dist/web')
   },
   resolve: {
     extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss', '.pug'],
     modules: [
       path.join(rootPath, 'node_modules'),
-      path.join(__dirname, 'node_modules')
+      path.join(common.rootDir, 'node_modules')
     ]
   },
   target: 'web'
