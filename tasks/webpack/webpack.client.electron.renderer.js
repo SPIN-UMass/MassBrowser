@@ -1,5 +1,7 @@
 'use strict'
 
+process.env.BABEL_ENV = 'electron-renderer'
+
 const path = require('path')
 const pkg = require('../../app/package.json')
 const webpack = require('webpack')
@@ -13,7 +15,7 @@ let config = {
   devtool: '#source-map',
   devServer: { overlay: true },
   entry: {
-    renderer: ['babel-polyfill', path.join(common.rootDir, 'app/src/app/main.js')]
+    renderer: ['babel-polyfill', path.join(common.rootDir, 'app/src/client/main/electron/renderer.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -29,7 +31,7 @@ let config = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: './app/src/app/index.ejs',
+      template: './app/src/common/main/electron/index.ejs',
       appModules: process.env.NODE_ENV !== 'production'
         ? path.resolve(common.rootDir, 'app/node_modules')
         : false,
@@ -44,7 +46,7 @@ let config = {
       : '"development"'
     })
   ],
-  resolve: common.resolve,
+  resolve: common.resolveFactory('client'),
   target: 'electron-renderer'
 }
 

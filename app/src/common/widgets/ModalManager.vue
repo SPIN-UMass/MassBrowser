@@ -3,8 +3,8 @@
 </template>
 
 <script>
-  import modal from '~/app/widgets/Modal'
-  import { Bus } from '~/app/utils'
+  import modal from '@common/widgets/Modal'
+  import { Bus } from '@common/utils'
 
   export default {
     data () {

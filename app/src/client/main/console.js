@@ -8,17 +8,16 @@ tls.connect = function (...args) {
 ////DANGERIOUS
 
 
-
-import Raven from '~/utils/raven'
+import Raven from '@utils/raven'
 import Promise from 'bluebird'
 
 import bootClient from './boot'
-import Status from '~/utils/status'
+import Status from '@utils/status'
 
-import { InvalidInvitationCodeError } from '~/utils/errors'
-import { error } from '~/utils/log'
-import config from '~/utils/config'
-import {initializeLogging} from '~/utils/log'
+import { InvalidInvitationCodeError } from '@utils/errors'
+import { error } from '@utils/log'
+import config from '@utils/config'
+import {initializeLogging} from '@utils/log'
 
 global.Promise = Promise
 

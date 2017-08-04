@@ -37,7 +37,7 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~styles/settings';
+  @import '~@common/styles/settings.scss';
 
   .y-browser-integration{
     background: white;

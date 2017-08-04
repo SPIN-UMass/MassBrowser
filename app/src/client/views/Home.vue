@@ -26,7 +26,7 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~styles/settings';
+  @import '~@common/styles/settings.scss';
 
   .top {
     height: 150px;

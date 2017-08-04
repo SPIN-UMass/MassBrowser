@@ -1,5 +1,6 @@
-
 'use strict'
+
+process.env.BABEL_ENV = 'console'
 
 const path = require('path')
 const pkg = require('../../app/package.json')
@@ -26,7 +27,7 @@ let config = {
     path: path.join(common.rootDir, 'app/dist/client')
   },
   plugins: common.plugis,
-  resolve: common.resolve,
+  resolve: common.resolveFactory('client'),
   target: 'node'
 }
 

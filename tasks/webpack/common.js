@@ -73,10 +73,10 @@ const rules = [
 
 const resolve = {
   alias: {
-    'components': path.join(rootDir, 'app/src/renderer/components'),
-    'renderer': path.join(rootDir, 'app/src/renderer'),
+    '@common': path.join(rootDir, 'app/src/common'),
     'styles': path.join(rootDir, 'app/src/app/styles'),
-    'assets': path.join(rootDir, 'app/assets'),
+    '@assets': path.join(rootDir, 'app/assets'),
+    '@utils': path.join(rootDir, 'app/src/utils'),
     '~': path.join(rootDir, 'app/src/'),
     'package.json': path.join(rootDir, 'app/package.json')
   },
@@ -85,6 +85,12 @@ const resolve = {
     path.join(rootDir, 'app/node_modules'),
     path.join(rootDir, 'node_modules')
   ]
+}
+
+const resolveFactory = (target) => {
+  let r = Object.assign({}, resolve)
+  r.alias['@'] = path.join(rootDir, `app/src/${target}`)
+  return r
 }
 
 const plugins = [
@@ -100,5 +106,6 @@ module.exports = {
   rootDir,
   rules,
   resolve,
+  resolveFactory,
   plugins
 }

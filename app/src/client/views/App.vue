@@ -7,9 +7,9 @@
 </template>
 
 <script>
-  import AutoUpdater from '~/services/AutoUpdater'
-  import ModalManager from '~/app/widgets/ModalManager'
-  import { showConfirmDialog } from '~/app/utils'
+  import AutoUpdater from '@common/services/AutoUpdater'
+  import ModalManager from '@common/widgets/ModalManager'
+  import { showConfirmDialog } from '@common/utils'
 
   export default {
     data() {

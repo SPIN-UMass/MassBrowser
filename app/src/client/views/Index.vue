@@ -20,7 +20,7 @@
 
 <script>
   import StatusWidget from './StatusWidget'
-  import SyncService from '~/client/services/SyncService'
+  import SyncService from '@/services/SyncService'
 
   export default {
     data () {
@@ -44,7 +44,7 @@
 
 
 <style scoped lang='scss'>
-  @import '~styles/settings.scss';
+  @import '~@common/styles/settings.scss';
 
   $border_radius: 0px;
   $header_height: 75px;

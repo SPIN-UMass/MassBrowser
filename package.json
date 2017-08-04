@@ -5,7 +5,8 @@
     "postinstall": "cd app && yarn",
     "build": "node --no-deprecation tasks/build.js",
     "build:clean": "cross-env BUILD_TARGET=clean node tasks/build.js",
-    "dev": "node tasks/runner.js",
+    "dev:client": "node tasks/devRunner.js client",
+    "dev:relay": "node tasks/devRunner.js relay",
     "release": "node tasks/release.js",
     "watch": "webpack --progress --watch --config tasks/webpack/webpack.console.js",
     "client": "cross-env NODE_ENV=production node ./app/dist/client/client.js",
@@ -125,10 +126,9 @@
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
     "webpack-hot-middleware": "^2.18.0",
-    "webpack-merge": "^2.4.0"
-  },
-  "dependencies": {
+    "webpack-merge": "^2.4.0",
     "babel-polyfill": "^6.23.0",
+    "blessed": "^0.1.81",
     "bluebird": "^3.5.0",
     "js-yaml": "^3.9.1"
   }

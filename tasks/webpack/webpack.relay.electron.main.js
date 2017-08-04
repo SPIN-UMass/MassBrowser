@@ -1,5 +1,7 @@
 'use strict'
 
+process.env.BABEL_ENV = 'electron-main'
+
 const path = require('path')
 const pkg = require('../../app/package.json')
 const webpack = require('webpack')
@@ -9,7 +11,7 @@ const common = require('./common')
 let config = {
   devtool: '#source-map',
   entry: {
-    main: ['babel-polyfill', path.join(common.rootDir, 'app/src/app/main/index.js')]
+    main: ['babel-polyfill', path.join(common.rootDir, 'app/src/relay/main/electron/index.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -32,7 +34,7 @@ let config = {
       : '"development"'
     })
   ],
-  resolve: common.resolve,
+  resolve: common.resolveFactory('relay'),
   target: 'electron-main'
 }
 

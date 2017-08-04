@@ -9,13 +9,13 @@ import ToggleButton from 'vue-js-toggle-button'
 
 import routes from './routes'
 
-import { Raven, RavenVue } from '~/utils/raven'
-import config from '~/utils/config'
-import {initializeLogging, warn} from '~/utils/log'
+import { Raven, RavenVue } from '@utils/raven'
+import config from '@utils/config'
+import {initializeLogging, warn} from '@utils/log'
 
-import 'assets/font-awesome/css/font-awesome.min.css'
-import 'assets/bootstrap/css/bootstrap.min.css'
-import 'assets/nifty/nifty.min.css'
+import '@assets/font-awesome/css/font-awesome.min.css'
+import '@assets/bootstrap/css/bootstrap.min.css'
+import '@assets/nifty/nifty.min.css'
 
 // Overwrite native Promise implementation with Bluebird's
 window.Promise = Promise;
@@ -45,7 +45,7 @@ const router = new VueRouter({
 })
 
 
-import App from './App'
+import App from '@/views/App'
 /* eslint-disable no-new */
 // var options = Object.assign({router}, App)
 var options = {

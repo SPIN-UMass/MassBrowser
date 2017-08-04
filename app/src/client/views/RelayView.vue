@@ -6,7 +6,6 @@
             th ip address
             th bytes sent
             th bytes received
-            th graph
         tbody
           tr(v-for="item in sessions")
             td {{ item.ip }}
@@ -42,7 +41,7 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~styles/settings';
+  @import '~@common/styles/settings.scss';
 
   $tbody_height: 100%;
   $tcell_width: 25%;
