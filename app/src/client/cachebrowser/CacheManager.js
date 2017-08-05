@@ -6,14 +6,14 @@
  */
 import crypto from 'crypto'
 import CacheProxy from './CacheProxy'
-import config from '~/utils/config'
+import config from '@utils/config'
 var net = require('net')
 
-import { NotCacheBrowsableError } from '~/utils/errors'
+import { NotCacheBrowsableError } from '@utils/errors'
 
 class _CacheManager {
   interceptConnection (socket, dst, dstport, onConnect) {
-    let proxy = net.createConnection({port: config.client.cachebrowser.mitmPort, host: 'localhost'})
+    let proxy = net.createConnection({port: config.cachebrowser.mitmPort, host: 'localhost'})
     proxy.on('connect', () => {
       CacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
     })

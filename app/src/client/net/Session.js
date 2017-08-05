@@ -2,9 +2,8 @@
  * Created by milad on 6/29/17.
  */
 import { EventEmitter } from 'events'
-import Promise from 'bluebird'
-import ConnectionManager from '~/client/net/ConnectionManager'
-import RelayConnection from '~/client/net/RelayConnection'
+import ConnectionManager from '@/net/ConnectionManager'
+import RelayConnection from '@/net/RelayConnection'
 import DomainConnection from './DomainConnection'
 
 export class Session extends EventEmitter {

@@ -28,7 +28,7 @@
 </template>
 
 <script>
-  import HealthManager from '~/relay/net/HealthManager'
+  import HealthManager from '@/net/HealthManager'
 
   export default {
     data () {
@@ -65,7 +65,7 @@
 </script>
 
 <style scoped lang='scss'>
-    @import '~styles/settings.scss';
+    @import '~@common/styles/settings.scss';
 
     .setting-bandwidth {
 

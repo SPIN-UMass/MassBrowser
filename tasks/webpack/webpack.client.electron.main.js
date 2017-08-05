@@ -28,15 +28,8 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/client')
   },
-  plugins: [
-    new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
-      ? '"production"' 
-      : '"development"'
-    })
-  ],
-  resolve: common.resolveFactory('client'),
+  plugins: common.plugins('client', 'electron'),
+  resolve: common.resolve('client'),
   target: 'electron-main'
 }
 

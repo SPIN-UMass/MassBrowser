@@ -8,9 +8,9 @@ import Forge from 'node-forge'
 import crypto from 'crypto'
 import async from 'async'
 
-import { getDataDir } from '~/utils'
-import { debug, warn } from '~/utils/log'
-import { CacheBrowserError } from '~/utils/errors'
+import { getDataDir } from '@utils'
+import { debug, warn } from '@utils/log'
+import { CacheBrowserError } from '@utils/errors'
 
 var pki = Forge.pki
 

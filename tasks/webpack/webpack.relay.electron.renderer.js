@@ -27,7 +27,7 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/relay')
   },
-  plugins: [
+  plugins: common.plugins('relay', 'electron', [
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',
@@ -36,17 +36,11 @@ let config = {
         ? path.resolve(common.rootDir, 'app/node_modules')
         : false,
     }),
-    new webpack.NoEmitOnErrorsPlugin(),
     new webpack.LoaderOptionsPlugin({ // Hadi: should it be only in production?
       minimize: true
-    }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
-      ? '"production"' 
-      : '"development"'
     })
-  ],
-  resolve: common.resolveFactory('relay'),
+  ]),
+  resolve: common.resolve('relay'),
   target: 'electron-renderer'
 }
 

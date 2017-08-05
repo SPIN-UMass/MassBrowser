@@ -2,16 +2,15 @@
  * Created by milad on 5/2/17.
  */
 
-import Promise from 'bluebird'
-import ConnectionManager from '~/client/net/ConnectionManager'
-import RelayConnection from '~/client/net/RelayConnection'
-import API from '~/client/api'
+import ConnectionManager from '@/net/ConnectionManager'
+import RelayConnection from '@/net/RelayConnection'
+import API from '@/api'
 import { EventEmitter } from 'events'
-import { logger, warn, debug, info } from '~/utils/log'
-import { SessionRejectedError, NoRelayAvailableError } from '~/utils/errors'
+import { logger, warn, debug, info } from '@utils/log'
+import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 var schedule = require('node-schedule')
-import { Session } from '~/client/net/Session'
-import { Domain, Category } from '~/client/models'
+import { Session } from '@/net/Session'
+import { Domain, Category } from '@/models'
 
 /**
  * Note: Implements RelayAssigner

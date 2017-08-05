@@ -1,4 +1,4 @@
-import { createModel, RelationField } from '~/utils/orm'
+import { createModel, RelationField } from '@utils/orm'
 
 const globalRegexCache = {}
 

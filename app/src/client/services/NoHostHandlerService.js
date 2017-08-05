@@ -4,10 +4,10 @@ import serveStatic from 'serve-static'
 import path from 'path'
 import fs from 'fs-extra'
 
-import { debug, warn, error } from '~/utils/log'
-import { AutoUpdateError } from '~/utils/errors'
-import config from '~/utils/config'
-import { getDataDir } from '~/utils'
+import { debug, warn, error } from '@utils/log'
+import { AutoUpdateError } from '@utils/errors'
+import config from '@utils/config'
+import { getDataDir } from '@utils'
 
 import electron from 'electron'
 
@@ -21,7 +21,7 @@ class _NoHostHandlerService {
   }
 
   start() {
-    let port = config.client.noHostHandlerPort
+    let port = config.noHostHandlerPort
     this.server = http.createServer(this.app)
     this.server.listen(port, () => debug(`No-host handler started on port ${port}`))
   }

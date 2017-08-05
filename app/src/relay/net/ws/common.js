@@ -1,7 +1,7 @@
 /**
  * Created by milad on 4/23/17.
  */
-import KVStore from '~/utils/kvstore'
+import KVStore from '@utils/kvstore'
 const util = require('util')
 import { EventEmitter } from 'events'
 

@@ -2,11 +2,10 @@
  * Created by milad on 4/12/17.
  */
 import crypto from 'crypto'
-import Promise from 'bluebird'
 
 import RelayConnection from './RelayConnection'
-import * as errors from '~/utils/errors'
-import { debug } from '~/utils/log'
+import * as errors from '@utils/errors'
+import { debug } from '@utils/log'
 
 class _ConnectionManager {
   constructor () {

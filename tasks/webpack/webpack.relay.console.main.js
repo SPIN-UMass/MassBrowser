@@ -26,8 +26,8 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/relay')
   },
-  plugins: common.plugis,
-  resolve: common.resolveFactory('relay'),
+  plugins: common.plugins('relay', 'console'),
+  resolve: common.resolve('relay'),
   target: 'node'
 }
 

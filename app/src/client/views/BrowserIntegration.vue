@@ -8,14 +8,14 @@
 </template>
 
 <script>
-  import config from '~/utils/config'
+  import config from '@utils/config'
   import { shell } from 'electron'
-  import KVStore from '~/utils/kvstore'
+  import KVStore from '@utils/kvstore'
 
   export default {
     data () {
       return {
-        webDomain: config.client.web.domain
+        webDomain: config.web.domain
       }
     },
     mounted() {

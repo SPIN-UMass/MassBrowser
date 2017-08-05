@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
-import { Domain } from '~/client/models'
-import * as errors from '~/utils/errors'
+import { Domain } from '@/models'
+import * as errors from '@utils/errors'
 
 class _PolicyManager extends EventEmitter {
   constructor () {

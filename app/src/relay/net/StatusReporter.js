@@ -2,11 +2,11 @@
  * Created by milad on 6/11/17.
  */
 var schedule = require('node-schedule')
-import   ConnectivityConnection from '~/api/connectivityAPI'
-import API from '~/relay/api'
+import ConnectivityConnection from '@/connectivityAPI'
+import API from '@/api'
 import { EventEmitter } from 'events'
-import config from '~/utils/config'
-import HealthManager from '~/relay/net/HealthManager'
+import config from '@utils/config'
+import HealthManager from '@/net/HealthManager'
 
 class _StatusReporter extends EventEmitter {
 

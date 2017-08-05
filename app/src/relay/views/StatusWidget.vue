@@ -11,7 +11,7 @@
 
 <script>
   // import Bus from '~/utils/bus'
-  import StatusReporter from '~/relay/net/StatusReporter'
+  import StatusReporter from '@/net/StatusReporter'
 
   export default {
     data () {
@@ -43,7 +43,7 @@
 </script>
 
 <style scoped lang='scss'>
-    @import '~styles/settings.scss';
+    @import '~@common/styles/settings.scss';
 
     .status-container {
 

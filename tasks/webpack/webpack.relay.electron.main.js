@@ -11,7 +11,7 @@ const common = require('./common')
 let config = {
   devtool: '#source-map',
   entry: {
-    main: ['babel-polyfill', path.join(common.rootDir, 'app/src/relay/main/electron/index.js')]
+    main: ['babel-polyfill', path.join(common.rootDir, 'app/src/relay/main/electron/main.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -26,15 +26,8 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/relay')
   },
-  plugins: [
-    new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
-      ? '"production"' 
-      : '"development"'
-    })
-  ],
-  resolve: common.resolveFactory('relay'),
+  plugins: common.plugins('relay', 'electron'),
+  resolve: common.resolve('relay'),
   target: 'electron-main'
 }
 

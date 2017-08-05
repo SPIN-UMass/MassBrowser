@@ -10,33 +10,30 @@ export default [
     component: require('@/views/Boot')
   },
   {
-    path: '/browser-integration',
-    name: 'browser-integration',
-    component: require('@/views/BrowserIntegration')
-  },
-  {
     path: '/start',
     name: 'start',
     component: require('@common/views/Start')
   },
   {
-    path: '/client',
-    name: 'index',
+    path: '/relay',//
+    name: 'relay',
     component: require('@/views/Index'),
     children: [
       {
-        path: '/',
-        component: require('@/views/Home'),
-        name: 'home'
+        path: '/relay/settings',
+        component: require('@/views/SettingsView'),
+        name: 'relay-settings'
+
       },
       {
-        path: '/client/websites',
-        component: require('@/views/WebsitesView'),
-        name: 'websites'
+        path: '/relay/categories',
+        component: require('@/views/CategoriesView'),
+        name: 'relay-categories'
+
       }
     ]
+
   },
-  
   {
     path: '*',
     redirect: '/'

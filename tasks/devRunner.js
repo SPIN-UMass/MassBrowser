@@ -47,7 +47,7 @@ var mainWatchPanel = createPanel(
     top: "50%",
     left: "50%",
     width: '50%',
-    height: '50%',
+    height: '53%',
   }, 
   [
     {

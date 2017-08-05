@@ -11,17 +11,16 @@ tls.connect = function (...args) {
 import Raven from '@utils/raven'
 import Promise from 'bluebird'
 
-import bootClient from './boot'
+import bootClient from '@/boot'
 import Status from '@utils/status'
 
 import { InvalidInvitationCodeError } from '@utils/errors'
 import { error } from '@utils/log'
+import { initializeLogging } from '@utils/log'
 import config from '@utils/config'
-import {initializeLogging} from '@utils/log'
 
 global.Promise = Promise
 
-config.applicationInterface = 'commandline'
 initializeLogging()
 
 Raven

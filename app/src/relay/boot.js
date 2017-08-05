@@ -1,26 +1,27 @@
-import { runTLSserver } from './net/TLSReceiver'
-import { runOBFSserver } from './net/OBFSReceiver'
-import { runHTTPListener } from './net/HttpListener'
+import { runTLSserver } from '@/net/TLSReceiver'
+import { runOBFSserver } from '@/net/OBFSReceiver'
+import { runHTTPListener } from '@/net/HttpListener'
 
-import { pendMgr } from './net/PendingConnections'
+import { pendMgr } from '@/net/PendingConnections'
 
 var stun = require('vs-stun')
-import ConnectivityConnection from '~/api/connectivityAPI'
-import API from '~/relay/api'
-import KVStore from '~/utils/kvstore'
-import * as errors from '~/utils/errors'
-import StatusReporter from './net/StatusReporter'
-import config from '~/utils/config'
-import { initializeLogging } from '~/utils/log'
+import ConnectivityConnection from '@/connectivityAPI'
+import API from '@/api'
+import KVStore from '@utils/kvstore'
+import * as errors from '@utils/errors'
+import StatusReporter from '@/net/StatusReporter'
+import config from '@utils/config'
+import { error } from '@utils/log'
+import { Raven } from '@utils/raven'
 import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
-} from '~/utils/errors'
+} from '@utils/errors'
 
-import { WebSocketTransport } from '~/utils/transport'
-import { eventHandler } from '~/relay/events'
+import { WebSocketTransport } from '@utils/transport'
+import { eventHandler } from '@/events'
 
-import HealthManager from '~/relay/net/HealthManager'
+import HealthManager from '@/net/HealthManager'
 
 var stunserver = {
   host: 'stun.l.google.com',
@@ -82,11 +83,11 @@ export default function bootRelay (gui) {
       HealthManager.startMonitor(gui)
     })
     .then(() => {
-      if (config.relay.domainfrontable) {
+      if (config.domainfrontable) {
         console.log('Starting HTTP Server')
         return runHTTPListener(HealthManager.HTTPPortNumber).then(() => {
           console.log('Reporting DomainFront to server')
-          return API.relayDomainFrontUp(config.relay.domain_name, config.relay.domainfrontPort)
+          return API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)
         })
       }
     })

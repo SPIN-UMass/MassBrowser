@@ -1,8 +1,8 @@
-import API from '~/client/api'
-import KVStore from '~/utils/kvstore'
-import { debug, info } from '~/utils/log'
+import API from '@/api'
+import KVStore from '@utils/kvstore'
+import { debug, info } from '@utils/log'
 
-import { Website, Domain, CDN, Region, Category } from '~/client/models'
+import { Website, Domain, CDN, Region, Category } from '@/models'
 
 class _SyncService {
   constructor () {

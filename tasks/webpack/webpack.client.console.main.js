@@ -26,8 +26,8 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/client')
   },
-  plugins: common.plugis,
-  resolve: common.resolveFactory('client'),
+  plugins: common.plugins('client', 'console'),
+  resolve: common.resolve('client'),
   target: 'node'
 }
 

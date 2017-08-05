@@ -6,9 +6,9 @@ import dns from 'dns'
 import fs from 'fs'
 
 import CertificateManager from './CertManager'
-import config from '~/utils/config'
-import { debug, info, warn } from '~/utils/log'
-import { CacheBrowserError } from '~/utils/errors'
+import config from '@utils/config'
+import { debug, info, warn } from '@utils/log'
+import { CacheBrowserError } from '@utils/errors'
 
 class _CacheProxy {
 
@@ -43,7 +43,7 @@ class _CacheProxy {
         this.handleCacheSocket(socket)
       })
 
-      this.proxyserver.listen(config.client.cachebrowser.mitmPort, () => {
+      this.proxyserver.listen(config.cachebrowser.mitmPort, () => {
         started = true
         debug('Initializing certificate manager')
         CertificateManager.initializeCA().then(() => {

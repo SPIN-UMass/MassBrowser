@@ -71,41 +71,39 @@ const rules = [
   }   
 ]
 
-const resolve = {
-  alias: {
-    '@common': path.join(rootDir, 'app/src/common'),
-    'styles': path.join(rootDir, 'app/src/app/styles'),
-    '@assets': path.join(rootDir, 'app/assets'),
-    '@utils': path.join(rootDir, 'app/src/utils'),
-    '~': path.join(rootDir, 'app/src/'),
-    'package.json': path.join(rootDir, 'app/package.json')
-  },
-  extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss'],
-  modules: [
-    path.join(rootDir, 'app/node_modules'),
-    path.join(rootDir, 'node_modules')
-  ]
+const resolve = (target) => {
+  return {
+    alias: {
+      '@': path.join(rootDir, `app/src/${target}`),
+      '@common': path.join(rootDir, 'app/src/common'),
+      'styles': path.join(rootDir, 'app/src/app/styles'),
+      '@assets': path.join(rootDir, 'app/assets'),
+      '@utils': path.join(rootDir, 'app/src/utils'),
+      '~': path.join(rootDir, 'app/src/'),
+      'package.json': path.join(rootDir, 'app/package.json')
+    },
+    extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss'],
+    modules: [
+      path.join(rootDir, 'app/node_modules'),
+      path.join(rootDir, 'node_modules')
+    ]
+  }
 }
 
-const resolveFactory = (target) => {
-  let r = Object.assign({}, resolve)
-  r.alias['@'] = path.join(rootDir, `app/src/${target}`)
-  return r
-}
-
-const plugins = [
+const plugins = (role, interface, otherPlugins) => [
   new webpack.NoEmitOnErrorsPlugin(),
   new webpack.DefinePlugin({
     'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
     ? '"production"' 
-    : '"development"'
+    : '"development"',
+    'process.env.ROLE': `"${role}"`,
+    'process.env.APP_INTERFACE': `"${interface}"`
   })
-]
+].concat(otherPlugins || [])
 
 module.exports = {
   rootDir,
   rules,
   resolve,
-  resolveFactory,
   plugins
 }

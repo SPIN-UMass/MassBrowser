@@ -28,7 +28,7 @@
 <style scoped lang='scss'>
   @font-face {
     font-family: Neuropol;
-    src: url(./neuropol.ttf);
+    src: url('~@common/styles/settings.scss');
   }
   #container.p-index {
     background-color: white;

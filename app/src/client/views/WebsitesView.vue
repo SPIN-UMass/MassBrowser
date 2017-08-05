@@ -8,7 +8,7 @@
 </template>
 
 <script>
-  import Website from '~/client/models/Website'
+  import Website from '@/models/Website'
     
   const WebsiteToggle = {
     render: function(h) {

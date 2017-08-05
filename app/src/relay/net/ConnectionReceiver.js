@@ -1,13 +1,13 @@
 /**
  * Created by milad on 4/12/17.
  */
-import PolicyManager from '~/relay/services/PolicyManager'
+import PolicyManager from '@/services/PolicyManager'
 const net = require('net')
-import { error, debug } from '~/utils/log'
+import { error, debug } from '@utils/log'
 
-import { Crypto } from '~/utils/crypto'
+import { Crypto } from '@utils/crypto'
 
-import API from '~/relay/api'
+import API from '@/api'
 import { pendMgr } from './PendingConnections'
 
 export class ConnectionReceiver {

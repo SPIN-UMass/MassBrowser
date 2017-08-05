@@ -5,30 +5,30 @@
 
 import crypto from 'crypto'
 
-import Raven from '~/utils/raven'
-import KVStore from '~/utils/kvstore'
-import Status from '~/utils/status'
-import config from '~/utils/config'
-import { debug, error } from '~/utils/log'
-import { HttpTransport } from '~/utils/transport'
+import Raven from '@utils/raven'
+import KVStore from '@utils/kvstore'
+import Status from '@utils/status'
+import config from '@utils/config'
+import { debug, error } from '@utils/log'
+import { HttpTransport } from '@utils/transport'
 
-import API from '~/client/api'
+import API from '@/api'
 
-import SessionService from '~/client/services/SessionService'
-import SyncService from '~/client/services/SyncService'
-import WebPanelService from '~/client/services/WebPanelService'
-import NoHostHandlerService from '~/client/services/NoHostHandlerService'
-import CacheProxy from '~/client/cachebrowser/CacheProxy'
+import SessionService from '@/services/SessionService'
+import SyncService from '@/services/SyncService'
+import WebPanelService from '@/services/WebPanelService'
+import NoHostHandlerService from '@/services/NoHostHandlerService'
+import CacheProxy from '@/cachebrowser/CacheProxy'
 
-import { startClientSocks } from './net/ClientSocks'
-import ConnectionManager from './net/ConnectionManager'
-import RelayConnection from './net/RelayConnection'
-import { RandomRelayAssigner } from './net/RelayAssigner'
+import { startClientSocks } from '@/net/ClientSocks'
+import ConnectionManager from '@/net/ConnectionManager'
+import RelayConnection from '@/net/RelayConnection'
+import { RandomRelayAssigner } from '@/net/RelayAssigner'
 
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
   ServerError, CacheBrowserError, ApplicationBootError
-} from '~/utils/errors'
+} from '@utils/errors'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
@@ -93,7 +93,7 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
     })
     .then(() => {
       let status = Status.info('Starting SOCKS server')
-      return startClientSocks('127.0.0.1', config.client.socksPort)
+      return startClientSocks('127.0.0.1', config.socksPort)
         .then(() => status.clear())
     })
     .then(() => {

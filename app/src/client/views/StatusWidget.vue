@@ -4,7 +4,7 @@
 
 <script>
   // import Bus from '~/utils/bus'
-  import Status from '~/utils/status'
+  import Status from '@utils/status'
 
   export default {
     data () {

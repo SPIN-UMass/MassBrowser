@@ -1,12 +1,13 @@
 /**
  * Created by milad on 7/12/17.
  */
-import KVStore from '~/utils/kvstore'
+import KVStore from '@utils/kvstore'
 var ThrottleGroup = require('./throttle').ThrottleGroup
 import { runOBFSserver } from './OBFSReceiver'
 import StatusReporter from './StatusReporter'
-import { error, debug } from '~/utils/log'
-import API from '~/relay/api'
+import { error, debug } from '@utils/log'
+import API from '@/api'
+
 let UNLIMIT=1000000000
 class _HealthManager {
   constructor () {

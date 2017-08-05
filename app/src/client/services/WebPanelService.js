@@ -4,11 +4,11 @@ import serveStatic from 'serve-static'
 import path from 'path'
 import fs from 'fs-extra'
 
-import { debug, warn, error } from '~/utils/log'
-import { AutoUpdateError } from '~/utils/errors'
-import config from '~/utils/config'
-import { getDataDir } from '~/utils'
-import KVStore from '~/utils/kvstore'
+import { debug, warn, error } from '@utils/log'
+import { AutoUpdateError } from '@utils/errors'
+import config from '@utils/config'
+import { getDataDir } from '@utils'
+import KVStore from '@utils/kvstore'
 
 import electron from 'electron'
 
@@ -22,7 +22,7 @@ class _OnBoardingService {
   }
 
   start() {
-    let port = config.client.web.port
+    let port = config.web.port
     this.server = http.createServer(this.app)
     this.server.listen(port, () => debug(`Web panel server started on port ${port}`))
   }

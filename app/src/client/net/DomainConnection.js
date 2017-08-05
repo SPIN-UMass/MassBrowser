@@ -5,11 +5,11 @@
  * Created by milad on 4/11/17.
  */
 import net from 'net'
-import { Crypto } from '~/utils/crypto'
+import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
-import { logger, debug, warn } from '~/utils/log'
-import config from '~/utils/config'
-import { RelayConnectionError } from '~/utils/errors'
+import { logger, debug, warn } from '@utils/log'
+import config from '@utils/config'
+import { RelayConnectionError } from '@utils/errors'
 import https from 'https'
 
 export default class DomainConnection extends EventEmitter {

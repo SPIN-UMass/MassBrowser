@@ -8,8 +8,8 @@
 </template>
 
 <script>
-  import Category from '~/relay/models/Category'
-  import SyncService from '~/relay/services/SyncService'
+  import Category from '@/models/Category'
+  import SyncService from '@/services/SyncService'
 
   const CategoryToggle = {
     render: function (h) {

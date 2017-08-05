@@ -1,6 +1,5 @@
-import Promise from 'bluebird'
-import { HttpTransport } from '~/utils/transport'
-import config from '~/utils/config'
+import { HttpTransport } from '@utils/transport'
+import config from '@utils/config'
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'

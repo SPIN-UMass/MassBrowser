@@ -14,8 +14,8 @@
 </template>
 
 <script>
-  import SessionService from '~/client/services/SessionService'
-  import { Session } from '~/client/net/Session'
+  import SessionService from '@/services/SessionService'
+  import { Session } from '@/net/Session'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 

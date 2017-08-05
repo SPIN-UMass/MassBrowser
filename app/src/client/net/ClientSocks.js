@@ -8,14 +8,14 @@ var net = require('net'),
   socks = require('./socks.js')
 
 import ConnectionManager from './ConnectionManager'
-import CacheManager from '~/client/cachebrowser/CacheManager'
-import PolicyManager from '~/client/services/PolicyManager'
+import CacheManager from '@/cachebrowser/CacheManager'
+import PolicyManager from '@/services/PolicyManager'
 // Create server
 // The relay accepts SOCKS connections. This particular relay acts as a proxy.
 
-import { debug, info, warn, error } from '~/utils/log'
-import * as errors from '~/utils/errors'
-import config from '~/utils/config'
+import { debug, info, warn, error } from '@utils/log'
+import * as errors from '@utils/errors'
+import config from '@utils/config'
 
 const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
@@ -34,7 +34,7 @@ export function startClientSocks (mhost, mport) {
       return sendToNoHostHandler(socket, address, port, proxyReady)
     }
 
-    if (address === config.client.web.domain) {
+    if (address === config.web.domain) {
       return sendToWebPanel(socket, address, port, proxyReady)
     }
 
@@ -158,10 +158,10 @@ function sendToWebPanel(socket, address, port, proxyReady) {
   if (port === 443) {
     return cachebrowse(socket, 'yaler.co', port, proxyReady)  
   } else {
-    return regularProxy(socket, '127.0.0.1', config.client.web.port, proxyReady)
+    return regularProxy(socket, '127.0.0.1', config.web.port, proxyReady)
   }
 }
 
 function sendToNoHostHandler(socket, address, port, proxyReady) {
-  return regularProxy(socket, '127.0.0.1', config.client.noHostHandlerPort, proxyReady)
+  return regularProxy(socket, '127.0.0.1', config.noHostHandlerPort, proxyReady)
 }

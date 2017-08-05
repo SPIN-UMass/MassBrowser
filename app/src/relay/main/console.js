@@ -6,25 +6,24 @@ tls.connect = function (...args) {
   return tlsconnect(...args)
 }
 ////DANGERIOUS
-import API from '~/relay/api'
+import API from '@/api'
 
-import Raven from '~/utils/raven'
+import Raven from '@utils/raven'
 import Promise from 'bluebird'
 
-import bootClient from '~/relay/boot'
-import Status from '~/utils/status'
+import bootClient from '@/boot'
+import Status from '@utils/status'
 
-import { InvalidInvitationCodeError } from '~/utils/errors'
-import { error } from '~/utils/log'
-import config from '~/utils/config'
-import { initializeLogging } from '~/utils/log'
-import StatusReporter from '~/relay/net/StatusReporter'
+import { InvalidInvitationCodeError } from '@utils/errors'
+import { error } from '@utils/log'
+import config from '@utils/config'
+import { initializeLogging } from '@utils/log'
+import StatusReporter from '@/net/StatusReporter'
 
-import HealthManager from '~/relay/net/HealthManager'
+import HealthManager from '@/net/HealthManager'
 
 global.Promise = Promise
 
-config.applicationInterface = 'commandline'
 initializeLogging()
 
 Raven

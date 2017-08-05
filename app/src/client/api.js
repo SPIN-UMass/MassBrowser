@@ -1,7 +1,7 @@
-import { CommonAPI } from '~/api/common'
-import { PermissionDeniedError, InvalidInvitationCodeError } from '~/utils/errors'
-import config from '~/utils/config'
-import { error, debug } from '~/utils/log'
+import { CommonAPI } from '@common/api'
+import { PermissionDeniedError, InvalidInvitationCodeError } from '@utils/errors'
+import config from '@utils/config'
+import { error, debug } from '@utils/log'
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
