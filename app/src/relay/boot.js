@@ -17,6 +17,7 @@ import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
 } from '@utils/errors'
+import Status from '@/services/StatusService'
 
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
@@ -42,7 +43,7 @@ export default function bootRelay (gui) {
       if (relay) {
         return relay
       } else {
-        console.log('Registering Relay')
+        Status.info('Registering Relay')
         return API.registerRelay()
           .then(relay => {
             KVStore.set('relay', {id: relay.id, password: relay.password})
@@ -51,11 +52,11 @@ export default function bootRelay (gui) {
       }
     })
     .then(relay => {
-      console.log(`Authenticating Relay ${relay.id}`)
+      Status.info(`Authenticating Relay`)
       return API.authenticate(relay.id, relay.password)
     })
     .then(auth => {
-      console.log('Connecting to WebSocket server')
+      Status.info('Connecting to WebSocket server')
       let transport = new WebSocketTransport(
         `${config.websocketURL}/api/?session_key=${auth.session_key}`,
         '/api'
@@ -67,11 +68,11 @@ export default function bootRelay (gui) {
       })
     })
     .then(() => {
-      console.log('Connecting to Connectivity server')
+      Status.info('Connecting to Connectivity server')
       return ConnectivityConnection.connect()
         .then(data => {
           StatusReporter.startRoutine()
-          console.log('Connectivity', data)
+          // console.log('Connectivity', data)
           StatusReporter.localip = data[0]
           StatusReporter.localport = data[1]
           StatusReporter.remoteport = data[3]
@@ -79,12 +80,12 @@ export default function bootRelay (gui) {
         })
     })
     .then(() => {
-      console.log('Starting Relay')
+      Status.info('Starting Relay')
       HealthManager.startMonitor(gui)
     })
     .then(() => {
       if (config.domainfrontable) {
-        console.log('Starting HTTP Server')
+        Status.info('Starting HTTP Server')
         return runHTTPListener(HealthManager.HTTPPortNumber).then(() => {
           console.log('Reporting DomainFront to server')
           return API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)

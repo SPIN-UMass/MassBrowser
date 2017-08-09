@@ -28,7 +28,7 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/client')
   },
-  plugins: common.plugins('client', 'electron'),
+  plugins: common.plugins('client', 'electron', 'main'),
   resolve: common.resolve('client'),
   target: 'electron-main'
 }

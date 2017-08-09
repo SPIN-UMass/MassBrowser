@@ -1,10 +1,14 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
+import Promise from 'bluebird'
+
 import { initAutoUpdater } from './auto_updater'
 import config from '@utils/config'
 
-export function initializeMainProcess() {
+global.Promise = Promise
+
+export function initializeMainProcess(onWindowCreated) {
   let mainWindow
 
   const winURL = process.env.NODE_ENV === 'development'
@@ -35,10 +39,15 @@ export function initializeMainProcess() {
     })
 
     // eslint-disable-next-line no-console
-    console.log('mainWindow opened')
+    return mainWindow
   }
 
-  app.on('ready', createWindow)
+  app.on('ready', () => {
+    let window = createWindow()
+    if (onWindowCreated) {
+      onWindowCreated(window)
+    }
+  })
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -51,5 +60,6 @@ export function initializeMainProcess() {
       createWindow()
     }
   })
+  
 }
 

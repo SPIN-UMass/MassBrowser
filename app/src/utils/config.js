@@ -27,7 +27,10 @@ const defaultConfig = {
   relayConnectionTimeout: 5000
 }
 
-function initializeConfig(env, role, applicationInterface) {
+function initializeConfig(options) {
+  let role = (options || {}).role
+  let mode = (options || {}).mode
+
   if (role !== 'client' && role !== 'relay') {
     throw new Error("Invalid configuration role")
   }
@@ -62,7 +65,7 @@ function initializeConfig(env, role, applicationInterface) {
     updateConfig(config, pConfig)
     updateConfig(config, roleConfig)
 
-    if (env === 'development') {
+    if (mode === 'development') {
       updateConfig(config, devConfig)
       updateConfig(config, roleDevConfig)
     } else {
@@ -74,10 +77,10 @@ function initializeConfig(env, role, applicationInterface) {
   configureWith(defaultConfig)
   configureWith(packageJSON.config)
   
+  updateConfig(config, options)
   
-  if (env === 'development') {
+  if (config.mode === 'development') {
     console.log("Running in development mode")
-    config.environment == 'development'
     config.isDevelopment = true
     config.isProduction = false
   } else {
@@ -86,19 +89,20 @@ function initializeConfig(env, role, applicationInterface) {
     config.isProduction = true
   }
 
-  config.role = role
   config.isClient = role === 'client'
   config.isRelay = role === 'relay'
 
-  config.applicationInterface = applicationInterface
+  config.isElectronRendererProcess = config.applicationInterface === 'electron' && config.electronProcess === 'renderer'
+  config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'
 
   return config
 }
 
-const config = initializeConfig(
-  process.env.NODE_ENV,
-  process.env.ROLE,
-  process.env.APP_INTERFACE
-)
+const config = initializeConfig({
+  mode: process.env.NODE_ENV,
+  role: process.env.ROLE,
+  applicationInterface: process.env.APP_INTERFACE,
+  electronProcess: process.env.ELECTRON_PROCESS
+})
 
 export default config

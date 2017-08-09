@@ -25,16 +25,15 @@
 
 <script>
   import StatusWidget from './StatusWidget'
+  import { getService } from '@utils/remote'
 
-  import bootRelay from '@/boot'
-  import HealthManager from '@/net/HealthManager'
-  import SyncService from '@/services/SyncService'
+  const HealthManager = getService('health')
 
   export default {
     data () {
       return {
         currentTab: '',
-        accessStatus: HealthManager.openAccess,
+        accessStatus: false,
         togglesize: 95
       }
     },
@@ -42,16 +41,10 @@
       StatusWidget
     },
     created () {
-      console.log(" I AM HERE ")
-      bootRelay().then(() => {
-        SyncService.syncAll()
-      })
-      
-
+      HealthManager.openAccess.then(openAccess => this.openAccess = openAccess)
     },
     methods: {
       onChange: function (e) {
-        console.log(e.value)
         if (e.value) {
           HealthManager.changeAccess(e.value)
         }
@@ -60,13 +53,6 @@
         }
       }
     }
-//    created () {
-//      this.currentTab = this.$router.currentRoute.name
-//      this.$router.afterEach((to, from) => {
-//        this.currentTab = to.name
-//      })
-//        SyncService.syncAll()
-//    }
   }
 </script>
 

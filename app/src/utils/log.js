@@ -28,32 +28,59 @@ class BrowserConsoleTransport extends winston.Transport {
 }
 
 export function initializeLogging() {
-  if (config.isDevelopment && config.applicationInterface == 'electron') {
-    logger = console
-  } else {
-    logger = new (winston.Logger)()  
-    var transports = [
-      new (winston.transports.Console)()
-    ]
-
-    if (config.applicationInterface == 'electron') {
-      transports.push(new BrowserConsoleTransport())
-    }
-
-    logger.configure({
-      level: config.log.level,
-      transports: transports
-    })
-  }
-  
-  log = logger.log
-  info = logger.info
-  warn = logger.warn
-  debug = logger.debug
-  error = logger.error
+  // TODO remove
 }
 
-export var logger, log, info, warn, debug, error
+export var logger, log, status, info, warn, debug, error
+
+// TODO fix this, need to seperate electron main and renderer process
+if (config.isDevelopment && config.isElectronRendererProcess) {
+  logger = console
+  logger.status = console.log
+} else {
+  logger = new (winston.Logger)()
+
+  var transports = [
+    new (winston.transports.Console)({
+      colorize: true,
+      prettyPrint: true,
+      depth: 2,
+      humanReadableUnhandledException: true,
+      showLevel: true,
+      timestamp: false
+    })
+  ]
+
+  if (config.isElectronRendererProcess) {
+    transports.push(new BrowserConsoleTransport())
+  }
+
+  logger.configure({
+    level: config.log.level,
+    transports: transports,
+    levels: {
+      error: 0,
+      warn: 1,
+      status: 2,
+      info: 3,
+      debug: 4
+    },
+    colors: {
+      error: 'red',
+      warn: 'yellow',
+      status: 'magenta',
+      info: 'green',
+      debug: 'blue'
+    }
+  })
+}
+
+log = logger.log
+status = logger.status
+info = logger.info
+warn = logger.warn
+debug = logger.debug
+error = logger.error
 
 export default logger
 

@@ -37,7 +37,7 @@ class WSServerReachability extends EventEmitter {
         localPort: 10000 + Math.floor(Math.random() * (65535 - 10000)),
         exclusive: false
       }, () => {
-        console.log('Connected to Echo Server')
+        debug('Connected to Echo Server')
         this.socket.write('TEST')
         this.socket.setKeepAlive(true)
         this.isConnected = true
@@ -66,7 +66,7 @@ class WSServerReachability extends EventEmitter {
             localPort: 10000 + Math.floor(Math.random() * (65535 - 10000)),
             exclusive: false
           }, () => {
-            console.log('Connected to Echo Server')
+            debug('Connected to Echo Server')
             this.socket.write('TEST')
             this.socket.setKeepAlive(true)
             this.isConnected = true

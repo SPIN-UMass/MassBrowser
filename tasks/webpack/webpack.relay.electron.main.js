@@ -26,7 +26,7 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/relay')
   },
-  plugins: common.plugins('relay', 'electron'),
+  plugins: common.plugins('relay', 'electron', 'main'),
   resolve: common.resolve('relay'),
   target: 'electron-main'
 }

@@ -27,7 +27,7 @@ let config = {
     libraryTarget: 'commonjs2',
     path: path.join(common.rootDir, 'app/dist/client')
   },
-  plugins: common.plugins('client', 'electron', [
+  plugins: common.plugins('client', 'electron', 'renderer', [
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',

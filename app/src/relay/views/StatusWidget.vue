@@ -10,21 +10,25 @@
 </template>
 
 <script>
-  // import Bus from '~/utils/bus'
-  import StatusReporter from '@/net/StatusReporter'
+  import { getService } from '@utils/remote'
+
+  const StatusReporter = getService('statusReporter')
 
   export default {
     data () {
       return {
         text: '',
         show: false,
-        reachable: StatusReporter.reachable,
-        WSconnected: StatusReporter.WSconnected,
+        reachable: false,
+        WSconnected: false,
         closable: false,
         level: ''
       }
     },
     created () {
+      StatusReporter.reachable.then(reachable => this.reachable = reachable)
+      StatusReporter.WSconnected.then(WSconnected => this.WSconnected = WSconnected)
+
       const showStatus = () => {
         this.reachable = StatusReporter.reachable
         this.WSconnected = StatusReporter.WSconnected

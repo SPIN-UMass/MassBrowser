@@ -26,10 +26,10 @@ var rendererHotDevPanel = createPanel(
   'Renderer Process - Webpack HotDev', 
   {
     top: 0,
-    left: 0,
+    left: "50%",
     width: '50%',
-    height: '100%',
-  }, 
+    height: '50%',
+  },
   [
     {
       label: 'Restart',
@@ -48,7 +48,7 @@ var mainWatchPanel = createPanel(
     left: "50%",
     width: '50%',
     height: '53%',
-  }, 
+  },
   [
     {
       label: 'Restart',
@@ -64,9 +64,9 @@ var mainProcessPanel = createPanel(
   'Main Process', 
   {
     top: 0,
-    left: "50%",
+    left: 0,
     width: '50%',
-    height: '50%',
+    height: '100%',
   }, 
   [
     {

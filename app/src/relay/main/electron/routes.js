@@ -2,7 +2,7 @@ export default [
   {
     path: '/',
     name: 'splash',
-    component: require('@common/views/Splash')
+    component: require('@/views/Splash')
   },
   {
     path: '/boot',
@@ -15,7 +15,7 @@ export default [
     component: require('@common/views/Start')
   },
   {
-    path: '/relay',//
+    path: '/relay',
     name: 'relay',
     component: require('@/views/Index'),
     children: [

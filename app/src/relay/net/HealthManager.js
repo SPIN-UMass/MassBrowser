@@ -33,12 +33,12 @@ class _HealthManager {
       this.natEnabled = naten
       debug('NAT STATUS', this.natEnabled)
       if (!naten) {
-        KVStore.get('OBFSport', 8040).then((portnum) => {
+        return KVStore.get('OBFSport', 8040).then((portnum) => {
           this.OBFSPortNumber = portnum
         })
       }
     }).then(() => {
-      KVStore.get('uploadLimit', UNLIMIT).then((uplimit) => {
+      return KVStore.get('uploadLimit', UNLIMIT).then((uplimit) => {
         this.uploadLimit = uplimit
         if (UNLIMIT !== uplimit) {
           this.bandwidthLimited = true
@@ -46,7 +46,7 @@ class _HealthManager {
         this.uploadLimiter.resetRate({rate: this.uploadLimit})
       })
     }).then(() => {
-      KVStore.get('downloadLimit', UNLIMIT).then((downlimit) => {
+      return KVStore.get('downloadLimit', UNLIMIT).then((downlimit) => {
         this.downloadLimit = downlimit
         if (UNLIMIT !== downlimit) {
           this.bandwidthLimited = true

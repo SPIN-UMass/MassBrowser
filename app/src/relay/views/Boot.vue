@@ -13,19 +13,23 @@
 
 <script>
   // import StatusWidget from './StatusWidget'
-  import Status from '@utils/status'
+  // import Status from '@utils/status'
   import GridLoader from 'vue-spinner/src/GridLoader.vue'
 
-  import bootRelay from '@/boot'
+  // import bootRelay from '@/boot'
   import { InvalidInvitationCodeError, ApplicationBootError } from '@utils/errors'
   import KVStore from '@utils/kvstore'
   import config from '@utils/config'
+
+  import { getService } from '@utils/remote'
+
+  const Status = getService('status')
+  const Context = getService('context')
 
   const INVITATION_CODE_LENGTH = 10
   const DELIM = '  '
 
   var invitationCodePromiseResolve = null
-
   export default {
     data () {
       return {
@@ -41,11 +45,13 @@
     created () {
       Status.on('status-changed', this.onStatusChanged)
       Status.on('status-cleared', this.onStatusCleared)
-      this.bootRelay()
+      Context.on('boot-finished', this.onBootFinished)
+      Context.hasBooted.then(booted => booted ? this.onBootFinished() : '')
     },
     beforeDestroy () {
       Status.removeListener('status-changed', this.onStatusChanged)
       Status.removeListener('status-cleared', this.onStatusCleared)
+      Context.removeListener('boot-finished', this.onBootFinished)
     },
     methods: {
       onStatusChanged: function(status) {
@@ -56,14 +62,15 @@
       onStatusCleared: function () {
         this.statusMessage = ''
       },
-      bootRelay() {
-        bootRelay(true)
-        .then(() => this.$router.push({path: '/relay'}))
-        .catch(ApplicationBootError, err => {
-          this.errorMessage = err.message
-          this.status = 'error'
-          this.canRetry = err.retriable
-        })
+      onBootFinished: function() {
+        this.$router.push({path: '/relay'})
+
+        //   .catch(ApplicationBootError, err => {
+        //     this.errorMessage = err.message
+        //     this.status = 'error'
+        //     this.canRetry = err.retriable
+        //   })
+        // }
       }
     }
   }

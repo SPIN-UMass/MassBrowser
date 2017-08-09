@@ -90,14 +90,15 @@ const resolve = (target) => {
   }
 }
 
-const plugins = (role, interface, otherPlugins) => [
+const plugins = (role, interface, electronProcess, otherPlugins) => [
   new webpack.NoEmitOnErrorsPlugin(),
   new webpack.DefinePlugin({
     'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
     ? '"production"' 
     : '"development"',
     'process.env.ROLE': `"${role}"`,
-    'process.env.APP_INTERFACE': `"${interface}"`
+    'process.env.APP_INTERFACE': `"${interface}"`,
+    'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
   })
 ].concat(otherPlugins || [])
 

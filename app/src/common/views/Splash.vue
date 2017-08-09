@@ -4,7 +4,7 @@
 <script>
   export default {
     created () {
-        this.$router.push('/boot')
+      this.$router.push('/boot')
     }
   }
 </script>
