@@ -25,13 +25,22 @@ class LogStatus {
   }
 
   get statusType() {
-    return this.manager.STATUS_LOG
+    return STATUS_LOG
+  }
+
+  toObject() {
+    return {
+      statusType: this.statusType,
+      message: this.message,
+      level: this.level,
+      key: this.key,
+      options: this.options
+    }
   }
 }
 
-class ProgressStatus extends EventEmitter {
+class ProgressStatus {
   constructor(manager, key, message, maxSteps) {
-    super()
     this._message = message
     this.manager = manager
     this.key = key
@@ -50,7 +59,7 @@ class ProgressStatus extends EventEmitter {
       this.progress = this.maxSteps
     }
 
-    this.emit('update', this)
+    this.manager.emit(`status-progress-${this.key}-update`, this)
 
     if (this.progress === this.maxSteps) {
       this.finish()
@@ -59,7 +68,7 @@ class ProgressStatus extends EventEmitter {
 
   finish() {
     this.manager._removeStatus(this)
-    this.emit('finish', this)
+    this.emit(`status-progress-${this.key}-finish`, this)
   }
 
   get message () {
@@ -70,7 +79,19 @@ class ProgressStatus extends EventEmitter {
   }
 
   get statusType() {
-    return StatusManager.STATUS_PROGRESS
+    return STATUS_PROGRESS
+  }
+
+  toObject() {
+    return {
+      statusType: this.statusType,
+      message: this.message,
+      level: this.level,
+      key: this.key,
+      options: this.options,
+      progress: this.progress,
+      maxSteps: this.maxSteps
+    }
   }
 }
 
@@ -96,7 +117,7 @@ class _StatusService extends EventEmitter {
       if (!this.statuses.length) {
         this.emit('status-cleared')
       } else {
-        this.emit('status-changed', this.statuses[this.statuses.length - 1])
+        this.emit('status-changed', this.statuses[this.statuses.length - 1].toObject())
       }
     } else {
       this.statuses.splice(index, 1)
@@ -110,7 +131,7 @@ class _StatusService extends EventEmitter {
 
   _addStatus (status) {
     this.statuses.push(status)
-    this.emit('status-changed', status)
+    this.emit('status-changed', status.toObject())
   }
 
   /* --- API ---  */
@@ -162,15 +183,10 @@ class _StatusService extends EventEmitter {
     this._addStatus(progressStatus)
     return progressStatus
   }
-
-  get STATUS_LOG () {
-    return 'log'
-  }
-
-  get STATUS_PROGRESS () {
-    return 'progress'
-  }
 }
+
+export const STATUS_LOG = 'log'
+export const STATUS_PROGRESS = 'progress'
 
 const StatusService = new _StatusService()
 export default StatusService

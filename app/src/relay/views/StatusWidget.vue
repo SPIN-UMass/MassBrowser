@@ -29,19 +29,19 @@
       StatusReporter.reachable.then(reachable => this.reachable = reachable)
       StatusReporter.WSconnected.then(WSconnected => this.WSconnected = WSconnected)
 
-      const showStatus = () => {
-        this.reachable = StatusReporter.reachable
-        this.WSconnected = StatusReporter.WSconnected
-
+      const showStatus = async () => {
+        this.reachable = await StatusReporter.reachable
+        this.WSconnected = await StatusReporter.WSconnected
       }
+
       const clearStatus = () => {
         this.text = ''
         this.show = false
         this.level = false
         this.closable = false
       }
-      StatusReporter.on('status-updated', showStatus)
 
+      StatusReporter.on('status-updated', showStatus)
     }
   }
 </script>

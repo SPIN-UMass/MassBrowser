@@ -5,12 +5,12 @@ const path = require('path')
 const pkg = require('../../app/package.json')
 const webpack = require('webpack')
 
-const commont = require('./common')
+const common = require('./common')
 
 let config = {
   devtool: '#source-map',
   entry: {
-    control: path.join(common.rootDir, 'app/src/client/control.js')
+    control: path.join(common.rootDir, 'app/src/client/main/control.js')
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -30,6 +30,4 @@ let config = {
   target: 'node'
 }
 
-const webConfig = require('./webpack.web.config')
-
-module.exports = [mainConfig, webConfig]
+module.exports = config

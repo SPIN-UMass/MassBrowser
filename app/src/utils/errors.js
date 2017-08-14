@@ -67,7 +67,7 @@ export class APIError extends BaseError {
     this.statusText = statusText
     this.response = response
     this.request = request
-    this.url = request.url
+    this.url = (request || {}).url
 
     this.report = function() {
       
@@ -141,6 +141,7 @@ export class NoRelayAvailableError extends AppError {}
 export class InvalidInvitationCodeError extends AppError {}
 export class InvalidHostError extends AppError {}
 export class AutoUpdateError extends AppError {}
+export class InvalidEnvironmentError extends AppError {}
 
 export class CacheBrowserError extends AppError {}
 export class NotCacheBrowsableError extends CacheBrowserError {}

@@ -9,7 +9,8 @@
 
 <script>
   import Website from '@/models/Website'
-    
+  import websitesCtrl from '@/controllers/websitesCtrl'
+
   const WebsiteToggle = {
     render: function(h) {
       return h('toggle-button', { 
@@ -32,7 +33,7 @@
     methods: {
       onChange: function(e) {
         this.website.enabled = e.value
-        this.website.save()
+        websitesCtrl.toggleWebsite(this.website, e.value)
       }
     }
   }
@@ -46,11 +47,8 @@
     components: {
       'website-toggle': WebsiteToggle
     },
-    created () {
-      Website.find({thirdParty: false})
-      .then(websites => {
-        this.websites = websites
-      })
+    async created () {
+      this.websites = await websitesCtrl.getWebsites()
     },
     methods: {
       

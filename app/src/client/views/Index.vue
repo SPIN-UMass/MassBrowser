@@ -20,8 +20,10 @@
 
 <script>
   import StatusWidget from './StatusWidget'
-  import SyncService from '@/services/SyncService'
+  import { getService } from '@utils/remote'
 
+  const SyncService = getService('sync')
+  
   export default {
     data () {
       return {

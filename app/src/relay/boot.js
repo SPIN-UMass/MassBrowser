@@ -17,7 +17,7 @@ import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
 } from '@utils/errors'
-import Status from '@/services/StatusService'
+import Status from '@common/services/StatusService'
 
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'

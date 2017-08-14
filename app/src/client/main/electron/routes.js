@@ -2,7 +2,7 @@ export default [
   {
     path: '/',
     name: 'splash',
-    component: require('@common/views/Splash')
+    component: require('@/views/Splash')
   },
   {
     path: '/boot',
@@ -10,15 +10,21 @@ export default [
     component: require('@/views/Boot')
   },
   {
+    path: '/start',
+    name: 'start',
+    component: require('@/views/Start')
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: require('@/views/Register')
+  },
+  {
     path: '/browser-integration',
     name: 'browser-integration',
     component: require('@/views/BrowserIntegration')
   },
-  {
-    path: '/start',
-    name: 'start',
-    component: require('@common/views/Start')
-  },
+
   {
     path: '/client',
     name: 'index',

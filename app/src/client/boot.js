@@ -7,13 +7,14 @@ import crypto from 'crypto'
 
 import Raven from '@utils/raven'
 import KVStore from '@utils/kvstore'
-import Status from '@utils/status'
+
 import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { HttpTransport } from '@utils/transport'
 
 import API from '@/api'
 
+import Status from '@common/services/StatusService'
 import SessionService from '@/services/SessionService'
 import SyncService from '@/services/SyncService'
 import WebPanelService from '@/services/WebPanelService'
@@ -29,6 +30,8 @@ import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
   ServerError, CacheBrowserError, ApplicationBootError
 } from '@utils/errors'
+
+import context from '@/context'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
@@ -114,6 +117,9 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
               .then(() => status.clear())
           }
         })
+    })
+    .then(() => {
+      context.bootFinished()
     })
     .catch(AuthenticationError, err => {
       err.logAndReport()
