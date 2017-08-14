@@ -9,8 +9,6 @@ import { AutoUpdateError } from '@utils/errors'
 import config from '@utils/config'
 import { getDataDir } from '@utils'
 
-import electron from 'electron'
-
 
 class _NoHostHandlerService {
   constructor () {

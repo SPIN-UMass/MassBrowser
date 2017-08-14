@@ -6,12 +6,12 @@ const path = require('path')
 const pkg = require('../../app/package.json')
 const webpack = require('webpack')
 
-const commont = require('./common')
+const common = require('./common')
 
 let config = {
   devtool: '#source-map',
   entry: {
-    client: path.join(common.rootDir, 'app/src/client/main.js')
+    client: path.join(common.rootDir, 'app/src/client/main/console.js')
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {

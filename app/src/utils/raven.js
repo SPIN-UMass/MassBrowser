@@ -10,7 +10,7 @@ Raven.smartConfig = function (options) {
   var options = options || {}
 
   var appInterface = config.applicationInterface
-  if (appInterface !== 'commandline' && appInterface !== 'electron') {
+  if (appInterface !== 'console' && appInterface !== 'electron') {
     throw new Error(`Invalid application interface ${appInterface}, please set correct value for the APP_INTERFACE env variable`)
   }
 

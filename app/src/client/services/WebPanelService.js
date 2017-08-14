@@ -10,15 +10,15 @@ import config from '@utils/config'
 import { getDataDir } from '@utils'
 import KVStore from '@utils/kvstore'
 
-import electron from 'electron'
-
 
 class _OnBoardingService {
   constructor () {
     this.app = connect()
     this.server = null
 
-    this.initializeApp(this.app)
+    if (config.isElectronMainProcess) {
+      this.initializeApp(this.app)
+    }
   }
 
   start() {
@@ -52,8 +52,10 @@ class _OnBoardingService {
       KVStore.set('browser-integration-completed', true)
     })
 
+    const electron = require('electron')
     /* TODO hadi: I don't like this */
-    app.use(serveStatic(`${electron.remote.app.getAppPath()}/dist/web`))
+    /* Needs to change for console mode */
+    app.use(serveStatic(`${electron.app.getAppPath()}/dist/web`))
   }
 }
 
