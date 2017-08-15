@@ -56,7 +56,13 @@ class WSServerReachability extends EventEmitter {
         this.isConnected = false
 
       })
+      this.socket.on('close', () => {
+        debug('Connectivity Server Ended')
+        this.isConnected = false
+      })
+
       this.socket.on('error', (e) => {
+        debug('Connectivity Server Error',e)
         if (e.code === 'EADDRINUSE') {
 
           this.socket.close()
@@ -71,6 +77,8 @@ class WSServerReachability extends EventEmitter {
             this.socket.setKeepAlive(true)
             this.isConnected = true
           })
+        } else {
+
         }
 
       })

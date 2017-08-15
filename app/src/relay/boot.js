@@ -69,15 +69,7 @@ export default function bootRelay (gui) {
     })
     .then(() => {
       Status.info('Connecting to Connectivity server')
-      return ConnectivityConnection.connect()
-        .then(data => {
-          StatusReporter.startRoutine()
-          // console.log('Connectivity', data)
-          StatusReporter.localip = data[0]
-          StatusReporter.localport = data[1]
-          StatusReporter.remoteport = data[3]
-          StatusReporter.remoteip = data[2]
-        })
+      StatusReporter.connectConnectivity()
     })
     .then(() => {
       Status.info('Starting Relay')

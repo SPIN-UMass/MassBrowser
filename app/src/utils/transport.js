@@ -138,7 +138,9 @@ export class WebSocketTransport extends Transport {
   eventReceived(resp) {
     this.eventHandler(resp.event, resp.data)
   }
-
+  handleReconnect() {
+    this.eventHandler('reconnected','')
+  }
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
       // debug('I am HERE',this.connectionMap[resp['message_id']])
@@ -152,8 +154,8 @@ export class WebSocketTransport extends Transport {
     }
   }
 
-  request(method, path, data) {
-    path = this.basePath + path
+  request(method, pathtail, data) {
+    var path = this.basePath + pathtail
 
     return new Promise((resolve, reject) => {
       var proto = {}
@@ -174,7 +176,8 @@ export class WebSocketTransport extends Transport {
               this.reconnect()
               .then(() => {
                 debug('reconnected')
-                this.request(method, path, data)
+                this.handleReconnect()
+                this.request(method, pathtail, data)
               })
             }, 60)
           } else {

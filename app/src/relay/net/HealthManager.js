@@ -8,7 +8,7 @@ import StatusReporter from './StatusReporter'
 import { error, debug } from '@utils/log'
 import API from '@/api'
 
-let UNLIMIT=1000000000
+let UNLIMIT = 1000000000
 class _HealthManager {
   constructor () {
     this.isRunningFromGUI = false
@@ -76,6 +76,16 @@ class _HealthManager {
     this.natEnabled = natEnabled
     KVStore.set('natEnabled', natEnabled)
     // NEED SOMETHING TODO
+  }
+
+  handleReconnect () {
+    if (this.openAccess === false) {
+      return
+    }
+    let publicaddress = this.getReachableOBFSAddress()
+    API.relayUp(publicaddress.ip, publicaddress.port)
+    this.restartOBFSServer()
+
   }
 
   changeAccess (access) {

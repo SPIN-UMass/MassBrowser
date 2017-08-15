@@ -50,6 +50,19 @@ class _StatusReporter extends EventEmitter {
     ConnectivityConnection.keepAlive()
   }
 
+
+  connectConnectivity () {
+    ConnectivityConnection.connect()
+      .then(data => {
+        StatusReporter.startRoutine()
+        // console.log('Connectivity', data)
+        StatusReporter.localip = data[0]
+        StatusReporter.localport = data[1]
+        StatusReporter.remoteport = data[3]
+        StatusReporter.remoteip = data[2]
+      })
+
+  }
   getPublicAddress () {
     return {ip: this.remoteip, port: this.remoteport}
   }
