@@ -37,11 +37,13 @@ export class ServiceRegistry {
     service.emit = function(event, ...args) {
       // console.log("REMOTE EVENT")
       // console.log(args)
-      self.webContents.send('remote.service.event', {
-        service: serviceName,
-        event,
-        args
-      })
+      if (self.webContents) {
+        self.webContents.send('remote.service.event', {
+          service: serviceName,
+          event,
+          args
+        })
+      }
       oldEmitter.apply(service, arguments)
     }
   }

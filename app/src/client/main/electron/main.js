@@ -18,9 +18,18 @@ serviceRegistry.registerService('boot', { bootClient })
 var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 requireControllerFilter.keys().forEach(requireControllerFilter)
 
+
+let currentWindow = null
+
 function onWindowCreated(window) {
   debug("Window created")
   serviceRegistry.setWebContents(window.webContents)
+  currentWindow = window
 }
 
-initializeMainProcess(onWindowCreated)
+function onWindowClosed() {
+  currentWindow = null
+  serviceRegistry.setWebContents(null)
+}
+
+initializeMainProcess(onWindowCreated, onWindowClosed)
