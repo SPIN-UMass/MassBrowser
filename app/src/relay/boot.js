@@ -11,13 +11,15 @@ import KVStore from '@utils/kvstore'
 import * as errors from '@utils/errors'
 import StatusReporter from '@/net/StatusReporter'
 import config from '@utils/config'
-import { error } from '@utils/log'
+import context from '@/context'
+import { debug, error } from '@utils/log'
 import { Raven } from '@utils/raven'
 import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
 } from '@utils/errors'
 import Status from '@common/services/StatusService'
+import SyncService from '@/services/SyncService'
 
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
@@ -72,6 +74,20 @@ export default function bootRelay (gui) {
       StatusReporter.connectConnectivity()
     })
     .then(() => {
+      /// Only sync database in boot if it is the first time booting
+      /// otherwise sync will after the client has started to avoid
+      /// having delay on each run
+      return SyncService.isFirstSync()
+        .then(firstSync => {
+          if (firstSync) {
+            debug('It is first boot, syncing database')
+            let status = Status.info('Syncing database')
+            return SyncService.syncAll()
+              .then(() => status.clear())
+          }
+        })
+    })
+    .then(() => {
       Status.info('Starting Relay')
       HealthManager.startMonitor(gui)
     })
@@ -83,6 +99,9 @@ export default function bootRelay (gui) {
           return API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)
         })
       }
+    })
+    .then(() => {
+      context.bootFinished()
     })
     .catch(AuthenticationError, err => {
       err.logAndReport()

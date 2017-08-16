@@ -99,8 +99,8 @@ function createServiceProxy(serviceName) {
 // if in renderer process
 if (ipcRenderer) {
   ipcRenderer.on('remote.service.reply', (event, reply) => {
-    console.log(`REPLY`)
-    console.log(reply)
+    // console.log(`REPLY`)
+    // console.log(reply)
     let p = pendingRequests[reply.id]
     if (reply.error) {
       p.reject(deserializeError(reply.error))
@@ -110,8 +110,8 @@ if (ipcRenderer) {
   })
 
   ipcRenderer.on('remote.service.event', (event, details) => {
-    console.log("REMOTE EVENT")
-    console.log(details)
+    // console.log("REMOTE EVENT")
+    // console.log(details)
     services[details.service].emit(details.event, ...details.args)
   })
 }

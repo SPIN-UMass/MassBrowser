@@ -2,13 +2,11 @@
 </template>
 
 <script>
-  import { getService } from '@utils/remote'
-
-  const Context = getService('context')
+  import splashCtrl from '@/controllers/splashCtrl'
 
   export default {
-    created () {
-      Context.hasBooted.then(booted => this.$router.push(booted ? '/relay' : '/boot'))
+    async created () {
+      this.$router.push(await splashCtrl.getRoute()) 
     }
   }
 </script>

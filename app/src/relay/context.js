@@ -8,7 +8,6 @@ class _Context extends EventEmitter {
 
   bootFinished() {
     this.hasBooted = true
-    this.emit('boot-finished')
   }
 }
 

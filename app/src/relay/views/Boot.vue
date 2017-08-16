@@ -1,7 +1,7 @@
 <template lang="pug">
   .y-splash
     .y-container
-      h1 MassProxy
+      h1 MassBrowser
       .loading-container(v-if="status=='loading'")
         GridLoader.spinner(color="#aaa")
         .status-container  {{ statusMessage }}
@@ -24,12 +24,9 @@
   import { getService } from '@utils/remote'
 
   const Status = getService('status')
+  const Boot = getService('boot')
   const Context = getService('context')
 
-  const INVITATION_CODE_LENGTH = 10
-  const DELIM = '  '
-
-  var invitationCodePromiseResolve = null
   export default {
     data () {
       return {
@@ -45,13 +42,12 @@
     created () {
       Status.on('status-changed', this.onStatusChanged)
       Status.on('status-cleared', this.onStatusCleared)
-      Context.on('boot-finished', this.onBootFinished)
-      Context.hasBooted.then(booted => booted ? this.onBootFinished() : '')
+      
+      this.bootRelay()
     },
     beforeDestroy () {
       Status.removeListener('status-changed', this.onStatusChanged)
       Status.removeListener('status-cleared', this.onStatusCleared)
-      Context.removeListener('boot-finished', this.onBootFinished)
     },
     methods: {
       onStatusChanged: function(status) {
@@ -62,15 +58,14 @@
       onStatusCleared: function () {
         this.statusMessage = ''
       },
-      onBootFinished: function() {
-        this.$router.push({path: '/relay'})
-
-        //   .catch(ApplicationBootError, err => {
-        //     this.errorMessage = err.message
-        //     this.status = 'error'
-        //     this.canRetry = err.retriable
-        //   })
-        // }
+      bootRelay() {
+        return Boot.bootRelay()
+        .then(() => this.$router.push('/splash'))
+        .catch(ApplicationBootError, err => {
+          this.errorMessage = err.message
+          this.status = 'error'
+          this.canRetry = true
+        })
       }
     }
   }

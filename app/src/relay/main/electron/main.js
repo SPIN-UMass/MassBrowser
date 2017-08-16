@@ -15,6 +15,10 @@ serviceRegistry.registerService('status', StatusService)
 serviceRegistry.registerService('context', Context)
 serviceRegistry.registerService('health', HealthManager)
 serviceRegistry.registerService('statusReporter', StatusReporter)
+serviceRegistry.registerService('boot', { bootRelay })
+
+var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
+requireControllerFilter.keys().forEach(requireControllerFilter)
 
 let currentWindow = null
 
@@ -30,6 +34,3 @@ function onWindowClosed() {
 }
 
 initializeMainProcess(onWindowCreated, onWindowClosed)
-
-bootRelay()
-.then(() =>  Context.bootFinished())

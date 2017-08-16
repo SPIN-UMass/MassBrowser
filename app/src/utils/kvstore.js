@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events'
 
 import { createModel } from './orm'
+import config from '@utils/config'
+
 
 class KeyValSchema {
   constructor () {
@@ -11,7 +13,7 @@ class KeyValSchema {
 class _KVStore extends EventEmitter {
   constructor () {
     super()
-    this.model = createModel('KeyVal', KeyValSchema, { collection: 'keyval' })
+    this.model = createModel('KeyVal', KeyValSchema, { collection: 'keyval', database: config.role })
   }
 
   set (key, value) {

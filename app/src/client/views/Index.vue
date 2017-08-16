@@ -1,7 +1,7 @@
 <template lang="pug">
   .y-container
     .y-header
-      h1 Yaler
+      h1 MassBrowser
       .y-nav
         ul
           li(:class="{active: currentTab==='client-home'}")
@@ -9,13 +9,13 @@
           li(:class="{active: currentTab==='client-websites'}")
             router-link(to='/client/websites') websites
             //- .span(v-on:click="$router.push('client-websites')") websites
-          li(:class="{active: currentTab==='client-settings'}")
-            a() settings
+          //- li(:class="{active: currentTab==='client-settings'}")
+          //-   a() settings
     .y-content
       router-view
     .y-footer
       StatusWidget.status-bar
-      button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
+      //- button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
 </template>
 
 <script>
@@ -72,6 +72,7 @@
       margin-top: 22px;
       padding: 5px 30px;
       float: left;
+      font-size: 30px;
       
       color: #999;
       font-weight: bold;

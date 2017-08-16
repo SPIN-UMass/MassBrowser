@@ -1,7 +1,7 @@
 <template lang="pug">
   .y-splash
     .y-container
-      h1 MassProxy
+      h1 MassBrowser
       .loading-container(v-if="status=='loading'")
         GridLoader.spinner(color="#aaa")
         .status-container  {{ statusMessage }}

@@ -71,7 +71,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 500,
     width: 660,
-    resizable: false
+    resizable: true
   })
 
   if (config.isProduction) {

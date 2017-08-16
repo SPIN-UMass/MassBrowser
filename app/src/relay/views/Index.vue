@@ -28,6 +28,7 @@
   import { getService } from '@utils/remote'
 
   const HealthManager = getService('health')
+  const SyncService = getService('sync')
 
   export default {
     data () {
@@ -42,6 +43,7 @@
     },
     created () {
       HealthManager.openAccess.then(openAccess => this.openAccess = openAccess)
+      SyncService.syncAll()
     },
     methods: {
       onChange: function (e) {
