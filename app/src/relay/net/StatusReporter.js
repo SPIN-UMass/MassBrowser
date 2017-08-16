@@ -25,6 +25,7 @@ class _StatusReporter extends EventEmitter {
     if (this.routineStatus) {
       return
     }
+    this.routineStatus = true
     this._startKeepAlive()
   }
 
