@@ -79,13 +79,12 @@ class _HealthManager {
   }
 
   handleReconnect () {
-    if (this.openAccess === false) {
-      return
+    if (this.openAccess) {
+      debug(this.openAccess)
+      let publicaddress = this.getReachableOBFSAddress()
+      API.relayUp(publicaddress.ip, publicaddress.port)
+      this.restartOBFSServer()
     }
-    let publicaddress = this.getReachableOBFSAddress()
-    API.relayUp(publicaddress.ip, publicaddress.port)
-    this.restartOBFSServer()
-
   }
 
   changeAccess (access) {

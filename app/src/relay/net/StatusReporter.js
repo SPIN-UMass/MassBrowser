@@ -18,11 +18,13 @@ class _StatusReporter extends EventEmitter {
     this.localip = ''
     this.reachable = false
     this.WSconnected = false
-    this.isOpen = false
+    this.routineStatus = false
   }
 
   startRoutine () {
-
+    if (this.routineStatus) {
+      return
+    }
     this._startKeepAlive()
   }
 
@@ -50,22 +52,37 @@ class _StatusReporter extends EventEmitter {
     ConnectivityConnection.keepAlive()
   }
 
+  ConncetivityResHandler (data) {
+    StatusReporter.startRoutine()
+    // console.log('Connectivity', data)
+    if (StatusReporter.localip !== data[0] || StatusReporter.localport !== data[1] || StatusReporter.remoteport !== data[3] || StatusReporter.remoteip !== data[2]) {
+      StatusReporter.localip = data[0]
+      StatusReporter.localport = data[1]
+      StatusReporter.remoteport = data[3]
+      StatusReporter.remoteip = data[2]
+      HealthManager.handleReconnect()
+    }
+  }
+
+  ConnectivityErrorHandler () {
+    if (HealthManager.openAccess) {
+      ConnectivityConnection.reconnect()
+
+    }
+  }
 
   connectConnectivity () {
-    ConnectivityConnection.connect()
-      .then(data => {
-        StatusReporter.startRoutine()
-        // console.log('Connectivity', data)
-        StatusReporter.localip = data[0]
-        StatusReporter.localport = data[1]
-        StatusReporter.remoteport = data[3]
-        StatusReporter.remoteip = data[2]
-      })
-
+    ConnectivityConnection.connect((data) => {
+      this.ConncetivityResHandler(data)
+    }, () => {
+      this.ConnectivityErrorHandler()
+    })
   }
+
   getPublicAddress () {
     return {ip: this.remoteip, port: this.remoteport}
   }
+
   getPrivateAddress () {
     return {ip: this.localip, port: this.localport}
   }

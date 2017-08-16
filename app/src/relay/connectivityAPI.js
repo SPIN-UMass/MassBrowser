@@ -20,17 +20,16 @@ const ECHOPORT = 8823
 
 class WSServerReachability extends EventEmitter {
   constructor () {
-
     super()
     this.socket = undefined
     this.isConnected = false
     this.autoConnect = false
-
+    this.respHandler = {}
+    this.errHandler = {}
   }
 
-  connect () {
+  connect (resphandler, errorhandler) {
     return new Promise((resolve, reject) => {
-
       this.socket = net.createConnection({
         port: ECHOPORT,
         host: ECHOSERVER,
@@ -38,9 +37,12 @@ class WSServerReachability extends EventEmitter {
         exclusive: false
       }, () => {
         debug('Connected to Echo Server')
+        this.errHandler = errorhandler
+        this.respHandler = resphandler
         this.socket.write('TEST')
         this.socket.setKeepAlive(true)
         this.isConnected = true
+        resolve()
       })
       this.socket.on('data', (data) => {
         data = data.toString()
@@ -48,7 +50,7 @@ class WSServerReachability extends EventEmitter {
         let ip = data.split(':')[0]
         let port = data.split(':')[1]
         //console.log(ip,port)
-        resolve([this.socket.localAddress, this.socket.localPort, ip, port])
+        this.respHandler([this.socket.localAddress, this.socket.localPort, ip, port])
 
       })
       this.socket.on('end', () => {
@@ -62,7 +64,7 @@ class WSServerReachability extends EventEmitter {
       })
 
       this.socket.on('error', (e) => {
-        debug('Connectivity Server Error',e)
+        debug('Connectivity Server Error', e)
         if (e.code === 'EADDRINUSE') {
 
           this.socket.close()
@@ -78,13 +80,18 @@ class WSServerReachability extends EventEmitter {
             this.isConnected = true
           })
         } else {
-
+          this.errHandler()
         }
-
       })
+    })
+  }
+
+  reconnect () {
+    debug('RECONNECTING CONNECTIVITY')
+    this.connect(this.respHandler, this.errHandler).then(() => {
+      debug('RECONNECTED CONNECTIVITY')
 
     })
-
   }
 
   keepAlive () {
