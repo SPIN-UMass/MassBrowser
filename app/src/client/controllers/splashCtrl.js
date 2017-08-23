@@ -10,10 +10,8 @@ async function getRoute() {
       return '/client'
     }
   } else {
-    if (context.hasRegistered()) {
+    if (await context.hasRegistered()) {
       return '/boot'
-    } else if (context.hasInvitationCode()){
-      return '/register'
     } else {
       return '/start'
     }
