@@ -85,7 +85,7 @@ function initializeDockerBuild() {
   .then(config => {
     /* Copy relay.js from dist  */
 
-    return fs.copy('app/dist/relay.js', 'docker/relay.js')
+    return fs.copy('app/dist/relay/relay.js', 'docker/relay.js')
     .then(() => config)
   })
 }
@@ -156,6 +156,8 @@ function publishImage(config) {
     })
   })
 }
+
+console.log(chalk.yellow.bold("Make sure to build the project before running docker build"))
 
 initializeDockerBuild()
 .then(buildDockerImage)
