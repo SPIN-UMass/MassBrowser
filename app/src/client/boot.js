@@ -36,17 +36,7 @@ import context from '@/context'
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
 
-/**
- * @param registrationCallback is called if the client requires registration, the callback is
- * expected to return a promise which provides an invitation code used for registration
- * 
- * * @param registrationCallback is called if the client requires registration, the callback is
- * expected to return a promise which provides an invitation code used for registration
- *
- * @throws ApplicationBootError
- * @throws InvalidInvitationCodeError
- */
-export default function bootClient (registrationCallback, updateAvailableCallback) {
+export default function bootClient () {
   Status.clearAll()
 
   return KVStore.get('client', null)
@@ -54,17 +44,7 @@ export default function bootClient (registrationCallback, updateAvailableCallbac
       if (client) {
         return client
       } else {
-        return registrationCallback()
-          .then(invitationCode => {
-            let status = Status.info(`Registering Client`)
-            return API.registerClient(invitationCode)
-              .then(client => {
-                status.clear()
-                KVStore.set('client', {id: client.id, password: client.password})
-                return {id: client.id, password: client.password}
-              })
-          })
-
+        throw new ApplicationBootError('Client not registered')
       }
     })
     .then(client => {

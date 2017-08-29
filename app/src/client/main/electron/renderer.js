@@ -6,8 +6,6 @@ import { initializeRendererProcess } from '@common/main/electron/renderer'
 
 import Vue from 'vue'
 
-initializeLogging()
-
 if (config.sentry.enabled) {
   Raven.smartConfig()
   .addPlugin(RavenVue, Vue)

@@ -69,9 +69,10 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 500,
-    width: 660,
-    resizable: true
+    height: 350,
+    width: 500,
+    resizable: true,
+    titleBarStyle: 'hidden'
   })
 
   if (config.isProduction) {

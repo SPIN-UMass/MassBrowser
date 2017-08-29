@@ -1,15 +1,11 @@
 <template lang="pug">
-  .y-home
-    .top
-    .bottom
-      ul.options
-        li #[a relays]
-        li #[a connections]
-      RelayView
+  #m-home
+    MapView
 </template>
 
 <script>
   import RelayView from './RelayView'
+  import MapView from './widgets/MapView'
 
   export default {
     data () {
@@ -17,7 +13,8 @@
       }
     },
     components: {
-      RelayView
+      RelayView,
+      MapView
     },
     mounted () {
 
@@ -26,14 +23,9 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@common/styles/settings.scss';
-
-  .top {
-    height: 150px;
-    background: $color_main;
-  }
-  
-  .y-home{
+  @import '~@/styles/settings.scss';
+  #m-home{
+    height: $content_height;
     .bottom {
       background: $color_main;
 

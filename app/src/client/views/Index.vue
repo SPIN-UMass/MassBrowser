@@ -1,8 +1,8 @@
 <template lang="pug">
-  .y-container
-    .y-header
+  #m-container
+    #m-header
       h1 MassBrowser
-      .y-nav
+      #m-nav
         ul
           li(:class="{active: currentTab==='client-home'}")
             router-link(to='/client') home
@@ -11,9 +11,9 @@
             //- .span(v-on:click="$router.push('client-websites')") websites
           //- li(:class="{active: currentTab==='client-settings'}")
           //-   a() settings
-    .y-content
+    #m-content
       router-view
-    .y-footer
+    #m-footer
       StatusWidget.status-bar
       //- button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
 </template>
@@ -46,46 +46,50 @@
 
 
 <style scoped lang='scss'>
-  @import '~@common/styles/settings.scss';
+  @import '~@/styles/settings.scss';
 
-  $border_radius: 0px;
-  $header_height: 75px;
-  $middle_height: 250px;
-  $bottom_height: 255px;
-  $footer_height: 60px;
+  // $border_radius: 0px;
+  // $header_height: 75px;
+  // $middle_height: 250px;
+  // $bottom_height: 255px;
+  // $footer_height: 60px;
 
-  .y-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  $title_font_size: 20px;
+  $nav_font_size: 16px;
+
+  #m-container {
+    height: $application_height;
   }
 
-  .y-header {
-    border-radius: $border_radius $border_radius 0 0;
+  #m-header {
+    border-radius: $application_border_radius $application_border_radius 0 0;
     background: $color_main;
     height: $header_height;
-    // box-shadow: 0 2px 0 rgba(0,0,0,0.075);
+    -webkit-app-region: drag;
     
-    flex-grow: 0;
     h1 {
+      position: absolute;
+      left: 0px;
+      top: $header_height / 2 - $title_font_size / 2;
+
       margin: 0px;
-      margin-top: 22px;
       padding: 5px 30px;
-      float: left;
-      font-size: 30px;
-      
+
+      font-size: 20px;
       color: #999;
       font-weight: bold;
       font-family: $font_title;
     }
   }
 
-  .y-nav {
+  #m-nav {
+    position: absolute;
+    right: 0px;
+    top: $header_height / 2 - $nav_font_size / 2;
+
     font-family: $font-menu;
     overflow: auto;
-    margin-top: 35px;
-    margin-right: 15px;
-    float: right;
+    // float: right;
     ul {
         list-style-type: none;
         margin: 0;
@@ -103,7 +107,7 @@
         text-decoration: none;
         
         color: #bbb;    
-        font-size: 16px;
+        font-size: $nav_font_size;
         
         &:hover {
           color: #111;
@@ -122,20 +126,20 @@
     }
   }
 
-  .y-content {
+  #m-content {
+    height: $content_height;
+
     clear: both;
     background: #f1f4f7;
     box-shadow: 0 -1px 0 0 rgba(0,0,0,0.1);
-    flex-grow: 1;
   }
 
-  .y-footer {
+  #m-footer {
     height: $footer_height;
-    flex-grow: 0;
 
     clear: both;
     
-    border-radius: 0 0 $border_radius $border_radius;
+    border-radius: 0 0 $application_border_radius $application_border_radius;
     background: $color-main;
     box-shadow: 0px -1px 0 0 rgba(0, 0, 0, 0.1);
     

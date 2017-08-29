@@ -25,8 +25,7 @@ export class Session extends EventEmitter {
     this.allowedCategories = new Set(allowedcats)
     this.connection = null
     this.isCDN = isCDN || false
-    this.connected = false
-    this.connecting = false
+    this.state = Session.CREATED
     this.domainName = domainName
 
     this.bytesSent = 0
@@ -34,11 +33,14 @@ export class Session extends EventEmitter {
   }
 
   connect () {
+    this.changeState(Session.CONNECTING)
+
     if (this.isCDN) {
       var relay = new DomainConnection(this.domainName, this.desc)
     } else {
       var relay = new RelayConnection(this.ip, this.port, this.desc)
     }
+
     relay.id = this.id
     relay.on('data', data => {
       ConnectionManager.listener(data)
@@ -53,16 +55,26 @@ export class Session extends EventEmitter {
 
     relay.on('close', () => {
       ConnectionManager.onRelayClose(relay)
-
+      this.changeState(Session.CLOSED)
     })
 
     this.connected = true
     return relay.connect()
       .then(() => {
         this.connection = relay
-        this.connected = true
-        this.connecting = false
+        this.changeState(Session.CONNECTED)
       })
       .then(() => relay)
   }
+
+  changeState(state) {
+    this.state = state
+    this.emit('state-changed', state)
+  }
+
+  static get CREATED() { return 'created' }
+  static get CONNECTING() { return 'connecting' }
+  static get CONNECTED() { return 'connected' }
+  static get CLOSED() { return 'closed' }
+
 }
