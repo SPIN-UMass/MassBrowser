@@ -1,14 +1,14 @@
 <template lang="pug">
   #m-home
-    MapView#map
-    //- GraphView#graph hello
+    RelayStatus.relay-status
+    MapView.map
+    //- GraphView#graph
     
 </template>
 
 <script>
-  import RelayView from './RelayView'
   import MapView from './widgets/MapView'
-  import GraphView from './widgets/GraphView'
+  import RelayStatus from './widgets/RelayStatus'
 
   export default {
     data () {
@@ -16,9 +16,8 @@
       }
     },
     components: {
-      RelayView,
       MapView,
-      GraphView
+      RelayStatus
     },
     mounted () {
 
@@ -31,16 +30,13 @@
   #m-home{
     height: $content_height;
     position: relative;
-    #map {
-      height: 100%;
-      // position: absolute;
-      // bottom: 2px;
+    .map {
+      height: 88%;
+      box-shadow: 0 -1px 0 0 rgba(0,0,0,.1);
     }
 
-    #graph {
-      height: 59%;
-      // position: absolute;
-      // top: 0px;
+    .relay-status {
+      // background: blue;
     }
   }
   

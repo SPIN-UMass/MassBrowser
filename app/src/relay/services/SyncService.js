@@ -48,7 +48,7 @@ class _SyncService {
         .then(categories => {
 
           categories.forEach((category) => {
-            console.log('allowedIDS', allowedIDs, category.id, allowedIDs.indexOf(category.id) > -1)
+            // console.log('allowedIDS', allowedIDs, category.id, allowedIDs.indexOf(category.id) > -1)
 
             if (allowedIDs.indexOf(category.id) > -1) {
               category.enabled = true

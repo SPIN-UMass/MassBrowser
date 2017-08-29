@@ -3,8 +3,6 @@
 </template>
 
 <script>
-  // import Bus from '~/utils/bus'
-  // import Status from '@utils/status'
   import { getService } from '@utils/remote'
   import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/StatusService'
 

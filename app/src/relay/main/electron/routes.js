@@ -20,10 +20,14 @@ export default [
     component: require('@/views/Index'),
     children: [
       {
+        path: '/relay',
+        component: require('@/views/Home'),
+        name: 'relay-home'
+      },
+      {
         path: '/relay/settings',
         component: require('@/views/SettingsView'),
         name: 'relay-settings'
-
       },
       {
         path: '/relay/categories',

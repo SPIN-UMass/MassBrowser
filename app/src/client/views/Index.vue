@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import StatusWidget from './StatusWidget'
+  import StatusWidget from '@common/widgets/StatusWidget'
   import { getService } from '@utils/remote'
 
   const SyncService = getService('sync')

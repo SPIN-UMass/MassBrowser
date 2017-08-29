@@ -71,7 +71,10 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 350,
     width: 500,
-    resizable: true,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
     titleBarStyle: 'hidden'
   })
 

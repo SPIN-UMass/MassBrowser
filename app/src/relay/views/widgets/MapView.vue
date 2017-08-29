@@ -5,9 +5,9 @@
 
 <script>
   import Datamap from '@assets/datamaps.world.js'
-  import mapCtrl from '@/controllers/mapCtrl'
-  import { getLocationForIP, getMyIP } from '@utils/geoip'
-  const SESSION_POLL_INTERVAL = 1000
+  // import mapCtrl from '@/controllers/mapCtrl'
+  // import { getLocationForIP, getMyIP } from '@utils/geoip'
+  // const SESSION_POLL_INTERVAL = 1000
 
   var map
   var pollIntervalIdent
@@ -23,13 +23,13 @@
     },
     mounted () {
       map = createMap(this.$refs.mapdiv)
-      map.bubbles(this.pins)
+      // map.bubbles(this.pins)
       
-      this.startPollingSessions()
-      this.addSelfPin()
+      // this.startPollingSessions()
+      // this.addSelfPin()
     },
     beforeDestroy() {
-      this.stopPollingSessions()
+      // this.stopPollingSessions()
     },
     methods: {
       addPin(pin) {
