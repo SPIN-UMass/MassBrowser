@@ -4,6 +4,7 @@ import { debug } from '@utils/log'
 
 import SyncService from '@/services/SyncService'
 import StatusService from '@common/services/StatusService'
+import AutoUpdater from '@common/services/AutoUpdater'
 import RegistrationService from '@/services/RegistrationService'
 import Context from '@/context'
 
@@ -14,6 +15,7 @@ serviceRegistry.registerService('status', StatusService)
 serviceRegistry.registerService('context', Context)
 serviceRegistry.registerService('registration', RegistrationService)
 serviceRegistry.registerService('boot', { bootClient })
+serviceRegistry.registerService('autoupdate', AutoUpdater)
 
 var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 requireControllerFilter.keys().forEach(requireControllerFilter)

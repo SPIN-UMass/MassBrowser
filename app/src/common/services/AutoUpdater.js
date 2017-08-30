@@ -1,37 +1,47 @@
+import { EventEmitter } from 'events'
 import { autoUpdater } from 'electron-updater'
-import { warn, error } from '~/utils/log'
+import { CancellationToken } from 'electron-builder-http'
+
 import { AutoUpdateError } from '~/utils/errors'
-import { prettyBytes } from '~/utils'
-import Status from '~/utils/status'
-import config from '~/utils/config'
-import { ipcRenderer } from 'electron'
+import Status from '@common/services/StatusService'
+import config from '@utils/config'
+import { warn } from '@utils/log'
 
-class _AutoUpdater {
-  constructor () {
-    this.checkUpdatePromise = null
-  }
 
+class _AutoUpdater extends EventEmitter {
   checkForUpdates() {
     return new Promise((resolve, reject) => {
       if (config.isDevelopment) {
         warn('Auto updater does not work in development mode')
         return resolve(false)
       }
+  
+      const onUpdateAvailable = () => {
+        clearListeners()
+        resolve(true)
+      }
+  
+      const onUpdateNotAvailable = () => {
+        clearListeners()
+        resolve(false)
+      }
+      
+      const onError = (err) => {
+        clearListeners()
+        reject(new AutoUpdaterError(err))
+      }
 
-      this.checkUpdatePromise = {resolve: resolve, reject: reject}
+      const clearListeners = () => {
+        autoUpdater.removeListener('update-available', onUpdateAvailable)
+        autoUpdater.removeListener('update-not-available', onUpdateNotAvailable)
+        autoUpdater.removeListener('error', onError)
+      }
+  
+      autoUpdater.on('update-available', onUpdateAvailable)
+      autoUpdater.on('update-not-available', onUpdateNotAvailable)
+      autoUpdater.on('error', onError)
 
-      ipcRenderer.once('autoupdate-update-available', () => resolve(true))
-      ipcRenderer.once('autoupdate-update-not-available', () => resolve(false))
-      ipcRenderer.once('autoupdate-error', (sender, err) => {
-        reject(new AutoUpdateError(err))
-      })
-
-      ipcRenderer.send('autoupdate-check-for-update')
-    }).then(result => {
-      ipcRenderer.removeAllListeners('autoupdate-update-available')
-      ipcRenderer.removeAllListeners('autoupdate-update-not-available')
-      ipcRenderer.removeAllListeners('autoupdate-error')
-      return result
+      autoUpdater.checkForUpdates()
     })
   }
 
@@ -44,34 +54,43 @@ class _AutoUpdater {
         100
       )
 
-      ipcRenderer.send('autoupdate-download-update')
-
-      ipcRenderer.on('autoupdate-download-progress', (sender, info) => {
+      const onProgress = (progressObj) => {
         progress.setProgress(Math.floor(info.percent))
         downloadSpeed = info.bytesPerSecond
-      })
+      }
 
-      ipcRenderer.once('autoupdate-error', (sender, err) => {
-        reject(new AutoUpdateError(err))
-      })
-
-      ipcRenderer.on('autoupdate-update-downloaded', (sender, info) => {
-        ipcRenderer.removeAllListeners('autoupdate-download-progress')
-        ipcRenderer.removeAllListeners('autoupdate-update-downloaded')
-        ipcRenderer.removeAllListeners('autoupdate-error')
-
+      const onFinish = () => {
+        clearListeners()
         progress.finish()
-
         resolve()
-      })
+      }
+
+      const onError = (err) => {
+        clearListeners()
+        reject(new AutoUpdateError(err))
+      }
+      
+      const clearListeners = () => {
+        autoUpdater.removeListener('download-progress', onProgress)
+        autoUpdater.removeListener('update-downloaded', onFinish)
+        autoUpdater.removeListener('error', onError)
+      }
+
+
+      autoUpdater.on('download-progress', onProgress)
+      autoUpdater.on('update-downloaded', onFinish)
+      autoUpdater.on('error', onError)
+
+      let downloadCancelationToken = new CancellationToken()
+      autoUpdater.downloadUpdate(downloadCancelationToken)
     })
   }
-
+   
   quitAndInstall() {
     Status.info("Installing update...")
-    ipcRenderer.send('autoupdate-install')
+    autoUpdater.quitAndInstall()
   }
 }
 
-var AutoUpdater = new _AutoUpdater()
+const AutoUpdater = new _AutoUpdater()
 export default AutoUpdater

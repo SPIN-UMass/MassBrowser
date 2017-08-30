@@ -3,7 +3,7 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
 import Promise from 'bluebird'
 
-import { initAutoUpdater } from './auto_updater'
+// import { initAutoUpdater } from './auto_updater'
 import config from '@utils/config'
 
 global.Promise = Promise
@@ -79,7 +79,7 @@ function createWindow () {
   })
 
   if (config.isProduction) {
-    initAutoUpdater(mainWindow)  
+    // initAutoUpdater(mainWindow)  
   }
   
   mainWindow.loadURL(winURL)
