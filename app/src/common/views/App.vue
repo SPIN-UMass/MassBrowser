@@ -1,15 +1,18 @@
 <template lang='pug'>
   #app(data-app='true')
-    
     router-view
     modal-manager
     
 </template>
 
 <script>
-  import AutoUpdater from '@common/services/AutoUpdater'
+  // import AutoUpdater from '@common/services/AutoUpdater'
   import ModalManager from '@common/widgets/ModalManager'
   import { showConfirmDialog } from '@common/utils'
+
+  import { getService } from '@utils/remote'
+
+  const AutoUpdater = getService('autoupdate')
 
   export default {
     data() {

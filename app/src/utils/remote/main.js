@@ -127,7 +127,7 @@ export class ServiceRegistry {
       if (async) {
         try {
           let response = service[property].apply(service, args)
-          if (response instanceof Promise) {
+          if (response.then !== undefined) {
             response
             .then(response => sendResponse(response))
             .catch(err => sendError(err))

@@ -7,6 +7,7 @@ import Context from '@/context'
 import bootRelay from '@/boot'
 import HealthManager from '@/net/HealthManager'
 import StatusReporter from '@/net/StatusReporter'
+import AutoUpdater from '@common/services/AutoUpdater'
 
 
 // const serviceRegistry = new ServiceRegistry()
@@ -16,6 +17,7 @@ serviceRegistry.registerService('context', Context)
 serviceRegistry.registerService('health', HealthManager)
 serviceRegistry.registerService('statusReporter', StatusReporter)
 serviceRegistry.registerService('boot', { bootRelay })
+serviceRegistry.registerService('autoupdate', AutoUpdater)
 
 var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 requireControllerFilter.keys().forEach(requireControllerFilter)

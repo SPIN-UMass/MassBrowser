@@ -25,7 +25,6 @@
   import { getService } from '@utils/remote'
 
   const SyncService = getService('sync')
-  const AutoUpdater = getService('autoupdate')
 
   export default {
     data () {
@@ -44,7 +43,6 @@
       })
 
       SyncService.syncAll()
-      AutoUpdater.checkForUpdates()
     },
     methods: {
     }

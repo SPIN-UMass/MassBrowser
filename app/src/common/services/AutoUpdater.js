@@ -5,17 +5,25 @@ import { CancellationToken } from 'electron-builder-http'
 import { AutoUpdateError } from '~/utils/errors'
 import Status from '@common/services/StatusService'
 import config from '@utils/config'
-import { warn } from '@utils/log'
+import { warn, info } from '@utils/log'
+import { GitHubProvider } from './github'
 
+
+autoUpdater.autoDownload = false
+autoUpdater.allowPrerelease = false
+autoUpdater.loadUpdateConfig().then(options => {
+  autoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, autoUpdater, autoUpdater.httpExecutor)))
+})
 
 class _AutoUpdater extends EventEmitter {
   checkForUpdates() {
+  
     return new Promise((resolve, reject) => {
       if (config.isDevelopment) {
         warn('Auto updater does not work in development mode')
         return resolve(false)
       }
-  
+      info("Checking for updates")
       const onUpdateAvailable = () => {
         clearListeners()
         resolve(true)

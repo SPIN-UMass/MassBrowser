@@ -178,7 +178,6 @@ function doReleaseGithub(config, filelist) {
 
   const errorlist = [];
 
-  console.log(filelist)
   const uploads = filelist.map(file => {
       return publisher.upload(file)
           .catch((err) => {
