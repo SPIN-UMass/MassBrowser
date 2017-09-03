@@ -22,15 +22,16 @@
 
 <script>
   import StatusWidget from '@common/widgets/StatusWidget'  
+  import config from '@utils/config'
   import { getService } from '@utils/remote'
 
   const SyncService = getService('sync')
-
+  
   export default {
     data () {
       return {
         currentTab: '',
-        version: process.version
+        version: config.version
       }
     },
     components: {
@@ -141,9 +142,9 @@
 
     .status-bar {
       float: left;
-      margin-top: 20px;
-      margin-left: 30px;
-      
+      margin-top: 5px;
+      margin-left: 15px;
+      font-size: 10px;
       color: #aaa;
     }
 

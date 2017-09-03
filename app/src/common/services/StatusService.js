@@ -59,7 +59,7 @@ class ProgressStatus {
       this.progress = this.maxSteps
     }
 
-    this.manager.emit(`status-progress-${this.key}-update`, this)
+    this.manager.emit(`status-progress-${this.key}-update`, this.toObject())
 
     if (this.progress === this.maxSteps) {
       this.finish()
@@ -68,7 +68,7 @@ class ProgressStatus {
 
   finish() {
     this.manager._removeStatus(this)
-    this.emit(`status-progress-${this.key}-finish`, this)
+    this.manager.emit(`status-progress-${this.key}-finish`, this.toObject())
   }
 
   get message () {

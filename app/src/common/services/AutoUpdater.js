@@ -7,6 +7,7 @@ import Status from '@common/services/StatusService'
 import config from '@utils/config'
 import { warn, info } from '@utils/log'
 import { GitHubProvider } from './github'
+import { prettyBytes } from '~/utils'
 
 
 autoUpdater.autoDownload = false
@@ -62,7 +63,7 @@ class _AutoUpdater extends EventEmitter {
         100
       )
 
-      const onProgress = (progressObj) => {
+      const onProgress = (info) => {
         progress.setProgress(Math.floor(info.percent))
         downloadSpeed = info.bytesPerSecond
       }

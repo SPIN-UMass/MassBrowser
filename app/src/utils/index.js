@@ -17,7 +17,8 @@ export function isPlatform(platform) {
 const UNITS = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 export function prettyBytes(num) {
 	if (!Number.isFinite(num)) {
-		throw new TypeError(`Expected a finite number, got ${typeof num}: ${num}`)
+		// throw new TypeError(`Expected a finite number, got ${typeof num}: ${num}`)
+		return '-'
 	}
 
 	const neg = num < 0

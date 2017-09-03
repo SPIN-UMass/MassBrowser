@@ -95,6 +95,8 @@ function initializeConfig(options) {
   config.isElectronRendererProcess = config.applicationInterface === 'electron' && config.electronProcess === 'renderer'
   config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'
 
+  config.version = packageJSON.version
+  
   return config
 }
 

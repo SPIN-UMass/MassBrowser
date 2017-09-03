@@ -153,9 +153,9 @@
     
     .status-bar {
       float: left;
-      margin-top: 20px;
-      margin-left: 30px;
-      
+      margin-top: 5px;
+      margin-left: 15px;
+      font-size: 10px;
       color: #aaa;
     }
   }
