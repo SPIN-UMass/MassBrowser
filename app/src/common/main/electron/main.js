@@ -3,7 +3,6 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
 import Promise from 'bluebird'
 
-// import { initAutoUpdater } from './auto_updater'
 import config from '@utils/config'
 
 global.Promise = Promise
@@ -77,14 +76,10 @@ function createWindow () {
     fullscreenable: false,
     titleBarStyle: 'hidden'
   })
-
-  if (config.isProduction) {
-    // initAutoUpdater(mainWindow)  
-  }
   
   mainWindow.loadURL(winURL)
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', () => {
     mainWindow = null

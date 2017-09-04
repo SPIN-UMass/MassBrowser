@@ -15,12 +15,14 @@
       router-view
     #m-footer
       StatusWidget.status-bar
+      .version {{version}}
       //- button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
 </template>
 
 <script>
   import StatusWidget from '@common/widgets/StatusWidget'
   import { getService } from '@utils/remote'
+  import config from '@utils/config'
 
   const SyncService = getService('sync')
   const AutoUpdater = getService('autoupdate')
@@ -28,7 +30,8 @@
   export default {
     data () {
       return {
-        currentTab: ''
+        currentTab: '',
+        version: config.version
       }
     },
     components: {
@@ -50,11 +53,6 @@
 <style scoped lang='scss'>
   @import '~@/styles/settings.scss';
 
-  // $border_radius: 0px;
-  // $header_height: 75px;
-  // $middle_height: 250px;
-  // $bottom_height: 255px;
-  // $footer_height: 60px;
 
   $title_font_size: 20px;
   $nav_font_size: 16px;
@@ -116,8 +114,6 @@
         }    
       }
       
-
-      
       &.active {
         a{
           color: black;
@@ -145,18 +141,19 @@
     background: $color-main;
     box-shadow: 0px -1px 0 0 rgba(0, 0, 0, 0.1);
     
-    .btn {
-      float: right;
-      margin-top: 15px;
-      margin-right: 20px;
-    }
-    
     .status-bar {
       float: left;
-      margin-top: 5px;
+      margin-top: 6px;
       margin-left: 15px;
       font-size: 10px;
       color: #aaa;
+    }
+
+    .version {
+      font-size: 8px;
+      color: #aaa;
+      float: right;
+      padding: 8px 12px;
     }
   }
 
