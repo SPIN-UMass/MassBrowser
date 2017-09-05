@@ -93,7 +93,7 @@
 
     h1 {
       font-family: $font_title;
-      font-size: 48px;
+      font-size: 36px;
       margin-top: 0px;
     }
 
@@ -111,14 +111,14 @@
     }
 
     .invitation-container {
-      margin-top: 60px;
+      margin-top: 30px;
       
       input {
         margin-top: 20px;
         text-align: center;
         font-size: 24px;
         font-weight: bold;
-        padding: 9px 0px;
+        padding: 2px 0px;
         letter-spacing: 2px;
         text-transform: uppercase;
       }
@@ -130,6 +130,7 @@
     }
     .error-container {
       margin-top: 20px;
+      margin-bottom: -20px;
       color: red;
       .btn {
         margin-top: 40px;

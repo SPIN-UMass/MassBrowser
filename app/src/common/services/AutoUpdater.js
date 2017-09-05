@@ -17,11 +17,13 @@ import { prettyBytes } from '~/utils'
 import config from '@utils/config'
 import { isPlatform, WINDOWS, OSX, LINUX } from '@utils'
 
-autoUpdater.autoDownload = false
-autoUpdater.allowPrerelease = false
-autoUpdater.loadUpdateConfig().then(options => {
-  autoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, autoUpdater, autoUpdater.httpExecutor)))
-})
+if (config.isProduction) {
+  autoUpdater.autoDownload = false
+  autoUpdater.allowPrerelease = false
+  autoUpdater.loadUpdateConfig().then(options => {
+    autoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, autoUpdater, autoUpdater.httpExecutor)))
+  })
+}
 
 class _AutoUpdater extends EventEmitter {
   checkForUpdates() {
@@ -112,9 +114,9 @@ class _AutoUpdater extends EventEmitter {
 
 function getChannelName() {
   if (isPlatform(OSX)) {
-    return `${config.role}-mac`
+    return `${config.appName}-mac`
   } else {
-    return `${config.role}`
+    return `${config.appName}`
   }
 }
 

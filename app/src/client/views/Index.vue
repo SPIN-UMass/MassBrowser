@@ -15,7 +15,7 @@
       router-view
     #m-footer
       StatusWidget.status-bar
-      .version {{version}}
+      .version v{{version}}
       //- button.btn.btn-sm.btn-success(v-on:click="$router.push('client-splash')" ) Open Browser
 </template>
 

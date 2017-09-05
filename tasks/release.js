@@ -11,7 +11,7 @@ const webpack = require('webpack')
 const Multispinner = require('multispinner')
 const Promise = require('bluebird')
 const yaml = require('js-yaml');
-
+const pkg = require('../package.json')
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' '
 const errorLog = chalk.bgRed.white(' ERROR ') + ' '
@@ -145,11 +145,11 @@ function getFileLists(config, targets) {
   const version = config.version
 
   return targets.reduce((files, target) => files.concat([
-    `${target}.yml`,
-    `${target}-mac.yml`,
-    `${target}-${version}.dmg`,
-    `${target}-${version}-mac.zip`,
-    `${target} Setup ${version}.exe`,
+    `${pkg.productNames[target]}.yml`,
+    `${pkg.productNames[target]}-mac.yml`,
+    `${pkg.productNames[target]}-${version}.dmg`,
+    `${pkg.productNames[target]}-${version}-mac.zip`,
+    `${pkg.productNames[target]} Setup ${version}.exe`,
   ]), [])
   .map(file => `build/${file}`)
 }

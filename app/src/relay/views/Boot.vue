@@ -86,7 +86,7 @@
 
     h1 {
       font-family: $font_title;
-      font-size: 48px;
+      font-size: 36px;
       margin-top: 0px;
     }
 

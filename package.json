@@ -1,6 +1,4 @@
 {
-  "name": "yaler",
-  "description": "P2P Proxy",
   "scripts": {
     "postinstall": "cd app && yarn",
     "build": "node --no-deprecation tasks/build.js",
@@ -16,8 +14,11 @@
     "client:control": "node ./app/dist/client/control.js",
     "docker": "node ./tasks/docker_build.js"
   },
+  "productNames": {
+    "relay": "MassRelay",
+    "client": "MassBrowser"
+  },
   "build": {
-    "productName": "yaler",
     "appId": "co.yaler.client",
     "directories": {
       "output": "build"

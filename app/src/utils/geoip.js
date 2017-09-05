@@ -10,6 +10,6 @@ export function getLocationForIP(ipAddress) {
 export function getMyIP() {
   return axios.get(`https://api.ipify.org/?format=json`)
   .catch(err => error(err))
-  // .then(response => response.data.ip)
-  .then(response => '2.144.100.100')
+  .then(response => response.data.ip)
+  // .then(response => '2.144.100.100')
 }

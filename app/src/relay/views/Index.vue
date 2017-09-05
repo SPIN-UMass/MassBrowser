@@ -15,7 +15,7 @@
       router-view
     #m-footer
       StatusWidget.status-bar
-      .version {{version}}
+      .version v{{version}}
 
       
 </template>
@@ -149,8 +149,6 @@
     }
 
     .version {
-      // font-family: $font-menu;
-      // font-family: "Helvatica";
       font-size: 8px;
       color: #aaa;
       float: right;

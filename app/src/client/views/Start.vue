@@ -18,18 +18,21 @@
   #container.p-index {
     background-color: white;
 
-    padding: 80px;
+    padding: 50px 80px;
 
     h1 {
-      font-size: 54px;
+      font-size: 36px;
       font-family: "Neuropol";
+    }
+
+    h3 {
+      font-size: 16px;
     }
 
     .btn.get-started {
       font-weight: bold;
       float: right;
-      margin-top: 50px;
-      margin-right: 100px;
+      margin-top: 70px;
     }
   }
 </style>

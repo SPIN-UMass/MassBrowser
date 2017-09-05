@@ -82,7 +82,7 @@ class _SessionService extends EventEmitter {
          * TODO optimization
          */
         for (var i = 0; i < this.sessions.length; i++) {
-          console.log('allowed',this.sessions[i].allowedCategories)
+          // console.log('allowed',this.sessions[i].allowedCategories)
           if (this.sessions[i].allowedCategories.has(category.id)) {
             return this.sessions[i]
           }

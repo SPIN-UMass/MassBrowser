@@ -35,7 +35,7 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed) {
 }
 
 function initializeTray() {
-  var image = nativeImage.createFromDataURL(require('@assets/images/tray.png'))
+  var image = nativeImage.createFromDataURL(require('@assets/icons/tray.png'))
   tray = new Tray(image)
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -68,6 +68,7 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
+    title: config.appName,
     height: 350,
     width: 500,
     resizable: false,
@@ -77,9 +78,12 @@ function createWindow () {
     titleBarStyle: 'hidden'
   })
   
+  mainWindow.setTitle(config.appName);
   mainWindow.loadURL(winURL)
 
-  // mainWindow.webContents.openDevTools()
+  if (config.isDevelopment) {
+    mainWindow.webContents.openDevTools()  
+  }
 
   mainWindow.on('closed', () => {
     mainWindow = null

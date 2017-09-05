@@ -96,6 +96,7 @@ function initializeConfig(options) {
   config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'
 
   config.version = packageJSON.version
+  config.appName = packageJSON.name
   
   return config
 }
