@@ -7,11 +7,12 @@
         .status-container  {{ statusMessage }}
       .invitation-container(v-if="status=='prompt'")
         h4 Please enter your invitation code
-        input(v-mask="invitationCodeMask" v-model='invitationCode' placeholder='')
-        .error-container(v-if="!!errorMessage")
-            h4.red {{ errorMessage }}
-        div
-          button.btn.btn-rounded.btn-lg(v-on:click='submitInvitationCode' :disabled="!invitationCodeValid" v-bind:class="{'btn-danger': !invitationCodeValid, 'btn-success': invitationCodeValid}") Submit
+        form(v-on:submit='submitInvitationCode')
+          input(v-mask="invitationCodeMask" v-model='invitationCode' placeholder='')
+          .error-container(v-if="!!errorMessage")
+              h4.red {{ errorMessage }}
+          div
+            button.btn.btn-rounded.btn-lg(:disabled="!invitationCodeValid" v-bind:class="{'btn-danger': !invitationCodeValid, 'btn-success': invitationCodeValid}") Submit
         
 </template>
 
