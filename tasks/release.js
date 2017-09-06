@@ -11,7 +11,6 @@ const webpack = require('webpack')
 const Multispinner = require('multispinner')
 const Promise = require('bluebird')
 const yaml = require('js-yaml');
-const pkg = require('../package.json')
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' '
 const errorLog = chalk.bgRed.white(' ERROR ') + ' '
@@ -57,6 +56,11 @@ function ensureConfig() {
   })
 }
 
+function readBuildConfig(target) {
+  return fs.readFile(`tasks/electron-builder/${target}.yml`)
+  .then(y => yaml.safeLoad(y))
+}
+
 function run(command, options) {
   var options = options || {}
   
@@ -78,89 +82,95 @@ function run(command, options) {
  *    3.1: GH_TOKEN (https://github.com/settings/tokens)
  */
 
-function releaseGithub() {
-  return Promise.all([fs.readJson('package.json'), fs.readJson('app/package.json')])
-  .then(package => {
-    if (package[0].version && package[0].version !== package[1].version) {
-       console.error("package.json versions don't match")
-       process.exit(1)
+async function releaseGithub() {
+  let version = await fs.readJson('app/package.json')
+  let answers = await  inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: `Using version ${version} for release, is this ok?`,
+      default: true
     }
-    return package[1].version
-  })
-  .then(version => {
-    return inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'confirm',
-        message: `Using version ${version} for release, is this ok?`,
-        default: true
-      }
-    ])
-    .then(answer => answer.confirm ? getGithubConfig() : process.exit(0))
-    .then(config => Object.assign(config, {version: version}))
-  })
-  .then(config => {
-    return checkTargetBuilds(config)
-    .then(targets => getFileLists(config, targets))
-    .then(filelist => doReleaseGithub(config, filelist))
-    // run(`cross-env GH_TOKEN=${config.authToken} build -mw -p always`)
-  })
-  .then(() => {
-    console.log(chalk.yellow.bold('Release draft published, you will need to visit Github releases page to finalize the release'))
-  })
+  ])
+
+  if (!answers.confirm) {
+    process.exit(0)
+  }
+
+  let config = Object.assign(await getGithubConfig(), {version: version})
+  let targets = await checkTargetBuilds(config)
+  let filelist = await getFileLists(config, targets)
+  await doReleaseGithub(config, filelist)
+
+  console.log(chalk.yellow.bold('Release draft published, you will need to visit Github releases page to finalize the release'))
 }
 
-function checkTargetBuilds(config) {
+async function checkTargetBuilds(config) {
   const targets = ['client', 'relay']
   const version = config.version
 
   let promises = []
+  let availableTargets = []
 
-  return Promise.reduce(targets, (availableTargets, target) => {
-    if (!fs.pathExistsSync(`./build/${target}.yml`)) {
-      return availableTargets
+  for (let i = 0; i < targets.length; i++) {
+    let target = targets[i]
+    let productName = await readBuildConfig(target).productName
+
+    if (!(await fs.pathExists(`./build/${target}/${productName}.yml`))) {
+      continue
     }
-    
-    return fs.readFile(`./build/${target}.yml`)
-    .then(content => yaml.safeLoad(content))
-    .then(c => c.version === version ? availableTargets.concat(target) : availableTargets)
-  }, [])
-  .then(availableTargets => {
-    if (availableTargets.length === 0) {
-      console.log(chalk.red.bold('No target build available, you should build before releasing'))
-      process.exit(1)
+
+    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${buildConfig.productName}.yml`))
+    if (releaseInfo.version === version) {
+      availableTargets.push(target)
     }
-    return inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'targets',
-        message: 'Select targets to publish in this release',
-        choices: availableTargets
-      }
-    ]).then(answers => answers.targets)
-  })
+  }
+  
+  if (!availableTargets.length) {
+    console.log(chalk.red.bold('No target build available, you should build before releasing'))
+    process.exit(1)
+  }
+
+  let answers = await inquirer.prompt([
+    {
+      type: 'checkbox',
+      name: 'targets',
+      message: 'Select targets to publish in this release',
+      choices: availableTargets
+    }
+  ])
+
+  return answers.targets
 }
 
-function getFileLists(config, targets) {
+async function getFileLists(config, targets) {
   const version = config.version
 
+  let productName = (await readBuildConfig()).productName
   return targets.reduce((files, target) => files.concat([
-    `${pkg.productNames[target]}.yml`,
-    `${pkg.productNames[target]}-mac.yml`,
-    `${pkg.productNames[target]}-${version}.dmg`,
-    `${pkg.productNames[target]}-${version}-mac.zip`,
-    `${pkg.productNames[target]} Setup ${version}.exe`,
+    `${productName}.yml`,
+    `${productName}-mac.yml`,
+    `${productName}-${version}.dmg`,
+    `${productName}-${version}-mac.zip`,
+    `${productName} Setup ${version}.exe`,
   ]), [])
-  .map(file => `build/${file}`)
+  .map(file => `build/${target}/${file}`)
 }
 
-function doReleaseGithub(config, filelist) {
+async function doReleaseGithub(config, filelist) {
   var CancellationToken = require('electron-builder-http/out/CancellationToken').CancellationToken;
   var GitHubPublisher = require('electron-publish/out/gitHubPublisher').GitHubPublisher;
   var MultiProgress = require('electron-publish/out/multiProgress').MultiProgress;
-  var publishConfig = require('../package.json').build.publish
   var appPJson = require('../app/package.json')
 
+  var clientBuildConfig = await readBuildConfig('client')
+  var relayBuildConfig = await readBuildConfig('relay')
+  if (client.publish !== relay.publish) {
+    console.log(chalk.red.bold('Target publish configurations are different, this is not supported'))
+    process.exit(0)
+  }
+  var publishConfig = clientBuildConfig.publish
+  
   publishConfig.token = config.authToken
 
   const context = {

@@ -35,7 +35,7 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed) {
 }
 
 function initializeTray() {
-  var image = nativeImage.createFromDataURL(require('@assets/icons/tray.png'))
+  var image = nativeImage.createFromDataURL(require(`@assets/icons/${config.role}/tray.png`))
   tray = new Tray(image)
   const contextMenu = Menu.buildFromTemplate([
     {

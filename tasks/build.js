@@ -9,7 +9,7 @@ const webpack = require('webpack')
 const Multispinner = require('multispinner')
 const inquirer = require('inquirer')
 const fs = require('fs-extra')
-const pkg = require('../package.json')
+const yaml = require('js-yaml')
 const { YELLOW, BLUE, LABEL_DONE, greeting, run, format } = require('./utils')
 
 
@@ -61,13 +61,15 @@ function askTargets() {
         console.log(format(target, 'Packing...', BLUE))
         return build(target)
         .then(() => console.log(format(target, 'Building...', BLUE)))
-        .then(() => run(`build -mw --em.main=./dist/${target}/electron.main.js --config.productName=${pkg.productNames[target]}`, YELLOW, `${target}`))
+        .then(() => run(`build -mw --em.main=./dist/${target}/electron.main.js --config='./tasks/electron-builder/${target}.yml`, YELLOW, `${target}`))
       })
-      .then(() => {
+      .then(() => fs.readFile(`tasks/electron-builder/${target}.yml`))
+      .then(y => yaml.safeLoad(y))
+      .then(config => {
         console.log(format(target, 'Renaming release files...', BLUE))
         return Promise.all([
-          fs.move('build/latest.yml', `build/${pkg.productNames[target]}.yml`, { overwrite: true }),
-          fs.move('build/latest-mac.yml', `build/${pkg.productNames[target]}-mac.yml`, { overwrite: true })
+          fs.move(`build/${target}/latest.yml`, `build/${target}/${config.productName}.yml`, { overwrite: true }),
+          fs.move(`build/${target}/latest-mac.yml`, `build/${target}/${config.productName}-mac.yml`, { overwrite: true })
         ])
       }) 
     })
