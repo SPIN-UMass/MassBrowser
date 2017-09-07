@@ -37,9 +37,10 @@ class _Context extends EventEmitter {
     return this._browserIntegrationCompleted || !!(await KVStore.get('browser-integration-completed'))
   }
 
-  browserIntegrationCompleted() {
+  async browserIntegrationCompleted() {
     this._browserIntegrationCompleted = true
-    return KVStore.set('browser-integration-completed', true)
+    await KVStore.set('browser-integration-completed', true)
+    this.emit('browser-integration-completed')
   }
 }
 
