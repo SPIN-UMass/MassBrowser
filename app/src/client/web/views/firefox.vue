@@ -144,9 +144,9 @@
       onTabChange() {
         if (this.tab === 'finish') {
           return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
-        } else if (tab === 'cert') {
+        } else if (this.tab === 'cert') {
           this.checkCert()
-        } else if (tab === 'dnsCache') {
+        } else if (this.tab === 'dnsCache') {
           this.checkDNSCache()
         }
       },

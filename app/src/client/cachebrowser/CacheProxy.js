@@ -105,20 +105,22 @@ class _CacheProxy {
           socket.end()
         }
       })
+    })
 
-      proxysocket.on('error', (err) => {
-        console.log('error2', err)
-      })
+    proxysocket.on('error', (err) => {
+      warn(`Cachebrowser proxy connection errored ${err.code || ''}`)
     })
 
     socket.on('data', (d) => {
       proxysocket.write(d)
     })
+
     socket.on('error', (err) => {
-      console.log('erroring', err, 'end of error', proxysocket.destroyed)
+      warn(`Cachebrowser browser connection errored ${err.code || ''}`)
       socket.end()
       proxysocket.end()
     })
+
     socket.on('end', () => {
       proxysocket.end()
     })

@@ -61,7 +61,7 @@ function askTargets() {
         console.log(format(target, 'Packing...', BLUE))
         return build(target)
         .then(() => console.log(format(target, 'Building...', BLUE)))
-        .then(() => run(`build -mw --em.main=./dist/${target}/electron.main.js --config='./tasks/electron-builder/${target}.yml`, YELLOW, `${target}`))
+        .then(() => run(`build -mw --em.main=./dist/${target}/electron.main.js --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`))
       })
       .then(() => fs.readFile(`tasks/electron-builder/${target}.yml`))
       .then(y => yaml.safeLoad(y))
