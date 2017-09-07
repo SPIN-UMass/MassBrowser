@@ -1,12 +1,17 @@
 import { debug, warn } from '~/utils/log'
 import HealthManager from '@/net/HealthManager'
+import { connectToClient } from './OBFSReceiver'
 
 import { pendMgr } from '~/relay/net/PendingConnections'
 import API from '~/relay/api'
-
+let TCP_CLIENT = 0
+let TCP_RELAY = 1
+let UDP = 2
+let CDN = 3
 const handlers = {
   'new-session': newSession,
-  'reconnected': reconnected
+  'reconnected': reconnected,
+  'client-session': connectClientSession
 }
 
 export function eventHandler (event, data) {
@@ -26,16 +31,37 @@ function newSession (data) {
     'readiv': (Buffer.from(data.write_iv, 'base64')),
     'token': (Buffer.from(data.token, 'base64')),
     'client': data.client,
+    'connectiontype': data.connection_type,
     'sessionId': data.id
 
   }
+
   debug('session', desc, desc.token.length, Buffer.from(data.token, 'base64').length)
 
-  pendMgr.addPendingConnection((desc.token), desc)
+  if (desc.connectiontype === TCP_CLIENT) {
+    pendMgr.addPendingConnection((desc.token), desc)
+
+  }
   API.acceptSession(data.client, data.id)
 }
 function reconnected (data) {
   debug('WS RECONNECTED REFERESHING INFO')
   HealthManager.handleReconnect()
+
+}
+function connectClientSession (data) {
+  var desc = {
+    'writekey': (Buffer.from(data.read_key, 'base64')),
+    'writeiv': (Buffer.from(data.read_iv, 'base64')),
+    'readkey': (Buffer.from(data.write_key, 'base64')),
+    'readiv': (Buffer.from(data.write_iv, 'base64')),
+    'token': (Buffer.from(data.token, 'base64')),
+    'client': data.client,
+    'connectiontype': data.connection_type,
+    'sessionId': data.id
+  }
+  pendMgr.addPendingConnection((desc.token), desc)
+
+  connectToClient(data.client.ip, data.client.port, data.id)
 
 }

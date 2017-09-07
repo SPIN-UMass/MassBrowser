@@ -16,8 +16,8 @@ export default class RelayConnection extends EventEmitter {
     this.relayip = relayip
     this.relayport = relayport
     this.desc = desc
-
-    this.cipher = null
+    this.initialBuffer =
+      this.cipher = null
     this.socket = null
   }
 
@@ -50,6 +50,15 @@ export default class RelayConnection extends EventEmitter {
     })
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
+  }
+
+  sessionFounded (session) {
+    this.desc = session.desc
+    this.relayip = session.ip
+    this.relayport = session.port
+    return new Promise((resolve, reject) => {
+      this._initRelay(this.socket).then((socket) => this._initRelay(socket)).then((socket) => resolve())
+    })
   }
 
   _initSocket (socket) {
@@ -85,6 +94,13 @@ export default class RelayConnection extends EventEmitter {
     socket.write(Buffer.concat(padarr))
 
     return socket
+  }
+
+  relayReverse (socket) {
+    this.socket = socket
+    var sessionId = this.socket.read(12)
+    console.log(sessionId)
+
   }
 
   end () {
