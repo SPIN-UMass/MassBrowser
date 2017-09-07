@@ -9,10 +9,10 @@
         span.status-label Reachable
         
     .toggle-container
-      toggle-button.toggle( v-on:change="onChange", :labels= {
+      toggle-button.toggle(v-on:change="onChange", :labels= {
         checked: 'Open Access',
         unchecked: 'Offline'
-      }   v-bind:value="accessStatus" v-bind:width="95" )
+      }   v-bind:value="openAccess" v-bind:width="95" :sync="true")
       //- span.relaytext Status:
 
 </template>
@@ -28,14 +28,16 @@
       return {
         reachable: false,
         WSconnected: false,
-        openAccess: false
+        openAccess: true
       }
     },
     created () {
       StatusReporter.reachable.then(reachable => this.reachable = reachable)
       StatusReporter.WSconnected.then(WSconnected => this.WSconnected = WSconnected)
       StatusReporter.on('status-updated', this.onStatusUpdated)
-      HealthManager.openAccess.then(openAccess => this.openAccess = openAccess)
+      HealthManager.openAccess.then(openAccess => {
+        this.openAccess = openAccess
+      })
     },
     beforeDestroy() {
       StatusReporter.removeListener('status-updated', this.onStatusUpdated)
