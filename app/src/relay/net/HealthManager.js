@@ -7,6 +7,12 @@ import { runOBFSserver } from './OBFSReceiver'
 import StatusReporter from './StatusReporter'
 import { error, debug } from '@utils/log'
 import API from '@/api'
+var stun = require('vs-stun')
+
+var stunserver = {
+  host: 'stun2.l.google.com',
+  port: 19302
+}
 
 let UNLIMIT = 1000000000
 class _HealthManager {
@@ -20,7 +26,7 @@ class _HealthManager {
     this.uploadLimit = UNLIMIT
     this.downloadLimit = UNLIMIT
     this.bandwidthLimited = false
-
+    this.natType = ''
     this.OBFSPortNumber = 8040
     this.HTTPPortNumber = 8083
 
@@ -78,12 +84,22 @@ class _HealthManager {
     // NEED SOMETHING TODO
   }
 
+  checkNatType() {
+    if (this.natEnabled) {
+      stun.connect(stunserver, (err,data) => {
+        console.log('NAT TYPE IS',data.stun)
+      })
+    }
+  }
+
   handleReconnect () {
     if (this.openAccess) {
       debug(this.openAccess)
       let publicaddress = this.getReachableOBFSAddress()
       API.relayUp(publicaddress.ip, publicaddress.port)
       this.restartOBFSServer()
+      this.checkNatType()
+
     }
   }
 
@@ -92,6 +108,7 @@ class _HealthManager {
       this.openAccess = access
       if (this.openAccess) {
         let publicaddress = this.getReachableOBFSAddress()
+        this.checkNatType()
         API.relayUp(publicaddress.ip, publicaddress.port)
         this.restartOBFSServer()
       } else {

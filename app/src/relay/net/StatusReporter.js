@@ -8,6 +8,7 @@ import { EventEmitter } from 'events'
 import config from '@utils/config'
 import HealthManager from '@/net/HealthManager'
 
+
 class _StatusReporter extends EventEmitter {
 
   constructor () {
@@ -19,6 +20,7 @@ class _StatusReporter extends EventEmitter {
     this.reachable = false
     this.WSconnected = false
     this.routineStatus = false
+
   }
 
   startRoutine () {
