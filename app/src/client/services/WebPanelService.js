@@ -55,7 +55,12 @@ class _OnBoardingService {
     const electron = require('electron')
     /* TODO hadi: I don't like this */
     /* Needs to change for console mode */
-    app.use(serveStatic(`${electron.app.getAppPath()}/dist/web`))
+    if (config.isProduction) {
+      app.use(serveStatic(`${electron.app.getAppPath()}/dist/web`))
+    } else {
+      app.use(serveStatic(`./app/dist/web`))
+    }
+    
   }
 }
 

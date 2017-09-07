@@ -99,4 +99,3 @@ function createWindow () {
   // eslint-disable-next-line no-console
   return mainWindow
 }
-

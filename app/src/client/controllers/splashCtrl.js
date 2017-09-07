@@ -4,7 +4,7 @@ import context from '@/context'
 
 async function getRoute() {
   if (context.hasBooted) {
-    if (config.isProduction && !!await context.hasCompletedBrowserIntegration()){
+    if (!(await context.hasCompletedBrowserIntegration())) {
       return '/browser-integration'
     } else {
       return '/client'

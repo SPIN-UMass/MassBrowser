@@ -26,7 +26,7 @@
       KVStore.on('browser-integration-completed', this.listener)
     },
     unmounted() {
-      KVStore.remoteListener('browser-integration-completed', this.listener)
+      KVStore.removeListener('browser-integration-completed', this.listener)
     },
     methods: {
       openLink() {
