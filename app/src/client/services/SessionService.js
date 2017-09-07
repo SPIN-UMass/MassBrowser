@@ -212,6 +212,7 @@ class _SessionService extends EventEmitter {
 
         if (!(session.id in this.sessions)) {
           this.processedSessions[session.id] = desc
+          console.log('Connection type', session.connection_type)
           var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'], session.is_cdn, session.relay.domain_name)
 
           if (session.id in this.pendingSessions) {

@@ -32,6 +32,7 @@ export function runOBFSserver (publicIP, publicPort,up_limit,down_limit) {
     socket.on('end', () => {
       console.log('socket ending')
       recver.closeConnections()
+
       socket.unpipe(my_up)
       my_down.unpipe(socket)
       my_down.end()
@@ -39,6 +40,7 @@ export function runOBFSserver (publicIP, publicPort,up_limit,down_limit) {
     })
   })
   return new Promise((resolve, reject) => {
+    console.log("starting server on port",publicPort)
     server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
       console.log('relay bound')
       resolve(server)
