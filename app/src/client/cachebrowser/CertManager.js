@@ -1,7 +1,3 @@
-/**
- * Created by milad on 5/30/17.
- */
-
 import fs from 'fs-extra'
 import path from 'path'
 import Forge from 'node-forge'
@@ -16,7 +12,7 @@ var pki = Forge.pki
 
 var CAattrs = [{
   name: 'commonName',
-  value: 'UOIS'
+  value: 'massbrowser.cs.umass.edu'
 }, {
   name: 'countryName',
   value: 'US'
@@ -28,10 +24,10 @@ var CAattrs = [{
   value: 'Amherst'
 }, {
   name: 'organizationName',
-  value: 'UMASS MILAD HADI'
+  value: 'MassBrowser'
 }, {
   shortName: 'OU',
-  value: 'SPIN'
+  value: 'MassBrowser'
 }]
 
 var CAextensions = [{
@@ -75,10 +71,10 @@ var ServerAttrs = [{
   value: 'Amherst'
 }, {
   name: 'organizationName',
-  value: 'UMASS HADI MILAD'
+  value: 'MassBrowser'
 }, {
   shortName: 'OU',
-  value: 'SPIN'
+  value: 'MassBrowser'
 }]
 
 var ServerExtensions = [{

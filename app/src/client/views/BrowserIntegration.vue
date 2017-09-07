@@ -10,7 +10,9 @@
 <script>
   import config from '@utils/config'
   import { shell } from 'electron'
-  import KVStore from '@utils/kvstore'
+  import { getService } from '@utils/remote'
+
+  const context = getService('context')
 
   export default {
     data () {
@@ -23,10 +25,10 @@
         this.$router.push('/client')
       }
 
-      KVStore.on('browser-integration-completed', this.listener)
+      context.on('browser-integration-completed', this.listener)
     },
     unmounted() {
-      KVStore.removeListener('browser-integration-completed', this.listener)
+      context.removeListener('browser-integration-completed', this.listener)
     },
     methods: {
       openLink() {

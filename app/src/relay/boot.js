@@ -90,6 +90,7 @@ export default function bootRelay (gui) {
     .then(() => {
       Status.info('Starting Relay')
       HealthManager.startMonitor(gui)
+      HealthManager.changeAccess(true)
     })
     .then(() => {
       if (config.domainfrontable) {

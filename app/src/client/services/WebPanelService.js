@@ -8,7 +8,7 @@ import { debug, warn, error } from '@utils/log'
 import { AutoUpdateError } from '@utils/errors'
 import config from '@utils/config'
 import { getDataDir } from '@utils'
-import KVStore from '@utils/kvstore'
+import context from '@/context'
 
 
 class _OnBoardingService {
@@ -49,7 +49,7 @@ class _OnBoardingService {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.end('ok')
 
-      KVStore.set('browser-integration-completed', true)
+      context.browserIntegrationCompleted()
     })
 
     const electron = require('electron')
