@@ -10,9 +10,10 @@ class PendingConnections {
     this.connections[session.id] = session
   }
 
-  getPendingConnection (token,relay) {
+  setPendingConnection (token,relay) {
     console.log('connection before:', this.connections)
     if (token in this.connections) {
+      console.log('session founded')
       const ses = this.connections[token]
       delete (this.connections[token])
 

@@ -100,6 +100,12 @@ export class Session extends EventEmitter {
       this.changeState(Session.CLOSED)
 
     })
+    relay.sessionFounded(this).then(()=>{
+      this.listener_resolve()
+    }).catch((err)=>{
+      this.listener_reject(err)
+
+    })
 
 
 

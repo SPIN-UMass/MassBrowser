@@ -7,6 +7,8 @@ import { EventEmitter } from 'events'
 import { logger, debug, warn } from '@utils/log'
 import config from '@utils/config'
 import { RelayConnectionError } from '@utils/errors'
+import { pendMgr } from './PendingConnections'
+
 
 export default class RelayConnection extends EventEmitter {
   constructor (relayip, relayport, desc) {
@@ -16,6 +18,8 @@ export default class RelayConnection extends EventEmitter {
     this.relayip = relayip
     this.relayport = relayport
     this.desc = desc
+    this.hasSessionID=true
+    this.sessionID=''
     this.initialBuffer =
       this.cipher = null
     this.socket = null
@@ -57,7 +61,9 @@ export default class RelayConnection extends EventEmitter {
     this.relayip = session.ip
     this.relayport = session.port
     return new Promise((resolve, reject) => {
-      this._initRelay(this.socket).then((socket) => this._initRelay(socket)).then((socket) => resolve())
+      this._initSocket(this.socket)
+      this._initRelay(this.socket)
+      resolve()
     })
   }
 
@@ -97,9 +103,21 @@ export default class RelayConnection extends EventEmitter {
   }
 
   relayReverse (socket) {
+    this.hasSessionID = false
     this.socket = socket
-    var sessionId = this.socket.read(12)
-    console.log(sessionId)
+
+    const readable = (data)=>{
+        var sessionId = data.toString()
+        console.log('read session id',sessionId,sessionId.length)
+        this.hasSessionID = true
+        this.sessionID=sessionId
+
+        this.socket.removeListener('data',readable)
+
+        pendMgr.setPendingConnection(this.sessionID,this)
+
+    }
+    this.socket.on('data',readable)
 
   }
 
