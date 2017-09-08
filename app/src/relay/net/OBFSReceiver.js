@@ -66,6 +66,7 @@ export function connectToClient (clientIP, clientPort, token) {
     if (err) {
       console.log(err)
     }
+    console.log("CONNECTED TO CLIENT")
     var my_up = HealthManager.uploadLimiter.throttle()
     my_up.on('error', (err) => {})
     var my_down = HealthManager.downloadLimiter.throttle()

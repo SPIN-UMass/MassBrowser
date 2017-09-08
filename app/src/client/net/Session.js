@@ -70,6 +70,7 @@ export class Session extends EventEmitter {
   }
 
   listen () {
+
     this.changeState(Session.LISTENING)
     pendMgr.addPendingConnection(this)
     return new Promise((resolve, reject) => {

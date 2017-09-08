@@ -151,10 +151,9 @@ class _SessionService extends EventEmitter {
           debug(`Session [${session.id}] created, waiting for relay to accept`)
 
           this.pendingSessions[session.id] = {
-            accept: _session => {
-              this._handleNewSession(_session, session, resolve, reject)
+            accept: _session => this._handleNewSession(_session, session, resolve, reject)
 
-            },
+            ,
 
             reject: s => {
               warn(`Session [${session.id}] rejected by relay`)
@@ -189,7 +188,7 @@ class _SessionService extends EventEmitter {
           })
       }
       if (_session.connectionType === TCP_RELAY) {
-        API.updateSessionStatus(session.id, 'accepted')
+        API.updateSessionStatus(session.id, 'client_accepted')
         _session.listen()
           .then(() => {
             this.sessions.push(_session)
@@ -241,7 +240,7 @@ class _SessionService extends EventEmitter {
           'writeiv': Buffer.from(session.write_iv, 'base64'),
           'token': Buffer.from(session.token, 'base64'),
         }
-        debug(`sessions ${session.is_cdn}`)
+        debug(`sessions ${session.connection_type}`)
 
         if (!(session.id in this.sessions)) {
           this.processedSessions[session.id] = desc
