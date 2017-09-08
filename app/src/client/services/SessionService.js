@@ -190,7 +190,7 @@ class _SessionService extends EventEmitter {
       }
       if (_session.connectionType === TCP_RELAY) {
         API.updateSessionStatus(session.id, 'accepted')
-        _session.receive()
+        _session.listen()
           .then(() => {
             this.sessions.push(_session)
             debug(`Session [${session.id}] connected`)

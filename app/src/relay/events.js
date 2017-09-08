@@ -60,6 +60,8 @@ function connectClientSession (data) {
     'connectiontype': data.connection_type,
     'sessionId': data.id
   }
+
+  console.log('HEEEY  RECEIVING NEW COMMAND')
   pendMgr.addPendingConnection((desc.token), desc)
 
   connectToClient(data.client.ip, data.client.port, data.id)

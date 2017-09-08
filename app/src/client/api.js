@@ -48,6 +48,7 @@ class ClientAPI extends CommonAPI {
   }
 
   updateClientAddress (RemoteIP,RemotePort) {
+    debug("UPDATING IP",RemotePort)
     return this.transport.post(
       CLIENT_URL + '/' + this.userID,
       {

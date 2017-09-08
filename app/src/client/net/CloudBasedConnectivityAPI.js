@@ -16,7 +16,7 @@ import { pendMgr } from '~/relay/net/PendingConnections'
 import WebSocket from 'ws'
 import * as errors from '~/utils/errors'
 import { error, debug } from '~/utils/log'
-
+import { runLocalServer } from './IncommingConnection'
 import * as net from 'net'
 var schedule = require('node-schedule')
 
@@ -29,7 +29,9 @@ class CloudBasedConnectivityAPI extends EventEmitter {
     this.isConnected = false
     this.autoConnect = false
     this.routineStatus = false
+    this.ListenServer = {}
     this.localIP = ''
+    this.isServerRunning = false
     this.remoteIP = ''
     this.localPort = 0
     this.remotePort = 0
@@ -38,18 +40,19 @@ class CloudBasedConnectivityAPI extends EventEmitter {
 
   respHandler (localIP, localPort, remoteIP, remotePort) {
     console.log(localIP, localPort, remoteIP, remotePort)
-    if (this.localPort === localPort && this.localIP === localIP && this.remotePort === remotePort && this.remoteIP === remoteIP) {
+    if (this.localPort !== localPort && this.localIP !== localIP && this.remotePort !== remotePort && this.remoteIP !== remoteIP) {
       this.localIP = localIP
       this.localPort = localPort
       this.remoteIP = remoteIP
       this.remotePort = remotePort
-      API.updateClientAddress()
+      this.restartListenerServer()
+      API.updateClientAddress(remoteIP, remotePort)
     }
 
   }
 
   startRoutine () {
-    return new Promise((resolve,reject)=>{
+    return new Promise((resolve, reject) => {
       if (this.routineStatus) {
         return
       }
@@ -149,6 +152,35 @@ class CloudBasedConnectivityAPI extends EventEmitter {
     this.connect().then(() => {
       debug('RECONNECTED CONNECTIVITY')
     })
+  }
+
+  stopListenServer () {
+    if (this.isServerRunning) {
+      this.ListenServer.close(() => {
+        this.isServerRunning = false
+        this.ListenServer = {}
+      })
+
+    }
+  }
+
+  restartListenerServer () {
+    if (!this.isServerRunning) {
+      runLocalServer(this.localIP, this.localPort).then((server) => {
+        this.isOBFSServerRunning = true
+        this.ListenServer = server
+      }).catch((err) => {
+        this.errorHandler(err)
+      })
+    } else if (this.ListenServer.address().port !== this.localIP) {
+      this.stopListenServer()
+      runLocalServer(this.localIP, this.localPort).then((server) => {
+        this.isServerRunning = true
+        this.ListenServer = server
+      }).catch((err) => {
+        this.errorHandler(err)
+      })
+    }
   }
 
 }

@@ -20,7 +20,7 @@ export function runLocalServer (publicIP, publicPort) {
     recver.relayReverse(socket)
     socket.on('error', (err) => {
       console.log('socket error', err.message)
-      recver.closeConnections()
+      recver.end()
 
     })
     socket.on('end', () => {
