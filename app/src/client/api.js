@@ -33,7 +33,7 @@ class ClientAPI extends CommonAPI {
   requestSession (categories) {
     return this.transport.post(
       CLIENT_URL + '/' + this.userID + SESSION_URL, {
-        'cdn_session': false,
+        'testing': true,
         'categories': categories
       }
     )
