@@ -1,6 +1,6 @@
 {
   "name": "MassBrowser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "P2P Proxy",
   "config": {
     "serverURL": "https://yaler.co",
