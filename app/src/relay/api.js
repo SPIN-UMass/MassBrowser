@@ -14,11 +14,11 @@ class RelayAPI extends CommonAPI {
   }
 
   acceptSession (client, sessionid) {
-    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'accepted'})
+    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'relay_accepted'})
   }
 
   clientSessionConnected (client, sessionid) {
-    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'used'})
+    return this.transport.put(SESSION_PATH + sessionid + '/status',  {status: 'used'})
   }
 
   clientSessionDisconnected (client, sessionid) {
@@ -71,6 +71,8 @@ class RelayAPI extends CommonAPI {
     var data = {'allowed_categories': categories}
     return this.transport.post('/relay/categories', data).then(r => r.data.allowed_categories)
   }
+
+
 }
 
 const API = new RelayAPI()

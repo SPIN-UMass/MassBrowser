@@ -12,6 +12,8 @@ import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { HttpTransport } from '@utils/transport'
 
+import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
+
 import API from '@/api'
 
 import Status from '@common/services/StatusService'
@@ -77,6 +79,11 @@ export default function bootClient () {
     .then(() => {
       let status = Status.info('Starting SOCKS server')
       return startClientSocks('127.0.0.1', config.socksPort)
+        .then(() => status.clear())
+    })
+    .then(() => {
+      let status = Status.info('Starting Connectivity Monitor')
+      return ConnectivityConnection().startRoutine()
         .then(() => status.clear())
     })
     .then(() => {

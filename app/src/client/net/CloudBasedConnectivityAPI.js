@@ -11,27 +11,81 @@ import KVStore from '~/utils/kvstore'
 import * as util from 'util'
 // const util = require('util')
 import { EventEmitter } from 'events'
-
+import API from '@/api'
 import { pendMgr } from '~/relay/net/PendingConnections'
 import WebSocket from 'ws'
 import * as errors from '~/utils/errors'
 import { error, debug } from '~/utils/log'
 
 import * as net from 'net'
+var schedule = require('node-schedule')
 
 class ClientReachability extends EventEmitter {
-  constructor (server, port, key, iv) {
+  constructor () {
     super()
-    this.server = server
-    this.port = port
+    this.server = ''
+    this.port = 0
     this.socket = undefined
     this.isConnected = false
     this.autoConnect = false
-    this.respHandler = {}
-    this.errHandler = {}
+    this.routineStatus = false
+    this.localIP = ''
+    this.remoteIP = ''
+    this.localPort = 0
+    this.remotePort = 0
+
   }
 
-  connect (resphandler, errorhandler) {
+  respHandler (localIP, localPort, remoteIP, remotePort) {
+    console.log(localIP, localPort, remoteIP, remotePort)
+    if (this.localPort === localPort && this.localIP === localIP && this.remotePort === remotePort && this.remoteIP === remoteIP) {
+      this.localIP = localIP
+      this.localPort = localPort
+      this.remoteIP = remoteIP
+      this.remotePort = remotePort
+      API.updateClientAddress()
+    }
+
+  }
+
+  startRoutine () {
+    if (this.routineStatus) {
+      return
+    }
+    this.routineStatus = true
+    this._startKeepAlive()
+  }
+
+  _startKeepAlive () {
+    setTimeout(() => {
+      this.sendKeepAlive()
+    }, 50)
+    schedule.scheduleJob('*/30 * * * * *', () => {
+      this.sendKeepAlive()
+    })
+  }
+
+  checkStunServer () {
+    return new Promise((resolve, reject) => {
+      if (this.port === 0) {
+        API.requestNewStunServer().then((data) => {
+          this.server = data.ip
+          this.port = data.port
+          this.connect()
+          resolve()
+        })
+      }
+    })
+  }
+
+  sendKeepAlive () {
+    this.checkStunServer().then(() => {
+      this.socket.write('TEST')
+    })
+
+  }
+
+  connect () {
     return new Promise((resolve, reject) => {
       this.socket = net.createConnection({
         port: this.port,
@@ -40,8 +94,6 @@ class ClientReachability extends EventEmitter {
         exclusive: false
       }, () => {
         debug('Connected to Echo Server')
-        this.errHandler = errorhandler
-        this.respHandler = resphandler
         this.socket.write('TEST')
         this.socket.setKeepAlive(true)
         this.isConnected = true
@@ -49,10 +101,8 @@ class ClientReachability extends EventEmitter {
       })
       this.socket.on('data', (data) => {
         data = data.toString()
-        //console.log(data)
         let ip = data.split(':')[0]
         let port = data.split(':')[1]
-        //console.log(ip,port)
         this.respHandler([this.socket.localAddress, this.socket.localPort, ip, port])
 
       })
@@ -83,7 +133,7 @@ class ClientReachability extends EventEmitter {
             this.isConnected = true
           })
         } else {
-          this.errHandler()
+          this.reconnect()
         }
       })
     })
@@ -91,21 +141,11 @@ class ClientReachability extends EventEmitter {
 
   reconnect () {
     debug('RECONNECTING CONNECTIVITY')
-    this.connect(this.respHandler, this.errHandler).then(() => {
+    this.connect().then(() => {
       debug('RECONNECTED CONNECTIVITY')
-
-    })
-  }
-
-  keepAlive () {
-
-    return new Promise((resolve, reject) => {
-      //console.log('sending keepalive')
-      this.socket.write('OK')
-      resolve()
     })
   }
 
 }
-var ConnectivityConnection = new WSServerReachability()
+var ConnectivityConnection = new ClientReachability()
 export default ConnectivityConnection
