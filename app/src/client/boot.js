@@ -83,7 +83,7 @@ export default function bootClient () {
     })
     .then(() => {
       let status = Status.info('Starting Connectivity Monitor')
-      return ConnectivityConnection().startRoutine()
+      return ConnectivityConnection.startRoutine()
         .then(() => status.clear())
     })
     .then(() => {

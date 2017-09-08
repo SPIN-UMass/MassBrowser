@@ -46,13 +46,26 @@ class ClientAPI extends CommonAPI {
         return null
       })
   }
-  updateClientAddress() {
+
+  updateClientAddress (RemoteIP,RemotePort) {
+    return this.transport.post(
+      CLIENT_URL + '/' + this.userID,
+      {
+        'ip': RemoteIP,
+        'port': RemotePort
+      }
+    ).then(r => r.data)
 
   }
 
   requestNewStunServer () {
     var data = {}
-    return {'ip': 'yaler.co', 'port': 8823}
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': 'yaler.co',
+        'port': 8823
+      })
+    })
     // TODO:
     //return this.transport.get('/client/stun', data).then(r => r.data.allowed_categories)
   }

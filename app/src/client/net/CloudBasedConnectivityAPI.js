@@ -20,7 +20,7 @@ import { error, debug } from '~/utils/log'
 import * as net from 'net'
 var schedule = require('node-schedule')
 
-class ClientReachability extends EventEmitter {
+class CloudBasedConnectivityAPI extends EventEmitter {
   constructor () {
     super()
     this.server = ''
@@ -49,11 +49,15 @@ class ClientReachability extends EventEmitter {
   }
 
   startRoutine () {
-    if (this.routineStatus) {
-      return
-    }
-    this.routineStatus = true
-    this._startKeepAlive()
+    return new Promise((resolve,reject)=>{
+      if (this.routineStatus) {
+        return
+      }
+      this.routineStatus = true
+      this._startKeepAlive()
+      resolve()
+    })
+
   }
 
   _startKeepAlive () {
@@ -75,6 +79,7 @@ class ClientReachability extends EventEmitter {
           resolve()
         })
       }
+      resolve()
     })
   }
 
@@ -103,7 +108,7 @@ class ClientReachability extends EventEmitter {
         data = data.toString()
         let ip = data.split(':')[0]
         let port = data.split(':')[1]
-        this.respHandler([this.socket.localAddress, this.socket.localPort, ip, port])
+        this.respHandler(this.socket.localAddress, this.socket.localPort, ip, port)
 
       })
       this.socket.on('end', () => {
@@ -147,5 +152,5 @@ class ClientReachability extends EventEmitter {
   }
 
 }
-var ConnectivityConnection = new ClientReachability()
+var ConnectivityConnection = new CloudBasedConnectivityAPI()
 export default ConnectivityConnection
