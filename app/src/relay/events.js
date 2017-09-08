@@ -1,6 +1,6 @@
 import { debug, warn } from '~/utils/log'
 import HealthManager from '@/net/HealthManager'
-import { connectToClient } from './OBFSReceiver'
+import { connectToClient } from './net/OBFSReceiver'
 
 import { pendMgr } from '~/relay/net/PendingConnections'
 import API from '~/relay/api'
