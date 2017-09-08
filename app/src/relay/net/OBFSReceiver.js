@@ -62,6 +62,7 @@ export function runOBFSserver (publicIP, publicPort, up_limit, down_limit) {
   })
 }
 export function connectToClient (clientIP, clientPort, token) {
+  console.log('Connecting to',clientIP)
   const socket = net.connect({host: clientIP, port: clientPort}, (err) => {
     if (err) {
       console.log(err)
