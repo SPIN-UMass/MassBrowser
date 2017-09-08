@@ -25,7 +25,7 @@ export function runLocalServer (publicIP, publicPort) {
     })
     socket.on('end', () => {
       console.log('socket ending')
-      recver.closeConnections()
+      recver.end()
 
 
     })
