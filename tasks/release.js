@@ -83,7 +83,7 @@ function run(command, options) {
  */
 
 async function releaseGithub() {
-  let version = await fs.readJson('app/package.json')
+  let version = (await fs.readJson('app/package.json')).version
   let answers = await  inquirer.prompt([
     {
       type: 'confirm',
@@ -114,13 +114,13 @@ async function checkTargetBuilds(config) {
 
   for (let i = 0; i < targets.length; i++) {
     let target = targets[i]
-    let productName = await readBuildConfig(target).productName
+    let productName = (await readBuildConfig(target)).productName
 
     if (!(await fs.pathExists(`./build/${target}/${productName}.yml`))) {
       continue
     }
 
-    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${buildConfig.productName}.yml`))
+    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${productName}.yml`))
     if (releaseInfo.version === version) {
       availableTargets.push(target)
     }
@@ -145,16 +145,18 @@ async function checkTargetBuilds(config) {
 
 async function getFileLists(config, targets) {
   const version = config.version
-
-  let productName = (await readBuildConfig()).productName
-  return targets.reduce((files, target) => files.concat([
-    `${productName}.yml`,
-    `${productName}-mac.yml`,
-    `${productName}-${version}.dmg`,
-    `${productName}-${version}-mac.zip`,
-    `${productName} Setup ${version}.exe`,
-  ]), [])
-  .map(file => `build/${target}/${file}`)
+  let files = []
+  for (let i = 0; i < targets.length; i++) {
+    let productName = (await readBuildConfig(targets[i])).productName
+    files = files.concat([
+      `${productName}.yml`,
+      `${productName}-mac.yml`,
+      `${productName}-${version}.dmg`,
+      `${productName}-${version}-mac.zip`,
+      `${productName} Setup ${version}.exe`,
+    ].map(file => `build/${targets[i]}/${file}`))
+  }
+  return files
 }
 
 async function doReleaseGithub(config, filelist) {
@@ -165,7 +167,7 @@ async function doReleaseGithub(config, filelist) {
 
   var clientBuildConfig = await readBuildConfig('client')
   var relayBuildConfig = await readBuildConfig('relay')
-  if (client.publish !== relay.publish) {
+  if (JSON.stringify(clientBuildConfig.publish) !== JSON.stringify(relayBuildConfig.publish)) {
     console.log(chalk.red.bold('Target publish configurations are different, this is not supported'))
     process.exit(0)
   }
