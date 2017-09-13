@@ -116,8 +116,7 @@
 
       &.active {
         a{
-          color: black;
-          font-size: 19px;
+          color: #555;
           font-weight: bold;
         }
       }

@@ -4,9 +4,9 @@
       h1 MassBrowser
       #m-nav
         ul
-          li(:class="{active: currentTab==='client-home'}")
+          li(:class="{active: currentTab==='home'}")
             router-link(to='/client') home
-          li(:class="{active: currentTab==='client-websites'}")
+          li(:class="{active: currentTab==='websites'}")
             router-link(to='/client/websites') websites
             //- .span(v-on:click="$router.push('client-websites')") websites
           //- li(:class="{active: currentTab==='client-settings'}")
@@ -116,8 +116,7 @@
       
       &.active {
         a{
-          color: black;
-          font-size: 19px;
+          color: #555;
           font-weight: bold;
         }
       }
