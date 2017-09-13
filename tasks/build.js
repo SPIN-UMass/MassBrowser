@@ -13,7 +13,7 @@ const yaml = require('js-yaml')
 const { YELLOW, BLUE, LABEL_DONE, greeting, run, format } = require('./utils')
 
 
-const targets = {
+const targetInfo = {
   relay: {
     config: require('./webpack/webpack.relay.electron'),
     del: ['app/dist/relay/*', '!.gitkeep', '!assets/']
@@ -32,7 +32,7 @@ function main() {
   if (process.env.BUILD_TARGET === 'clean') {
     clean()
   } else if (process.env.BUILD_TARGET) {
-    build(process.env.BUILD_TARGET)
+    buildForTarget(process.env.BUILD_TARGET)
   } else {
     askTargets()
   }
@@ -44,8 +44,8 @@ function clean () {
   process.exit()
 }
 
-function askTargets() {
-  inquirer.prompt([
+async function askTargets() {
+  let answers = await inquirer.prompt([
     {
       type: 'checkbox',
       name: 'targets',
@@ -53,43 +53,25 @@ function askTargets() {
       choices: ['relay', 'client']
     }
   ])
-  .then(answers => answers.targets)
-  .then(targets => {
-    var p = new Promise((r, _) => r())
-    targets.forEach(target => {
-      p = p.then(() => {
-        console.log(format(target, 'Packing...', BLUE))
-        return build(target)
-        .then(() => console.log(format(target, 'Building...', BLUE)))
-        .then(() => run(`build -mw --em.main=./dist/${target}/electron.main.js --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`))
-      })
-      .then(() => fs.readFile(`tasks/electron-builder/${target}.yml`))
-      .then(y => yaml.safeLoad(y))
-      .then(config => {
-        console.log(format(target, 'Renaming release files...', BLUE))
-        return Promise.all([
-          fs.move(`build/${target}/latest.yml`, `build/${target}/${config.productName}.yml`, { overwrite: true }),
-          fs.move(`build/${target}/latest-mac.yml`, `build/${target}/${config.productName}-mac.yml`, { overwrite: true })
-        ])
-      }) 
-    })
-  })
+
+  let targets = answers.targets
+  targets.forEach(target => buildForTarget(target))
 }
 
 
-function singleBuild(target) {
-  build(target)
-  .then(() => {
-    process.exit()
-  })
-  .catch(() => {
-    console.error("Build failed")
-  })
-}
+async function buildForTarget(target) {
+  let config = yaml.safeLoad(await fs.readFile(`tasks/electron-builder/${target}.yml`))
+  
+  console.log(format(target, 'Packing...', BLUE))
+  del.sync(targetInfo[target].del)
+  await pack(targetInfo[target].config)
 
-function build (target) {
-  del.sync(targets[target].del)
-  return Promise.all(pack(targets[target].config))
+  console.log(format(target, 'Building...', BLUE))
+  await run(`build -mw --em.main=./dist/${target}/electron.main.js --em.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
+
+  console.log(format(target, 'Renaming release files...', BLUE))
+  await fs.move(`build/${target}/latest.yml`, `build/${target}/${target}.yml`, { overwrite: true })
+  await fs.move(`build/${target}/latest-mac.yml`, `build/${target}/${target}-mac.yml`, { overwrite: true })
 }
 
 function pack (config) {

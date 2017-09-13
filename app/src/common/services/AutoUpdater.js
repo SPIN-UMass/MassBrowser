@@ -114,9 +114,9 @@ class _AutoUpdater extends EventEmitter {
 
 function getChannelName() {
   if (isPlatform(OSX)) {
-    return `${config.appName}-mac`
+    return `${config.role}-mac`
   } else {
-    return `${config.appName}`
+    return `${config.role}`
   }
 }
 
