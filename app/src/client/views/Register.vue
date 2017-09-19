@@ -61,7 +61,7 @@
         this.invitationCode = ''
 
         RegistrationService.registerClient(invitationCode)
-        .then(() => this.$router.push('/splash'))
+        .then(() => this.$router.push('/'))
         .catch(InvalidInvitationCodeError, err => {
           this.errorMessage = 'Invalid invitation code'
           this.status = 'prompt'

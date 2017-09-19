@@ -145,3 +145,5 @@ export class InvalidEnvironmentError extends AppError {}
 
 export class CacheBrowserError extends AppError {}
 export class NotCacheBrowsableError extends CacheBrowserError {}
+
+export class NoSuchMutationError extends AppError {}

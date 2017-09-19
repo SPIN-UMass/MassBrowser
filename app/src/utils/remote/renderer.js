@@ -3,6 +3,8 @@ import { EventEmitter } from 'events'
 
 import * as errors from '@utils/errors'
 
+export const remote = ipcRenderer
+
 const services = {}
 const pendingRequests = {}
 
@@ -76,8 +78,8 @@ function createServiceProxy(serviceName) {
       let p = sendRequest('remote.service.get', property)
       let promisizedFunction = Object.assign(function(){}, {
         then: p.then.bind(p),
-        catch: p.catch.bind(p),
-        finally: p.finally.bind(p),
+        catch: p.catch.bind(p)
+        // finally: p.finally.bind(p),
       })
       return new Proxy(promisizedFunction, {
         apply: (target, thisArg, args) => {

@@ -8,7 +8,7 @@ import { debug, warn, error } from '@utils/log'
 import { AutoUpdateError } from '@utils/errors'
 import config from '@utils/config'
 import { getDataDir } from '@utils'
-import context from '@/context'
+import { store } from '@utils/store'
 
 
 class _OnBoardingService {
@@ -49,7 +49,7 @@ class _OnBoardingService {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.end('ok')
 
-      context.browserIntegrationCompleted()
+      store.commit('completeBrowserIntegration')
     })
 
     const electron = require('electron')
@@ -60,7 +60,6 @@ class _OnBoardingService {
     } else {
       app.use(serveStatic(`./app/dist/web`))
     }
-    
   }
 }
 

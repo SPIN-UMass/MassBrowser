@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events'
 import { logger } from '@utils/log'
 
+import { store } from '@utils/store'
 
 function randKey () {
   return (((1+Math.random())*0x10000)|0).toString(16).substring(1)
@@ -21,7 +22,7 @@ class LogStatus {
   }
 
   clear() {
-    this.manager._removeStatus(this)
+    return this.manager._removeStatus(this)
   }
 
   get statusType() {
@@ -59,7 +60,7 @@ class ProgressStatus {
       this.progress = this.maxSteps
     }
 
-    this.manager.emit(`status-progress-${this.key}-update`, this.toObject())
+    store.commit('changeStatus', this.toObject())
 
     if (this.progress === this.maxSteps) {
       this.finish()
@@ -68,7 +69,7 @@ class ProgressStatus {
 
   finish() {
     this.manager._removeStatus(this)
-    this.manager.emit(`status-progress-${this.key}-finish`, this.toObject())
+    this.manager.emit('clearStatus')
   }
 
   get message () {
@@ -104,20 +105,22 @@ class _StatusService extends EventEmitter {
 
     this.on('status-request', () => {
       if (this.statuses.length) {
-        this.emit('status-changed', this.statuses[this.statuses.length - 1])
+        store.commit('changeStatus', this.statuses[this.statuses.length - 1].toObject())
       }
     })
   }
 
   _removeStatus (statusID) {
+    if (typeof statusID === 'object') {
+      statusID = statusID.key
+    }
     let index = this.statuses.findIndex(s => s.key === statusID)
     if (index === this.statuses.length - 1) {
       this.statuses.pop()
-
       if (!this.statuses.length) {
-        this.emit('status-cleared')
+        return store.commit('clearStatus')
       } else {
-        this.emit('status-changed', this.statuses[this.statuses.length - 1].toObject())
+        return store.commit('changeStatus', this.statuses[this.statuses.length - 1].toObject())
       }
     } else {
       this.statuses.splice(index, 1)
@@ -126,18 +129,18 @@ class _StatusService extends EventEmitter {
 
   _removeAll () {
     this.statuses = []
-    this.emit('status-cleared')
+    store.commit('clearStatus')
   }
 
   _addStatus (status) {
     this.statuses.push(status)
-    this.emit('status-changed', status.toObject())
+    store.commit('changeStatus', status.toObject())
   }
 
   /* --- API ---  */
 
   clear (key) {
-    this._removeStatus(key)
+    return this._removeStatus(key)
   }
 
   clearAll () {

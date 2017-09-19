@@ -13,11 +13,13 @@ function serializeError(err) {
   }
 }
 
-export class ServiceRegistry {
+class Remote {
   constructor() {
     this.services = {}
     this.webContents = null
     this._initIPCListeners()
+
+    this.pendingMessages = {}
   }
 
   registerService(serviceName, service) {
@@ -29,6 +31,16 @@ export class ServiceRegistry {
 
   setWebContents(contents) {
     this.webContents = contents
+  }
+
+  send(...args) {
+    if (this.webContents) {
+      return this.webContents.send(...args)
+    }
+  }
+
+  on(event, ...args) {
+    return ipcMain.on(event, ...args)
   }
 
   _patchServiceEventEmitter(serviceName, service) {
@@ -50,7 +62,6 @@ export class ServiceRegistry {
 
   _initIPCListeners() {
     ipcMain.on('remote.service.get', (event, details) => {
-      
       let service = this.services[details.service]
       let property = details.property
       let async = details.async
@@ -144,3 +155,4 @@ export class ServiceRegistry {
   }
 }
 
+export const remote = new Remote()

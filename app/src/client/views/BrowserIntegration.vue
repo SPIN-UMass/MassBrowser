@@ -11,24 +11,27 @@
   import config from '@utils/config'
   import { shell } from 'electron'
   import { getService } from '@utils/remote'
+  import { store } from '@utils/store'
+  import { mapState } from 'vuex'
 
   const context = getService('context')
 
   export default {
+    store,
     data () {
       return {
         webDomain: config.web.domain
       }
     },
-    mounted() {
-      this.listener = () => {
-        this.$router.push('/client')
-      }
-
-      context.on('browser-integration-completed', this.listener)
+    computed: {
+      integrationComplete: () => this.$store.state.browserIntegrationComplete
     },
-    unmounted() {
-      context.removeListener('browser-integration-completed', this.listener)
+    watch: {
+      integrationComplete: (complete) => {
+        if (complete) {
+          this.$router.push('/client')
+        }
+      }
     },
     methods: {
       openLink() {

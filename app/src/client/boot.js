@@ -33,110 +33,90 @@ import {
   ServerError, CacheBrowserError, ApplicationBootError
 } from '@utils/errors'
 
-import context from '@/context'
+import { store } from '@utils/store'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
 
-export default function bootClient () {
+export default async function bootClient () {
   Status.clearAll()
 
-  return KVStore.get('client', null)
-    .then(client => {
-      if (client) {
-        return client
-      } else {
-        throw new ApplicationBootError('Client not registered')
-      }
-    })
-    .then(client => {
-      Raven.setUserContext({
-        id: client.id
-      })
-      return client
-    })
-    .then(client => {
-      let status = Status.info('Authenticating Client')
-      return API.authenticate(client.id, client.password)
-        .then(auth => API.transport.setAuthToken(auth.token))
-        .then(() => status.clear())
-    })
-    .then(() => {
-      let status = Status.info('Server connection established')
-      return API.clientUp()
-        .then(() => status.clear())
-    })
-    .then(() => {
-      let status = Status.info('Connecting to relay')
-      return SessionService.start()
-        .then(() => status.clear())
-    })
-    .then(() => {
-      let status = Status.info('Starting cachebrowser server')
-      return CacheProxy.startCacheProxy()
-        .then(() => status.clear())
-    })
-    .then(() => {
-      let status = Status.info('Starting SOCKS server')
-      return startClientSocks('127.0.0.1', config.socksPort)
-        .then(() => status.clear())
-    })
-    .then(() => {
-      let status = Status.info('Starting Connectivity Monitor')
-      return ConnectivityConnection.startRoutine()
-        .then(() => status.clear())
-    })
-    .then(() => {
-      let status = Status.info('Starting remaining services')
-      return Promise.all([WebPanelService.start(), NoHostHandlerService.start()])
-        .then(() => status.clear())
-    })
-    .then(() => {
-      /// Only sync database in boot if it is the first time booting
-      /// otherwise sync will after the client has started to avoid
-      /// having delay on each run
-      return SyncService.isFirstSync()
-        .then(firstSync => {
-          if (firstSync) {
-            debug('It is first boot, syncing database')
-            let status = Status.info('Syncing database')
-            return SyncService.syncAll()
-              .then(() => status.clear())
-          }
-        })
-    })
-    .then(() => {
-      context.bootFinished()
-    })
-    .catch(AuthenticationError, err => {
-      err.logAndReport()
-      throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
-    })
-    .catch(NetworkError, err => {
-      err.log()
-      throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
-    })
-    .catch(RequestError, err => {
-      err.logAndReport()
-      throw new ApplicationBootError('Error occured while booting application', true)
-    })
-    .catch(CacheBrowserError, err => {
-      err.logAndReport()
-      throw new ApplicationBootError('Failed to start the CacheBrowser proxy server', true)
-    })
-    .catch(ServerError, err => {
-      err.log()
-      throw new ApplicationBootError('There is a problem with the server, please try again later', true)
-    })
-    .catch(err => !(err instanceof ApplicationBootError || err instanceof InvalidInvitationCodeError), err => {
-      // console.warn(handledErrors.reduce((o, a) => o || err instanceof a, false))
-      if (err.smart) {
-        err.logAndReport()
-      } else {
-        error(err)
-        Raven.captureException(err)
-      }
+  let status
 
-      throw new ApplicationBootError('Failed to start Application')
-    })
+  try {
+    let client = store.state.client
+    if (!client) {
+      throw new ApplicationBootError('Client not registered')
+    }
+
+    Raven.setUserContext({ id: client.id })
+
+    status = Status.info('Authenticating Client')
+    let auth = await API.authenticate(client.id, client.password)
+    API.transport.setAuthToken(auth.token)
+    status.clear()
+
+    status = Status.info('Server connection established')
+    await API.clientUp()
+    status.clear()
+
+    status = Status.info('Connecting to relay')
+    await SessionService.start()
+    status.clear()
+
+    status = Status.info('Starting cachebrowser server')
+    await CacheProxy.startCacheProxy()
+    status.clear()
+
+    status = Status.info('Starting SOCKS server')
+    await startClientSocks('127.0.0.1', config.socksPort)
+    status.clear()
+
+    status = Status.info('Starting Connectivity Monitor')
+    await ConnectivityConnection.startRoutine()
+    status.clear()
+
+    status = Status.info('Starting remaining services')
+    await Promise.all([WebPanelService.start(), NoHostHandlerService.start()])
+    status.clear()
+
+    if (await SyncService.isFirstSync()) {
+      debug('It is first boot, syncing database')
+      status = Status.info('Syncing database')
+      await SyncService.syncAll()
+      status.clear()
+    }
+
+    await store.commit('completeBoot')
+
+  } catch (err) {
+    handleBootError(err) 
+  }
+}
+
+function handleBootError(err) {
+  if (err instanceof AuthenticationError) {
+    err.logAndReport()
+    throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
+  } else if (err instanceof NetworkError) {
+    err.log()
+    throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
+  } else if (err instanceof RequestError) {
+    err.logAndReport()
+    throw new ApplicationBootError('Error occured while booting application', true)
+  } else if (err instanceof CacheBrowserError) {
+    err.logAndReport()
+    throw new ApplicationBootError('Failed to start the CacheBrowser proxy server', true)
+  } else if (err instanceof ServerError) {
+    err.log()
+    throw new ApplicationBootError('There is a problem with the server, please try again later', true)
+  } else if (!(err instanceof ApplicationBootError || err instanceof InvalidInvitationCodeError)) {
+    if (err.smart) {
+      err.logAndReport()
+    } else {
+      error(err)
+      Raven.captureException(err)
+    }
+    throw new ApplicationBootError('Failed to start Application')
+  }
 }

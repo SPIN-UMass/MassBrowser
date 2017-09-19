@@ -2,10 +2,10 @@
   .y-splash
     .y-container
       h1 MassBrowser
-      .loading-container(v-if="status=='loading'")
+      .loading-container(v-if="step=='loading'")
         GridLoader.spinner(color="#aaa")
-        .status-container  {{ statusMessage }}
-      .error-container(v-if="status=='error'")
+        .status-container  {{ status }}
+      .error-container(v-if="step=='error'")
         h4.red {{ errorMessage }}
         div
           button.btn.btn-rounded.btn-lg.btn-warning(v-if="canRetry" v-on:click='bootClient') Try Again
@@ -17,49 +17,45 @@
 
   import { ApplicationBootError } from '@utils/errors'
   import { getService } from '@utils/remote'
-  import { STATUS_LOG } from '@common/services/StatusService'
+  import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/StatusService'
+  import { store } from '@utils/store'
 
-  const Status = getService('status')
   const Boot = getService('boot')
-  const Context = getService('context')
 
   export default {
-    data () {
-      return {
-        status: 'loading',
-        errorMessage: '',
-        canRetry: false,
-        statusMessage: ''
-      }
-    },
     components: {
       GridLoader
     },
+    store,
+    data () {
+      return {
+        step: 'loading',
+        errorMessage: '',
+        canRetry: false
+      }
+    },
+    computed: {
+      status: function() {
+        let status = this.$store.state.status
+        if (status.statusType === STATUS_LOG) {
+          return status.message
+        } else if (status.statusType === STATUS_PROGRESS) {
+          return status.message
+        } else {
+          return ''
+        }
+      }
+    },
     created () {
-      Status.on('status-changed', this.onStatusChanged)
-      Status.on('status-cleared', this.onStatusCleared)
-      
       this.bootClient()
     },
-    beforeDestroy () {
-      Status.removeListener('status-changed', this.onStatusChanged)
-      Status.removeListener('status-cleared', this.onStatusCleared)
-    },
     methods: {
-      onStatusChanged: function(status) {
-        if (status.statusType === STATUS_LOG) {
-          this.statusMessage = status.message
-        }
-      },
-      onStatusCleared: function () {
-        this.statusMessage = ''
-      },
       bootClient() {
         return Boot.bootClient()
-        .then(() => this.$router.push('/splash'))
+        .then(() => this.$router.push('/'))
         .catch(ApplicationBootError, err => {
           this.errorMessage = err.message
-          this.status = 'error'
+          this.step = 'error'
           this.canRetry = true
         })
       }
@@ -87,7 +83,7 @@
     }
 
     .loading-container {
-      margin-top: 80px;
+      margin-top: 50px;
       
       .spinner { 
         margin: auto;

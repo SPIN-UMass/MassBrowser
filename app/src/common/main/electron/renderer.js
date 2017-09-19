@@ -3,8 +3,13 @@ import Electron from 'vue-electron'
 import Resource from 'vue-resource'
 import VueRouter from 'vue-router'
 import VueMask from 'v-mask'
+// import Vuex from 'vuex'
+
 import Promise from 'bluebird'
 import ToggleButton from 'vue-js-toggle-button'
+
+// import storeConfig from '@/store'
+// import { initializeStore } from '@utils/store'
 
 import '@assets/font-awesome/css/font-awesome.min.css'
 import '@assets/bootstrap/css/bootstrap.min.css'
@@ -21,7 +26,10 @@ export function initializeRendererProcess(routes) {
   Vue.use(VueRouter)
   Vue.use(VueMask)
   Vue.use(ToggleButton)
+  // Vue.use(Vuex)
 
+  // initializeStore(storeConfig)
+  
   Vue.config.debug = true
 
   const router = new VueRouter({

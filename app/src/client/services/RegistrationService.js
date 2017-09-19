@@ -1,7 +1,7 @@
 import API from '@/api'
 import KVStore from '@utils/kvstore'
 import { debug, info } from '@utils/log'
-import Context from '@/context'
+import { store } from '@utils/store'
 
 class _RegistrationService {
   constructor () {
@@ -11,7 +11,7 @@ class _RegistrationService {
     return API.registerClient(invitationCode)
     .then(_client => {
       let client = {id: _client.id, password: _client.password}
-      return Context.registerClient(client)
+      return store.commit('completeRegistration', client)
     })
   }
 }

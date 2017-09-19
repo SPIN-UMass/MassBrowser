@@ -1,18 +1,25 @@
 import config from '@utils/config'
 
-import { ServiceRegistry } from './main'
-import { getService } from './renderer'
+if (config.isElectronMainProcess) {
+  const { remote } = require('./main')
 
-export { getService } from './renderer'
+  module.exports = {
+    remote,
+    createController: function(name, ctrlClass) {
+      let ctrl = typeof ctrlClass === 'object' ? ctrlClass : new ctrlClass()
+      remote.registerService(`ctrl:${name}`, ctrl)
+      return ctrl
+    }
+  }
 
-export const serviceRegistry = config.isElectronMainProcess ? new ServiceRegistry() : null
+} else if (config.isElectronRendererProcess) {
+  const { remote, getService } = require('./renderer')
 
-export function createController(name, ctrlClass) {
-  if (config.isElectronMainProcess) {
-    let ctrl = typeof ctrlClass === 'object' ? ctrlClass : new ctrlClass()
-    serviceRegistry.registerService(`ctrl:${name}`, ctrl)
-    return ctrl
-  } else if (config.isElectronRendererProcess) {
-    return getService(`ctrl:${name}`)
+  module.exports = {
+    getService,
+    remote,
+    createController: function(name, ctrlClass) {
+      return getService(`ctrl:${name}`)
+    }
   }
 }

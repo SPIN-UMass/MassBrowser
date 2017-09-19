@@ -2,7 +2,6 @@
   #m-home
     MapView#map
     //- GraphView#graph hello
-    
 </template>
 
 <script>
@@ -10,19 +9,15 @@
   import MapView from './widgets/MapView'
   import GraphView from './widgets/GraphView'
 
+  import { store } from '@utils/store'
+  
   export default {
-    data () {
-      return {
-      }
-    },
     components: {
       RelayView,
       MapView,
       GraphView
     },
-    mounted () {
-
-    }
+    store
   }
 </script>
 
