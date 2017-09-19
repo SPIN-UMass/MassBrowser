@@ -20,7 +20,6 @@
 
 <script>
   import Website from '@/models/Website'
-  import websitesCtrl from '@/controllers/websitesCtrl'
   import { getService } from '@utils/remote'
 
   const KVStore = getService('kvstore')
@@ -49,7 +48,7 @@
     methods: {
       onChange: function(e) {
         this.website.enabled = e.value
-        websitesCtrl.toggleWebsite(this.website, e.value)
+        Website.update({id: this.website.id}, {$set: {enabled: this.website.enabled}})
       }
     }
   }
@@ -66,7 +65,7 @@
       'website-toggle': WebsiteToggle
     },
     async created () {
-      this.websites = allWebsites = await websitesCtrl.getWebsites()
+      this.websites = await Website.find({thirdParty: false}) 
       
       let helpDone = await KVStore.get('websites-page-help-finished')
       if (!helpDone) {
@@ -94,7 +93,7 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
   $toolbar_height: 34px;
 

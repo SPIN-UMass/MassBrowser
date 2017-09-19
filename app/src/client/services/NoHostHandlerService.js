@@ -10,7 +10,7 @@ import config from '@utils/config'
 import { getDataDir } from '@utils'
 
 
-class _NoHostHandlerService {
+class NoHostHandlerService {
   constructor () {
     this.app = connect()
     this.server = null
@@ -39,5 +39,5 @@ class _NoHostHandlerService {
   }
 }
 
-var NoHostHandlerService = new _NoHostHandlerService()
-export default NoHostHandlerService
+export const noHostHandlerService = new NoHostHandlerService()
+export default noHostHandlerService

@@ -2,9 +2,9 @@
  * Created by milad on 6/29/17.
  */
 import { EventEmitter } from 'events'
-import ConnectionManager from '@/net/ConnectionManager'
-import RelayConnection from '@/net/RelayConnection'
-import DomainConnection from './DomainConnection'
+import { connectionManager } from '@/net/connectionManager'
+import { RelayConnection } from '@/net/RelayConnection'
+import { DomainConnection } from './DomainConnection'
 import { pendMgr } from './PendingConnections'
 
 export class Session extends EventEmitter {
@@ -45,7 +45,7 @@ export class Session extends EventEmitter {
 
     relay.id = this.id
     relay.on('data', data => {
-      ConnectionManager.listener(data)
+      connectionManager.listener(data)
       this.bytesReceived += data.length
       this.emit('receive', data.length)
     })
@@ -56,7 +56,7 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      ConnectionManager.onRelayClose(relay)
+      connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
     })
 
@@ -85,7 +85,7 @@ export class Session extends EventEmitter {
     this.changeState(Session.CONNECTED)
     relay.id = this.id
     relay.on('data', data => {
-      ConnectionManager.listener(data)
+      connectionManager.listener(data)
       this.bytesReceived += data.length
       this.emit('receive', data.length)
     })
@@ -96,7 +96,7 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      ConnectionManager.onRelayClose(relay)
+      connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
 
     })

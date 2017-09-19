@@ -1,4 +1,5 @@
 import { createModel, RelationField } from '@utils/orm'
+import { remoteModel } from '@utils/remote'
 
 class CDNSchema {
   constructor () {
@@ -9,5 +10,8 @@ class CDNSchema {
   }
 }
 
-const CDN = createModel('CDN', CDNSchema, { database: 'client' })
+export const CDN = remoteModel(
+  'cdn',
+  () => createModel('CDN', CDNSchema, { database: 'client' })
+)
 export default CDN

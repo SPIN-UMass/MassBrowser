@@ -22,7 +22,8 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
+  
   #m-home{
     height: $content_height;
     position: relative;

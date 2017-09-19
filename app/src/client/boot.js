@@ -16,17 +16,10 @@ import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
 
 import API from '@/api'
 
-import Status from '@common/services/StatusService'
-import SessionService from '@/services/SessionService'
-import SyncService from '@/services/SyncService'
-import WebPanelService from '@/services/WebPanelService'
-import NoHostHandlerService from '@/services/NoHostHandlerService'
-import CacheProxy from '@/cachebrowser/CacheProxy'
-
-import { startClientSocks } from '@/net/ClientSocks'
-import ConnectionManager from '@/net/ConnectionManager'
-import RelayConnection from '@/net/RelayConnection'
-import { RandomRelayAssigner } from '@/net/RelayAssigner'
+import { statusManager } from '@common/services/statusManager'
+import { sessionService, syncService, webPanelService, noHostHandlerService } from '@/services'
+import { cacheProxy } from '@/cachebrowser'
+import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
 
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
@@ -39,7 +32,7 @@ import { store } from '@utils/store'
 require('events').EventEmitter.prototype._maxListeners = 10000
 
 export default async function bootClient () {
-  Status.clearAll()
+  statusManager.clearAll()
 
   let status
 
@@ -51,39 +44,39 @@ export default async function bootClient () {
 
     Raven.setUserContext({ id: client.id })
 
-    status = Status.info('Authenticating Client')
+    status = statusManager.info('Authenticating Client')
     let auth = await API.authenticate(client.id, client.password)
     API.transport.setAuthToken(auth.token)
     status.clear()
 
-    status = Status.info('Server connection established')
+    status = statusManager.info('Server connection established')
     await API.clientUp()
     status.clear()
 
-    status = Status.info('Connecting to relay')
-    await SessionService.start()
+    status = statusManager.info('Connecting to relay')
+    await sessionService.start()
     status.clear()
 
-    status = Status.info('Starting cachebrowser server')
-    await CacheProxy.startCacheProxy()
+    status = statusManager.info('Starting cachebrowser server')
+    await cacheProxy.startCacheProxy()
     status.clear()
 
-    status = Status.info('Starting SOCKS server')
+    status = statusManager.info('Starting SOCKS server')
     await startClientSocks('127.0.0.1', config.socksPort)
     status.clear()
 
-    status = Status.info('Starting Connectivity Monitor')
+    status = statusManager.info('Starting Connectivity Monitor')
     await ConnectivityConnection.startRoutine()
     status.clear()
 
-    status = Status.info('Starting remaining services')
-    await Promise.all([WebPanelService.start(), NoHostHandlerService.start()])
+    status = statusManager.info('Starting remaining services')
+    await Promise.all([webPanelService.start(), noHostHandlerService.start()])
     status.clear()
 
-    if (await SyncService.isFirstSync()) {
+    if (await syncService.isFirstSync()) {
       debug('It is first boot, syncing database')
-      status = Status.info('Syncing database')
-      await SyncService.syncAll()
+      status = statusManager.info('Syncing database')
+      await syncService.syncAll()
       status.clear()
     }
 

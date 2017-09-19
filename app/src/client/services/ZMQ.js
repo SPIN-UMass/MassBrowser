@@ -2,7 +2,7 @@
  * Created by milad on 6/28/17.
  */
 import { Session } from '@/net/Session'
-import ConnectionManager from '@/net/ConnectionManager'
+import { connectionManager } from '@/net/connectionManager'
 
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5560'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
@@ -37,7 +37,7 @@ class _ZMQListener {
     var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
     _session.connect().then(() => {
       console.log('Session Connected')
-      ConnectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
+      connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
         if (this.validSessions.has(session)) {
           this.validSessions.delete(session)
           _session.connection.end()

@@ -2,19 +2,20 @@ import { initializeMainProcess } from '@common/main/electron/main'
 import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
 
-import SyncService from '@/services/SyncService'
-import StatusService from '@common/services/StatusService'
-import AutoUpdater from '@common/services/AutoUpdater'
-import RegistrationService from '@/services/RegistrationService'
+import { statusManager } from '@common/services/statusManager'
+import { autoUpdater } from '@common/services/autoUpdater'
+import { syncService, registrationService } from '@/services'
 import KVStore from '@utils/kvstore'
-import { store } from '@utils/store' // required for boot
+import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
 
-remote.registerService('sync', SyncService)
-remote.registerService('status', StatusService)
-remote.registerService('registration', RegistrationService)
+import models from '@/models' // required for bootstrapping remote models
+
+remote.registerService('sync', syncService)
+remote.registerService('status', statusManager)
+remote.registerService('registration', registrationService)
 remote.registerService('boot', { bootClient })
-remote.registerService('autoupdate', AutoUpdater)
+remote.registerService('autoupdate', autoUpdater)
 remote.registerService('kvstore', KVStore)
 
 

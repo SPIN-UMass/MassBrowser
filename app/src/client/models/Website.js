@@ -1,4 +1,5 @@
 import { createModel, RelationField } from '@utils/orm'
+import { remoteModel } from '@utils/remote'
 
 class WebsiteSchema {
   constructor () {
@@ -20,5 +21,8 @@ class WebsiteSchema {
   }
 }
 
-const Website = createModel('Website', WebsiteSchema, { database: 'client' })
+export const Website = remoteModel(
+  'website',
+  () => createModel('Website', WebsiteSchema, { database: 'client' })
+)
 export default Website

@@ -4,7 +4,7 @@
 
 <script>
   import { store } from '@utils/store'
-  import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/StatusService'
+  import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/statusManager'
 
   export default {
     store,

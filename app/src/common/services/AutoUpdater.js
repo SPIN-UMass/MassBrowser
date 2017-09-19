@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { autoUpdater } from 'electron-updater'
+import { autoUpdater as eAutoUpdater } from 'electron-updater'
 import { CancellationToken, HttpError, HttpExecutor, RequestOptionsEx } from "electron-builder-http"
 import { GithubOptions, githubUrl } from "electron-builder-http/out/publishOptions"
 import { UpdateInfo } from "electron-builder-http/out/updateInfo"
@@ -7,25 +7,24 @@ import { RequestOptions } from "http"
 import { safeLoad } from "js-yaml"
 import * as path from "path"
 import { parse as parseUrl } from "url"
-import { AppUpdater } from "electron-updater/out/AppUpdater"
 import { FileInfo, formatUrl, getChannelFilename, getDefaultChannelName, isUseOldMacProvider, Provider } from "electron-updater/out/main"
 
 import { AutoUpdateError } from '~/utils/errors'
-import Status from '@common/services/StatusService'
+import { statusManager } from '@common/services/statusManager'
 import { warn, info } from '@utils/log'
 import { prettyBytes } from '~/utils'
 import config from '@utils/config'
 import { isPlatform, WINDOWS, OSX, LINUX } from '@utils'
 
 if (config.isProduction) {
-  autoUpdater.autoDownload = false
-  autoUpdater.allowPrerelease = false
-  autoUpdater.loadUpdateConfig().then(options => {
-    autoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, autoUpdater, autoUpdater.httpExecutor)))
+  eAutoUpdater.autoDownload = false
+  eAutoUpdater.allowPrerelease = false
+  eAutoUpdater.loadUpdateConfig().then(options => {
+    eAutoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, eAutoUpdater, eAutoUpdater.httpExecutor)))
   })
 }
 
-class _AutoUpdater extends EventEmitter {
+class AutoUpdater extends EventEmitter {
   checkForUpdates() {
   
     return new Promise((resolve, reject) => {
@@ -50,23 +49,23 @@ class _AutoUpdater extends EventEmitter {
       }
 
       const clearListeners = () => {
-        autoUpdater.removeListener('update-available', onUpdateAvailable)
-        autoUpdater.removeListener('update-not-available', onUpdateNotAvailable)
-        autoUpdater.removeListener('error', onError)
+        eAutoUpdater.removeListener('update-available', onUpdateAvailable)
+        eAutoUpdater.removeListener('update-not-available', onUpdateNotAvailable)
+        eAutoUpdater.removeListener('error', onError)
       }
   
-      autoUpdater.on('update-available', onUpdateAvailable)
-      autoUpdater.on('update-not-available', onUpdateNotAvailable)
-      autoUpdater.on('error', onError)
+      eAutoUpdater.on('update-available', onUpdateAvailable)
+      eAutoUpdater.on('update-not-available', onUpdateNotAvailable)
+      eAutoUpdater.on('error', onError)
 
-      autoUpdater.checkForUpdates()
+      eAutoUpdater.checkForUpdates()
     })
   }
 
   downloadUpdate() {
     return new Promise((resolve, reject) => {
       let downloadSpeed = 0
-      let progress = Status.progress(
+      let progress = statusManager.progress(
         'update-progress',
         progress => progress === 100 
           ? 'Finalizing update...' 
@@ -91,24 +90,24 @@ class _AutoUpdater extends EventEmitter {
       }
       
       const clearListeners = () => {
-        autoUpdater.removeListener('download-progress', onProgress)
-        autoUpdater.removeListener('update-downloaded', onFinish)
-        autoUpdater.removeListener('error', onError)
+        eAutoUpdater.removeListener('download-progress', onProgress)
+        eAutoUpdater.removeListener('update-downloaded', onFinish)
+        eAutoUpdater.removeListener('error', onError)
       }
 
 
-      autoUpdater.on('download-progress', onProgress)
-      autoUpdater.on('update-downloaded', onFinish)
-      autoUpdater.on('error', onError)
+      eAutoUpdater.on('download-progress', onProgress)
+      eAutoUpdater.on('update-downloaded', onFinish)
+      eAutoUpdater.on('error', onError)
 
       let downloadCancelationToken = new CancellationToken()
-      autoUpdater.downloadUpdate(downloadCancelationToken)
+      eAutoUpdater.downloadUpdate(downloadCancelationToken)
     })
   }
    
   quitAndInstall() {
-    Status.info("Installing update...")
-    autoUpdater.quitAndInstall()
+    statusManager.info("Installing update...")
+    eAutoUpdater.quitAndInstall()
   }
 }
 
@@ -262,5 +261,5 @@ export class GitHubProvider extends BaseGitHubProvider {
   }
 }
 
-const AutoUpdater = new _AutoUpdater()
-export default AutoUpdater
+export const autoUpdater = new AutoUpdater()
+export default autoUpdater

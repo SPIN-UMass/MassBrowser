@@ -96,7 +96,7 @@ class ProgressStatus {
   }
 }
 
-class _StatusService extends EventEmitter {
+class StatusManager extends EventEmitter {
   constructor () {
     super()
 
@@ -191,5 +191,5 @@ class _StatusService extends EventEmitter {
 export const STATUS_LOG = 'log'
 export const STATUS_PROGRESS = 'progress'
 
-const StatusService = new _StatusService()
-export default StatusService
+export const statusManager = new StatusManager()
+export default statusManager

@@ -107,7 +107,7 @@ var ServerExtensions = [{
   name: 'subjectKeyIdentifier'
 }]
 
-class _CertificateManager {
+class CertificateManager {
   constructor () {
     this.certspath = path.join(getDataDir(), '/certs')
     this.keypath = path.join(this.certspath, '/keys')
@@ -243,5 +243,5 @@ class _CertificateManager {
   }
 }
 
-var CertificateManager = new _CertificateManager()
-export default CertificateManager
+export const certificateManager = new CertificateManager()
+export default certificateManager

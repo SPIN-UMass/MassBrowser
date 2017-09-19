@@ -4,12 +4,8 @@ import { debug, info } from '@utils/log'
 
 import { Website, Domain, CDN, Region, Category } from '@/models'
 
-class _SyncService {
-  constructor () {
-  }
-
+class SyncService {
   start () {
-
   }
 
   syncAll () {
@@ -117,5 +113,5 @@ class _SyncService {
   }
 }
 
-const SyncService = new _SyncService()
-export default SyncService
+export const syncService = new SyncService()
+export default syncService

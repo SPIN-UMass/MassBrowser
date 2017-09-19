@@ -2,21 +2,23 @@
  * Created by milad on 5/2/17.
  */
 
-import ConnectionManager from '@/net/ConnectionManager'
-import RelayConnection from '@/net/RelayConnection'
+import { connectionManager, RelayConnection, Session } from '@/net'
+import { pendMgr } from '~/client/net/PendingConnections'
 import API from '@/api'
 import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
+import { store } from '@utils/store'
+
 var schedule = require('node-schedule')
-import { Session } from '@/net/Session'
-import { pendMgr } from '~/client/net/PendingConnections'
+
 import { Domain, Category } from '@/models'
 
 let TCP_CLIENT = 0
 let TCP_RELAY = 1
 let UDP = 2
 let CDN = 3
+
 /**
  * Note: Implements RelayAssigner
  *
@@ -27,7 +29,7 @@ let CDN = 3
  * is rejected then we will remove the category from the waitlists.
  *
  */
-class _SessionService extends EventEmitter {
+class SessionService extends EventEmitter {
   constructor () {
     super()
 
@@ -53,61 +55,39 @@ class _SessionService extends EventEmitter {
 
   }
 
-  start () {
-    ConnectionManager.setRelayAssigner(this)
+  async start () {
+    connectionManager.setRelayAssigner(this)
     console.log('Starting Session Services')
     this._startSessionPoll()
-    return new Promise((resolve, reject) => {resolve()})
-
-    /*return this.createSession()
-     .then(() => {debug('First session created')})
-     .catch(NoRelayAvailableError, err => {
-     warn('No relay available for first session')
-     })*/
   }
 
-  getSessions () {
-    return this.sessions
+  async assignRelay (host, port) {
+    let domain = await Domain.findDomain(host)
+    let category = (await (await domain.getWebsite()).getCategory())
+
+    debug(`Assigning session for ${domain}`) 
+    let session = await this.assignSessionForCategory(category)
+    return session.connection
   }
 
-  assignRelay (host, port) {
-    return Domain.findDomain(host)
-      .then(domain => {
-        debug(`Assigning session for ${domain}`)
-        return domain
+  async assignSessionForCategory(category) {
+    // Search through active sessions to find session which allows category
+    for (var i = 0; i < this.sessions.length; i++) {
+      if (this.sessions[i].allowedCategories.has(category.id)) {
+        return this.sessions[i]
+      }
+    }
+  
+    // Check category waitlists to see if the category already has a pending session
+    if (category && this.categoryWaitLists[category.id]) {
+      return new Promise((resolve, reject) => {
+        this.categoryWaitLists[category.id].push(session => {
+          resolve(session)
+        })
       })
-      .then(domain => domain.getWebsite())
-      .then(website => website.getCategory())
-      .then(category => {
+    }
 
-        /**
-         * Search through active sessions to find session which allows category
-         *
-         * TODO optimization
-         */
-        for (var i = 0; i < this.sessions.length; i++) {
-          // console.log('allowed',this.sessions[i].allowedCategories)
-          if (this.sessions[i].allowedCategories.has(category.id)) {
-            return this.sessions[i]
-          }
-        }
-
-        /**
-         * Check category waitlists to see if the category already has
-         * a pending session
-         */
-        if (category && this.categoryWaitLists[category.id]) {
-          return new Promise((resolve, reject) => {
-            this.categoryWaitLists[category.id].push(session => {
-              resolve(session)
-            })
-          })
-        }
-
-        /* No session found, create new session */
-        return this.createSession(category)
-      })
-      .then(session => session.connection)
+    return this.createSession(category)
   }
 
   /**
@@ -119,20 +99,9 @@ class _SessionService extends EventEmitter {
    * @return A promise which is resolved when the session has been accepted by
    * the corresponding Relay
    */
-  createSession (categories) {
-    var catIDs = []
-
-    if (categories) {
-      if (!Array.isArray(categories)) {
-        categories = [categories]
-      }
-
-      for (let i = 0; i < categories.length; i++) {
-        let cat = categories[i]
-        catIDs.push(cat.id)
-      }
-    }
-    // console.log('Creating new session', categories, 'ids', catIDs)
+  async createSession(categories) {
+    categories = Array.isArray(categories) ? categories : [categories] 
+    let catIDs = categories.map(c => c.id)
 
     catIDs.forEach(category => {
       if (!this.categoryWaitLists[category]) {
@@ -140,135 +109,124 @@ class _SessionService extends EventEmitter {
       }
     })
 
-    return new Promise((resolve, reject) => {
-      API.requestSession(catIDs)
-        .then(session => {
-          if (!session) {
-            warn('No relay was found for new session')
-            return reject(new NoRelayAvailableError('No relay is available for the requested session'))
-          }
+    return new Promise(async (resolve, reject) => {
+      let sessionInfo = await API.requestSession(catIDs)
 
-          debug(`Session [${session.id}] created, waiting for relay to accept`)
+      if (!sessionInfo) {
+        warn('No relay was found for new session')
+        return reject(new NoRelayAvailableError('No relay is available for the requested session'))
+      }
 
-          this.pendingSessions[session.id] = {
-            accept: _session => this._handleNewSession(_session, session, resolve, reject)
+      debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
 
-            ,
+      this.pendingSessions[sessionInfo.id] = {
+        accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
+        reject: s => {
+          warn(`Session [${sessionInfo.id}] rejected by relay`)
+          storeRemoveSession(sessionInfo)
+          reject(new SessionRejectedError('session was rejected by relay'))
+        }
+      }
 
-            reject: s => {
-              warn(`Session [${session.id}] rejected by relay`)
-              reject(new SessionRejectedError('session was rejected by relay'))
-            }
-          }
-        })
+      storeUpdateSession(sessionInfo, 'pending')
     })
   }
 
-  _handleNewSession (_session, session, resolve, reject) {
-    return new Promise((_resolve, _reject) => {
-      debug(`Session [${session.id}] accepted by relay`)
+  async _handleAcceptedSession(session, sessionInfo, resolve, reject) {
+    debug(`Session [${sessionInfo.id}] accepted by relay`)
 
-      this.emit('sessions-changed', this.sessions)
-      if (_session.connectionType === TCP_CLIENT) {
-        debug(`Connecting session [${session.id}]`)
-
-        _session.connect()
-          .then(() => {
-            this.sessions.push(_session)
-            debug(`Session [${session.id}] connected`)
-            resolve(_session)
-            _resolve(_session)
-          })
-          .catch(err => {
-            debug(`Session [${session.id}] connection to relay failed`)
-            reject(err)
-            _reject(err)
-            // // Report session failure to server
-            API.updateSessionStatus(session.id, 'failed')
-          })
-      }
-      if (_session.connectionType === TCP_RELAY) {
-        API.updateSessionStatus(session.id, 'client_accepted')
-        _session.listen()
-          .then(() => {
-            this.sessions.push(_session)
-            debug(`Session [${session.id}] connected`)
-            resolve(_session)
-            _resolve(_session)
-          })
-          .catch(err => {
-            debug(`Session [${session.id}] connection to relay failed`)
-            reject(err)
-            _reject(err)
-            // // Report session failure to server
-            API.updateSessionStatus(session.id, 'failed')
-          })
-
-
-
+    try {
+      if (session.connectionType === TCP_CLIENT) {
+        debug(`Connecting session [${sessionInfo.id}]`)
+        await session.connect()
+      } else if (session.connectionType === TCP_RELAY) {
+        API.updateSessionStatus(sessionInfo.id, 'client_accepted')
+        await session.listen()
       }
 
-    })
-  }
+      this.sessions.push(session)
+      storeUpdateSession(sessionInfo, 'active')
 
-  _handleRetrievedSessions (sessions) {
-    if (sessions !== undefined) {
-      var [staleCount, duplicateCount] = [0, 0]
-      var validSessions = sessions.filter(session => {
-        if (session.id in this.sessions) {
-          duplicateCount++
-          return false
-        } else if (!(session.id in this.pendingSessions)) {
-          staleCount++
+      debug(`Session [${sessionInfo.id}] connected`)
+      resolve(session)
+      return session
 
-          // Report stale session to server
-          API.updateSessionStatus(session.id, 'expired')
-
-          return false
-        }
-
-        return true
-      })
-
-      debug(`Retrieved ${sessions.length} sessions (valid: ${validSessions.length}  stale: ${staleCount}  duplicate: ${duplicateCount}) `)
-
-      validSessions.forEach((session) => {
-        var desc = {
-          'readkey': Buffer.from(session.read_key, 'base64'),
-          'readiv': Buffer.from(session.read_iv, 'base64'),
-          'writekey': Buffer.from(session.write_key, 'base64'),
-          'writeiv': Buffer.from(session.write_iv, 'base64'),
-          'token': Buffer.from(session.token, 'base64'),
-        }
-        debug(`sessions ${session.connection_type}`)
-
-        if (!(session.id in this.sessions)) {
-          this.processedSessions[session.id] = desc
-
-          var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'], session.connection_type, session.relay.domain_name)
-
-          if (session.id in this.pendingSessions) {
-            let resolve = this.pendingSessions[session.id].accept
-            delete this.pendingSessions[session.id]
-            resolve(_session)
-              .then(_session => this._flushCategoryWaitLists(session.relay['allowed_categories'] || [], _session))
-              .catch(() => {
-                /* Refer to Bug #1 */
-                (session.relay['allowed_categories'] || []).forEach(category => {
-                  if (this.categoryWaitLists[category.id]) {
-                    delete this.categoryWaitLists[category.id]
-                  }
-                })
-              })
-          } else {
-            staleCount += 1
-          }
-        }
-      })
+    } catch (err) {
+      debug(`Session [${sessionInfo.id}] connection to relay failed`)
+      reject(err)
+      // Report session failure to server
+      API.updateSessionStatus(sessionInfo.id, 'failed')
+      throw err
     }
   }
 
-  _flushCategoryWaitLists (categories, session) {
+  /**
+   * Is called when accepted sessions are received from the server
+   * 
+   * Resolves pending sessions with the newly created sessions
+   */
+  async _handleRetrievedSessions(sessionInfos) {
+    if (sessionInfos === undefined) {
+      return
+    }
+
+    let validSessionInfos = this._filterValidSessions(sessionInfos)
+
+    for (let sessionInfo of validSessionInfos) {    
+      var desc = {
+        'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
+        'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
+        'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
+        'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
+        'token': Buffer.from(sessionInfo.token, 'base64'),
+      }
+
+      // debug(`sessions ${session.connection_type}`)
+
+      if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
+        // TODO: give warning here
+        continue
+      }
+
+      this.processedSessions[sessionInfo.id] = desc
+      let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, desc, sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
+
+      let resolve = this.pendingSessions[sessionInfo.id].accept
+      delete this.pendingSessions[sessionInfo.id]
+
+      try {
+        await resolve(session)
+        await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
+      } catch(e) {
+        /* Refer to Bug #1 */
+        (sessionInfo.relay['allowed_categories'] || []).forEach(category => {
+          if (this.categoryWaitLists[category.id]) {
+            delete this.categoryWaitLists[category.id]
+          }
+        })
+      }
+    }
+  }
+
+  _filterValidSessions(sessionInfos) {
+    var [staleCount, duplicateCount] = [0, 0]
+    var validSessionInfos = sessionInfos.filter(session => {
+      if (session.id in this.sessions) {
+        duplicateCount++
+        return false
+      } else if (!(session.id in this.pendingSessions)) {
+        // Report stale session to server
+        API.updateSessionStatus(session.id, 'expired')
+        staleCount++
+        return false
+      }
+      return true
+    })
+    debug(`Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  stale: ${staleCount}  duplicate: ${duplicateCount}) `)
+    return validSessionInfos
+  }
+
+  async _flushCategoryWaitLists (categories, session) {
     categories.forEach(category => {
       let waitList = this.categoryWaitLists[category.id]
       if (waitList !== undefined) {
@@ -290,5 +248,19 @@ class _SessionService extends EventEmitter {
   }
 }
 
-var SessionService = new _SessionService()
-export default SessionService
+function storeUpdateSession(session, state) {
+  store.commit('updateSession', {
+    id: session.id,
+    ip: session.relay.ip,
+    state: state
+  })
+}
+
+function storeRemoveSession(session) {
+  store.commit('removeSession', {id: session.id})
+}
+
+
+
+export const sessionService = new SessionService()
+export default sessionService

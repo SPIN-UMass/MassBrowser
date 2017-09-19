@@ -3,10 +3,7 @@ import KVStore from '@utils/kvstore'
 import { debug, info } from '@utils/log'
 import { store } from '@utils/store'
 
-class _RegistrationService {
-  constructor () {
-  }
-
+class RegistrationService {
   registerClient(invitationCode) {
     return API.registerClient(invitationCode)
     .then(_client => {
@@ -16,5 +13,5 @@ class _RegistrationService {
   }
 }
 
-const RegistrationService = new _RegistrationService()
-export default RegistrationService
+export const registrationService = new RegistrationService()
+export default registrationService

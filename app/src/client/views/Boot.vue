@@ -17,7 +17,7 @@
 
   import { ApplicationBootError } from '@utils/errors'
   import { getService } from '@utils/remote'
-  import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/StatusService'
+  import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/statusManager'
   import { store } from '@utils/store'
 
   const Boot = getService('boot')
@@ -65,7 +65,7 @@
 
 
 <style scoped lang='scss'>
-  @import '~@common/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
   .y-splash {
     background-color: white;

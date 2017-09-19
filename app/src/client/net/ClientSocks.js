@@ -1,17 +1,9 @@
-/**
- * Created by milad on 4/21/17.
- */
-/**
- * Created by milad on 4/12/17.
- */
 var net = require('net'),
   socks = require('./socks.js')
 
-import ConnectionManager from './ConnectionManager'
-import CacheManager from '@/cachebrowser/CacheManager'
-import PolicyManager from '@/services/PolicyManager'
-// Create server
-// The relay accepts SOCKS connections. This particular relay acts as a proxy.
+import { connectionManager } from './connectionManager'
+import { cacheManager } from '@/cachebrowser'
+import { policyManager } from '@/services'
 
 import { debug, info, warn, error } from '@utils/log'
 import * as errors from '@utils/errors'
@@ -38,13 +30,13 @@ export function startClientSocks (mhost, mport) {
       return sendToWebPanel(socket, address, port, proxyReady)
     }
 
-    PolicyManager.getDomainPolicy(address, port)
+    policyManager.getDomainPolicy(address, port)
     .then((proxyType) => {
       debug(`New socks connection to ${address}:${port} using policy '${proxyType}'`)
       
-      if (proxyType === PolicyManager.POLICY_YALER_PROXY) {
+      if (proxyType === policyManager.POLICY_YALER_PROXY) {
         return yalerProxy(socket, address, port, proxyReady)
-      } else if (proxyType === PolicyManager.POLICY_CACHEBROWSE) {
+      } else if (proxyType === policyManager.POLICY_CACHEBROWSE) {
         return cachebrowse(socket, address, port, proxyReady)
       } else {
         return regularProxy(socket, address, port, proxyReady)
@@ -85,11 +77,11 @@ export function startClientSocks (mhost, mport) {
 }
 
 function yalerProxy(socket, address, port, proxyReady) {
-  return ConnectionManager.newClientConnection(socket, address, port, proxyReady)
+  return connectionManager.newClientConnection(socket, address, port, proxyReady)
 }
 
 function cachebrowse(socket, address, port, proxyReady) {
-  return CacheManager.newCacheConnection(socket, address, port, proxyReady)
+  return cacheManager.newCacheConnection(socket, address, port, proxyReady)
   .catch(errors.NotCacheBrowsableError, err => {
     warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
     return yalerProxy(socket, address, port, proxyReady)

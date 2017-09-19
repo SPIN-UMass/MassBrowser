@@ -5,14 +5,13 @@
 
 <script>
   import Datamap from '@assets/datamaps.world.js'
-  import mapCtrl from '@/controllers/mapCtrl'
   import { getLocationForIP, getMyIP } from '@utils/geoip'
-  const SESSION_POLL_INTERVAL = 1000
+  import { store } from '@utils/store'
 
   var map
-  var pollIntervalIdent
 
   export default {
+    store,
     data() {
       return {
         pins: [],
@@ -21,15 +20,24 @@
         selfPin: null
       }
     },
+    computed: {
+      sessions() { 
+        return this.$store.state.sessions 
+      }
+    },
     mounted () {
       map = createMap(this.$refs.mapdiv)
       map.bubbles(this.pins)
       
-      this.startPollingSessions()
       this.addSelfPin()
     },
-    beforeDestroy() {
-      this.stopPollingSessions()
+    watch: {
+      sessions: {
+        handler(sessions) {
+          return this.updateSessions(sessions)
+        },
+        deep: true
+      }
     },
     methods: {
       addPin(pin) {
@@ -39,7 +47,6 @@
       },
       addArc(arc) {
         this.arcs.push(arc)
-        console.log(this.arcs)
         map.arc(this.arcs)
       },
       async addSelfPin() {
@@ -51,25 +58,18 @@
         this.selfPin = pin
         this.addPin(pin)
       },
-      async pollSessions() {
-        let sessions = await mapCtrl.getSessions()
+      async updateSessions(sessions) {
         for(let i = 0; i < sessions.length; i++) {
           let session = sessions[i]
+          if (!session.id) {
+            continue
+          }
           if (this.pinMap[session.id] === undefined) {
             let loc = await getLocationForIP(session.ip)
             let pin = new Pin(session.id, loc.longitude, loc.latitude)
             this.addPin(pin)
             this.addArc(new Arc(this.selfPin, pin))
           }
-        }
-        // console.log(sessions)
-      },
-      startPollingSessions() {
-        pollIntervalIdent = setInterval(this.pollSessions, SESSION_POLL_INTERVAL)
-      },
-      stopPollingSessions() {
-        if (pollIntervalIdent) {
-          clearInterval(pollIntervalIdent)
         }
       }
     }

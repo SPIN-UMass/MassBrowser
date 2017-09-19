@@ -1,21 +1,15 @@
-/**
- * Created by milad on 5/27/17.
- */
-/**
- * Created by milad on 4/12/17.
- */
 import crypto from 'crypto'
-import CacheProxy from './CacheProxy'
+import { cacheProxy } from './cacheProxy'
 import config from '@utils/config'
 var net = require('net')
 
 import { NotCacheBrowsableError } from '@utils/errors'
 
-class _CacheManager {
+class CacheManager {
   interceptConnection (socket, dst, dstport, onConnect) {
     let proxy = net.createConnection({port: config.cachebrowser.mitmPort, host: 'localhost'})
     proxy.on('connect', () => {
-      CacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
+      cacheProxy.registerConnection(proxy.localPort, dst, dstport, onConnect)
     })
 
     proxy.on('data', (d) => {
@@ -83,6 +77,5 @@ class _CacheManager {
 
 }
 
-var CacheManager = new _CacheManager()
-// module.exports = {ConnectionManager: _ConMgr};
-export default CacheManager
+export const cacheManager = new CacheManager()
+export default cacheManager

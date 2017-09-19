@@ -5,19 +5,19 @@ import tls from 'tls'
 import dns from 'dns'
 import fs from 'fs'
 
-import CertificateManager from './CertManager'
+import { certificateManager } from './certManager'
 import config from '@utils/config'
 import { debug, info, warn } from '@utils/log'
 import { CacheBrowserError } from '@utils/errors'
 
-class _CacheProxy {
+class CacheProxy {
 
   constructor () {
     this.proxyserver = undefined
     this.connectionlist = {}
     this.proxyoptions = {
       SNICallback: function (domain, cb) {
-        CertificateManager.getServerCerts(domain).then((data) => {
+        certificateManager.getServerCerts(domain).then((data) => {
           return cb(null, tls.createSecureContext(data))
         })
       },
@@ -46,7 +46,7 @@ class _CacheProxy {
       this.proxyserver.listen(config.cachebrowser.mitmPort, () => {
         started = true
         debug('Initializing certificate manager')
-        CertificateManager.initializeCA().then(() => {
+        certificateManager.initializeCA().then(() => {
           resolve()
         })
       })
@@ -131,5 +131,5 @@ class _CacheProxy {
   }
 }
 
-var CacheProxy = new _CacheProxy()
-export default CacheProxy
+export const cacheProxy = new CacheProxy()
+export default cacheProxy

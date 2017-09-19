@@ -14,8 +14,6 @@
 </template>
 
 <script>
-  import SessionService from '@/services/SessionService'
-  import { Session } from '@/net/Session'
 
   const tableHeaders = ['', 'Relay ID', 'Sent', 'Recieved', 'IP Address', 'Port']
 
@@ -29,11 +27,7 @@
     components: {
     },
     created () {
-      this.sessions = SessionService.getSessions()
-
-      SessionService.on('sessions-changed', sessions => {
-        this.sessions = sessions
-      })
+      
     },
     methods: {
     }
@@ -41,7 +35,7 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@common/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
   $tbody_height: 100%;
   $tcell_width: 25%;

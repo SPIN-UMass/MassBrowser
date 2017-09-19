@@ -1,4 +1,5 @@
 import { createModel, RelationField } from '@utils/orm'
+import { remoteModel } from '@utils/remote'
 
 class RegionSchema {
   constructor () {
@@ -7,5 +8,8 @@ class RegionSchema {
   }
 }
 
-const Region = createModel('Region', RegionSchema, { database: 'client' })
+export const Region = remoteModel(
+  'region',
+  () => createModel('Region', RegionSchema, { database: 'client' })
+)
 export default Region

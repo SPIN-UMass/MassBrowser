@@ -51,7 +51,7 @@
 
 
 <style scoped lang='scss'>
-  @import '~@/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
 
   $title_font_size: 20px;

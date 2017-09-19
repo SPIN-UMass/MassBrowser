@@ -1,18 +1,14 @@
-/**
- * Created by milad on 4/12/17.
- */
 import crypto from 'crypto'
-
-import RelayConnection from './RelayConnection'
+import { RelayConnection } from './RelayConnection'
 import * as errors from '@utils/errors'
 import { debug } from '@utils/log'
 
-class _ConnectionManager {
+class ConnectionManager {
   constructor () {
     this.relayAssigner = null
 
-    this.ClientConnections = {}
-    this.Connectionmaps = {}
+    this.clientConnections = {}
+    this.connectionMaps = {}
     this.carrylen = 0
     this.carry = ''
     this.lastcommand = ''
@@ -26,7 +22,7 @@ class _ConnectionManager {
   }
 
   newConnection (ip, port, conid) {
-    this.ClientConnections[conid].relayConnected()
+    this.clientConnections[conid].relayConnected()
   }
 
   commandParser (lastconid, CMD, size, data) {
@@ -52,8 +48,8 @@ class _ConnectionManager {
     }
     if (CMD === 'D') {
       // console.log(this.ClientConnections);
-      if (lastconid in this.ClientConnections) {
-        this.ClientConnections[lastconid].write(data)
+      if (lastconid in this.clientConnections) {
+        this.clientConnections[lastconid].write(data)
       }
     }
     if (CMD === 'C') {
@@ -62,7 +58,7 @@ class _ConnectionManager {
   }
 
   cleanClose (conid) {
-    this.ClientConnections[conid].end()
+    this.clientConnections[conid].end()
     // delete this.ClientConnections[conid]
   }
 
@@ -110,20 +106,20 @@ class _ConnectionManager {
   }
 
   connectionClose (socket) {
-    console.log('closed')
+//    console.log('closed')
   }
 
   onRelayClose (relay) {
-    Object.keys(this.Connectionmaps).forEach((key) => {
-      if (this.Connectionmaps[key] === relay) {
-        this.ClientConnections[key].end()
+    Object.keys(this.connectionMaps).forEach((key) => {
+      if (this.connectionMaps[key] === relay) {
+        this.clientConnections[key].end()
       }
     })
   }
 
   writer (data, conid) {
     // console.log('DATA SEND', data, conid);
-    this.Connectionmaps[conid].write(conid, 'D', data)
+    this.connectionMaps[conid].write(conid, 'D', data)
   }
 
   newClientConnection (connection, dstip, dstport, onConnect) {
@@ -135,27 +131,27 @@ class _ConnectionManager {
       throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
     }
 
-    this.ClientConnections[conid] = connection
-    this.ClientConnections[conid].relayConnected = () => { onConnect() }
+    this.clientConnections[conid] = connection
+    this.clientConnections[conid].relayConnected = () => { onConnect() }
 
     return new Promise((resolve, reject) => {
       this.relayAssigner.assignRelay(dstip, dstport)
         .then(relay => {
-          debug(`Relay ${relay} assigned for connection`)
-          this.Connectionmaps[conid] = relay
+          debug(`Relay [${relay.id}] assigned for connection`)
+          this.connectionMaps[conid] = relay
           var cr = String(dstip) + ':' + String(dstport)
           // console.log('sendsize:', cr.length, cr)
-          this.Connectionmaps[conid].write(conid, 'N', Buffer(cr))
+          this.connectionMaps[conid].write(conid, 'N', Buffer(cr))
 
           connection.on('data', (data) => {
             this.writer(data, conid)
           })
 
           connection.on('close', () => {
-            this.Connectionmaps[conid].write(conid, 'C', Buffer(0))
+            this.connectionMaps[conid].write(conid, 'C', Buffer(0))
           })
           connection.on('error', (err) => {
-            this.Connectionmaps[conid].write(conid, 'C', Buffer(0))
+            this.connectionMaps[conid].write(conid, 'C', Buffer(0))
           })
           resolve('Assigned')
         })
@@ -172,21 +168,20 @@ class _ConnectionManager {
   testConnect (dstip, dstport, relay, onConnect, onDisconnect) {
     var conid = crypto.randomBytes(2).readUInt16BE()
     debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
-    this.ClientConnections[conid] = {}
-    this.ClientConnections[conid].relayConnected = () => { onConnect() }
-    this.ClientConnections[conid].end = () => { onDisconnect() }
+    this.clientConnections[conid] = {}
+    this.clientConnections[conid].relayConnected = () => { onConnect() }
+    this.clientConnections[conid].end = () => { onDisconnect() }
     return new Promise((resolve, reject) => {
       debug(`Relay ${relay} assigned for connection`)
-      this.Connectionmaps[conid] = relay
+      this.connectionMaps[conid] = relay
       var cr = String(dstip) + ':' + String(dstport)
       // console.log('sendsize:', cr.length, cr)
-      this.Connectionmaps[conid].write(conid, 'N', Buffer(cr))
+      this.connectionMaps[conid].write(conid, 'N', Buffer(cr))
 
       resolve('Assigned')
     })
   }
 }
 
-var ConnectionManager = new _ConnectionManager()
-// module.exports = {ConnectionManager: _ConMgr};
-export default ConnectionManager
+export const connectionManager = new ConnectionManager()
+export default connectionManager

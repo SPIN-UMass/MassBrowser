@@ -81,7 +81,7 @@
 
 
 <style scoped lang='scss'>
-  @import '~@common/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
   .y-register {
     background-color: white;

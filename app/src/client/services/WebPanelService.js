@@ -11,7 +11,7 @@ import { getDataDir } from '@utils'
 import { store } from '@utils/store'
 
 
-class _OnBoardingService {
+class WebPanelService {
   constructor () {
     this.app = connect()
     this.server = null
@@ -63,5 +63,5 @@ class _OnBoardingService {
   }
 }
 
-var OnBoardingService = new _OnBoardingService()
-export default OnBoardingService
+export const webPanelService = new WebPanelService()
+export default webPanelService 

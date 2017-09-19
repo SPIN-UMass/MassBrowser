@@ -1,9 +1,3 @@
-/**
- * Created by milad on 7/5/17.
- */
-/**
- * Created by milad on 4/11/17.
- */
 import net from 'net'
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
@@ -12,7 +6,7 @@ import config from '@utils/config'
 import { RelayConnectionError } from '@utils/errors'
 import https from 'https'
 
-export default class DomainConnection extends EventEmitter {
+export class DomainConnection extends EventEmitter {
   constructor (domainName, desc) {
     super()
 
@@ -30,8 +24,6 @@ export default class DomainConnection extends EventEmitter {
       servername: 'test'
     }
 
-
-    console.log('New Domain Session', this.option)
     this.httpsRequest = null
     this.httpsResponse = null
   }
@@ -42,7 +34,6 @@ export default class DomainConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      console.log('Connecting to CDN')
       var httpsRequest = https.request(this.option, (res) => {
         this.httpsResponse = res
         setInterval(() => {this.keepalive}, 500)
@@ -79,7 +70,6 @@ export default class DomainConnection extends EventEmitter {
 
   _initSocket (httpsRequest) {
     var desc = this.desc
-    console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
     }, () => {
@@ -127,3 +117,4 @@ export default class DomainConnection extends EventEmitter {
 
 }
 
+export default DomainConnection
