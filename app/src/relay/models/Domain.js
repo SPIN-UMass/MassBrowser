@@ -1,4 +1,5 @@
 import { createModel, RelationField } from '@utils/orm'
+import { remoteModel } from '@utils/remote'
 
 const globalRegexCache = {}
 
@@ -92,5 +93,8 @@ class DomainSchema {
   }
 }
 
-const Domain = createModel('Domain', DomainSchema, { database: 'relay' })
+export const Domain = remoteModel(
+  'domain',
+  () => createModel('Domain', DomainSchema, { database: 'relay' })
+)
 export default Domain

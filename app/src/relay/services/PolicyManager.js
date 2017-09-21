@@ -3,7 +3,7 @@ import { Domain } from '@/models'
 import * as errors from '@utils/errors'
 import { error, debug } from '@utils/log'
 
-class _PolicyManager extends EventEmitter {
+class PolicyManager extends EventEmitter {
   constructor () {
     super()
   }
@@ -50,5 +50,5 @@ class _PolicyManager extends EventEmitter {
 
 }
 
-var PolicyManager = new _PolicyManager()
-export default PolicyManager
+export const policyManager = new PolicyManager()
+export default policyManager

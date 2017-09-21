@@ -4,12 +4,6 @@
 </template>
 
 <script>
-  import mapCtrl from '@/controllers/mapCtrl'
-
-  const POLL_INTERVAL = 1000
-
-  var pollIntervalIdent
-
   export default {
     data() {
       return {

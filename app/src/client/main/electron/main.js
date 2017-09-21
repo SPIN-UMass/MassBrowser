@@ -14,12 +14,12 @@ import models from '@/models' // required for bootstrapping remote models
 remote.registerService('sync', syncService)
 remote.registerService('status', statusManager)
 remote.registerService('registration', registrationService)
-remote.registerService('boot', { bootClient })
+remote.registerService('boot', { boot: bootClient })
 remote.registerService('autoupdate', autoUpdater)
 remote.registerService('kvstore', KVStore)
 
 
-var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
+let requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 requireControllerFilter.keys().forEach(requireControllerFilter)
 
 

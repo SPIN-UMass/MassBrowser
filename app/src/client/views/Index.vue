@@ -24,8 +24,8 @@
   import { getService } from '@utils/remote'
   import config from '@utils/config'
 
-  const SyncService = getService('sync')
-  const AutoUpdater = getService('autoupdate')
+  const syncService = getService('sync')
+  const autoUpdater = getService('autoupdate')
   
   export default {
     data () {
@@ -43,8 +43,8 @@
         this.currentTab = to.name
       })
 
-      SyncService.syncAll()
-      AutoUpdater.checkForUpdates()
+      syncService.syncAll()
+      autoUpdater.checkForUpdates()
     }
   }
 </script>

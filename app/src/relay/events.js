@@ -1,5 +1,5 @@
 import { debug, warn } from '~/utils/log'
-import HealthManager from '@/net/HealthManager'
+import { relayManager } from '@/services'
 import { connectToClient } from './net/OBFSReceiver'
 
 import { pendMgr } from '~/relay/net/PendingConnections'
@@ -46,8 +46,7 @@ function newSession (data) {
 }
 function reconnected (data) {
   debug('WS RECONNECTED REFERESHING INFO')
-  HealthManager.handleReconnect()
-
+  relayManager.handleReconnect()
 }
 function connectClientSession (data) {
   var desc = {
@@ -61,7 +60,6 @@ function connectClientSession (data) {
     'sessionId': data.id
   }
 
-  console.log('HEEEY  RECEIVING NEW COMMAND')
   pendMgr.addPendingConnection((desc.token), desc)
 
   connectToClient(data.client.ip, data.client.port, data.id)

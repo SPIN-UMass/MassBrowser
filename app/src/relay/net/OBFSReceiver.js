@@ -5,7 +5,7 @@ const net = require('net')
 const fs = require('fs')
 import { ConnectionReceiver } from './ConnectionReceiver'
 var ThrottleGroup = require('./throttle').ThrottleGroup
-import HealthManager from '@/net/HealthManager'
+import { relayManager } from '@/services'
 
 export function runOBFSserver (publicIP, publicPort, up_limit, down_limit) {
 
@@ -68,9 +68,9 @@ export function connectToClient (clientIP, clientPort, token) {
       console.log(err)
     }
     console.log("CONNECTED TO CLIENT")
-    var my_up = HealthManager.uploadLimiter.throttle()
+    var my_up = relayManager.uploadLimiter.throttle()
     my_up.on('error', (err) => {})
-    var my_down = HealthManager.downloadLimiter.throttle()
+    var my_down = relayManager.downloadLimiter.throttle()
     my_down.on('error', (err) => {})
 
     socket.write(token)

@@ -7,7 +7,7 @@ export default [
   {
     path: '/boot',
     name: 'boot',
-    component: require('@/views/Boot')
+    component: require('@common/views/Boot')
   },
   {
     path: '/start',

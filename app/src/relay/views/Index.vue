@@ -25,7 +25,7 @@
   import config from '@utils/config'
   import { getService } from '@utils/remote'
 
-  const SyncService = getService('sync')
+  const syncService = getService('sync')
   
   export default {
     data () {
@@ -43,7 +43,7 @@
         this.currentTab = to.name
       })
 
-      SyncService.syncAll()
+      syncService.syncAll()
     },
     methods: {
     }
@@ -52,7 +52,7 @@
 
 
 <style scoped lang='scss'>
-  @import '~@/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
   $title_font_size: 20px;
   $nav_font_size: 16px;

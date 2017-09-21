@@ -21,7 +21,7 @@ export default {
     clearStatus(state) {
       state.status = { type: 'none' }
     },
-    completeRegistration(state, client) {
+    registerClient(state, client) {
       state.client = client
       state.registrationComplete = true
     },

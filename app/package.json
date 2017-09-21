@@ -21,7 +21,15 @@
       "port": 8040,
       "domainfrontable": false,
       "domainfrontPort": 8083,
-      "domain_name": "d2td5r0tz3q2r2.cloudfront.net"
+      "domain_name": "d2td5r0tz3q2r2.cloudfront.net",
+      "stunServer": {
+        "host": "stun2.l.google.com",
+        "port": 19302
+      },
+      "echoServer": {
+        "host": "yaler.co",
+        "port": 8823
+      }
     },
     "sentry": {
       "version": "v0.0.1-6_5681c",

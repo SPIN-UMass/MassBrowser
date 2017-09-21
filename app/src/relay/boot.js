@@ -4,123 +4,93 @@ import { runHTTPListener } from '@/net/HttpListener'
 
 import { pendMgr } from '@/net/PendingConnections'
 
-var stun = require('vs-stun')
-import ConnectivityConnection from '@/connectivityAPI'
 import API from '@/api'
 import KVStore from '@utils/kvstore'
 import * as errors from '@utils/errors'
-import StatusReporter from '@/net/StatusReporter'
 import config from '@utils/config'
-import context from '@/context'
 import { debug, error } from '@utils/log'
 import { Raven } from '@utils/raven'
 import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
 } from '@utils/errors'
-import Status from '@common/services/StatusService'
-import SyncService from '@/services/SyncService'
+import { statusManager } from '@common/services/statusManager'
+import { syncService, relayManager, networkMonitor } from '@/services'
 
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
+import { store } from '@utils/store'
 
-import HealthManager from '@/net/HealthManager'
 
-var stunserver = {
-  host: 'stun.l.google.com',
-  port: 19302
-}
+export default async function bootRelay() {
+  let status
 
-var isCalledbefore = false
+  try {
+    let relay = store.state.relay
 
-export default function bootRelay (gui) {
-  if (isCalledbefore) {
-    return new Promise((resolve, reject) => resolve())
-  }
+    if (!relay) {
+      status = statusManager.info('Registering Relay')
+      relayInfo = await API.registerRelay()
+      relay = {id: relayInfo.id, password: relayInfo.password}
+      store.commit('registerRelay', relay)
+      status.clear()
+    }
 
-  isCalledbefore = true
+    status = statusManager.info(`Authenticating Relay`)
+    let auth = await API.authenticate(relay.id, relay.password)
+    status.clear()
 
-  return KVStore.get('relay', null)
-    .then(relay => {
-      if (relay) {
-        return relay
-      } else {
-        Status.info('Registering Relay')
-        return API.registerRelay()
-          .then(relay => {
-            KVStore.set('relay', {id: relay.id, password: relay.password})
-            return {id: relay.id, password: relay.password}
-          })
-      }
-    })
-    .then(relay => {
-      Status.info(`Authenticating Relay`)
-      return API.authenticate(relay.id, relay.password)
-    })
-    .then(auth => {
-      Status.info('Connecting to WebSocket server')
-      let transport = new WebSocketTransport(
-        `${config.websocketURL}/api/?session_key=${auth.session_key}`,
-        '/api'
-      )
-      transport.setEventHandler(eventHandler)
-      return transport.connect()
-      .then(() => {
-        API.setTransport(transport)
-      })
-    })
-    .then(() => {
-      Status.info('Connecting to Connectivity server')
-      StatusReporter.connectConnectivity()
-    })
-    .then(() => {
-      /// Only sync database in boot if it is the first time booting
-      /// otherwise sync will after the client has started to avoid
-      /// having delay on each run
-      return SyncService.isFirstSync()
-        .then(firstSync => {
-          if (firstSync) {
-            debug('It is first boot, syncing database')
-            let status = Status.info('Syncing database')
-            return SyncService.syncAll()
-              .then(() => status.clear())
-          }
-        })
-    })
-    .then(() => {
-      Status.info('Starting Relay')
-      HealthManager.startMonitor(gui)
-      HealthManager.changeAccess(true)
-    })
-    .then(() => {
-      if (config.domainfrontable) {
-        Status.info('Starting HTTP Server')
-        return runHTTPListener(HealthManager.HTTPPortNumber).then(() => {
-          console.log('Reporting DomainFront to server')
-          return API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)
-        })
-      }
-    })
-    .then(() => {
-      context.bootFinished()
-    })
-    .catch(AuthenticationError, err => {
+    status = statusManager.info('Connecting to WebSocket server')
+    let transport = new WebSocketTransport(
+      `${config.websocketURL}/api/?session_key=${auth.session_key}`,
+      '/api'
+    )
+    transport.setEventHandler(eventHandler)
+    await transport.connect()
+    API.setTransport(transport)
+    status.clear()
+
+    status = statusManager.info('Connecting to Connectivity server')
+    await networkMonitor.start()
+    status.clear()
+
+    // Only sync database in boot if it is the first time booting
+    // otherwise sync will after the client has started to avoid
+    // having delay on each run
+    let isFirstSync = await syncService.isFirstSync()
+    if (isFirstSync) {
+      debug('It is first boot, syncing database')
+      let status = statusManager.info('Syncing database')
+      await syncService.syncAll()
+      status.clear()
+    }
+
+    status = statusManager.info('Starting Relay')
+    relayManager.startRelay()
+    status.clear()
+
+    if (config.domainfrontable) {
+      status = statusManager.info('Starting Domain Fronting Server')
+      await runHTTPListener(config.domainfrontPort)
+      await API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)
+      status.clear()
+    }
+
+    store.commit('completeBoot')
+  } catch(err) {
+    if (err instanceof AuthenticationError) {
       err.logAndReport()
       throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
-    })
-    .catch(NetworkError, err => {
+    } else if (err instanceof NetworkError) {
       err.log()
       throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
-    })
-    .catch(RequestError, err => {
+    } else if (err instanceof RequestError) {
       err.logAndReport()
       throw new ApplicationBootError('Error occured while booting application', true)
-    })
-    .catch(ServerError, err => {
+    } else if (err instanceof ServerError) {
       err.log()
       throw new ApplicationBootError('There is a problem with the server, please try again later', true)
-    })
-    .catch(err => !(err instanceof ApplicationBootError ), err => {
+    } else if (!(err instanceof ApplicationBootError)){
       // console.warn(handledErrors.reduce((o, a) => o || err instanceof a, false))
       if (err.smart) {
         err.logAndReport()
@@ -128,8 +98,8 @@ export default function bootRelay (gui) {
         error(err)
         Raven.captureException(err)
       }
-
       throw new ApplicationBootError('Failed to start Application')
-    })
+    }
+  }
 }
 

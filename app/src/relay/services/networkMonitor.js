@@ -1,0 +1,97 @@
+import schedule from 'node-schedule'
+import API from '@/api'
+import config from '@utils/config'
+import { relayManager } from '@/services'
+import { NATConnectivityConnection } from '@/net'
+import { store } from '@utils/store'
+
+
+class NetworkMonitor {
+  constructor () {
+    this.localPort = -1
+    this.remotePort = -1
+    this.remoteIP = ''
+    this.localIP = ''
+
+    this.isRelayReachable = false
+    this.isServerConnected = false
+
+    this.natConnection = null
+  }
+
+  async start() {
+    let natConnection = this.natConnection = new NATConnectivityConnection(
+      config.echoServer.host,
+      config.echoServer.port
+    )
+
+    natConnection.on('net-update', this._onNetworkUpdate)
+    natConnection.on('close', () => { natConnection.reconnect() })
+
+    await natConnection.connect()
+
+    setTimeout(() => { this._sendKeepAlive() }, 500)
+    schedule.scheduleJob('*/30 * * * * *', () => {
+      this._sendKeepAlive()
+    })
+  }
+
+  getPublicAddress () {
+    return {ip: this.remoteIP, port: this.remotePort}
+  }
+
+  getPrivateAddress () {
+    return {ip: this.localIP, port: this.localPort}
+  }
+
+  async _sendKeepAlive () {
+    let isRelayReachable, isServerConnected
+    
+    try {
+      let res = await API.keepAlive(relayManager.openAccess)
+      isServerConnected = true
+      isRelayReachable = res.data.reachable
+    } catch(err) {
+      isRelayReachable = false
+      isServerConnected = false
+    }
+
+    if (isServerConnected !== this.isServerConnected) {
+      this.isServerConnected = isServerConnected
+      store.commit('changeServerConnected', isServerConnected)
+    }
+
+    if (isRelayReachable !== this.isRelayReachable) {
+      this.isRelayReachable = isRelayReachable
+      store.commit('changeRelayReachable', isRelayReachable)
+    }
+
+    if (this.natConnection.isConnected) {
+      this.natConnection.keepAlive()
+    }
+  }
+
+  _onNetworkUpdate (data) {
+    let changed = false
+
+    for (let field of ['localIP', 'localPort', 'remoteIP', 'remotePort']) {
+      changed = changed || (this[field] !== data[field])
+      this[field] = data[field]
+    }
+
+    if (changed) {
+      relayManager.handleReconnect()
+    }
+  }
+  
+  // checkNatType() {
+  //   var stun = require('vs-stun')
+  //   if (this.natEnabled) {
+  //     stun.connect(config.stunServer, (err, data) => {
+  //       console.log('NAT TYPE IS', data.stun)
+  //     })
+  //   }
+  // }
+}
+export const networkMonitor = new NetworkMonitor()
+export default networkMonitor

@@ -1,7 +1,7 @@
 /**
  * Created by milad on 4/12/17.
  */
-import PolicyManager from '@/services/PolicyManager'
+import { policyManager } from '@/services'
 const net = require('net')
 import { error, debug } from '@utils/log'
 
@@ -45,24 +45,17 @@ export class ConnectionReceiver {
     if (data.length >= this.headersize) {
       const sessiontoken = data.slice(0, this.headersize)
       const desc = pendMgr.getPendingConnection(sessiontoken)
-      console.log('Conid', sessiontoken)
       if (desc) {
         API.clientSessionConnected(desc.client, desc.sessionId)
         this.desciber = desc
-        console.log('clientID', sessiontoken)
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
         }, () => {
-          console.log('I am here 3')
           this.socket.end()
         })
-        console.log('I am here')
         this.crypt.decrypt(data.slice(this.headersize, data.length))
-        console.log('I am here 2')
         this.isAuthenticated = true
-        console.log('Authenticated')
       } else {
-        console.log('I am here 4')
         this.socket.end()
       }
     }
@@ -78,9 +71,8 @@ export class ConnectionReceiver {
   }
 
   newConnection (ip, port, conid) {
-    PolicyManager.getDomainPolicy(ip, port).then(() => {
+    policyManager.getDomainPolicy(ip, port).then(() => {
       try {
-        console.log('ip', ip, 'port', port)
         this.connections[conid] = net.connect({host: ip, port: port}, () => {
           this.write(conid, 'N', Buffer(ip + ':' + String(port)))
         })
@@ -98,7 +90,6 @@ export class ConnectionReceiver {
       }
       catch (err) {
         this.write(conid, 'C', Buffer(ip + ':' + String(port)))
-        console.log(err)
       }
     }).catch((err) => {
       this.write(conid, 'C', Buffer(ip + ':' + String(port)))
@@ -110,12 +101,10 @@ export class ConnectionReceiver {
     if (CMD === 'N') {
       data = String(data)
       if (data.length === size) {
-        console.log('new con', data)
         const sp = data.split(':')
 
         const ip = sp[0]
         const port = sp[1]
-        console.log('CREATE CONNECTION', ip, port)
         this.newconcarry = ''
         this.newConnection(ip, port, lastconid)
       } else {
@@ -124,7 +113,6 @@ export class ConnectionReceiver {
           const sp = this.newconcarry.split(':')
           const ip = sp[0]
           const port = sp[1]
-          console.log('CREATE CONNECTION', ip, port)
           this.newConnection(ip, port, lastconid)
         }
       }
@@ -138,7 +126,6 @@ export class ConnectionReceiver {
       }
     } else if (CMD === 'K') {
     } else {
-      console.log('UNKOWN command received')
       if (lastconid in this.connections) {
         this.connections[lastconid].end()
       }

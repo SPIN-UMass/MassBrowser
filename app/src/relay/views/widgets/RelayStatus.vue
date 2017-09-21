@@ -2,7 +2,7 @@
   #m-relay-status
     .status-container
       .status.serverConnection
-        .status-led(v-bind:class="{'off': !WSconnected, 'on': WSconnected}")
+        .status-led(v-bind:class="{'off': !connected, 'on': connected}")
         span.status-label ServerConnection
       .status.reachable
         .status-led(v-bind:class="{'off': !reachable, 'on': reachable}")
@@ -19,40 +19,28 @@
 
 <script>
   import { getService } from '@utils/remote'
+  import { store } from '@utils/store'
+  import { mapState } from 'vuex'
 
-  const StatusReporter = getService('statusReporter')
-  const HealthManager = getService('health')
+  const relayManager = getService('relay')
 
   export default {
+    store,
     data () {
       return {
-        reachable: false,
-        WSconnected: false,
-        openAccess: true
       }
     },
-    created () {
-      StatusReporter.reachable.then(reachable => this.reachable = reachable)
-      StatusReporter.WSconnected.then(WSconnected => this.WSconnected = WSconnected)
-      StatusReporter.on('status-updated', this.onStatusUpdated)
-      HealthManager.openAccess.then(openAccess => {
-        this.openAccess = openAccess
-      })
-    },
-    beforeDestroy() {
-      StatusReporter.removeListener('status-updated', this.onStatusUpdated)
-    },
+    computed: mapState({
+      reachable: 'isRelayReachable',
+      connected: 'isServerConnected',
+      openAccess: 'openAccess'
+    }),
     methods: {
-      onStatusUpdated: async function() {
-        this.reachable = await StatusReporter.reachable
-        this.WSconnected = await StatusReporter.WSconnected
-      },
       onChange: function (e) {
         if (e.value) {
-          HealthManager.changeAccess(e.value)
-        }
-        else {
-          HealthManager.changeAccess(e.value)
+          relayManager.startRelay()
+        } else {
+          relayManager.stopRelay()
         }
       }
     }

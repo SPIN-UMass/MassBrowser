@@ -1,7 +1,5 @@
-/**
- * Created by milad on 7/3/17.
- */
 import CDNSocketMeek from './CDNSocketMeek'
+
 class _CDNManger {
   constructor () {
     this.connectionmap = {}
@@ -14,5 +12,6 @@ class _CDNManger {
     this.connectionmap[req.socket].newRequest(req, res)
   }
 }
+
 var CDNManager = new _CDNManger()
 export default CDNManager

@@ -9,6 +9,11 @@ if (config.isElectronMainProcess) {
       let ctrl = typeof ctrlClass === 'object' ? ctrlClass : new ctrlClass()
       remote.registerService(`ctrl:${name}`, ctrl)
       return ctrl
+    },
+    remoteModel: function(name, modelFactory) {
+      const model = modelFactory()
+      remote.registerService(`model:${name}`, model)
+      return model
     }
   }
 
@@ -20,6 +25,9 @@ if (config.isElectronMainProcess) {
     remote,
     createController: function(name, ctrlClass) {
       return getService(`ctrl:${name}`)
+    },
+    remoteModel: function(name) {
+      return getService(`model:${name}`)
     }
   }
 }

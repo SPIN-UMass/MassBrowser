@@ -1,38 +1,33 @@
 import { initializeMainProcess } from '@common/main/electron/main'
-import { serviceRegistry } from '@utils/remote'
+import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
-import SyncService from '@/services/SyncService'
-import StatusService from '@common/services/StatusService'
-import Context from '@/context'
+import { syncService, relayManager, networkMonitor } from '@/services'
+import { statusManager, autoUpdater } from '@common/services'
 import bootRelay from '@/boot'
-import HealthManager from '@/net/HealthManager'
-import StatusReporter from '@/net/StatusReporter'
-import AutoUpdater from '@common/services/AutoUpdater'
 
 
 // const serviceRegistry = new ServiceRegistry()
-serviceRegistry.registerService('sync', SyncService)
-serviceRegistry.registerService('status', StatusService)
-serviceRegistry.registerService('context', Context)
-serviceRegistry.registerService('health', HealthManager)
-serviceRegistry.registerService('statusReporter', StatusReporter)
-serviceRegistry.registerService('boot', { bootRelay })
-serviceRegistry.registerService('autoupdate', AutoUpdater)
+remote.registerService('sync', syncService)
+remote.registerService('status', statusManager)
+remote.registerService('relay', relayManager)
+remote.registerService('network-monitor', networkMonitor)
+remote.registerService('boot', { boot: bootRelay })
+remote.registerService('autoupdate', autoUpdater)
 
-var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
-requireControllerFilter.keys().forEach(requireControllerFilter)
+// var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
+// requireControllerFilter.keys().forEach(requireControllerFilter)
 
 let currentWindow = null
 
 function onWindowCreated(window) {
   debug("Window created")
-  serviceRegistry.setWebContents(window.webContents)
+  remote.setWebContents(window.webContents)
   currentWindow = window
 }
 
 function onWindowClosed() {
   currentWindow = null
-  serviceRegistry.setWebContents(null)
+  remote.setWebContents(null)
 }
 
 initializeMainProcess(onWindowCreated, onWindowClosed)

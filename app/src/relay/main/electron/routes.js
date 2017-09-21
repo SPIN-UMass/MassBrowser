@@ -1,13 +1,13 @@
 export default [
   {
     path: '/',
-    name: 'splash',
-    component: require('@/views/Splash')
+    name: 'root',
+    component: require('@/views/Root')
   },
   {
     path: '/boot',
     name: 'boot',
-    component: require('@/views/Boot')
+    component: require('@common/views/Boot')
   },
   {
     path: '/start',

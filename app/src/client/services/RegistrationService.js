@@ -8,7 +8,7 @@ class RegistrationService {
     return API.registerClient(invitationCode)
     .then(_client => {
       let client = {id: _client.id, password: _client.password}
-      return store.commit('completeRegistration', client)
+      return store.commit('registerClient', client)
     })
   }
 }

@@ -1,15 +1,17 @@
 <template lang='pug'>
-    .categories-container
-        .categories-list
-            ul.list-group
-                li.category-item.list-group-item(v-for="item in categories")
-                    span {{item.name}}
-                    category-toggle.toggle(:category="item")
+  .categories-container
+    .categories-list
+      ul.list-group
+        li.category-item.list-group-item(v-for="item in categories")
+          span {{item.name}}
+          category-toggle.toggle(:category="item")
 </template>
 
 <script>
-  import Category from '@/models/Category'
-  import SyncService from '@/services/SyncService'
+  import { Category } from '@/models'
+  import { getService } from '@utils/remote'
+
+  const syncService = getService('sync')
 
   const CategoryToggle = {
     render: function (h) {
@@ -31,11 +33,10 @@
       }
     },
     methods: {
-      onChange: function (e) {
+      async onChange(e) {
         this.category.enabled = e.value
-        this.category.save().then(() => {
-          SyncService.syncServerAllowedCategories()
-        })
+        await Category.update({id: this.category.id}, {$set: {enabled: this.category.enabled}})
+        syncService.syncServerAllowedCategories()
       }
     }
   }

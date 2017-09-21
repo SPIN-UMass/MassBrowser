@@ -2,68 +2,59 @@
   .y-splash
     .y-container
       h1 MassBrowser
-      .loading-container(v-if="status=='loading'")
+      .loading-container(v-if="step=='loading'")
         GridLoader.spinner(color="#aaa")
-        .status-container  {{ statusMessage }}
-      .error-container(v-if="status=='error'")
+        .status-container  {{ status }}
+      .error-container(v-if="step=='error'")
         h4.red {{ errorMessage }}
         div
-          button.btn.btn-rounded.btn-lg.btn-warning(v-if="canRetry" v-on:click='bootRelay') Try Again
+          button.btn.btn-rounded.btn-lg.btn-warning(v-if="canRetry" v-on:click='boot') Try Again
 </template>
 
 <script>
-  // import StatusWidget from './StatusWidget'
-  // import Status from '@utils/status'
   import GridLoader from 'vue-spinner/src/GridLoader.vue'
 
-  // import bootRelay from '@/boot'
-  import { InvalidInvitationCodeError, ApplicationBootError } from '@utils/errors'
-  import KVStore from '@utils/kvstore'
-  import config from '@utils/config'
-
+  import { ApplicationBootError } from '@utils/errors'
   import { getService } from '@utils/remote'
+  import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/statusManager'
+  import { store } from '@utils/store'
 
-  const Status = getService('status')
   const Boot = getService('boot')
-  const Context = getService('context')
 
   export default {
-    data () {
-      return {
-        status: 'loading',
-        errorMessage: '',
-        canRetry: false,
-        statusMessage: ''
-      }
-    },
     components: {
       GridLoader
     },
-    created () {
-      Status.on('status-changed', this.onStatusChanged)
-      Status.on('status-cleared', this.onStatusCleared)
-      
-      this.bootRelay()
+    store,
+    data () {
+      return {
+        step: 'loading',
+        errorMessage: '',
+        canRetry: false
+      }
     },
-    beforeDestroy () {
-      Status.removeListener('status-changed', this.onStatusChanged)
-      Status.removeListener('status-cleared', this.onStatusCleared)
+    computed: {
+      status: function() {
+        let status = this.$store.state.status
+        if (status.statusType === STATUS_LOG) {
+          return status.message
+        } else if (status.statusType === STATUS_PROGRESS) {
+          return status.message
+        } else {
+          return ''
+        }
+      }
+    },
+    created () {
+      this.boot()
     },
     methods: {
-      onStatusChanged: function(status) {
-        if (status.statusType === Status.STATUS_LOG) {
-          this.statusMessage = status.message
-        }
-      },
-      onStatusCleared: function () {
-        this.statusMessage = ''
-      },
-      bootRelay() {
-        return Boot.bootRelay()
-        .then(() => this.$router.push('/splash'))
+      boot() {
+        return Boot.boot()
+        .then(() => this.$router.push('/'))
         .catch(ApplicationBootError, err => {
           this.errorMessage = err.message
-          this.status = 'error'
+          this.step = 'error'
           this.canRetry = true
         })
       }
@@ -73,7 +64,7 @@
 
 
 <style scoped lang='scss'>
-  @import '~@common/styles/settings.scss';
+  @import '~@/views/styles/settings.scss';
 
   .y-splash {
     background-color: white;
@@ -91,7 +82,7 @@
     }
 
     .loading-container {
-      margin-top: 80px;
+      margin-top: 50px;
       
       .spinner { 
         margin: auto;

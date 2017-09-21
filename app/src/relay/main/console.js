@@ -18,9 +18,8 @@ import { InvalidInvitationCodeError } from '@utils/errors'
 import { error } from '@utils/log'
 import config from '@utils/config'
 import { initializeLogging } from '@utils/log'
-import StatusReporter from '@/net/StatusReporter'
 
-import HealthManager from '@/net/HealthManager'
+import { relayManager } from '@/services'
 
 global.Promise = Promise
 
@@ -32,7 +31,7 @@ Raven
 
 bootClient(false)
   .then(() => {
-    HealthManager.changeAccess(true)
+    relayManager.changeAccess(true)
     console.log('MILAD')
 
   })
