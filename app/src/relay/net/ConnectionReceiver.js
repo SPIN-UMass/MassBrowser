@@ -8,10 +8,11 @@ import { error, debug } from '@utils/log'
 import { Crypto } from '@utils/crypto'
 
 import API from '@/api'
-import { pendMgr } from './PendingConnections'
+// import { pendMgr } from './PendingConnections'
 
 export class ConnectionReceiver {
-  constructor (socketup, socketdown, socket) {
+  constructor (socketup, socketdown, socket, authenticator) {
+    this.authenticator = authenticator
     this.socketup = socketup
     this.socket = socket
     this.socketdown = socketdown
@@ -44,7 +45,7 @@ export class ConnectionReceiver {
     // console.log("MY DATA", data);
     if (data.length >= this.headersize) {
       const sessiontoken = data.slice(0, this.headersize)
-      const desc = pendMgr.getPendingConnection(sessiontoken)
+      const desc = this.authenticator.authenticate(sessiontoken)
       if (desc) {
         API.clientSessionConnected(desc.client, desc.sessionId)
         this.desciber = desc

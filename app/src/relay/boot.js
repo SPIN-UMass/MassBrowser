@@ -1,26 +1,17 @@
-import { runTLSserver } from '@/net/TLSReceiver'
-import { runOBFSserver } from '@/net/OBFSReceiver'
-import { runHTTPListener } from '@/net/HttpListener'
-
-import { pendMgr } from '@/net/PendingConnections'
-
 import API from '@/api'
-import KVStore from '@utils/kvstore'
-import * as errors from '@utils/errors'
 import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { Raven } from '@utils/raven'
+import { statusManager } from '@common/services/statusManager'
+import { syncService, relayManager, networkMonitor } from '@/services'
+import { DomainFrontedRelay } from '@/net'
+import { WebSocketTransport } from '@utils/transport'
+import { eventHandler } from '@/events'
+import { store } from '@utils/store'
 import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
 } from '@utils/errors'
-import { statusManager } from '@common/services/statusManager'
-import { syncService, relayManager, networkMonitor } from '@/services'
-
-import { WebSocketTransport } from '@utils/transport'
-import { eventHandler } from '@/events'
-import { store } from '@utils/store'
-
 
 export default async function bootRelay() {
   let status
@@ -71,7 +62,8 @@ export default async function bootRelay() {
 
     if (config.domainfrontable) {
       status = statusManager.info('Starting Domain Fronting Server')
-      await runHTTPListener(config.domainfrontPort)
+      let domainFrontedRelay = new DomainFrontedRelay(relayManager.authenticator, config.domainfrontPort)
+      await domainFrontedRelay.startRelay()
       await API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)
       status.clear()
     }

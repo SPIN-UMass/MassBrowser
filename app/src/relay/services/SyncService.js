@@ -6,10 +6,6 @@ import { Website, Domain, CDN, Region, Category } from '@/models'
 
 
 class SyncService {
-  start () {
-
-  }
-
   syncAll () {
     return Promise.all([
       this.syncWebsites(),

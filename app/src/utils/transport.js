@@ -138,9 +138,11 @@ export class WebSocketTransport extends Transport {
   eventReceived(resp) {
     this.eventHandler(resp.event, resp.data)
   }
+  
   handleReconnect() {
     this.eventHandler('reconnected','')
   }
+
   replyReceived(resp) {
     if (resp['message_id'] in this.connectionMap) {
       // debug('I am HERE',this.connectionMap[resp['message_id']])

@@ -1,7 +1,4 @@
-/**
- * Created by milad on 4/15/17.
- */
-class PendingConnections {
+export class ConnectionAuthenticator {
   constructor () {
     this.connections = {}
   }
@@ -10,19 +7,14 @@ class PendingConnections {
     this.connections[token] = description
   }
 
-  getPendingConnection (token) {
-    console.log('connection before:', this.connections)
+  authenticate (token) {
     if (token in this.connections) {
       const desc = this.connections[token]
       delete (this.connections[token])
-      console.log('connection after:', this.connections)
       return desc
     }
-
     return false
   }
-
 }
-var pendman = new PendingConnections()
 
-module.exports = {'pendMgr': pendman}
+export default ConnectionAuthenticator

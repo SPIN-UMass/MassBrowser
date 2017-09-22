@@ -1,13 +1,10 @@
-import { ThrottleGroup } from '@/net/throttle'
-import { runOBFSserver } from '@/net/OBFSReceiver'
-import { error, debug } from '@utils/log'
+import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
+import { warn, error, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
 import { networkMonitor } from '@/services'
+import { ConnectionType, UNLIMITED_BANDWIDTH } from '@/constants'
 import config from '@utils/config'
-
-
-let UNLIMIT = 1000000000
 
 
 /**
@@ -18,18 +15,20 @@ let UNLIMIT = 1000000000
  */
 class RelayManager {
   constructor () {
-    this.relayServer = {}
+    this.relayServer = null
     this.isRelayServerRunning = false
 
     this.openAccess = false
     this.natEnabled = store.state.natEnabled
     this.relayPort = store.state.relayPort
 
-    this.uploadLimit = store.state.uploadLimit || UNLIMIT
-    this.downloadLimit = store.state.downloadLimit || UNLIMIT
-    this.bandwidthLimited = this.uploadLimit !== UNLIMIT || this.downloadLimit !== UNLIMIT
+    this.uploadLimit = store.state.uploadLimit || UNLIMITED_BANDWIDTH
+    this.downloadLimit = store.state.downloadLimit || UNLIMITED_BANDWIDTH
+    this.bandwidthLimited = this.uploadLimit !== UNLIMITED_BANDWIDTH || this.downloadLimit !== UNLIMITED_BANDWIDTH
     this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit})
     this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit})
+
+    this.authenticator = new ConnectionAuthenticator()
 
     if (this.natEnabled) {
       debug('NAT mode is enabled')
@@ -91,31 +90,56 @@ class RelayManager {
     }
   }
 
-  _stopRelayServer () {
+  onNewSessionEvent (data) {
+    var desc = {
+      'writekey': (Buffer.from(data.read_key, 'base64')),
+      'writeiv': (Buffer.from(data.read_iv, 'base64')),
+      'readkey': (Buffer.from(data.write_key, 'base64')),
+      'readiv': (Buffer.from(data.write_iv, 'base64')),
+      'token': (Buffer.from(data.token, 'base64')),
+      'client': data.client,
+      'connectiontype': data.connection_type,
+      'sessionId': data.id
+    }
+  
+    debug(`New session received with token ${Buffer.from(data.token, 'base64')}`)
+  
+    if (desc.connectiontype === ConnectionType.TCP_CLIENT) {
+      this.authenticator.addPendingConnection((desc.token), desc)
+    }
+
+    API.acceptSession(data.client, data.id)
+  }
+
+  async _stopRelayServer() {
     if (this.isRelayServerRunning) {
-      this.relayServer.close(() => {
-        this.isRelayServerRunning = false
-        this.relayServer = {}
-      })
+      await relayServer.stop()
+      this.isRelayServerRunning = false
+      this.relayServer = null
     }
   }
 
-  async _restartRelayServer () {
+  async _startRelayServer() {
     let localAddress = this._getLocalAddress()
 
-    if (this.isRelayServerRunning) {
-      this._stopRelayServer() 
-    } 
+    let server = new TCPRelay(
+      this.authenticator,
+      localAddress.ip, 
+      localAddress.port,
+      this.uploadLimiter,
+      this.downloadLimiter
+    )
+    await server.start()
+    this.isRelayServerRunning = true
+    this.relayServer = server
+  }
 
+  async _restartRelayServer () {
     try {
-      let server = await runOBFSserver(
-        localAddress.ip, 
-        localAddress.port,
-        this.uploadLimiter,
-        this.downloadLimiter
-      )
-      this.isRelayServerRunning = true
-      this.relayServer = server
+      if (this.isRelayServerRunning) {
+        await this._stopRelayServer() 
+      } 
+      await this._startRelayServer()
     } catch(err) {
       warn(err)
     }

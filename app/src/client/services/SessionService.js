@@ -3,7 +3,6 @@
  */
 
 import { connectionManager, RelayConnection, Session } from '@/net'
-import { pendMgr } from '~/client/net/PendingConnections'
 import API from '@/api'
 import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '@utils/log'

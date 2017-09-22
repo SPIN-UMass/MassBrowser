@@ -4,6 +4,7 @@ import config from '@utils/config'
 import { relayManager } from '@/services'
 import { NATConnectivityConnection } from '@/net'
 import { store } from '@utils/store'
+import { debug } from '@utils/log'
 
 
 class NetworkMonitor {
@@ -50,7 +51,7 @@ class NetworkMonitor {
     try {
       let res = await API.keepAlive(relayManager.openAccess)
       isServerConnected = true
-      isRelayReachable = res.data.reachable
+      isRelayReachable = res.data.tcp_reachable
     } catch(err) {
       isRelayReachable = false
       isServerConnected = false
@@ -65,6 +66,8 @@ class NetworkMonitor {
       this.isRelayReachable = isRelayReachable
       store.commit('changeRelayReachable', isRelayReachable)
     }
+
+    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isRelayReachable}`)
 
     if (this.natConnection.isConnected) {
       this.natConnection.keepAlive()
