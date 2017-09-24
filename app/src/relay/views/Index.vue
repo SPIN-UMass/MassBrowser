@@ -4,12 +4,12 @@
       h1 MassRelay
       #m-nav
         ul
-          li(:class="{active: currentTab==='relay-home'}")
+          li(:class="{active: currentTab==='home'}")
             router-link(to='/relay') home
-          li(:class="{active: currentTab==='relay-categories'}")
+          li(:class="{active: currentTab==='categories'}")
             router-link(to='/relay/categories') acl
             //- .span(v-on:click="$router.push('client-websites')") websites
-          li(:class="{active: currentTab==='relay-settings'}")
+          li(:class="{active: currentTab==='settings'}")
             router-link(to='/relay/settings') settings
     #m-content
       router-view
@@ -40,7 +40,12 @@
     created () {
       this.currentTab = this.$router.currentRoute.name
       this.$router.afterEach((to, from) => {
-        this.currentTab = to.name
+        let name = to.name
+        if (name.indexOf('settings') !== -1) {
+          this.currentTab = 'settings'
+        } else {
+          this.currentTab = name
+        }
       })
 
       syncService.syncAll()

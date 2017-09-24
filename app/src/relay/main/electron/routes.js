@@ -22,17 +22,30 @@ export default [
       {
         path: '/relay',
         component: require('@/views/Home'),
-        name: 'relay-home'
+        name: 'home'
       },
       {
         path: '/relay/settings',
-        component: require('@/views/SettingsView'),
-        name: 'relay-settings'
+        component: require('@/views/settings/SettingsView'),
+        name: 'settings',
+        children: [
+          { path: '/relay/settings', redirect: '/relay/settings/network' },
+          {
+            path: '/relay/settings/network',
+            name: 'settings-network',
+            component: require('@/views/settings/NetworkSettingsView')
+          },
+          {
+            path: '/relay/settings/acl',
+            name: 'settings-acl',
+            component: require('@/views/settings/ACLSettingsView')
+          }
+        ]
       },
       {
         path: '/relay/categories',
         component: require('@/views/CategoriesView'),
-        name: 'relay-categories'
+        name: 'categories'
 
       }
     ]

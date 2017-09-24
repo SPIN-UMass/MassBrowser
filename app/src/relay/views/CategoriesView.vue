@@ -51,11 +51,8 @@
       'category-toggle': CategoryToggle
     },
     created () {
-      console.log('finding categories')
       Category.find()
         .then(categories => {
-          console.log('founded categories')
-          console.log(categories)
           this.categories = categories
         })
     },
@@ -64,10 +61,9 @@
 </script>
 
 <style scoped lang='scss'>
-
-    .category-item {
-        .toggle {
-            float: right;
-        }
+  .category-item {
+    .toggle {
+        float: right;
     }
+  }
 </style>

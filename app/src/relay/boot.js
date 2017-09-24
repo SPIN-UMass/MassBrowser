@@ -21,7 +21,7 @@ export default async function bootRelay() {
 
     if (!relay) {
       status = statusManager.info('Registering Relay')
-      relayInfo = await API.registerRelay()
+      let relayInfo = await API.registerRelay()
       relay = {id: relayInfo.id, password: relayInfo.password}
       store.commit('registerRelay', relay)
       status.clear()

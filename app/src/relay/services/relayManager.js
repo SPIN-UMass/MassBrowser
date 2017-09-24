@@ -37,15 +37,23 @@ class RelayManager {
     }   
   }
 
-  changeUploadLimit (limitKB) {
-    this.uploadLimit = limitKB * 8000
-    store.commit('changeUploadLimit', limitKB * 8000)
+  setUploadLimit (limitBytes) {
+    if (!limitBytes) {
+      limitBytes = UNLIMITED_BANDWIDTH
+    }
+
+    this.uploadLimit = limitBytes * 8
+    store.commit('changeUploadLimit', limitBytes)
     this.uploadLimiter.resetRate({rate: this.uploadLimit})
   }
 
-  changeDownloadLimit (limitKB) {
-    this.downloadLimit = limitKB * 8000
-    store.commit('changeDownloadLimit', limitKB * 8000)
+  setDownloadLimit (limitBytes) {
+    if (!limitBytes) {
+      limitBytes = UNLIMITED_BANDWIDTH
+    }
+
+    this.downloadLimit = limitBytes * 8
+    store.commit('changeDownloadLimit', limitBytes)
     this.downloadLimiter.resetRate({rate: this.downloadLimit})
   }
 
@@ -102,7 +110,7 @@ class RelayManager {
       'sessionId': data.id
     }
   
-    debug(`New session received with token ${Buffer.from(data.token, 'base64')}`)
+    debug(`New session [${data.id}] received for client [${data.client.id}]`)
   
     if (desc.connectiontype === ConnectionType.TCP_CLIENT) {
       this.authenticator.addPendingConnection((desc.token), desc)
@@ -113,7 +121,7 @@ class RelayManager {
 
   async _stopRelayServer() {
     if (this.isRelayServerRunning) {
-      await relayServer.stop()
+      await this.relayServer.stop()
       this.isRelayServerRunning = false
       this.relayServer = null
     }
