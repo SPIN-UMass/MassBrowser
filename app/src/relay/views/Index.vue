@@ -6,9 +6,6 @@
         ul
           li(:class="{active: currentTab==='home'}")
             router-link(to='/relay') home
-          li(:class="{active: currentTab==='categories'}")
-            router-link(to='/relay/categories') acl
-            //- .span(v-on:click="$router.push('client-websites')") websites
           li(:class="{active: currentTab==='settings'}")
             router-link(to='/relay/settings') settings
     #m-content
@@ -110,7 +107,7 @@
         text-align: center;
         padding: 5px 16px;
         text-decoration: none;
-        
+        cursor: pointer;
         color: #bbb;    
         font-size: $nav_font_size;
         

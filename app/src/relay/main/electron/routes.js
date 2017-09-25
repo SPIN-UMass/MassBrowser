@@ -36,17 +36,11 @@ export default [
             component: require('@/views/settings/NetworkSettingsView')
           },
           {
-            path: '/relay/settings/acl',
-            name: 'settings-acl',
-            component: require('@/views/settings/ACLSettingsView')
+            path: '/relay/settings/categories',
+            name: 'settings-categories',
+            component: require('@/views/settings/CategorySettingsView')
           }
         ]
-      },
-      {
-        path: '/relay/categories',
-        component: require('@/views/CategoriesView'),
-        name: 'categories'
-
       }
     ]
 

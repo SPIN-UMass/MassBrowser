@@ -1,18 +1,8 @@
-/**
- * Created by milad on 9/6/17.
- */
-/**
- * Created by milad on 6/18/17.
- */
-/**
- * Created by milad on 4/23/17.
- */
 import KVStore from '~/utils/kvstore'
 import * as util from 'util'
 // const util = require('util')
 import { EventEmitter } from 'events'
 import API from '@/api'
-import { pendMgr } from '~/relay/net/PendingConnections'
 import WebSocket from 'ws'
 import * as errors from '~/utils/errors'
 import { error, debug } from '~/utils/log'

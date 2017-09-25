@@ -6,10 +6,10 @@
           router-link(to='/relay/settings/network') 
             i.tab-icon.fa.fa-signal
             span.tab-label Network
-        li(v-bind:class="{ active: currentTab === 'settings-acl' }")
-          router-link(to='/relay/settings/acl')
-            i.tab-icon.fa.fa-key
-            span.tab-label Categories
+        li(v-bind:class="{ active: currentTab === 'settings-categories' }")
+          router-link(to='/relay/settings/categories')
+            i.tab-icon.fa.fa-globe
+            span.tab-label Websites
       .tab-content
         router-view.tab-pane.fade.active.in
           
@@ -55,6 +55,11 @@
 
     .tab-content {
       height: $content_height;
+    }
+
+    .settings-divider {
+      border-bottom: 1px solid rgba(50, 50, 50, 0.2);
+      margin: 5px 0px;
     }
   }
 </style>

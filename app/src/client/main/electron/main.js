@@ -19,8 +19,8 @@ remote.registerService('autoupdate', autoUpdater)
 remote.registerService('kvstore', KVStore)
 
 
-let requireControllerFilter = require.context('@/controllers', true, /\.js$/)
-requireControllerFilter.keys().forEach(requireControllerFilter)
+// let requireControllerFilter = require.context('@/controllers', true, /\.js$/)
+// requireControllerFilter.keys().forEach(requireControllerFilter)
 
 
 let currentWindow = null

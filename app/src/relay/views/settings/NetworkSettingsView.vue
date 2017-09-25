@@ -36,8 +36,6 @@
 </template>
 
 <script>
-  import vueSlider from 'vue-slider-component'
-  import NumberPicker from '@common/widgets/NumberPicker'
   import SlidedNumberPicker from '@common/widgets/SlidedNumberPicker'
   import SettingsGroup from '@common/widgets/SettingsGroup'
 
@@ -51,14 +49,8 @@
   export default {
     store,
     components: {
-      vueSlider,
-      NumberPicker,
       SlidedNumberPicker,
       SettingsGroup
-    },
-    data () {
-      return {
-      }
     },
     computed: {
      uploadLimit: {
