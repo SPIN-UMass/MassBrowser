@@ -8,7 +8,7 @@
         i.fa.fa-close
       .settings-help-header
         i.fa.fa-question-circle
-        .settings-help-title {{ title }}         
+        .settings-help-title(v-if="hasTitle") {{ title }}         
       .settings-help-body
         slot(name="help")
     .settings-title {{ title }}
@@ -23,17 +23,19 @@
     data () {
       return {
         displayHelp: false,
-        hasHelp: false
+        hasHelp: false,
+        hasTitle: false
       }
     },
     props: {
       color: {
         default: 'primary'
       },
-      title: {}
+      title: ''
     },
     created() {
       this.hasHelp = !!this.$slots.help
+      this.hasTitle = !!this.title
     }
   }
 
@@ -41,7 +43,6 @@
 
 <style scoped lang='scss'>
   .settings-group {
-    
     .settings-title {
       color: #666;
       font-weight: bold;
@@ -71,13 +72,13 @@
     }
 
     .settings-help {
-      position: absolute;
+      position: fixed;
       width: 85%;
       z-index: 1000;
       left: 0;
       right: 0;
+      top: 50px;
       margin: auto;
-      margin-top: -25px;
 
       .close {
         cursor: pointer;

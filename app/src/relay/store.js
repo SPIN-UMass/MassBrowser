@@ -7,8 +7,10 @@ export default {
       message: '',
       progress: 0
     },
+    syncProgress: 0,
+    isFirstRun: new RendererCachedPersistedState(true),
     bootComplete: false,
-    relay: new PersistedState({}),
+    relay: new PersistedState({}), // Has to be cached because it's used in the Root view
     registrationComplete: new RendererCachedPersistedState(false),
     natEnabled: new RendererCachedPersistedState(true),
     downloadLimit: new RendererCachedPersistedState(0),
@@ -19,6 +21,9 @@ export default {
     isServerConnected: false
   },
   mutations: {
+    setSyncProgress(state, progress) {
+      state.syncProgress = progress
+    },
     changeStatus(state, status) {
       state.status = status
     },

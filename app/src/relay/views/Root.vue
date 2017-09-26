@@ -5,7 +5,9 @@
   import { store } from '@utils/store'
   
   function getRoute() {
-    if (store.state.bootComplete) {
+    if (!store.state.registrationComplete) {
+      return '/start'
+    } else if (store.state.bootComplete) {
       return '/relay'
     } else {
       return '/boot'

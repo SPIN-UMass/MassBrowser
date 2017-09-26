@@ -27,6 +27,7 @@ export function parseStoreConfig(storeConfig) {
         config.persist = true
       } else if (value instanceof RendererCachedPersistedState) {
         config.cache = true
+        config.persist = true
       }
 
       value = value.value

@@ -3,21 +3,29 @@ import KVStore from '@utils/kvstore'
 import { debug, info } from '@utils/log'
 import { Website, Domain, CDN, Region, Category } from '@/models'
 
-import { SyncService as BaseSyncService } from '@common/services'
+import { SyncService as BaseSyncService, SyncProgress } from '@common/services'
+import { store } from '@utils/store'
 
 class SyncService extends BaseSyncService {
   syncAll () {
+    let progress = new SyncProgress(4)
+
     return Promise.all([
-      this.syncWebsites(),
-      this.syncDomains(),
-      this.syncCategories(),
-      this.syncCDNs(),
+      this.syncWebsites(progress),
+      this.syncDomains(progress),
+      this.syncCategories(progress),
+      this.syncCDNs(progress),
       this.syncAllowedCategories()
     ])
   }
 
   
   syncAllowedCategories () {
+    // Needs to be registerd
+    if (!store.state.relay) {
+      return
+    }
+
     API.getAllowedCategories().then((allowedCategories) => {
       var allowedIDs = []
       allowedCategories.forEach((cat) => {
@@ -41,17 +49,14 @@ class SyncService extends BaseSyncService {
     })
   }
 
-  syncServerAllowedCategories () {
-    Category.find({enabled: true})
-      .then(categories => {
-        var allowedIDs = []
-        categories.forEach((cat) => {
-          allowedIDs.push(cat.id)
-        })
-        API.setAllowedCategories(allowedIDs).then((d) => {
-          debug('Categories saved')
-        })
-      })
+  async syncServerAllowedCategories () {
+    let categories = await Category.find({enabled: true})
+    var allowedIDs = []
+    categories.forEach((cat) => {
+      allowedIDs.push(cat.id)
+    })
+    await API.setAllowedCategories(allowedIDs)
+    debug('Category settings updated on server')
   }
 }
 

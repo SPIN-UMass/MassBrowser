@@ -9,8 +9,11 @@ const RELAY_PATH = '/relays/'
 const CLIENT_PATH = '/client/'
 
 class RelayAPI extends CommonAPI {
-  registerRelay () {
-    return this.transport.post('/relays').then(r => r.data)
+  async registerRelay (categories) {
+    let response = await this.transport.post('/relays', {
+      categories: categories
+    })
+    return response.data
   }
 
   acceptSession (client, sessionid) {

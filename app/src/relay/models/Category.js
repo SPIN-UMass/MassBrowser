@@ -5,7 +5,7 @@ class CategorySchema {
   constructor () {
     this.name = null
     this.parent = new RelationField('Category')
-    this.enabled = true
+    this.enabled = false
     this.icon = ''
   }
 }

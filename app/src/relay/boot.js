@@ -20,11 +20,7 @@ export default async function bootRelay() {
     let relay = store.state.relay
 
     if (!relay) {
-      status = statusManager.info('Registering Relay')
-      let relayInfo = await API.registerRelay()
-      relay = {id: relayInfo.id, password: relayInfo.password}
-      store.commit('registerRelay', relay)
-      status.clear()
+      throw new ApplicationBootError('Relay not registered')
     }
 
     status = statusManager.info(`Authenticating Relay`)

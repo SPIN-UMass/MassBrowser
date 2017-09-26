@@ -10,6 +10,15 @@ let { state, stateConfig } = parseStoreConfig(storeConfig)
 for (let key in stateConfig) {
   if (stateConfig[key].cache) {
     let cachedValue = localStorage.getItem(key)
+    
+    if (!isNaN(cachedValue)) {
+      cachedValue = Number(cachedValue)
+    } else if (cachedValue === 'false') {
+      cachedValue = false
+    } else if (cachedValue === 'true') {
+      cachedValue = true
+    }
+
     if (cachedValue !== null) {
       state[key] = cachedValue
     }
@@ -17,7 +26,7 @@ for (let key in stateConfig) {
 }
 
 let parsedConfig = Object.assign({}, storeConfig)
-parsedConfig.state = state 
+parsedConfig.state = state
 
 Vue.use(Vuex)
 export const store = new Vuex.Store(parsedConfig)

@@ -1,6 +1,6 @@
 <template lang='pug'>
   .category-settings-container
-    settings-group(title="Website Access")
+    settings-group(:title="title")
       div(slot="help")
         p In this page you can restrict the websites you want to allow your connected users to browse.
         p Click on the different types of websites to allow or disallow that website category. If a 
@@ -26,12 +26,25 @@
         categories: []
       }
     },
+    props: {
+      title: {
+        default: 'Website Settings'
+      },
+      syncUpdates: {
+        type: Boolean,
+        default: true
+      }
+    },
     async created() {
       this.categories = (await Category.find()).filter(c => ['Ads', 'Third Parties'].indexOf(c.name) === -1)
     },
     methods: {
       toggleCategory(category) {
         category.enabled = !category.enabled;
+        Category.update({id: category.id}, {$set: {enabled: category.enabled}})
+        if (this.syncUpdates) {
+          // TODO 
+        }
       }
     }
   }
@@ -42,7 +55,7 @@
   @import '~@/views/styles/settings.scss';
   
   .category-settings-container {
-    padding: 0px 10px;
+    padding: 0px 0px;
 
     .category-list {
       overflow: auto;

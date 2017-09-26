@@ -12,7 +12,7 @@ export default [
   {
     path: '/start',
     name: 'start',
-    component: require('@common/views/Start')
+    component: require('@/views/Start')
   },
   {
     path: '/relay',
@@ -33,12 +33,12 @@ export default [
           {
             path: '/relay/settings/network',
             name: 'settings-network',
-            component: require('@/views/settings/NetworkSettingsView')
+            component: require('@/views/settings/NetworkSettings')
           },
           {
             path: '/relay/settings/categories',
             name: 'settings-categories',
-            component: require('@/views/settings/CategorySettingsView')
+            component: require('@/views/settings/CategorySettings')
           }
         ]
       }
