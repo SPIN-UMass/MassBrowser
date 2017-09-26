@@ -2,7 +2,7 @@ import API from '@/api'
 import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { Raven } from '@utils/raven'
-import { statusManager } from '@common/services/statusManager'
+import { statusManager, autoLauncher } from '@common/services'
 import { syncService, relayManager, networkMonitor } from '@/services'
 import { DomainFrontedRelay } from '@/net'
 import { WebSocketTransport } from '@utils/transport'
@@ -66,6 +66,10 @@ export default async function bootRelay() {
       await API.relayDomainFrontUp(config.domain_name, config.domainfrontPort)
       status.clear()
     }
+
+    status = statusManager.info('Finalizing')
+    autoLauncher.initialize()
+    status.clear()
 
     store.commit('completeBoot')
   } catch(err) {

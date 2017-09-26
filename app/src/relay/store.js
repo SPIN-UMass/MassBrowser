@@ -7,8 +7,9 @@ export default {
       message: '',
       progress: 0
     },
+    sessions: [],
     syncProgress: 0,
-    isFirstRun: new RendererCachedPersistedState(true),
+    autoLaunchEnabled: new PersistedState(true),
     bootComplete: false,
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
@@ -54,6 +55,9 @@ export default {
     },
     changeServerConnected(state, connected) {
       state.isServerConnected = connected
+    },
+    setAutoLauncher(state, enabled) {
+      state.autoLaunchEnabled = enabled
     }
   }
 }

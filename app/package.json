@@ -1,6 +1,6 @@
 {
   "name": "MassBrowser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "P2P Proxy",
   "config": {
     "serverURL": "https://yaler.co",
@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "async": "^2.5.0",
+    "auto-launch": "^5.0.1",
     "axios": "^0.16.2",
     "babel-core": "^6.25.0",
     "babel-polyfill": "^6.23.0",
