@@ -26,7 +26,7 @@ class NetworkMonitor {
       config.echoServer.port
     )
 
-    natConnection.on('net-update', this._onNetworkUpdate)
+    natConnection.on('net-update', data => this._onNetworkUpdate(data))
     natConnection.on('close', () => { natConnection.reconnect() })
 
     await natConnection.connect()
@@ -35,6 +35,12 @@ class NetworkMonitor {
     schedule.scheduleJob('*/30 * * * * *', () => {
       this._sendKeepAlive()
     })
+  }
+
+  waitForNetworkStatus() {
+    return new Promise((resolve, reject) => {
+      this.natConnection.once('net-update', data => resolve(data))
+    })  
   }
 
   getPublicAddress () {
@@ -76,7 +82,6 @@ class NetworkMonitor {
 
   _onNetworkUpdate (data) {
     let changed = false
-
     for (let field of ['localIP', 'localPort', 'remoteIP', 'remotePort']) {
       changed = changed || (this[field] !== data[field])
       this[field] = data[field]

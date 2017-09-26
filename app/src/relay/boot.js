@@ -40,6 +40,9 @@ export default async function bootRelay() {
     status = statusManager.info('Connecting to Connectivity server')
     await networkMonitor.start()
     status.clear()
+    status = statusManager.info('Obtaining NAT information')
+    await networkMonitor.waitForNetworkStatus()
+    status.clear()
 
     // Only sync database in boot if it is the first time booting
     // otherwise sync will after the client has started to avoid

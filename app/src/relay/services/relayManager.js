@@ -164,7 +164,6 @@ class RelayManager {
 
   _getLocalAddress () {
     let privateAddress = networkMonitor.getPrivateAddress()
-
     if (this.natEnabled) {
       return {ip: privateAddress.ip, port: privateAddress.port}
     }

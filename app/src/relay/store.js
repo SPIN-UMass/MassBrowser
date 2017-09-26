@@ -10,7 +10,7 @@ export default {
     syncProgress: 0,
     isFirstRun: new RendererCachedPersistedState(true),
     bootComplete: false,
-    relay: new PersistedState({}), // Has to be cached because it's used in the Root view
+    relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
     natEnabled: new RendererCachedPersistedState(true),
     downloadLimit: new RendererCachedPersistedState(0),
