@@ -2,7 +2,7 @@
   .y-browser-integration
       .text-center
         h1.title Browser Configuration
-        p.message Please visit the link below in your prefered browser to configure you're browser      
+        p.message Please visit the link below in Firefox to configure you're browser      
       .text-center.link-container
         code.link(v-on:click="openLink") http://{{webDomain}}
 </template>
@@ -12,9 +12,10 @@
   import { shell } from 'electron'
   import { getService } from '@utils/remote'
   import { store } from '@utils/store'
-  import { mapState } from 'vuex'
+  import { mapGetters } from 'vuex'
 
   const context = getService('context')
+
 
   export default {
     store,
@@ -23,17 +24,16 @@
         webDomain: config.web.domain
       }
     },
-    computed: {
-      integrationComplete: () => this.$store.state.browserIntegrationComplete
-    },
-    watch: {
-      integrationComplete: (complete) => {
-        if (complete) {
-          this.$router.push('/client')
-        }
-      }
+    created() {
+      let self = this
+      this.$store.watch(state => state.browserIntegrationComplete, () => {
+        self.finish()
+      })
     },
     methods: {
+      finish() {
+        this.$router.push('/client')
+      },
       openLink() {
         shell.openExternal(`http://${this.webDomain}`)
       }

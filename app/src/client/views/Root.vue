@@ -6,13 +6,12 @@
   
   function getRoute() {
     if (store.state.bootComplete) {
-      if (store.state.browserIntegrationComplete) {
+      if (!store.state.browserIntegrationComplete) {
         return '/browser-integration'
       } else {
         return '/client'
       }
     } else {
-      console.log(store.state)
       if (store.state.registrationComplete) {
         return '/boot'
       } else {

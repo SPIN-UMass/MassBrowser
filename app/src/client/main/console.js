@@ -12,7 +12,7 @@ import Raven from '@utils/raven'
 import Promise from 'bluebird'
 
 import bootClient from '@/boot'
-import Status from '@utils/status'
+import { statusManager } from '@common/status'
 
 import { InvalidInvitationCodeError } from '@utils/errors'
 import { error } from '@utils/log'

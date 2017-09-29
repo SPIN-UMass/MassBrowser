@@ -88,6 +88,9 @@
             .center([3, 40])
             .translate([element.offsetWidth / 2, element.offsetHeight / 2])
             .scale(80)
+            // .center([-70, 40])
+            // .translate([element.offsetWidth / 2, element.offsetHeight / 2])
+            // .scale(1000)
           
         path = d3.geo.path()
             .projection( projection );
@@ -137,7 +140,7 @@
         key: JSON.stringify
       },
       arcConfig: {
-        arcSharpness: 0.7,
+        arcSharpness: 0.3,
         strokeWidth: 2,
         strokeColor: 'blue'
       }

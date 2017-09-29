@@ -15,6 +15,7 @@ remote.registerService('boot', { boot: bootRelay })
 remote.registerService('autoupdate', autoUpdater)
 remote.registerService('registration', registrationService)
 
+
 // var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 // requireControllerFilter.keys().forEach(requireControllerFilter)
 
@@ -32,6 +33,7 @@ function onWindowClosed() {
 }
 
 process.on('uncaughtException', (e) => {
-  console.log(e)
+  console.error(e)
 })
+
 initializeMainProcess(onWindowCreated, onWindowClosed)

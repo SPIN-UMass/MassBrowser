@@ -45,10 +45,12 @@
         div(v-if="!cert.success")
           p MassBrowser requires that you trust a root CA Certificate. The certificate is generated locally and does not expose you to any security risks as long as it is kept within your machine.
           p Follow the instructions below to install the certificate
+          .alert 
+            | This is a local certificate that does not pose any threat to your confidentiality when you browse websites. You can simply remove the certificate at any time by going to your browser’s setting and searching for NAME
           
           ol
             li Click on the #[code Install Certificate] button below
-            li Select the #[code Trust this CA to identify websites] option and click OK
+            li(style='font-weight: bold') Select the #[code Trust this CA to identify websites] option and click OK
           div.text-center.mar-all
             button.cert-btn.btn.btn-success(v-on:click="installCert") Install Certificate
         div(v-if="cert.success").text-center.pad-all
@@ -155,6 +157,9 @@
         .then(response => {
           if (response.data === 'active') {
             this.proxy.success = true
+
+            this.checkCert()
+            this.pollCertValidation = true
           } else {
             if (showError) {
               this.proxy.errorMessage = 'Proxy settings not valid.'
@@ -181,8 +186,7 @@
             resolve()
           })
         }
-
-        return axios.get(`https://${ONBOARDING_DOMAIN}`, { validateStatus: () => true })
+        return axios.get(`https://${ONBOARDING_DOMAIN}/`, { validateStatus: () => true })
         .then(response => {
           this.cert.success = true
           this.pollCertValidation = false

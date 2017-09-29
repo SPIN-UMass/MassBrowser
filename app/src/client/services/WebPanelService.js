@@ -48,7 +48,6 @@ class WebPanelService {
     app.use('/settings-complete', function(req, res, next)  {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.end('ok')
-
       store.commit('completeBrowserIntegration')
     })
 

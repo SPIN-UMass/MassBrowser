@@ -30,6 +30,10 @@ for (let key in stateConfig) {
       cachedValue = false
     } else if (cachedValue === 'true') {
       cachedValue = true
+    } else if (cachedValue === 'null') {
+      cachedValue = null
+    } else if (cachedValue === 'undefined') {
+      cachedValue = undefined
     }
 
     if (cachedValue !== null) {
@@ -40,6 +44,7 @@ for (let key in stateConfig) {
 
 let parsedConfig = Object.assign({}, storeConfig)
 parsedConfig.state = state
+parsedConfig.getters = storeConfig.getters
 
 Vue.use(Vuex)
 export const store = new Vuex.Store(parsedConfig)

@@ -7,7 +7,10 @@
             h4 This guide will help you get started
             button.bottom.btn.btn-info.btn-rounded.btn-lg(v-on:click='start') Lets Start
           .not-supported(v-if='!supported')
-            h4 Your browser is not supported
+            h4 Unfortunately, your browser is not supported.
+            h4 #[span.red Firefox] is currently the only supported browser
+
+
 </template>
 
 <script>
@@ -45,10 +48,14 @@
     }
     .supported,.not-supported {
       margin-top: 50px;
+      padding-bottom: 30px;
     }
     .btn {
       margin-top: 50px;
       width: 150px;
+    }
+    .red {
+      color: #bb6666;
     }
   }
 </style>
