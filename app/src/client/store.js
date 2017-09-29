@@ -1,4 +1,4 @@
-import { PersistedState, RendererCachedPersistedState } from '@utils/store'
+import { PersistedState, RendererCachedState, RendererCachedPersistedState } from '@utils/store'
 
 export default {
   state: {
@@ -9,7 +9,7 @@ export default {
     },
     sessions: [{id: null, ip: null, state: null}],
     sessionMap: {},
-    bootComplete: false,
+    bootComplete: new RendererCachedState(false),
     client: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
     browserIntegrationComplete: new RendererCachedPersistedState(false)

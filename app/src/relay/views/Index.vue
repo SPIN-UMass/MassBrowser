@@ -1,7 +1,7 @@
 <template lang="pug">
   #m-container
     #m-header
-      h1 MassRelay
+      h1 MassBuddy
       #m-nav
         ul
           li(:class="{active: currentTab==='home'}")

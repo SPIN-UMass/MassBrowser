@@ -4,11 +4,24 @@ import Vue from 'vue'
 import { getService, remote } from '@utils/remote'
 import storeConfig from '@/store'
 import { parseStoreConfig } from './common'
+import electron from 'electron'
 
 let { state, stateConfig } = parseStoreConfig(storeConfig)
 
+let currentWindow = electron.remote.getCurrentWindow();
+let runID = currentWindow.runID
+let firstBoot = localStorage.getItem('runID') !== runID
+if (firstBoot) {
+  localStorage.setItem('runID', runID)
+}
+
 for (let key in stateConfig) {
   if (stateConfig[key].cache) {
+    if (firstBoot && !stateConfig[key].persist) {
+      localStorage.removeItem(key)
+      continue      
+    }
+
     let cachedValue = localStorage.getItem(key)
     
     if (!isNaN(cachedValue)) {

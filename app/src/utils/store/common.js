@@ -11,6 +11,8 @@ export class RendererCachedPersistedState extends State {}
 
 export class PersistedState extends State {}
 
+export class RendererCachedState extends State {}
+
 export function parseStoreConfig(storeConfig) {
   let state = {}
   let stateConfig = {}
@@ -28,6 +30,9 @@ export function parseStoreConfig(storeConfig) {
       } else if (value instanceof RendererCachedPersistedState) {
         config.cache = true
         config.persist = true
+      } else if (value instanceof RendererCachedState) {
+        config.cache = true
+        config.persist = false
       }
 
       value = value.value

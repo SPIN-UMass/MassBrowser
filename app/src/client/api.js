@@ -63,7 +63,7 @@ class ClientAPI extends CommonAPI {
     var data = {}
     return new Promise((resolve, reject) => {
       resolve({
-        'ip': 'yaler.co',
+        'ip': config.serverURL.replace('https://', ''),
         'port': 8823
       })
     })

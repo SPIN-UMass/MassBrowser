@@ -1,7 +1,7 @@
 <template lang="pug">
   .y-splash
     .y-container
-      h1 MassBrowser
+      h1 {{ appName }}
       .loading-container(v-if="step=='loading'")
         GridLoader.spinner(color="#aaa")
         .status-container  {{ status }}
@@ -18,6 +18,7 @@
   import { getService } from '@utils/remote'
   import { STATUS_LOG, STATUS_PROGRESS} from '@common/services/statusManager'
   import { store } from '@utils/store'
+  import config from '@utils/config'
 
   const Boot = getService('boot')
 
@@ -30,7 +31,8 @@
       return {
         step: 'loading',
         errorMessage: '',
-        canRetry: false
+        canRetry: false,
+        appName: config.role == 'relay' ? 'MassBuddy' : 'MassBrowser'
       }
     },
     computed: {

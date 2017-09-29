@@ -1,4 +1,4 @@
-import { PersistedState, RendererCachedPersistedState } from '@utils/store'
+import { PersistedState, RendererCachedState, RendererCachedPersistedState } from '@utils/store'
 
 export default {
   state: {
@@ -10,7 +10,7 @@ export default {
     sessions: [],
     syncProgress: 0,
     autoLaunchEnabled: new PersistedState(true),
-    bootComplete: false,
+    bootComplete: new RendererCachedState(false),
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
     natEnabled: new RendererCachedPersistedState(true),

@@ -55,7 +55,9 @@ async function askTargets() {
   ])
 
   let targets = answers.targets
-  targets.forEach(target => buildForTarget(target))
+  for (let target of targets) {
+    await buildForTarget(target)
+  }
 }
 
 

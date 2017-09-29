@@ -12,6 +12,8 @@ let tray
 let windowCreatedCallback
 let windowClosedCallback
 
+const runID = Math.random().toString(36).substring(7)
+
 export function initializeMainProcess(onWindowCreated, onWindowClosed) {
   windowCreatedCallback = onWindowCreated
   windowClosedCallback = onWindowClosed
@@ -77,6 +79,7 @@ function createWindow () {
     fullscreenable: false,
     titleBarStyle: 'hidden'
   })
+  mainWindow.runID = runID
   
   mainWindow.setTitle(config.appName);
   mainWindow.loadURL(winURL)
