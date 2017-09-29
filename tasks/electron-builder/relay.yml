@@ -1,5 +1,5 @@
 appId: "co.yaler.relay"
-productName: MassRelay
+productName: MassBuddy
 directories:
   output: build/relay
 files:

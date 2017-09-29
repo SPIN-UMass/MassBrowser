@@ -14,6 +14,7 @@ import ToggleButton from 'vue-js-toggle-button'
 import '@assets/font-awesome/css/font-awesome.min.css'
 import '@assets/bootstrap/css/bootstrap.min.css'
 import '@assets/nifty/nifty.min.css'
+import '@assets/fonts/neuropol.ttf'
 
 import App from '@common/views/App'
 

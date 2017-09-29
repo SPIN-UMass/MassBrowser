@@ -116,11 +116,11 @@ async function checkTargetBuilds(config) {
     let target = targets[i]
     let productName = (await readBuildConfig(target)).productName
 
-    if (!(await fs.pathExists(`./build/${target}/${productName}.yml`))) {
+    if (!(await fs.pathExists(`./build/${target}/${target}.yml`))) {
       continue
     }
 
-    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${productName}.yml`))
+    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${target}.yml`))
     if (releaseInfo.version === version) {
       availableTargets.push(target)
     }
@@ -149,8 +149,8 @@ async function getFileLists(config, targets) {
   for (let i = 0; i < targets.length; i++) {
     let productName = (await readBuildConfig(targets[i])).productName
     files = files.concat([
-      `${productName}.yml`,
-      `${productName}-mac.yml`,
+      `${targets[i]}.yml`,
+      `${targets[i]}-mac.yml`,
       `${productName}-${version}.dmg`,
       `${productName}-${version}-mac.zip`,
       `${productName} Setup ${version}.exe`,
