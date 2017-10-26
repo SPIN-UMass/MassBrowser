@@ -1,6 +1,6 @@
-# yaler
+# MassBrowser
 
-> P2P Proxy
+Volunteer-based censorship circumvention tool
 
 ## Build Setup
 
@@ -20,8 +20,6 @@ npm run lint
 # run webpack in production
 npm run pack
 ```
-More information can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/docs/npm_scripts.html).
+More information can be found [here](https://massbrowser.cs.umass.edu).
 
----
 
-This project was generated from [electron-vue](https://github.com/SimulatedGREG/electron-vue) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about this project can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
