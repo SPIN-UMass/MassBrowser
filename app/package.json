@@ -3,8 +3,8 @@
   "version": "0.0.3",
   "description": "P2P Proxy",
   "config": {
-    "serverURL": "https://yaler.co",
-    "websocketURL": "wss://yaler.co:443",
+    "serverURL": "https://dev.yaler.co",
+    "websocketURL": "wss://dev.yaler.co:443",
     "client": {
       "socksPort": 7080,
       "cachebrowser": {
@@ -27,7 +27,7 @@
         "port": 19302
       },
       "echoServer": {
-        "host": "yaler.co",
+        "host": "dev.yaler.co",
         "port": 8823
       }
     },

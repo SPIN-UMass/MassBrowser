@@ -44,10 +44,9 @@
         .step-title.text-thin Trust CA Certificate
         div(v-if="!cert.success")
           p MassBrowser requires that you trust a root CA Certificate. The certificate is generated locally and does not expose you to any security risks as long as it is kept within your machine.
+          .alert.alert-info
+            | This is a #[strong local certificate that does not pose any threat] to your confidentiality when you browse websites. You can simply remove the certificate at any time by going to your browser’s setting and searching for #[code MassBrowser]
           p Follow the instructions below to install the certificate
-          .alert 
-            | This is a local certificate that does not pose any threat to your confidentiality when you browse websites. You can simply remove the certificate at any time by going to your browser’s setting and searching for NAME
-          
           ol
             li Click on the #[code Install Certificate] button below
             li(style='font-weight: bold') Select the #[code Trust this CA to identify websites] option and click OK

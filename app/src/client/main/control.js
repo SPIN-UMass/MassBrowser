@@ -3,7 +3,7 @@
  */
 
 import Status from '@utils/status'
-import { startClientSocks } from '@/net/ClientSocks'
+import { startClientSocks } from '@/net'
 import ZMQListener from '@/services/ZMQ'
 
 ZMQListener.connect()

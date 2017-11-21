@@ -10,31 +10,29 @@ import API from '@/api'
 
 import Raven from '@utils/raven'
 import Promise from 'bluebird'
-
-import bootClient from '@/boot'
-import Status from '@utils/status'
-
 import { InvalidInvitationCodeError } from '@utils/errors'
 import { error } from '@utils/log'
 import config from '@utils/config'
-import { initializeLogging } from '@utils/log'
+import { remote } from '@utils/remote'
 
-import { relayManager } from '@/services'
+import { syncService, relayManager, networkMonitor, registrationService } from '@/services'
+import { statusManager, autoUpdater } from '@common/services'
+import bootRelay from '@/boot'
 
 global.Promise = Promise
 
-initializeLogging()
+remote.registerService('sync', syncService)
+remote.registerService('status', statusManager)
+remote.registerService('relay', relayManager)
+remote.registerService('network-monitor', networkMonitor)
+remote.registerService('boot', { boot: bootRelay })
+remote.registerService('autoupdate', autoUpdater)
+remote.registerService('registration', registrationService)
 
 Raven
   .smartConfig({'role': 'relay'})
   .install()
 
-bootClient(false)
-  .then(() => {
-    relayManager.changeAccess(true)
-    console.log('MILAD')
-
-  })
 
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)

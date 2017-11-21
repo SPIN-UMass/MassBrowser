@@ -13,6 +13,8 @@
     #m-footer
       StatusWidget.status-bar
       .version v{{version}}
+      .console
+        i.fa.fa-console
 
       
 </template>

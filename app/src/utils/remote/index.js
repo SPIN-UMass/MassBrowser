@@ -1,6 +1,19 @@
 import config from '@utils/config'
 
-if (config.isElectronMainProcess) {
+if (config.isElectronRendererProcess) {
+  const { remote, getService } = require('./renderer')
+
+  module.exports = {
+    getService,
+    remote,
+    createController: function(name, ctrlClass) {
+      return getService(`ctrl:${name}`)
+    },
+    remoteModel: function(name) {
+      return getService(`model:${name}`)
+    }
+  }
+} else {
   const { remote } = require('./main')
 
   module.exports = {
@@ -14,20 +27,6 @@ if (config.isElectronMainProcess) {
       const model = modelFactory()
       remote.registerService(`model:${name}`, model)
       return model
-    }
-  }
-
-} else if (config.isElectronRendererProcess) {
-  const { remote, getService } = require('./renderer')
-
-  module.exports = {
-    getService,
-    remote,
-    createController: function(name, ctrlClass) {
-      return getService(`ctrl:${name}`)
-    },
-    remoteModel: function(name) {
-      return getService(`model:${name}`)
     }
   }
 }
