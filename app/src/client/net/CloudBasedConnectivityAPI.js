@@ -6,7 +6,7 @@ import API from '@/api'
 import WebSocket from 'ws'
 import * as errors from '~/utils/errors'
 import { error, debug } from '~/utils/log'
-import { runLocalServer } from './IncommingConnection'
+import { runLocalServer } from './incommingConnection'
 import * as net from 'net'
 var schedule = require('node-schedule')
 
