@@ -6,12 +6,7 @@
       "plugins": ["istanbul"]
     },
     "console": {
-      "presets": [
-        ["es2015", {
-          "targets": { "node": 6 },
-          "useBuiltIns": true
-        }]
-      ]
+      "presets": ["latest", "stage-0"]
     },
     "electron-main": {
       "presets": ["latest", "stage-0"]

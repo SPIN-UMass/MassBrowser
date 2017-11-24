@@ -1,9 +1,13 @@
 import storeConfig from '@/store'
-import { remote } from '@utils/remote'
+
 import { NoSuchMutationError } from '@utils/errors'
 import KVStore from '@utils/kvstore'
 import { parseStoreConfig } from './common'
+import config from '@utils/config'
 
+if (config.applicationInterface == 'electron') {
+  var remote = require('@utils/remote').remote
+}
 
 class Store {
   constructor(storeConfig){
@@ -25,22 +29,30 @@ class Store {
 
     this.requestIDCounter = 0
     this.pendingRequests = {}
+    this.useRemote = config.applicationInterface == 'electron'
 
     let loadingPromise = this.loadPersistedStates()
 
-    remote.registerService('store', {
-      'getState': async () => {
-        await loadingPromise
-        return this.state
-      }
-    })
+    if (this.useRemote) {
+      remote.registerService('store', {
+        'getState': async function() {
+          await loadingPromise
+          return this.state
+        }
+      })
 
-    remote.on('store.commit.ack', (sender, requestID) => {
-      this.pendingRequests[requestID]()
-    })
+      remote.on('store.commit.ack', (sender, requestID) => {
+        let resolve = this.pendingRequests[requestID]
+        delete this.pendingRequests[requestID]
+        resolve()
+      })
+    }
+    
+
+
   }
 
-  commit(name, arg) {
+  async commit(name, arg) {
     let mutation = this.mutations[name]
     if (mutation === undefined) {
       throw new NoSuchMutationError(name)
@@ -52,9 +64,11 @@ class Store {
 
     remote.send('store.commit', { requestID, name, arg })
 
-    return new Promise((resolve, reject) => {
-      this.pendingRequests[requestID] = resolve
-    })
+    if (this.useRemote) {
+      return new Promise((resolve, reject) => {
+        this.pendingRequests[requestID] = resolve
+      })
+    }
   }
 
   saveKey(name) {

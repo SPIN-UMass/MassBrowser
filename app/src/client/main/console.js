@@ -7,38 +7,44 @@ tls.connect = function (...args) {
 }
 ////DANGERIOUS
 
+import minimist from 'minimist'
 
 import Raven from '@utils/raven'
-import Promise from 'bluebird'
-
-import bootClient from '@/boot'
-import { statusManager } from '@common/status'
 
 import { InvalidInvitationCodeError } from '@utils/errors'
-import { error } from '@utils/log'
-import { initializeLogging } from '@utils/log'
+import { debug, info, warn, error } from '@utils/log'
 import config from '@utils/config'
 
-global.Promise = Promise
+import { statusManager } from '@common/services/statusManager'
+import { syncService, registrationService } from '@/services'
+import { store } from '@utils/store' // required for boot, don't remove
+import bootClient from '@/boot'
 
-initializeLogging()
 
-Raven
-  .smartConfig({'role': 'client'})
-  .install()
+const argv = minimist(process.argv.slice(2))
+console.dir(argv)
 
-// Status.on('status-changed', function (status) {
-//   console.log(status.text)
-// })
+async function start() {
+  if (!registrationService.isRegistered()) {
+    info("Client not registered")
+    console.log("SHIT")
+    if (!argv.invitationCode) {
+      error('No invitation code provided')
+      process.exit(1)
+    }
 
-const invitationToken = 'mmn'
+    debug(`Registerting client with invitation code: ${argv.invitationCode}`)
+    let client = await registrationService.registerClient(argv.invitationCode)    
+    info(`Client registered with ID ${client.id}`)
+  }
 
-bootClient(() => new Promise((resolve, reject) => resolve(invitationToken)))
-.catch(InvalidInvitationCodeError, err => {
-  error("Invalid invitation code")
-  process.exit(1)
-})
+  // bootClient()
+}
+
+
 
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
 })
+
+start()

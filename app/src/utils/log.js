@@ -34,7 +34,7 @@ export function initializeLogging() {
 export var logger, log, status, info, warn, debug, error
 
 // TODO fix this, need to seperate electron main and renderer process
-if (config.isDevelopment && config.isElectronRendererProcess) {
+if (config.isDebug || (config.isDevelopment && config.isElectronRendererProcess)) {
   logger = console
   logger.status = console.log
 } else {

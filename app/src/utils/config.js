@@ -34,6 +34,7 @@ const defaultConfig = {
 function initializeConfig(options) {
   let role = (options || {}).role
   let mode = (options || {}).mode
+  let isDebug = (options || {}).debug
 
   if (role !== 'client' && role !== 'relay') {
     throw new Error("Invalid configuration role")
@@ -101,6 +102,8 @@ function initializeConfig(options) {
 
   config.version = packageJSON.version
   config.appName = packageJSON.name
+
+  config.isDebug = isDebug
   
   return config
 }
@@ -109,7 +112,8 @@ const config = initializeConfig({
   mode: process.env.NODE_ENV,
   role: process.env.ROLE,
   applicationInterface: process.env.APP_INTERFACE,
-  electronProcess: process.env.ELECTRON_PROCESS
+  electronProcess: process.env.ELECTRON_PROCESS,
+  debug: process.env.DEBUG
 })
 
 export default config
