@@ -35,7 +35,7 @@ class Store {
 
     if (this.useRemote) {
       remote.registerService('store', {
-        'getState': async function() {
+        'getState': async () => {
           await loadingPromise
           return this.state
         }

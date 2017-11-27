@@ -108,7 +108,7 @@ class SessionService extends EventEmitter {
       }
     })
 
-    return new Promise(async function (resolve, reject) {
+    return new Promise(async (resolve, reject) => {
       let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {

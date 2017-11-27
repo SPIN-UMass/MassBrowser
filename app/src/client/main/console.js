@@ -19,7 +19,7 @@ import { statusManager } from '@common/services/statusManager'
 import { syncService, registrationService } from '@/services'
 import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
-
+import models from '@/models' // required for bootstrapping remote models
 
 const argv = minimist(process.argv.slice(2))
 console.dir(argv)
