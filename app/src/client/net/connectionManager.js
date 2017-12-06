@@ -6,7 +6,7 @@ import { debug } from '@utils/log'
 class ConnectionManager {
   constructor () {
     this.relayAssigner = null
-
+    this.conid_IP_PORT={}
     this.clientConnections = {}
     this.connectionMaps = {}
     this.carrylen = 0
@@ -41,6 +41,7 @@ class ConnectionManager {
           const sp = this.newconcarry.split(':')
           const ip = sp[0]
           const port = sp[1]
+          this.newconcarry = ''
           // console.log('CREATE CONNECTION', ip, port)
           this.newConnection(ip, port, lastconid)
         }
@@ -130,7 +131,7 @@ class ConnectionManager {
     if (!this.relayAssigner) {
       throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
     }
-
+    this.conid_IP_PORT[conid]= dstip
     this.clientConnections[conid] = connection
     this.clientConnections[conid].relayConnected = () => { onConnect() }
 
@@ -149,6 +150,7 @@ class ConnectionManager {
 
           connection.on('close', () => {
             this.connectionMaps[conid].write(conid, 'C', Buffer(0))
+            connection.end()
           })
           connection.on('error', (err) => {
             this.connectionMaps[conid].write(conid, 'C', Buffer(0))
