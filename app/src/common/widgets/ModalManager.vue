@@ -29,8 +29,8 @@
         this.options = {
             title: title,
             body: text,
-            yesText: options.yesText || 'Yes',
-            noText: options.noText || 'No'
+            yesText: options.yesText,
+            noText: options.noText
         }
         this.$refs.modal.show()
         return new Promise((resolve, reject) => {

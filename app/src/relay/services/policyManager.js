@@ -21,15 +21,15 @@ class PolicyManager {
       throw new errors.InvalidHostError('Domain is not in our list')
     }
 
-    let website = domain.getWebsite()
-    if (website === null || website === undefined) {
-      throw new errors.InvalidHostError('Website not found')
-    }
+    // let website = domain.getWebsite()
+    // if (website === null || website === undefined) {
+    //   throw new errors.InvalidHostError('Website not found')
+    // }
 
-    let category = website.getCategory()
-    if (category === null || !category.enabled) {
-      throw new errors.InvalidHostError('Category is not allowed')
-    }
+    // let category = website.getCategory()
+    // if (category === null || !category.enabled) {
+    //   throw new errors.InvalidHostError('Category is not allowed')
+    // }
   }
 }
 

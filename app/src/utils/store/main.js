@@ -31,12 +31,12 @@ class Store {
     this.pendingRequests = {}
     this.useRemote = config.applicationInterface == 'electron'
 
-    let loadingPromise = this.loadPersistedStates()
+    this.ready = this.loadPersistedStates()
 
     if (this.useRemote) {
       remote.registerService('store', {
         'getState': async () => {
-          await loadingPromise
+          await this.ready
           return this.state
         }
       })
@@ -47,9 +47,6 @@ class Store {
         resolve()
       })
     }
-    
-
-
   }
 
   async commit(name, arg) {

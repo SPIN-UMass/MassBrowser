@@ -13,13 +13,16 @@ export default {
     bootComplete: new RendererCachedState(false),
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
-    natEnabled: new RendererCachedPersistedState(true),
+    natEnabled: new RendererCachedPersistedState(false),
     downloadLimit: new RendererCachedPersistedState(0),
     uploadLimit: new RendererCachedPersistedState(0),
-    relayPort: new PersistedState(8040),
+    relayPort: new RendererCachedPersistedState(8040),
     openAccess: new RendererCachedPersistedState(true),
     isRelayReachable: false,
-    isServerConnected: false
+    isServerConnected: false,
+    publicAddress: {},
+    privateAddress: {},
+    publicPort: 0,
   },
   mutations: {
     setSyncProgress(state, progress) {
@@ -47,6 +50,9 @@ export default {
     changeNatStatus(state, natEnabled) {
       state.natEnabled = natEnabled
     },
+    changeRelayPort(state, relayPort) {
+      state.relayPort = relayPort
+    },
     changeOpenAccess(state, openAccess) {
       state.openAccess = openAccess
     },
@@ -58,6 +64,12 @@ export default {
     },
     setAutoLauncher(state, enabled) {
       state.autoLaunchEnabled = enabled
+    },
+    changePublicAddress(state, address) {
+      state.publicAddress = address
+    },
+    changePrivateAddress(state, address) {
+      state.privateAddress = address
     }
   }
 }

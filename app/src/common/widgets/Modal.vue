@@ -9,8 +9,8 @@
             .modal-title {{ options.title }}
           .modal-body {{ options.body }}
           .modal-footer
-            button.btn.btn-default(v-on:click='no') {{ options.noText }}
-            button.btn.btn-primary(v-on:click='yes') {{ options.yesText }}
+            button.btn.btn-danger(v-on:click='no' v-if='options.noText') {{ options.noText }}
+            button.btn.btn-primary(v-on:click='yes' v-if='options.yesText') {{ options.yesText }}
 </template>
 
 <script>

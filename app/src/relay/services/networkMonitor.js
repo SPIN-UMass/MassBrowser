@@ -82,6 +82,10 @@ class NetworkMonitor {
 
   _onNetworkUpdate (data) {
     let changed = false
+    
+    data.remotePort = Number(data.remotePort)
+    data.localPort = Number(data.localPort)
+
     for (let field of ['localIP', 'localPort', 'remoteIP', 'remotePort']) {
       changed = changed || (this[field] !== data[field])
       this[field] = data[field]

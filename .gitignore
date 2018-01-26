@@ -13,6 +13,7 @@ builds/*
 build/
 coverage
 node_modules/
+app/node_modules/
 npm-debug.log
 npm-debug.log.*
 thumbs.db

@@ -17,7 +17,7 @@ class LogStatus {
 
     if (this.options.timeout) {
       let timeout = this.options.timeout === true ? 4000 : this.options.timeout
-      setTimeout(() => { this.manager._removeStatus(status) }, timeout)
+      setTimeout(() => { this.manager._removeStatus(this.key) }, timeout)
     }
   }
 

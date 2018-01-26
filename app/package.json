@@ -82,6 +82,7 @@
     "throttle": "^1.0.3",
     "topojson": "^3.0.0",
     "v-mask": "^1.2.0",
+    "v-money": "^0.8.1",
     "vs-stun": "0.0.7",
     "vue": "^2.3.4",
     "vue-electron": "^1.0.6",

@@ -6,6 +6,8 @@
         ul
           li(:class="{active: currentTab==='home'}")
             router-link(to='/relay') home
+          //- li(:class="{active: currentTab==='clients'}")
+            //- router-link(to='/relay/clients') clients
           li(:class="{active: currentTab==='settings'}")
             router-link(to='/relay/settings') settings
     #m-content

@@ -25,6 +25,11 @@ export default [
         name: 'home'
       },
       {
+        path: '/relay/clients',
+        component: require('@/views/clients/ClientsView'),
+        name: 'clients'
+      },
+      {
         path: '/relay/settings',
         component: require('@/views/settings/SettingsView'),
         name: 'settings',

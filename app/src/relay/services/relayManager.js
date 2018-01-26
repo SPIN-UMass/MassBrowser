@@ -3,6 +3,7 @@ import { warn, error, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
 import { networkMonitor } from '@/services'
+import { statusManager } from '@common/services'
 import { ConnectionType, UNLIMITED_BANDWIDTH } from '@/constants'
 import config from '@utils/config'
 
@@ -19,51 +20,52 @@ class RelayManager {
     this.isRelayServerRunning = false
 
     this.openAccess = false
-    this.natEnabled = store.state.natEnabled
-    this.relayPort = store.state.relayPort
 
-    this.uploadLimit = store.state.uploadLimit || UNLIMITED_BANDWIDTH
-    this.downloadLimit = store.state.downloadLimit || UNLIMITED_BANDWIDTH
-    this.bandwidthLimited = this.uploadLimit !== UNLIMITED_BANDWIDTH || this.downloadLimit !== UNLIMITED_BANDWIDTH
-    this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit})
-    this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit})
-
-    this.authenticator = new ConnectionAuthenticator()
-
-    if (this.natEnabled) {
-      debug('NAT mode is enabled')
-    } else {
-      debug(`NAT mode is not enabled, running relay on port: ${this.relayPort}`)
-    }   
+    store.ready.then(() => {
+      this.natEnabled = store.state.natEnabled
+      this.relayPort = store.state.relayPort
+  
+      this.uploadLimit = store.state.uploadLimit
+      this.downloadLimit = store.state.downloadLimit
+      this.bandwidthLimited = this.uploadLimit !== 0 || this.downloadLimit !== 0
+      this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit || UNLIMITED_BANDWIDTH})
+      this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
+  
+      this.authenticator = new ConnectionAuthenticator()
+  
+      if (this.natEnabled) {
+        debug('NAT mode is enabled')
+      } else {
+        debug(`NAT mode is not enabled, running relay on port: ${this.relayPort}`)
+      }   
+    })   
   }
 
   setUploadLimit (limitBytes) {
-    if (!limitBytes) {
-      limitBytes = UNLIMITED_BANDWIDTH
-    }
-
     this.uploadLimit = limitBytes * 8
     store.commit('changeUploadLimit', limitBytes)
-    this.uploadLimiter.resetRate({rate: this.uploadLimit})
+    this.uploadLimiter.resetRate({rate: this.uploadLimit || UNLIMITED_BANDWIDTH})
   }
 
   setDownloadLimit (limitBytes) {
-    if (!limitBytes) {
-      limitBytes = UNLIMITED_BANDWIDTH
-    }
-
     this.downloadLimit = limitBytes * 8
     store.commit('changeDownloadLimit', limitBytes)
-    this.downloadLimiter.resetRate({rate: this.downloadLimit})
+    this.downloadLimiter.resetRate({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
   }
 
   changeNatStatus (natEnabled) {
     this.natEnabled = natEnabled
     store.commit('changeNatStatus', natEnabled)
-    // NEED SOMETHING TODO
+    this.restartRelay()
   }
 
-  changeAccess (access) {
+  setRelayPort (relayPort) {
+    this.relayPort = relayPort
+    store.commit('changeRelayPort', relayPort)
+    this.restartRelay()
+  }
+
+  async changeAccess (access) {
     if (access === this.openAccess) {
       return
     }
@@ -74,19 +76,27 @@ class RelayManager {
     if (this.openAccess) {
       let publicaddress = this._getReachableAddress()
       API.relayUp(publicaddress.ip, publicaddress.port)
-      this._restartRelayServer()
+      await this._restartRelayServer()
+      statusManager.info(`Relay server started on port ${publicaddress.port}`, { timeout: true })
     } else {
       API.relayDown()
-      this._stopRelayServer()
+      await this._stopRelayServer()
     }
   }
 
   async startRelay() {
-    this.changeAccess(true)
+    await this.changeAccess(true)
   }
 
   async stopRelay() {
-    this.changeAccess(false)
+    await this.changeAccess(false)
+  }
+
+  async restartRelay() {
+    const status = statusManager.info('Restarting relay server...')
+    await this.stopRelay()
+    await this.startRelay()
+    status.clear()
   }
 
   handleReconnect () {
@@ -156,6 +166,8 @@ class RelayManager {
   _getReachableAddress () {
     let publicAddress = networkMonitor.getPublicAddress()
 
+    store.commit('changePublicAddress', publicAddress)
+
     if (this.natEnabled) {
       return {ip: publicAddress.ip, port: publicAddress.port}
     }
@@ -164,6 +176,9 @@ class RelayManager {
 
   _getLocalAddress () {
     let privateAddress = networkMonitor.getPrivateAddress()
+    
+    store.commit('changePrivateAddress', privateAddress)
+
     if (this.natEnabled) {
       return {ip: privateAddress.ip, port: privateAddress.port}
     }
