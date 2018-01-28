@@ -59,7 +59,9 @@ class Store {
 
     mutation(this.proxyState, arg)
 
-    remote.send('store.commit', { requestID, name, arg })
+    if (this.useRemote) {
+      remote.send('store.commit', { requestID, name, arg })
+    }
 
     if (this.useRemote) {
       return new Promise((resolve, reject) => {

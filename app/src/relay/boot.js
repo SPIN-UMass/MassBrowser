@@ -17,9 +17,11 @@ export default async function bootRelay() {
   let status
 
   try {
+    await store.ready
+
     let relay = store.state.relay
 
-    if (!relay) {
+    if (!relay || !relay.id) {
       throw new ApplicationBootError('Relay not registered')
     }
 
@@ -94,6 +96,8 @@ export default async function bootRelay() {
         Raven.captureException(err)
       }
       throw new ApplicationBootError('Failed to start Application')
+    } else {
+      throw err
     }
   }
 }

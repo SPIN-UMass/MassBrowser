@@ -37,6 +37,8 @@ export default async function bootClient () {
   let status
 
   try {
+    await store.ready
+    
     let client = store.state.client
     if (!client) {
       throw new ApplicationBootError('Client not registered')
@@ -111,5 +113,7 @@ function handleBootError(err) {
       Raven.captureException(err)
     }
     throw new ApplicationBootError('Failed to start Application')
+  } else {
+    throw err
   }
 }

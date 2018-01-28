@@ -11,7 +11,7 @@ import API from '@/api'
 import Raven from '@utils/raven'
 import Promise from 'bluebird'
 import { InvalidInvitationCodeError } from '@utils/errors'
-import { error } from '@utils/log'
+import { info, error } from '@utils/log'
 import config from '@utils/config'
 import { remote } from '@utils/remote'
 
@@ -21,19 +21,23 @@ import bootRelay from '@/boot'
 
 global.Promise = Promise
 
-remote.registerService('sync', syncService)
-remote.registerService('status', statusManager)
-remote.registerService('relay', relayManager)
-remote.registerService('network-monitor', networkMonitor)
-remote.registerService('boot', { boot: bootRelay })
-remote.registerService('autoupdate', autoUpdater)
-remote.registerService('registration', registrationService)
+// Raven
+//   .smartConfig({'role': 'relay'})
+//   .install()
 
-Raven
-  .smartConfig({'role': 'relay'})
-  .install()
-
+async function main() {
+  info('Booting relay...')
+  try {
+    await bootRelay()
+    info('Boot complete')
+  } catch (e) {
+    error(e)
+    error('Boot failed, exiting')
+  }
+}
 
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
 })
+
+main()
