@@ -12,8 +12,18 @@ class RegistrationService {
   }
 
   isRegistered() {
-    let client = store.state.client
-    return !!client && !!client.id
+    const client = this.getRegisteredUser()
+    return !!client
+  }
+
+  getRegisteredUser() {
+    const client = store.state.client
+
+    if (!client || !client.id) {
+      return null;
+    }
+
+    return client;
   }
 }
 

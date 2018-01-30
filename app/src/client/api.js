@@ -15,10 +15,13 @@ class ClientAPI extends CommonAPI {
         'invitation_code': invitationCode
       }
     )
-      .then(r => r.data)
-      .catch(PermissionDeniedError, err => {
+    .then(r => r.data)
+    .catch(err => {
+      if (err instanceof PermissionDeniedError) {
         throw new InvalidInvitationCodeError('Invalid Invitation Code')
-      })
+      }
+      throw err         
+    })
   }
 
   clientUp () {
@@ -47,13 +50,13 @@ class ClientAPI extends CommonAPI {
       })
   }
 
-  updateClientAddress (RemoteIP,RemotePort) {
-    debug("UPDATING IP",RemotePort)
+  updateClientAddress (remoteIP, remotePort) {
+    debug(`Sending address info to server: ${remoteIP} ${remotePort}`)
     return this.transport.post(
       CLIENT_URL + '/' + this.userID,
       {
-        'ip': RemoteIP,
-        'port': RemotePort
+        'ip': remoteIP,
+        'port': remotePort
       }
     ).then(r => r.data)
 

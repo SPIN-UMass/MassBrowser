@@ -13,7 +13,7 @@ export default {
     bootComplete: new RendererCachedState(false),
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
-    natEnabled: new RendererCachedPersistedState(false),
+    natEnabled: new RendererCachedPersistedState(true),
     downloadLimit: new RendererCachedPersistedState(0),
     uploadLimit: new RendererCachedPersistedState(0),
     relayPort: new RendererCachedPersistedState(8040),

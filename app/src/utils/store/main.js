@@ -79,8 +79,10 @@ class Store {
       if (!this.stateConfig[key].persist) {
         continue
       }
-      let val = await KVStore.get(key)
-      this.state[key] = val
+      let val = await KVStore.get(key, null)
+      if (val !== null) {
+        this.state[key] = val
+      }
     }
   }
 }

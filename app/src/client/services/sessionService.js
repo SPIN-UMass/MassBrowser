@@ -56,7 +56,6 @@ class SessionService extends EventEmitter {
 
   async start () {
     connectionManager.setRelayAssigner(this)
-    console.log('Starting Session Services')
     this._startSessionPoll()
   }
 

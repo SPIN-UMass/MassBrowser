@@ -14,6 +14,21 @@ class RegistrationService {
     let relay = { id: relayInfo.id, password: relayInfo.password }
     await store.commit('registerRelay', relay)
   }
+
+  isRegistered() {
+    const relay = this.getRegisteredUser()
+    return !!relay
+  }
+
+  getRegisteredUser() {
+    const relay = store.state.relay
+
+    if (!relay || !relay.id) {
+      return null;
+    }
+
+    return relay;
+  }
 }
 
 export const registrationService = new RegistrationService()

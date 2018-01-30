@@ -3,7 +3,7 @@ import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { Raven } from '@utils/raven'
 import { statusManager, autoLauncher } from '@common/services'
-import { syncService, relayManager, networkMonitor } from '@/services'
+import { syncService, relayManager, networkMonitor, registrationService } from '@/services'
 import { DomainFrontedRelay } from '@/net'
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
@@ -19,9 +19,9 @@ export default async function bootRelay() {
   try {
     await store.ready
 
-    let relay = store.state.relay
+    let relay = registrationService.getRegisteredUser()
 
-    if (!relay || !relay.id) {
+    if (!relay) {
       throw new ApplicationBootError('Relay not registered')
     }
 

@@ -17,7 +17,7 @@ import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
 import API from '@/api'
 
 import { statusManager } from '@common/services/statusManager'
-import { sessionService, syncService, webPanelService, noHostHandlerService } from '@/services'
+import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
 
@@ -39,7 +39,7 @@ export default async function bootClient () {
   try {
     await store.ready
     
-    let client = store.state.client
+    let client = registrationService.getRegisteredUser()
     if (!client) {
       throw new ApplicationBootError('Client not registered')
     }

@@ -56,6 +56,7 @@
     "postinstall": "cd src/client/web && yarn"
   },
   "dependencies": {
+    "argparse": "^1.0.9",
     "async": "^2.5.0",
     "auto-launch": "^5.0.1",
     "axios": "^0.16.2",

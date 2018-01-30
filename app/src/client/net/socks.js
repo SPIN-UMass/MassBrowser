@@ -85,13 +85,12 @@ var net = require('net'),
 function createSocksServer (cb, userpass, on_start) {
   // record userpass
   USERPASS = userpass
-  console.log('userpass:' + JSON.stringify(userpass))
 
   var socksServer = net.createServer()
 
   socksServer.on('listening', function () {
     var address = socksServer.address()
-    console.log('LISTENING %s:%d', address.address, address.port)
+    // console.log('LISTENING %s:%d', address.address, address.port)
     if (on_start) {
       on_start(socksServer)
     }
