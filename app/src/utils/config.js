@@ -13,6 +13,10 @@ const defaultConfig = {
     noHostHandlerPort: 6422
   },
   relay: {
+    tor: {
+      listURL: '',
+      listUpdateInterval: 432000000
+    },
     natEnabled: true,
     port: 8040   /* Only used if natEnabled is false */,
     stunServer: {

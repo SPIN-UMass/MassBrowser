@@ -21,6 +21,10 @@
       "port": 8040,
       "domainfrontable": false,
       "domainfrontPort": 8083,
+      "tor": {
+        "listURL": "https://media.yaler.co/torlist",
+        "listUpdateInterval": 432000000
+      },
       "domain_name": "d2td5r0tz3q2r2.cloudfront.net",
       "stunServer": {
         "host": "stun2.l.google.com",

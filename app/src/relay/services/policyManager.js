@@ -1,6 +1,7 @@
-import { Domain } from '@/models'
+import { Domain, Category } from '@/models'
 import * as errors from '@utils/errors'
 import { error, debug } from '@utils/log'
+import { torService } from '@/services'
 
 class PolicyManager {
   /**
@@ -13,7 +14,14 @@ class PolicyManager {
     const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
     if (ipRegex.test(host)) {
-      throw new errors.InvalidHostError('IP based filtering not supported')
+      /* IP hosts are only allowed for Tor destinations */
+      const torCategory = Category.find({name: 'Tor'})
+      if (!torCategory.enabled) {
+        throw new errors.InvalidHostError('IP based filtering only supported for Tor, but Tor is disabled')
+      }
+      if (!torService.isTorIP(host)) {
+        throw new errors.InvalidHostError('IP based filtering only supported for Tor')
+      }
     }
 
     let domain = Domain.findDomain(host)
@@ -21,15 +29,15 @@ class PolicyManager {
       throw new errors.InvalidHostError('Domain is not in our list')
     }
 
-    // let website = domain.getWebsite()
-    // if (website === null || website === undefined) {
-    //   throw new errors.InvalidHostError('Website not found')
-    // }
+    let website = domain.getWebsite()
+    if (website === null || website === undefined) {
+      throw new errors.InvalidHostError('Website not found')
+    }
 
-    // let category = website.getCategory()
-    // if (category === null || !category.enabled) {
-    //   throw new errors.InvalidHostError('Category is not allowed')
-    // }
+    let category = website.getCategory()
+    if (category === null || !category.enabled) {
+      throw new errors.InvalidHostError('Category is not allowed')
+    }
   }
 }
 

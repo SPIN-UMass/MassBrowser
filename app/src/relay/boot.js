@@ -3,7 +3,7 @@ import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { Raven } from '@utils/raven'
 import { statusManager, autoLauncher } from '@common/services'
-import { syncService, relayManager, networkMonitor, registrationService } from '@/services'
+import { syncService, relayManager, networkMonitor, registrationService, torService } from '@/services'
 import { DomainFrontedRelay } from '@/net'
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
@@ -56,6 +56,15 @@ export default async function bootRelay() {
       await syncService.syncAll()
       status.clear()
     }
+
+    if (await torService.requiresDownload()) {
+      status = statusManager.info('Downloading Tor list')
+      await torService.downloadTorList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Tor list')
+    await torService.loadTorList()
+    status.clear()
 
     status = statusManager.info('Starting Relay')
     relayManager.startRelay()
