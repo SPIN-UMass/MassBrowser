@@ -11,7 +11,7 @@ if (config.applicationInterface == 'electron') {
 
 class Store {
   constructor(storeConfig){
-    let parsedConfig = parseStoreConfig(storeConfig)
+    let parsedConfig = parseStoreConfig(storeConfig, config)
     this.state = parsedConfig.state
     this.stateConfig = parsedConfig.stateConfig
     
@@ -79,6 +79,7 @@ class Store {
       if (!this.stateConfig[key].persist) {
         continue
       }
+  
       let val = await KVStore.get(key, null)
       if (val !== null) {
         this.state[key] = val

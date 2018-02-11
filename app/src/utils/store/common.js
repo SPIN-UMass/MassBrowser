@@ -13,7 +13,15 @@ export class PersistedState extends State {}
 
 export class RendererCachedState extends State {}
 
-export function parseStoreConfig(storeConfig) {
+export class ConfigDefault {
+  constructor(configName) {
+    this.configName = configName;
+  }
+}
+
+export const fromConfig = name => new ConfigDefault(name);
+
+export function parseStoreConfig(storeConfig, appConfig) {
   let state = {}
   let stateConfig = {}
 
@@ -38,7 +46,13 @@ export function parseStoreConfig(storeConfig) {
       value = value.value
     }
 
-    state[key] = value      
+    if (value instanceof ConfigDefault) {
+      const configName = value.configName || key;
+      state[key] = appConfig.get(configName);
+    } else {
+      state[key] = value
+    }
+
     stateConfig[key] = config
   }
 

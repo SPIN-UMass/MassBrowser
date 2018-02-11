@@ -5,8 +5,9 @@ import { getService, remote } from '@utils/remote'
 import storeConfig from '@/store'
 import { parseStoreConfig } from './common'
 import electron from 'electron'
+import config from '@utils/config'
 
-let { state, stateConfig } = parseStoreConfig(storeConfig)
+let { state, stateConfig } = parseStoreConfig(storeConfig, config)
 
 let currentWindow = electron.remote.getCurrentWindow();
 let runID = currentWindow.runID

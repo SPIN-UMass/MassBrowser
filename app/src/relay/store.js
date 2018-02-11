@@ -1,4 +1,5 @@
-import { PersistedState, RendererCachedState, RendererCachedPersistedState } from '@utils/store'
+import { PersistedState, RendererCachedState, RendererCachedPersistedState,
+        fromConfig } from '@utils/store'
 
 export default {
   state: {
@@ -13,10 +14,10 @@ export default {
     bootComplete: new RendererCachedState(false),
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
-    natEnabled: new RendererCachedPersistedState(true),
+    natEnabled: new RendererCachedPersistedState(fromConfig()),
     downloadLimit: new RendererCachedPersistedState(0),
     uploadLimit: new RendererCachedPersistedState(0),
-    relayPort: new RendererCachedPersistedState(8040),
+    relayPort: new RendererCachedPersistedState(fromConfig('port')),
     openAccess: new RendererCachedPersistedState(true),
     isRelayReachable: false,
     isServerConnected: false,

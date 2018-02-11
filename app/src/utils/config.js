@@ -108,7 +108,16 @@ function initializeConfig(options) {
   config.appName = packageJSON.name
 
   config.isDebug = isDebug
-  
+
+  config.get = (name) => {
+    const parts = name.split('.');
+    let base = config;
+    for (let part of parts) {
+      base = base[part];
+    }
+    return base;
+  }
+
   return config
 }
 
