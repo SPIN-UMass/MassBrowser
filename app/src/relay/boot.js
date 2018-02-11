@@ -1,12 +1,13 @@
 import API from '@/api'
 import config from '@utils/config'
-import { debug, error } from '@utils/log'
+import { debug, error, warn } from '@utils/log'
 import { Raven } from '@utils/raven'
 import { statusManager, autoLauncher } from '@common/services'
 import { syncService, relayManager, networkMonitor, registrationService, torService } from '@/services'
 import { DomainFrontedRelay } from '@/net'
 import { WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
+import { Category } from '@/models'
 import { store } from '@utils/store'
 import {
   AuthenticationError, NetworkError, RequestError,
@@ -55,6 +56,14 @@ export default async function bootRelay() {
       let status = statusManager.info('Syncing database')
       await syncService.syncAll()
       status.clear()
+    }
+
+    /* Check Categories */
+    const enabledCategories = await Category.find({enabled: true})
+    if (!enabledCategories) {
+      warn('No categories are enabled, users will not be able to connect')
+    } else {
+      debug(`You have ${enabledCategories.length} categories enabled`)
     }
 
     if (await torService.requiresDownload()) {

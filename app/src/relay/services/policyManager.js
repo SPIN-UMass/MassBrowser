@@ -24,17 +24,17 @@ class PolicyManager {
       }
     }
 
-    let domain = Domain.findDomain(host)
+    let domain = await Domain.findDomain(host)
     if (!domain) {
       throw new errors.InvalidHostError('Domain is not in our list')
     }
 
-    let website = domain.getWebsite()
+    let website = await domain.getWebsite()
     if (website === null || website === undefined) {
       throw new errors.InvalidHostError('Website not found')
     }
 
-    let category = website.getCategory()
+    let category = await website.getCategory()
     if (category === null || !category.enabled) {
       throw new errors.InvalidHostError('Category is not allowed')
     }

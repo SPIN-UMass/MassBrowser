@@ -18,7 +18,6 @@ export class ConnectionReceiver {
     this.socket = socket
     this.socketdown = socketdown
     this.socketup.on('data', (data) => {
-      console.log('DATA RECIEVED', data);
       if (this.isAuthenticated) {
         this.crypt.decrypt(data)
       } else {

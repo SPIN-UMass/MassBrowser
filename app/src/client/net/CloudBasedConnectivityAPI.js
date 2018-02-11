@@ -29,7 +29,7 @@ class CloudBasedConnectivityAPI extends EventEmitter {
   }
 
   respHandler (localIP, localPort, remoteIP, remotePort) {
-    console.log(localIP, localPort, remoteIP, remotePort)
+    // console.log(localIP, localPort, remoteIP, remotePort)
     if (this.localPort !== localPort && this.localIP !== localIP && this.remotePort !== remotePort && this.remoteIP !== remoteIP) {
       this.localIP = localIP
       this.localPort = localPort

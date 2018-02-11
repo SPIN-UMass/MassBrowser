@@ -18,6 +18,7 @@ import { remote } from '@utils/remote'
 import { registrationService } from '@/services'
 import { statusManager, autoUpdater } from '@common/services'
 import bootRelay from '@/boot'
+import { store } from '@utils/store'
 
 global.Promise = Promise
 
@@ -26,6 +27,8 @@ global.Promise = Promise
 //   .install()
 
 async function main() {
+  await store.ready
+  
   if (!registrationService.isRegistered()) {
     info('Registering relay...')
     await registrationService.registerRelay()

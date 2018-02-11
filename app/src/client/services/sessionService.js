@@ -63,7 +63,7 @@ class SessionService extends EventEmitter {
     let domain = await Domain.findDomain(host)
     let category = (await (await domain.getWebsite()).getCategory())
 
-    debug(`Assigning session for ${domain}`) 
+    debug(`Assigning session for ${domain} of category ${category.name}`) 
     let session = await this.assignSessionForCategory(category)
     return session.connection
   }
@@ -111,7 +111,6 @@ class SessionService extends EventEmitter {
       let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
-        warn('No relay was found for new session')
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
       }
 

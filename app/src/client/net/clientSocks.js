@@ -42,14 +42,16 @@ export function startClientSocks (mhost, mport) {
         return regularProxy(socket, address, port, proxyReady)
       }
     })
-    .catch(errors.InvalidHostError, e => {
-      error(e.message)
-      /* TODO report to sentry to keep track of how often this happens */
-    })
     .catch(err => {
-      warn("Connection failed")
-      error(err)
-      
+      if (err instanceof errors.InvalidHostError) {
+        error(err.message) 
+      } else if (err instanceof errors.NoRelayAvailableError) {
+        warn('No relay was found for new session, terminating connection')
+        socket.end()
+      } else {
+        warn("Connection failed")
+        error(err)
+      }
       /* TODO atleast report errors which are not smart to sentry (errors which are we are sure aren't handled) */
     })
   }

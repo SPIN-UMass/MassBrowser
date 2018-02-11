@@ -19,17 +19,16 @@ export function runLocalServer (publicIP, publicPort) {
     socket.on('end', () => {
       // console.log('socket ending')
       recver.end()
-
-
     })
   })
+  
   return new Promise((resolve, reject) => {
     // console.log("starting server on port",publicPort)
     server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
       // console.log('relay bound')
       resolve(server)
     })
-    debug('relay started on ', publicPort)
+    debug('Relay started on ', publicPort)
     server.on('error', (e) => {
       if (e.code === 'EADDRINUSE') {
         warn('Relay address in use, retrying...')
