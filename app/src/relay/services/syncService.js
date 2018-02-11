@@ -14,41 +14,31 @@ class SyncService extends BaseSyncService {
       this.syncWebsites(progress),
       this.syncDomains(progress),
       this.syncCategories(progress),
-      this.syncCDNs(progress),
-      this.syncAllowedCategories()
+      this.syncCDNs(progress)
     ])
   }
 
   
-  syncAllowedCategories () {
-    // Needs to be registerd
-    if (!store.state.relay) {
-      return
-    }
-
-    API.getAllowedCategories().then((allowedCategories) => {
-      var allowedIDs = []
-      allowedCategories.forEach((cat) => {
-        allowedIDs.push(cat.id)
-      })
-      Category.find()
-        .then(categories => {
-
-          categories.forEach((category) => {
-            // console.log('allowedIDS', allowedIDs, category.id, allowedIDs.indexOf(category.id) > -1)
-
-            if (allowedIDs.indexOf(category.id) > -1) {
-              category.enabled = true
-            } else {
-              category.enabled = false
-            }
-            category.save()
-          })
-        })
-
+  async syncAllowedCategories () {
+    const allowedCategories = await API.getAllowedCategories();
+    
+    var allowedIDs = []
+    allowedCategories.forEach((cat) => {
+      allowedIDs.push(cat.id)
     })
+
+    const categories = await Category.find();
+    const promises = categories.map((category) => {
+      category.enabled = allowedIDs.indexOf(category.id) > -1
+      return category.save()
+    })
+    
+    return Promise.all(promises)
   }
 
+  /**
+   * Not currently used
+   */
   async syncServerAllowedCategories () {
     let categories = await Category.find({enabled: true})
     var allowedIDs = []
@@ -57,6 +47,7 @@ class SyncService extends BaseSyncService {
     })
     await API.setAllowedCategories(allowedIDs)
     debug('Category settings updated on server')
+    return categories;
   }
 }
 

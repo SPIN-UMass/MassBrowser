@@ -58,13 +58,15 @@ export default async function bootRelay() {
       status.clear()
     }
 
-    /* Check Categories */
+    let status = statusManager.info('Syncing allowed categories')
+    await syncService.syncAllowedCategories()
     const enabledCategories = await Category.find({enabled: true})
-    if (!enabledCategories) {
-      warn('No categories are enabled, users will not be able to connect')
+    if (!enabledCategories.length) {
+      warn('You have 0 categories enabled, users will not be able to connect')
     } else {
       debug(`You have ${enabledCategories.length} categories enabled`)
     }
+    status.clear()
 
     if (await torService.requiresDownload()) {
       status = statusManager.info('Downloading Tor list')
