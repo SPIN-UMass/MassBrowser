@@ -24,7 +24,11 @@ class _ZMQListener {
   }
 
   onRequest (data) {
+    
+
+    
     let session = JSON.parse(data.toString())
+    try {
     console.log(session)
     var desc = {
       'readkey': Buffer.from(session.read_key, 'base64'),
@@ -37,6 +41,9 @@ class _ZMQListener {
     var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
     _session.connect().then(() => {
       console.log('Session Connected')
+      
+
+
       connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
         if (this.validSessions.has(session)) {
           this.validSessions.delete(session)
@@ -58,6 +65,12 @@ class _ZMQListener {
 
       }
     })
+    
+    }
+    catch {
+      this.validSessions.delete(session)
+      this.onDisconnect(session)
+    }
   }
 
   onDisconnect (session) {
