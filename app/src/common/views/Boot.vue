@@ -1,6 +1,7 @@
 <template lang="pug">
-  .y-splash
-    .y-container
+  #m-splash
+    .dragger
+    #m-container
       h1 {{ appName }}
       .loading-container(v-if="step=='loading'")
         GridLoader.spinner(color="#aaa")
@@ -68,12 +69,20 @@
 <style scoped lang='scss'>
   @import '~@/views/styles/settings.scss';
 
-  .y-splash {
+  #m-splash {
     background-color: white;
     height: 100%;
     padding-top: 50px;
 
-    .y-container {
+    .dragger {
+      -webkit-app-region: drag;
+      position: fixed;
+      height: 50px;
+      width: 100%;
+      top: 0;
+    }
+
+    #m-container {
       text-align: center;  
     }
 
