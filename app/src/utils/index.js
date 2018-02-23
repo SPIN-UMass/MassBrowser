@@ -2,7 +2,7 @@ import path from 'path'
 
 export function getDataDir () {
   return process.platform === 'win32' ? 
-    path.join(process.env.LOCALAPPDATA, 'Yaler') : path.join(process.env.HOME, '.yaler')
+    path.join(process.env.LOCALAPPDATA, 'MassBrowser') : path.join(process.env.HOME, '.massbrowser')
 }
 
 export const WINDOWS = 'win32'
