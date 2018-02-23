@@ -29,7 +29,7 @@ global.Promise = Promise
 async function main() {
   await store.ready
   
-  if (!registrationService.isRegistered()) {
+  if (!(await registrationService.isRegistered())) {
     info('Registering relay...')
     await registrationService.registerRelay()
   }

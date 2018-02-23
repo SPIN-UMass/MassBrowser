@@ -15,12 +15,13 @@ class RegistrationService {
     await store.commit('registerRelay', relay)
   }
 
-  isRegistered() {
-    const relay = this.getRegisteredUser()
+  async isRegistered() {
+    const relay = await this.getRegisteredUser()
     return !!relay
   }
 
-  getRegisteredUser() {
+  async getRegisteredUser() {
+    await store.ready
     const relay = store.state.relay
 
     if (!relay || !relay.id) {

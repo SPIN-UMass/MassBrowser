@@ -22,7 +22,7 @@ export default async function bootRelay() {
   try {
     await store.ready
 
-    let relay = registrationService.getRegisteredUser()
+    let relay = await registrationService.getRegisteredUser()
 
     if (!relay) {
       throw new ApplicationBootError('Relay not registered')
