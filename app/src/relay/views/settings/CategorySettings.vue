@@ -16,6 +16,9 @@
 <script>
   import SettingsGroup from '@common/widgets/SettingsGroup'
   import { Category } from '@/models'
+  import { getService } from '@utils/remote'
+
+  const syncService = getService('sync')
 
   export default {
     components: {
@@ -37,13 +40,14 @@
     },
     async created() {
       this.categories = (await Category.find()).filter(c => ['Ads', 'Third Parties'].indexOf(c.name) === -1)
+      console.log(this.categories)
     },
     methods: {
       toggleCategory(category) {
         category.enabled = !category.enabled;
         Category.update({id: category.id}, {$set: {enabled: category.enabled}})
         if (this.syncUpdates) {
-          // TODO 
+          syncService.changeCategoryStatus(category.id, category.enabled)
         }
       }
     }

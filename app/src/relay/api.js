@@ -74,12 +74,18 @@ class RelayAPI extends CommonAPI {
     return this.transport.post('/relay/categories', data).then(r => r.data.allowed_categories)
   }
 
+  allowCategory(categoryID) {
+    return this.transport.put('/relay/category/' + categoryID)
+  }
+
+  disallowCategory(categoryID) {
+    return this.transport.delete('/relay/category/' + categoryID)
+  }
+
   async sendFeedback(content, rating) {
-    return await this.transport.post('/feedback', {
+    return await this.transport.post('/relay/feedback', {
       content,
-      rating,
-      userID: this.userID,
-      userType: 'relay'
+      rating
     })
   }
 }

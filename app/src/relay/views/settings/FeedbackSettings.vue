@@ -65,9 +65,6 @@
           } else {
             this.showAlert('danger', 'Unsuccessful', "Unfortunately we were not able to submit the feedback, please try again later")
           }
-          
-          
-
         },
         async showAlert(type, title, message) {
           this.alert = {

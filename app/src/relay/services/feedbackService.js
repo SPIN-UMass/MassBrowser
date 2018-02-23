@@ -5,7 +5,7 @@ import config from '@utils/config'
 import api from '@/api'
 import path from 'path'
 import fs from 'fs-extra'
-import { debug, error, warn } from '@utils/log'
+import { info, error, warn } from '@utils/log'
 
 class FeedbackService {
   constructor() {
@@ -13,6 +13,7 @@ class FeedbackService {
 
   async sendFeedback(content, rating) {
     try {
+      info('Sending user feedback to server')
       await api.sendFeedback(content, rating)
       return true
     } catch(e) {

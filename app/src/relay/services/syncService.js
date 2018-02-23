@@ -49,6 +49,14 @@ class SyncService extends BaseSyncService {
     debug('Category settings updated on server')
     return categories;
   }
+
+  async changeCategoryStatus(categoryID, enabled) {
+    if (enabled) {
+      return API.allowCategory(categoryID);
+    } else {
+      return API.disallowCategory(categoryID);
+    }
+  }
 }
 
 export const syncService = new SyncService()
