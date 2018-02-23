@@ -22,22 +22,22 @@
       div(slot="help")
         p ...
       .form(slot="body")
-        .row
+        .row(v-if="completeVersion")
           .col-xs-7
             label Behind NAT
           .col-xs-2 
             code {{ behindNAT ? 'Yes' : 'No'}}
-        .row(v-if='behindNAT')
+        .row(v-if='completeVersion && behindNAT')
           .col-xs-7
             label Local Address
           .col-xs-2 
             code {{ privateAddress.ip }}
-        .row
+        .row(v-if="completeVersion")
           .col-xs-7
             label Public Address
           .col-xs-2 
             code {{ publicAddress.ip }}
-        .row(v-if='!useCustomPort')
+        .row(v-if='completeVersion && !useCustomPort')
           .col-xs-7
             label Port
           .col-xs-2 
@@ -96,6 +96,12 @@
         }
       }
     },
+    props: {
+      completeVersion: {
+        type: Boolean,
+        default: true
+      },
+    },
     computed: {
       privateAddress: {
         get() {
@@ -120,10 +126,14 @@
           if (portNumber == this.$store.state.relayPort) {
             return
           }
+          
+          if (portNumber <= 1024 || portNumber > 65535) { 
+            return
+          }
 
           let action = () => { 
             info(`setting port to ${portNumber}`)  
-            relayManager.setRelayPort(Number(portNumber))
+            relayManager.setRelayPort(Number(portNumber), this.completeVersion)
           }
 
           if (portNumberTimeout != null) {
@@ -206,7 +216,7 @@
         }
         
         console.log(`Changing nat mode to ${!e.value}`)        
-        relayManager.changeNatStatus(!e.value)
+        relayManager.changeNatStatus(!e.value, this.completeVersion)
 
         if (e.value) {
           await showConfirmDialog(

@@ -53,16 +53,20 @@ class RelayManager {
     this.downloadLimiter.resetRate({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
   }
 
-  changeNatStatus (natEnabled) {
+  changeNatStatus (natEnabled, restartRelay=true) {
     this.natEnabled = natEnabled
     store.commit('changeNatStatus', natEnabled)
-    this.restartRelay()
+    if (restartRelay) {
+      this.restartRelay()
+    }    
   }
 
-  setRelayPort (relayPort) {
+  setRelayPort (relayPort, restartRelay=true) {
     this.relayPort = relayPort
     store.commit('changeRelayPort', relayPort)
-    this.restartRelay()
+    if (restartRelay) {
+      this.restartRelay()      
+    }    
   }
 
   async changeAccess (access) {

@@ -2,9 +2,11 @@
   .start-page-container
     .dragger
     .start-header
-      i.fa.fa-arrow-left.i-nav.i-prev(v-if="prevEnabled" v-on:click="prevPage")
+      span.i-nav.i-prev(v-if="prevEnabled" v-on:click="prevPage")
+        i.fa.fa-arrow-left
       h1 {{ appName }}
-      i.fa.fa-arrow-right.i-nav.i-next(v-if="nextEnabled" v-on:click="nextPage")
+      span.i-nav.i-next(v-if="nextEnabled" v-on:click="nextPage")
+        i.fa.fa-arrow-right
     .start-content
       .s-start(v-if="page == 'start'")
         .well
@@ -24,7 +26,8 @@
         .well.well-sm Customize your #[strong Network Settings] here. Click on #[span #[i.fa.fa-question-circle]] for help.
           br
           | All settings can also be changed again later on.
-        network-settings
+        .network-settings-container
+          network-settings(:completeVersion="false")
       .s-category-settings(v-if="page == 'category-settings'")
         .well.well-sm 
           | Select which types of websites you want to allow users to browser through you. Scroll down to see all options.
@@ -214,6 +217,10 @@
     .s-network-settings {
       .well {
         text-align: center;
+      }
+      .network-settings-container {
+        height: 200px;
+        overflow: auto;
       }
     }
 
