@@ -34,7 +34,12 @@ export default [
         component: require('@/views/settings/SettingsView'),
         name: 'settings',
         children: [
-          { path: '/relay/settings', redirect: '/relay/settings/network' },
+          { path: '/relay/settings', redirect: '/relay/settings/general' },
+          {
+            path: '/relay/settings/general',
+            name: 'settings-general',
+            component: require('@/views/settings/GeneralSettings')
+          },
           {
             path: '/relay/settings/network',
             name: 'settings-network',

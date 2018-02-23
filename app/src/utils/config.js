@@ -105,7 +105,7 @@ function initializeConfig(options) {
   config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'
 
   config.version = packageJSON.version
-  config.appName = packageJSON.name
+  // config.appName = packageJSON.name // Now included directly in config
 
   config.isDebug = isDebug
 

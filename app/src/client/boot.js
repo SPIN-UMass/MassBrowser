@@ -95,7 +95,7 @@ function handleBootError(err) {
     throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
   } else if (err instanceof NetworkError) {
     err.log()
-    throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
+    throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true, err)
   } else if (err instanceof RequestError) {
     err.logAndReport()
     throw new ApplicationBootError('Error occured while booting application', true)

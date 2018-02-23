@@ -7,7 +7,6 @@ import AutoLaunch from 'auto-launch'
 
 class AutoLauncher {
   constructor() {
-    this.launcher = this.createLauncher()
   }
 
   createLauncher() {
@@ -15,6 +14,7 @@ class AutoLauncher {
       return new AutoLaunch({
         name: config.appName,
         path: `/Applications/${config.appName}.app`,
+        isHidden: true
       })
     } else {
       warn('Auto launcher is currently only available for OSX')
@@ -23,12 +23,9 @@ class AutoLauncher {
   }
 
   async initialize() {
-    if (!this.launcher) {
-      return
-    }
+    this.launcher = this.createLauncher()
 
     let enabledInStore = store.state.autoLaunchEnabled
-
     let enabled = await this.isEnabled()
     if (enabled && !enabledInStore) {
       this.disable()
@@ -37,20 +34,21 @@ class AutoLauncher {
     }
   }
 
-  enable() {
+  async enable() {
     if (!this.launcher) {
       return
     }
-    this.launcher.enable()
-    store.commit('setAutoLauncher', true)
+
+    await this.launcher.enable()
+    await store.commit('setAutoLauncher', true)
   }
   
-  disable() {
+  async disable() {
     if (!this.launcher) {
       return
     }
-    this.launcher.disable()
-    store.commit('setAutoLauncher', false)
+    await this.launcher.disable()
+    await store.commit('setAutoLauncher', false)
   }
 
   async isEnabled() {

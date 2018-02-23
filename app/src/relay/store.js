@@ -10,7 +10,7 @@ export default {
     },
     sessions: [],
     syncProgress: 0,
-    autoLaunchEnabled: new PersistedState(true),
+    autoLaunchEnabled: new RendererCachedPersistedState(true),
     bootComplete: new RendererCachedState(false),
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),

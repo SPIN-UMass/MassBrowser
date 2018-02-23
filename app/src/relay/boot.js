@@ -1,11 +1,12 @@
 import API from '@/api'
 import config from '@utils/config'
+import { sleep } from '@utils'
 import { debug, error, warn } from '@utils/log'
 import { Raven } from '@utils/raven'
 import { statusManager, autoLauncher } from '@common/services'
 import { syncService, relayManager, networkMonitor, registrationService, torService } from '@/services'
 import { DomainFrontedRelay } from '@/net'
-import { WebSocketTransport } from '@utils/transport'
+import { HttpTransport, WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
 import { Category } from '@/models'
 import { store } from '@utils/store'
@@ -13,6 +14,7 @@ import {
   AuthenticationError, NetworkError, RequestError,
   ServerError, ApplicationBootError
 } from '@utils/errors'
+
 
 export default async function bootRelay() {
   let status
@@ -25,6 +27,10 @@ export default async function bootRelay() {
     if (!relay) {
       throw new ApplicationBootError('Relay not registered')
     }
+
+    status = statusManager.info(`Waiting for Internet conection`)
+    await waitForInternet()
+    status.clear()
 
     status = statusManager.info(`Authenticating Relay`)
     let auth = await API.authenticate(relay.id, relay.password)
@@ -95,12 +101,12 @@ export default async function bootRelay() {
 
     store.commit('completeBoot')
   } catch(err) {
-    if (err instanceof AuthenticationError) {
+    if (err instanceof NetworkError) {
+      err.log()
+      throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true, err)
+    } else if (err instanceof AuthenticationError) {
       err.logAndReport()
       throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
-    } else if (err instanceof NetworkError) {
-      err.log()
-      throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true)
     } else if (err instanceof RequestError) {
       err.logAndReport()
       throw new ApplicationBootError('Error occured while booting application', true)
@@ -120,5 +126,27 @@ export default async function bootRelay() {
       throw err
     }
   }
+}
+
+async function waitForInternet(attempt=0) {
+  const http = new HttpTransport();
+  
+  try {
+    let response = await http.get('http://httpbin.org/ip');
+    if (response.status == 200) {
+      return;
+    }
+  } catch(e) {}
+
+  try {
+    let response = await http.get('https://api.ipify.org/?format=json');
+    if (response.status == 200) {
+      return;
+    }
+  } catch(e) {}
+  
+  /* Sleep from 2 to 7 seconds */
+  await sleep(2000 + Math.min(5000, attempt * 1000))
+  return waitForInternet(attempt + 1)
 }
 

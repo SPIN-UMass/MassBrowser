@@ -2,6 +2,10 @@
   .settings-container
     .tab-base.tab-stacked-left
       ul.nav.nav-tabs
+        li(v-bind:class="{ active: currentTab === 'settings-general' }")
+          router-link(to='/relay/settings/general') 
+            i.tab-icon.fa.fa-cogs
+            span.tab-label General
         li(v-bind:class="{ active: currentTab === 'settings-network' }")
           router-link(to='/relay/settings/network') 
             i.tab-icon.fa.fa-signal
@@ -23,7 +27,7 @@
     store,
     data () {
       return {
-        currentTab: 'settings-network'
+        currentTab: 'settings-general'
       }
     },
     created() {

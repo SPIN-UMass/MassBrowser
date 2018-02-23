@@ -6,6 +6,7 @@
     "serverURL": "https://dev.yaler.co",
     "websocketURL": "wss://dev.yaler.co:443",
     "client": {
+      "appName": "MassBrowser",
       "socksPort": 7080,
       "cachebrowser": {
         "mitmPort": 6425
@@ -17,7 +18,8 @@
       "noHostHandlerPort": 6422
     },
     "relay": {
-      "natEnabled": true,
+      "appName": "MassBuddy",
+      "natEnabled": false,
       "port": 8040,
       "domainfrontable": false,
       "domainfrontPort": 8083,

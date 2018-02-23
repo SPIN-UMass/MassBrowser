@@ -12,7 +12,8 @@ export default {
     bootComplete: new RendererCachedState(false),
     client: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
-    browserIntegrationComplete: new RendererCachedPersistedState(false)
+    browserIntegrationComplete: new RendererCachedPersistedState(false),
+    autoLaunchEnabled: new RendererCachedPersistedState(false)
   },
   mutations: {
     changeStatus(state, status) {
@@ -43,6 +44,9 @@ export default {
       let index = state.sessions.findIndex(s => s.id === session.id)
       state.sessions.splice(index, 1)
       delete state.sessionMap[session.id]
+    },
+    setAutoLauncher(state, enabled) {
+      state.autoLaunchEnabled = enabled
     }
   }
 }

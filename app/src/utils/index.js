@@ -37,3 +37,9 @@ export function prettyBytes(num) {
 
 	return (neg ? '-' : '') + numStr + ' ' + unit
 }
+
+export function sleep(amount) {
+	return new Promise((resolve, _) => {
+		setTimeout(resolve, amount)
+	})
+}

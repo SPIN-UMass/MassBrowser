@@ -129,9 +129,10 @@ export class ApplicationBootError extends AppError {
   /**
    * @param retriable if error is retriable then user can try to boot application again
    */
-  constructor(message, retriable) {
+  constructor(message, retriable, originalError) {
     super(message)
     this.retriable = retriable
+    this.originalError = originalError
   }
 }
 

@@ -9,7 +9,7 @@
       .error-container(v-if="step=='error'")
         h4.red {{ errorMessage }}
         div
-          button.btn.btn-rounded.btn-lg.btn-warning(v-if="canRetry" v-on:click='boot') Try Again
+          button#retry-btn.btn.btn-rounded.btn-warning(v-if="canRetry" v-on:click='boot') Try Again
 </template>
 
 <script>
@@ -125,10 +125,10 @@
     }
     .error-container {
       margin-top: 60px;
-      
-      .btn {
-        margin-top: 40px;
-        padding: 10px 80px;
+      padding: 0px 50px; 
+      #retry-btn {
+        margin-top: 30px;
+        padding: 10px 50px 30px 50px;
       }
     }
   }
