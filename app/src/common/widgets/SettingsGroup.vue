@@ -1,14 +1,15 @@
 <template lang='pug'>
   .settings-group
-    .settings-help-icon(v-if="hasHelp")
-      i.fa.fa-question-circle(v-on:click="displayHelp = true")
+    .settings-help-icon(v-if="hasHelp" v-on:click="displayHelp = true")
+      i.fas.fa-question-circle
     .settings-help-mask(v-if="displayHelp" v-on:click="displayHelp = false")
     .settings-help.alert(v-if="displayHelp" :class="'alert-' + color")
       button.close(v-on:click="displayHelp = false")
-        i.fa.fa-close
+        i.fas.fa-times
+      .settings-icon-container
+        i.fas.fa-question-circle
       .settings-help-header
-        i.fa.fa-question-circle
-        .settings-help-title(v-if="hasTitle") {{ title }}         
+        .settings-help-title(v-if="hasTitle") {{ title }}
       .settings-help-body
         slot(name="help")
     .settings-title {{ title }}
@@ -53,7 +54,7 @@
     .settings-help-icon {
       float: right;
       cursor: pointer;
-      font-size: 1.2em;
+      font-size: 1em;
       &:hover {
         color: #48b; 
       }
@@ -84,8 +85,14 @@
         cursor: pointer;
       }
 
+      .settings-icon-container {
+        float: left;
+      }
+
       .settings-help-header {
+        float: left;
         overflow: auto;
+        margin-bottom: 5px;
         i {
           font-size: 16px;
           float: left;

@@ -15,8 +15,8 @@
     #m-footer
       StatusWidget.status-bar
       .version v{{version}}
-      .console
-        i.fa.fa-console
+      //- .console
+      //-   i.fas.fa-console
 
       
 </template>

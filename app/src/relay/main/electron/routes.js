@@ -49,7 +49,12 @@ export default [
             path: '/relay/settings/categories',
             name: 'settings-categories',
             component: require('@/views/settings/CategorySettings')
-          }
+          },
+          {
+            path: '/relay/settings/feedback',
+            name: 'settings-feedback',
+            component: require('@/views/settings/FeedbackSettings')
+          },
         ]
       }
     ]

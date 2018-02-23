@@ -4,16 +4,20 @@
       ul.nav.nav-tabs
         li(v-bind:class="{ active: currentTab === 'settings-general' }")
           router-link(to='/relay/settings/general') 
-            i.tab-icon.fa.fa-cogs
+            i.tab-icon.fas.fa-cogs
             span.tab-label General
         li(v-bind:class="{ active: currentTab === 'settings-network' }")
           router-link(to='/relay/settings/network') 
-            i.tab-icon.fa.fa-signal
+            i.tab-icon.fas.fa-signal
             span.tab-label Network
         li(v-bind:class="{ active: currentTab === 'settings-categories' }")
           router-link(to='/relay/settings/categories')
-            i.tab-icon.fa.fa-globe
+            i.tab-icon.fas.fa-globe
             span.tab-label Websites
+        li(v-bind:class="{ active: currentTab === 'settings-feedback' }")
+          router-link(to='/relay/settings/feedback')
+            i.tab-icon.fas.fa-comment
+            span.tab-label Feedback
       .tab-content
         router-view.tab-pane.fade.active.in
           
@@ -48,7 +52,7 @@
     }
 
     .tab-icon {
-      font-size: 1.2em;
+      font-size: 1em;
       margin-right: 10px;
       color: #888;
     }

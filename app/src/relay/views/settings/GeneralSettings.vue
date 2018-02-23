@@ -44,7 +44,7 @@
     data () {
       return {
         errorMessage: '',
-        autoLaunchEnabled: false,
+        autoLaunchEnabled: this.$store.state.autoLaunchEnabled,
         showDockHideOption: isPlatform(OSX),
         dockVisible: this.$store.state.dockVisible
       }

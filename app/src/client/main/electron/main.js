@@ -36,4 +36,7 @@ function onWindowClosed() {
   remote.setWebContents(null)
 }
 
+process.on('uncaughtException', (err) => {
+  console.error(err)
+})
 initializeMainProcess(onWindowCreated, onWindowClosed)
