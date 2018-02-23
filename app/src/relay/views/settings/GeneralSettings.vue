@@ -18,7 +18,7 @@
             } :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged")
         .row(v-if="showDockHideOption")
           .col-xs-8
-            label Show Icon in Dock
+            label Show dock icon when closed
           .col-xs-4.align-right
             toggle-button.toggle(:labels= {
             checked: 'Yes',
@@ -46,7 +46,7 @@
         errorMessage: '',
         autoLaunchEnabled: this.$store.state.autoLaunchEnabled,
         showDockHideOption: isPlatform(OSX),
-        dockVisible: this.$store.state.dockVisible
+        dockVisible: this.$store.state.dockIconVisible
       }
     },
     async created() {
@@ -68,11 +68,7 @@
         }
       },
       async dockVisibleChanged(e) {
-        if (e.value) {
-          dockHider.show()
-        } else {
-          dockHider.hide()
-        }
+        dockHider.changeVisibility(e.value)
       },
       showError(message) {
         this.errorMessage = message

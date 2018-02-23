@@ -5,6 +5,7 @@ import { syncService, relayManager, networkMonitor, registrationService, feedbac
 import { statusManager, autoUpdater, autoLauncher, dockHider } from '@common/services'
 import bootRelay from '@/boot'
 import { store } from '@utils/store'
+import { Category } from '@/models'
 
 // const serviceRegistry = new ServiceRegistry()
 remote.registerService('sync', syncService)
@@ -28,11 +29,13 @@ function onWindowCreated(window) {
   debug("Window created")
   remote.setWebContents(window.webContents)
   currentWindow = window
+  dockHider.windowOpened()
 }
 
 function onWindowClosed() {
   currentWindow = null
   remote.setWebContents(null)
+  dockHider.windowClosed()
 }
 
 process.on('uncaughtException', (e) => {

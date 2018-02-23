@@ -19,13 +19,16 @@ class DockHider {
     }
   }
 
+  changeVisibility(visible) {
+      return store.commit('changeDockIconVisible', visible)
+  }
+
   async show() {
     if (isPlatform(OSX)) {
         app.dock.show();
     } else {
         warn("Hiding dock icon only supported in OSX")
     }
-    await store.commit('changeDockIconVisible', true)
   }
   
   async hide() {
@@ -34,9 +37,18 @@ class DockHider {
     } else {
         warn("Hiding dock icon only supported in OSX")
     }
-    
-    await store.commit('changeDockIconVisible', false)
   }
+
+  async windowOpened() {
+    return this.show()
+  }
+
+  async windowClosed() {
+    let visible = store.state.dockIconVisible
+    if (!visible) {
+      this.hide()
+    }
+  }  
 }
 
 export const dockHider = new DockHider()
