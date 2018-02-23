@@ -11,6 +11,7 @@ export default {
     sessions: [],
     syncProgress: 0,
     autoLaunchEnabled: new RendererCachedPersistedState(true),
+    dockIconVisible: new RendererCachedPersistedState(false),
     bootComplete: new RendererCachedState(false),
     relay: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
@@ -71,6 +72,9 @@ export default {
     },
     changePrivateAddress(state, address) {
       state.privateAddress = address
+    },
+    changeDockIconVisible(state, visible) {
+      state.dockIconVisible = visible
     }
   }
 }

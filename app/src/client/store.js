@@ -13,7 +13,8 @@ export default {
     client: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
     browserIntegrationComplete: new RendererCachedPersistedState(false),
-    autoLaunchEnabled: new RendererCachedPersistedState(false)
+    autoLaunchEnabled: new RendererCachedPersistedState(false),
+    dockIconVisible: new RendererCachedPersistedState(false),
   },
   mutations: {
     changeStatus(state, status) {
@@ -47,6 +48,9 @@ export default {
     },
     setAutoLauncher(state, enabled) {
       state.autoLaunchEnabled = enabled
+    },
+    changeDockIconVisible(state, visible) {
+      state.dockIconVisible = visible
     }
   }
 }

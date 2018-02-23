@@ -1,9 +1,13 @@
 <template lang='pug'>
   .general-settings-container
-    settings-group(title="Launch Settings")
+    settings-group(title="Application Settings")
       div(slot="help")
         p
       div(slot="body")
+        .row(v-if="errorMessage")
+          .col-xs-12
+            .alert.alert-pink.err-message
+              p {{ errorMessage }}
         .row
           .col-xs-8
             label Launch MassBuddy on startup
@@ -12,10 +16,14 @@
             checked: 'Yes',
             unchecked: 'No'
             } :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged")
-        .row(v-if="errorMessage")
-          .col-xs-12
-            .alert.alert-pink.err-message
-              p {{ errorMessage }}
+        .row(v-if="showDockHideOption")
+          .col-xs-8
+            label Show Icon in Dock
+          .col-xs-4.align-right
+            toggle-button.toggle(:labels= {
+            checked: 'Yes',
+            unchecked: 'No'
+            } :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged")
 
 </template>
 
@@ -23,11 +31,10 @@
   import SettingsGroup from '@common/widgets/SettingsGroup'
   import { store } from '@utils/store'
   import { getService } from '@utils/remote'
-import { setTimeout } from 'timers';
+  import { isPlatform, OSX } from '@utils'
 
-  const autoLauncher = getService('autoLaunch');
-
-  // let autoLaunchEnabled = false
+  const autoLauncher = getService('autoLaunch')
+  const dockHider = getService('dockHider')
 
   export default {
     store,
@@ -36,8 +43,10 @@ import { setTimeout } from 'timers';
     },
     data () {
       return {
+        errorMessage: '',
         autoLaunchEnabled: false,
-        errorMessage: ''
+        showDockHideOption: isPlatform(OSX),
+        dockVisible: this.$store.state.dockVisible
       }
     },
     async created() {
@@ -49,17 +58,24 @@ import { setTimeout } from 'timers';
         if (e.value && !isEnabled) {
           await autoLauncher.enable()
           if (!(await autoLauncher.isEnabled())) {
-            this.showError()
+            this.showError("Unable to configure launch on startup, it may not be supported on your system.")
           }
         } else if (!e.value && isEnabled) {
           await autoLauncher.disable()
           if (await autoLauncher.isEnabled()) {
-            this.showError()
+            this.showError("Unable to configure launch on startup, it may not be supported on your system.")
           }
         }
       },
-      showError() {
-        this.errorMessage = "Unable to configure launch on startup, it may not be supported for you."
+      async dockVisibleChanged(e) {
+        if (e.value) {
+          dockHider.show()
+        } else {
+          dockHider.hide()
+        }
+      },
+      showError(message) {
+        this.errorMessage = message
       }
     }
   }
@@ -82,9 +98,7 @@ import { setTimeout } from 'timers';
 
     .err-message {
       font-size: 12px;
-      // background-color: #ff9393;
-      margin-top: 5px;
-      // border: none;
+      margin-bottom: 5px;
       padding: 5px;
     }
   }
