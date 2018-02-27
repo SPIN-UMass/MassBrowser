@@ -11,13 +11,23 @@ import ToggleButton from 'vue-js-toggle-button'
 // import storeConfig from '@/store'
 // import { initializeStore } from '@utils/store'
 
-// import '@assets/font-awesome/css/font-awesome.min.css'
-import '@assets/font-awesome/css/fa-svg-with-js.css'
-import '@assets/font-awesome/js/fontawesome.min.js'
-import '@assets/font-awesome/js/fa-solid.min.js'
+import '@assets/font-awesome/css/font-awesome.min.css'
 import '@assets/bootstrap/css/bootstrap.min.css'
 import '@assets/nifty/nifty.min.css'
 import '@assets/fonts/neuropol.ttf'
+
+import Icon from 'vue-awesome/components/Icon'
+import 'vue-awesome/icons/globe'
+import 'vue-awesome/icons/cogs'
+import 'vue-awesome/icons/signal'
+import 'vue-awesome/icons/comment'
+import 'vue-awesome/icons/times'
+import 'vue-awesome/icons/times-circle'
+import 'vue-awesome/icons/check-circle'
+import 'vue-awesome/icons/question-circle'
+import 'vue-awesome/icons/thumbs-up'
+import 'vue-awesome/icons/thumbs-down'
+
 
 import App from '@common/views/App'
 
@@ -32,7 +42,8 @@ export function initializeRendererProcess(routes) {
   Vue.use(ToggleButton)
   // Vue.use(Vuex)
 
-  // initializeStore(storeConfig)
+  Vue.component('icon', Icon)
+
   
   Vue.config.debug = true
 

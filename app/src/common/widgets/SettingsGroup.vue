@@ -1,13 +1,13 @@
 <template lang='pug'>
   .settings-group
     .settings-help-icon(v-if="hasHelp" v-on:click="displayHelp = true")
-      i.fas.fa-question-circle
+      icon(name="question-circle")
     .settings-help-mask(v-if="displayHelp" v-on:click="displayHelp = false")
     .settings-help.alert(v-if="displayHelp" :class="'alert-' + color")
       button.close(v-on:click="displayHelp = false")
-        i.fas.fa-times
+        icon(name="times")
       .settings-icon-container
-        i.fas.fa-question-circle
+        icon(name="question-circle")
       .settings-help-header
         .settings-help-title(v-if="hasTitle") {{ title }}
       .settings-help-body

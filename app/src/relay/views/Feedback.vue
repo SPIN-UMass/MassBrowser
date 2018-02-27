@@ -14,12 +14,10 @@
       .row#feedback-experience(style="text-align:center")
         //- .col-xs-6(style="margin-top: 5px") Rate your experience
         //- .col-xs-5
-        .exp-item(v-on:click="selectRate(0)" v-bind:class="{ active: rate === 0 }")
-            i.fa.fa-frown
-        .exp-item(v-on:click="selectRate(1)" :class="{ active: rate === 1 }")
-            i.fa.fa-meh
-        .exp-item(v-on:click="selectRate(2)" :class="{ active: rate === 2 }")
-            i.fa.fa-smile
+        .exp-item.negative(v-on:click="selectRate(1)" v-bind:class="{ active: rate === 1 }")
+            icon(name="thumbs-down" scale=2)
+        .exp-item.positive(v-on:click="selectRate(2)" :class="{ active: rate === 2 }")
+            icon(name="thumbs-up" scale=2)
       .row#submit-container
         .col-xs-12
             button.btn.btn-block.btn-info(v-on:click="submit()") Submit Feedback
@@ -127,16 +125,24 @@
             display: inline;
 
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 15px;
             font-size: 2em;
             color: lightgray;
 
-            &:hover {
-                color: #ffe9b2;
+            &.positive:hover {
+                color: #7caeff;
             }
 
-            &.active {
-                color:#f4b942;
+            &.positive.active {
+                color:#5771f2;
+            }
+
+            &.negative:hover {
+                color: #ff7f7f;
+            }
+
+            &.negative.active {
+                color:#ef4a4a;
             }
         }
     }

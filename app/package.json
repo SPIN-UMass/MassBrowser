@@ -92,6 +92,7 @@
     "v-money": "^0.8.1",
     "vs-stun": "0.0.7",
     "vue": "^2.3.4",
+    "vue-awesome": "^2.3.4",
     "vue-electron": "^1.0.6",
     "vue-js-toggle-button": "^1.1.0",
     "vue-resource": "^1.0.3",

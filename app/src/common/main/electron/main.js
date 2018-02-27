@@ -41,7 +41,7 @@ function initializeTray() {
   tray = new Tray(image)
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Open MassBrowser',
+      label: `Open ${config.appName}`,
       click() {
         if (mainWindow === null) {
           createWindow()

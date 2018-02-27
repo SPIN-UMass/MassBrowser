@@ -4,15 +4,15 @@
       ul.nav.nav-tabs
         li(v-bind:class="{ active: currentTab === 'settings-general' }")
           router-link(to='/relay/settings/general') 
-            i.tab-icon.fas.fa-cogs
+            icon.tab-icon(name='cogs')
             span.tab-label General
         li(v-bind:class="{ active: currentTab === 'settings-network' }")
           router-link(to='/relay/settings/network') 
-            i.tab-icon.fas.fa-signal
+            icon.tab-icon(name='signal')
             span.tab-label Network
         li(v-bind:class="{ active: currentTab === 'settings-categories' }")
           router-link(to='/relay/settings/categories')
-            i.tab-icon.fas.fa-globe
+            icon.tab-icon(name='globe')
             span.tab-label Websites
       .tab-content
         router-view.tab-pane.fade.active.in

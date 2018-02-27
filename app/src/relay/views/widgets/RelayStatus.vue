@@ -3,13 +3,15 @@
     .status-container
       .row.row-stat
         .col-xs-1.col-led
-          .status-led(v-bind:class="{'off': !connected, 'on': connected}")  
+          icon.status-led.on(name="check-circle"  scale="1.2" v-if="connected")
+          icon.status-led.off(name="times-circle" scale="1.2" v-if="!connected")
         .col-xs-8.col-text
           span.status-label(v-if='connected') Connection with server working
           span.status-label(v-if='!connected') Cannot establish connection with server
       .row.row-stat
         .col-xs-1.col-led
-          .status-led(v-bind:class="{'off': !reachable, 'on': reachable}")  
+          icon.status-led.on(name="check-circle"  scale="1.2" v-if="reachable")
+          icon.status-led.off(name="times-circle" scale="1.2" v-if="!reachable")
         .col-xs-8.col-text
           span.status-label(v-if='reachable') MassBuddy reachable by clients
           span.status-label(v-if='!reachable') MassBuddy is not reachable by clients
@@ -43,24 +45,21 @@
         margin-top: 15px;
 
         .col-led {
+          margin-top: 1px;
+          margin-right: -3px;
           text-align: right;
 
+          .on {
+            color: #8cc74f;
+          }
+
+          .off {
+            color: #f75d3f;
+          }
+          
           .status-led {
             vertical-align: middle;
             display: inline-block;
-            width: 20px;
-            height: 15px;
-            border-radius: 35%;
-
-            &.on {
-              background: #8cc74f;
-              border-color: #91c957;
-            }
-
-            &.off {
-              background: #f75d3f;
-              border-color: #f76549;
-            }
           }
         }
 
