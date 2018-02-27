@@ -14,10 +14,6 @@
           router-link(to='/relay/settings/categories')
             i.tab-icon.fas.fa-globe
             span.tab-label Websites
-        li(v-bind:class="{ active: currentTab === 'settings-feedback' }")
-          router-link(to='/relay/settings/feedback')
-            i.tab-icon.fas.fa-comment
-            span.tab-label Feedback
       .tab-content
         router-view.tab-pane.fade.active.in
           

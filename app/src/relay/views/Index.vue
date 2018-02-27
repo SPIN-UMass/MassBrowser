@@ -8,8 +8,11 @@
             router-link(to='/relay') home
           //- li(:class="{active: currentTab==='clients'}")
             //- router-link(to='/relay/clients') clients
+          li(:class="{active: currentTab==='feedback'}")
+            router-link(to='/relay/feedback') feedback
           li(:class="{active: currentTab==='settings'}")
             router-link(to='/relay/settings') settings
+          
     #m-content
       router-view
     #m-footer

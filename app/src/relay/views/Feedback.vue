@@ -3,25 +3,26 @@
     .status-alert.alert(v-if="alert" :class="'alert-' + alert.type")
       .title {{ alert.title }}
       p {{ alert.message }}
-    settings-group(title="Feedback")
-      div(slot="body")
-        .row#feedback-msg
-          .col-xs-12 Help us improve by giving us your feedback.
-        .row#feedback-input-container
-          .col-xs-12
-              textarea.form-control#feedback-input(rows="4" v-model="content" :class="{ invalid: !contentValid }")
-        .row#feedback-experience(style="text-align:center")
-          //- .col-xs-6(style="margin-top: 5px") Rate your experience
-          //- .col-xs-5
-          .exp-item(v-on:click="selectRate(0)" v-bind:class="{ active: rate === 0 }")
-              i.fa.fa-frown
-          .exp-item(v-on:click="selectRate(1)" :class="{ active: rate === 1 }")
-              i.fa.fa-meh
-          .exp-item(v-on:click="selectRate(2)" :class="{ active: rate === 2 }")
-              i.fa.fa-smile
-        .row#submit-container
-          .col-xs-12
-              button.btn.btn-block.btn-info(v-on:click="submit()") Submit Feedback
+    .container
+      .row#feedback-header
+        .col-xs-12 Feedback  
+      .row#feedback-msg
+        .col-xs-12 Help us improve by giving us your feedback.
+      .row#feedback-input-container
+        .col-xs-12
+            textarea.form-control#feedback-input(rows="4" v-model="content" :class="{ invalid: !contentValid }")
+      .row#feedback-experience(style="text-align:center")
+        //- .col-xs-6(style="margin-top: 5px") Rate your experience
+        //- .col-xs-5
+        .exp-item(v-on:click="selectRate(0)" v-bind:class="{ active: rate === 0 }")
+            i.fa.fa-frown
+        .exp-item(v-on:click="selectRate(1)" :class="{ active: rate === 1 }")
+            i.fa.fa-meh
+        .exp-item(v-on:click="selectRate(2)" :class="{ active: rate === 2 }")
+            i.fa.fa-smile
+      .row#submit-container
+        .col-xs-12
+            button.btn.btn-block.btn-info(v-on:click="submit()") Submit Feedback
                 
 </template>
 
@@ -85,6 +86,9 @@
   
   .feedback-settings-container {
     padding: 0px 0px;
+    background: white;
+    height: $content_height;
+    padding: 20px 40px;
 
     .status-alert {
       position: absolute;
@@ -98,10 +102,16 @@
       }
     }
 
+    #feedback-header {
+      font-weight: bold;
+      font-size: 14px;
+      color: rgb(80, 80, 80);
+    }
+
     #feedback-msg {
         font-weight: bold;
         margin-bottom: 15px;
-        margin-top: -5px;
+        margin-top: 10px;
     }
 
     #feedback-input-container {
@@ -133,7 +143,7 @@
 
     #submit-container {
         margin-top: 5px;
-        padding: 0px 20px;
+        padding: 0px 80px;
         .btn {
             height: 30px;
         }
