@@ -52,7 +52,7 @@ class WebPanelService {
     })
 
     const electron = require('electron')
-    /* TODO hadi: I don't like this */
+    /* TODO: hadi: I don't like this */
     /* Needs to change for console mode */
     if (config.isProduction) {
       app.use(serveStatic(`${electron.app.getAppPath()}/dist/web`))

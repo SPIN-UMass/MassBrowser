@@ -25,7 +25,7 @@ class NoHostHandlerService {
   }
 
   initializeApp(app) {
-    app.use('/ping', function(req, res)  {
+    app.use('/v2', function(req, res)  {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'text/plain')
       res.end('pong')

@@ -114,6 +114,7 @@ class CertificateManager {
     this.CAcert = undefined
     this.CAkeys = {}
     this.certCache = {}
+    this.pendingCertRequests = {}
   }
 
   initializeCA () {
@@ -132,16 +133,31 @@ class CertificateManager {
   getServerCerts (host) {
     return new Promise((resolve, reject) => {
       if (host in this.certCache) {
-        resolve(this.certCache[host])
+        return resolve(this.certCache[host])
+      }
+
+      if (!this.pendingCertRequests[host]) {
+        this.pendingCertRequests[host] = []
+      }
+
+      this.pendingCertRequests[host].push(resolve)
+
+      if (this.pendingCertRequests[host].length > 1) {
+        return;
       }
 
       this.generateServerCerts(host).then((data) => {
-        debug('certs generated')
+        debug(`Generated certificate for ${host}`)
         this.certCache[host] = {
           cert: data[0],
           key: data[1]
         }
-        resolve(this.certCache[host])
+        
+        for (let reslv of this.pendingCertRequests[host]) {
+          reslv(this.certCache[host])
+        }
+
+        delete this.pendingCertRequests[host]
       })
     })
   }

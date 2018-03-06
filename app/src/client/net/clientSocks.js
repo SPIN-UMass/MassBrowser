@@ -26,7 +26,8 @@ export function startClientSocks (mhost, mport) {
       return sendToNoHostHandler(socket, address, port, proxyReady)
     }
 
-    if (address === config.web.domain) {
+    if (address === config.web.domain || 
+        ((address === '127.0.0.1' || address === 'localhost') && port == config.web.port)) {
       return sendToWebPanel(socket, address, port, proxyReady)
     }
 
@@ -150,8 +151,10 @@ function regularProxy (socket, address, port, proxyReady) {
 
 function sendToWebPanel(socket, address, port, proxyReady) {
   if (port === 443) {
+    debug(`Forwarding webpanel cachebrowser request ${address}:${port}`)
     return cachebrowse(socket, 'yaler.co', port, proxyReady)  
   } else {
+    debug("Forwarding request to webpanel")
     return regularProxy(socket, '127.0.0.1', config.web.port, proxyReady)
   }
 }
