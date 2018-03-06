@@ -11,12 +11,14 @@ class RegistrationService {
     return client
   }
 
-  isRegistered() {
-    const client = this.getRegisteredUser()
+  async isRegistered() {
+    const client = await this.getRegisteredUser()
     return !!client
   }
 
-  getRegisteredUser() {
+  async getRegisteredUser() {
+    await store.ready
+    
     const client = store.state.client
 
     if (!client || !client.id) {

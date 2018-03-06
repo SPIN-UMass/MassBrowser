@@ -1,10 +1,13 @@
 <template lang="pug">
   .y-browser-integration
-      .text-center
-        h1.title Browser Configuration
-        p.message Please visit the link below in Firefox to configure you're browser      
-      .text-center.link-container
-        code.link(v-on:click="openLink") http://{{webDomain}}
+    .dragger
+    .text-center
+      h1.title Browser Configuration
+      p.message Please visit the link below in Firefox to configure you're browser      
+    .text-center.link-container
+      code.link(v-on:click="openLink") http://{{webDomain}}:{{webPanelPort}}
+    .text-center.alert.alert-danger.error-container(v-if="error") {{error}}
+      
 </template>
 
 <script>
@@ -13,7 +16,8 @@
   import { getService } from '@utils/remote'
   import { store } from '@utils/store'
   import { mapGetters } from 'vuex'
-
+  // import child_process from 'child_process'
+  import opn from 'opn'
   const context = getService('context')
 
 
@@ -21,7 +25,9 @@
     store,
     data () {
       return {
-        webDomain: config.web.domain
+        webDomain: '127.0.0.1', //config.web.domain,
+        webPanelPort: config.web.port,
+        error: ''
       }
     },
     created() {
@@ -34,8 +40,14 @@
       finish() {
         this.$router.push('/client')
       },
-      openLink() {
-        shell.openExternal(`http://${this.webDomain}`)
+      async openLink() {
+        try {
+          await opn(`http://${this.webDomain}:${this.webPanelPort}`, {app: 'firefox'})
+        } catch(e) {
+          this.error = "Currently only the Firefox browser is supported. Please install Firefox to continue"
+        }
+        // child_process.execSync(`open -a Firefox http://${this.webDomain}`)
+        // shell.openExternal(`http://${this.webDomain}`)
       }
     }
   }
@@ -48,17 +60,25 @@
     background: white;
     min-height: 100%;
 
+    .dragger {
+      -webkit-app-region: drag;
+      position: fixed;
+      height: 50px;
+      width: 100%;
+      top: 0;
+    }
+
     .title {
       margin-top: 0px;
       padding-top: 50px;
     }
 
     .message {
-      margin-top: 50px;
+      margin-top: 25px;
     }
 
     .link-container {
-      margin-top: 50px;
+      margin-top: 40px;
       code.link {    
         padding: 20px;
         font-size: 20px;
@@ -68,6 +88,14 @@
           
         }
       }
+    }
+
+    .error-container {
+      margin-top: 40px;
+      color:white;
+      font-size: 16px;
+      padding: 0px 60px;
+      border: none;
     }
     
   }
