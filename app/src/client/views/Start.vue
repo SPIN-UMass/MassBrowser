@@ -1,5 +1,6 @@
 <template lang="pug">
   #container.p-index
+    .dragger
     .content
       h1 MassBrowser
       h3 Best cencorship circumvention tool ever
@@ -20,6 +21,14 @@
 
     padding: 50px 80px;
 
+    .dragger {
+      -webkit-app-region: drag;
+      position: fixed;
+      height: 50px;
+      width: 100%;
+      top: 0;
+    }
+    
     h1 {
       font-size: 36px;
       font-family: "Neuropol";
