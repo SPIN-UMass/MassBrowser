@@ -39,7 +39,7 @@ export default async function bootClient () {
   try {
     await store.ready
     
-    let client = registrationService.getRegisteredUser()
+    let client = await registrationService.getRegisteredUser()
     if (!client) {
       throw new ApplicationBootError('Client not registered')
     }

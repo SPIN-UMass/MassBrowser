@@ -100,6 +100,7 @@ function initializeConfig(options) {
 
   config.isClient = role === 'client'
   config.isRelay = role === 'relay'
+  config.role = role
 
   config.isElectronRendererProcess = config.applicationInterface === 'electron' && config.electronProcess === 'renderer'
   config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'

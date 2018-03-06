@@ -4,8 +4,11 @@
 
 <script>
   import { store } from '@utils/store'
+  import { getService } from '@utils/remote'
+ 
+  const registrationService = getService('registration')
   
-  function getRoute() {
+  async function getRoute() {
     if (store.state.bootComplete) {
       if (!store.state.browserIntegrationComplete) {
         return '/browser-integration'
@@ -13,7 +16,7 @@
         return '/client'
       }
     } else {
-      if (store.state.registrationComplete) {
+      if (await registrationService.isRegistered()) {
         return '/boot'
       } else {
         return '/start'
@@ -22,8 +25,8 @@
   }
 
   export default {
-    created () {
-      let route = getRoute()
+    async created () {
+      let route = await getRoute()
       this.$router.push(route) 
     }
   }

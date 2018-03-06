@@ -43,7 +43,7 @@ async function main() {
 
   await store.ready
 
-  if (!registrationService.isRegistered()) {
+  if (!(await registrationService.isRegistered())) {
     info("Registering client...")
 
     if (!args.invitationCode) {

@@ -1,6 +1,8 @@
 import winston from 'winston'
 
-import config from '~/utils/config'
+import config from '@utils/config'
+import { getDataDir } from '@utils'
+import path from 'path'
 
 class BrowserConsoleTransport extends winston.Transport {
   constructor (options) {
@@ -50,6 +52,20 @@ if (config.isDebug || (config.isDevelopment && config.isElectronRendererProcess)
       timestamp: false
     })
   ]
+
+  if (config.log.file) {
+    const logpath = path.join(getDataDir(), config.role + ".log")
+    transports.push(new (winston.transports.File)({
+      filename: logpath,
+      colorize: true,
+      prettyPrint: true,
+      depth: 2,
+      humanReadableUnhandledException: true,
+      showLevel: true,
+      timestamp: false,
+      json: false
+    }))
+  }
 
   if (config.isElectronRendererProcess) {
     transports.push(new BrowserConsoleTransport())

@@ -1,5 +1,6 @@
 <template lang="pug">
   .y-register
+    .dragger
     .y-container
       h1 MassBrowser
       .loading-container(v-if="status=='loading'")
@@ -87,6 +88,14 @@
     background-color: white;
     height: 100%;
     padding-top: 50px;
+
+    .dragger {
+      -webkit-app-region: drag;
+      position: fixed;
+      height: 50px;
+      width: 100%;
+      top: 0;
+    }
 
     .y-container {
       text-align: center;  

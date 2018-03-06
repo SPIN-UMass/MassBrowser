@@ -46,7 +46,8 @@
         "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
       },
       "log": {
-        "level": "debug"
+        "level": "debug",
+        "file": true
       }
     },
     "prod": {
@@ -83,6 +84,7 @@
     "nedb": "^1.8.0",
     "node-forge": "^0.7.1",
     "node-schedule": "^1.2.1",
+    "opn": "^5.2.0",
     "randomstring": "^1.1.5",
     "raven": "^2.1.0",
     "raven-js": "^3.15.0",
