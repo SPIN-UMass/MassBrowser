@@ -10,13 +10,6 @@ class DockHider {
   }
 
   async initialize() {
-    await store.state.ready
-    let visible = store.state.dockIconVisible
-    if (visible) {
-      this.show()
-    } else {
-      this.hide()
-    }
   }
 
   changeVisibility(visible) {
@@ -44,6 +37,7 @@ class DockHider {
   }
 
   async windowClosed() {
+    await store.state.ready
     let visible = store.state.dockIconVisible
     if (!visible) {
       this.hide()

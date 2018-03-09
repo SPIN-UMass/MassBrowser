@@ -3,7 +3,7 @@ import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
 
 import { statusManager } from '@common/services/statusManager'
-import { autoUpdater } from '@common/services/autoUpdater'
+import { autoUpdater, autoLauncher, dockHider } from '@common/services'
 import { syncService, registrationService } from '@/services'
 import KVStore from '@utils/kvstore'
 import { store } from '@utils/store' // required for boot, don't remove
@@ -16,6 +16,8 @@ remote.registerService('status', statusManager)
 remote.registerService('registration', registrationService)
 remote.registerService('boot', { boot: bootClient })
 remote.registerService('autoupdate', autoUpdater)
+remote.registerService('autoLaunch', autoLauncher)
+remote.registerService('dockHider', dockHider)
 remote.registerService('kvstore', KVStore)
 
 
