@@ -1,11 +1,8 @@
 'use strict'
 
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
-import Promise from 'bluebird'
 
 import config from '@utils/config'
-
-global.Promise = Promise
 
 let mainWindow
 let tray

@@ -63,18 +63,20 @@
 
         RegistrationService.registerClient(invitationCode)
         .then(() => this.$router.push('/'))
-        .catch(InvalidInvitationCodeError, err => {
-          this.errorMessage = 'Invalid invitation code'
-          this.status = 'prompt'
+        .catch(err => {
+          if (err instanceof InvalidInvitationCodeError) {
+            this.errorMessage = 'Invalid invitation code'
+            this.status = 'prompt'
+          } else if (err instanceof NetworkError) {
+            this.errorMessage = 'Error connecting to server'
+            this.status = 'prompt'
+          } else if (err instanceof APIError) {
+            this.status = 'prompt'
+            this.errorMessage = 'Unknown error occured in registration'
+          } else {
+            throw err
+          }
         })
-        .catch(NetworkError, err => {
-          this.errorMessage = 'Error connecting to server'
-          this.status = 'prompt'
-        })
-        .catch(APIError, err => {
-          this.status = 'prompt'
-          this.errorMessage = 'Unknown error occured in registration'
-        }) 
       }
     }
   }

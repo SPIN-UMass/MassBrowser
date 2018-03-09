@@ -8,7 +8,6 @@ import * as errors from '~/utils/errors'
 import { error, debug } from '~/utils/log'
 import { runLocalServer } from './incommingConnection'
 import * as net from 'net'
-var schedule = require('node-schedule')
 
 class CloudBasedConnectivityAPI extends EventEmitter {
   constructor () {
@@ -26,6 +25,7 @@ class CloudBasedConnectivityAPI extends EventEmitter {
     this.localPort = 0
     this.remotePort = 0
 
+    this.keepAliveInterval = null
   }
 
   respHandler (localIP, localPort, remoteIP, remotePort) {
@@ -54,12 +54,11 @@ class CloudBasedConnectivityAPI extends EventEmitter {
   }
 
   _startKeepAlive () {
-    setTimeout(() => {
-      this.sendKeepAlive()
-    }, 50)
-    schedule.scheduleJob('*/30 * * * * *', () => {
-      this.sendKeepAlive()
-    })
+    if (this.keepAliveInterval) {
+      return
+    }
+    
+    this.keepAliveInterval = setInterval(() => this.sendKeepAlive(), 30 * 1000)
   }
 
   checkStunServer () {

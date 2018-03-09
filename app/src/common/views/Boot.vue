@@ -55,10 +55,14 @@
       boot() {
         return Boot.boot()
         .then(() => this.$router.push('/'))
-        .catch(ApplicationBootError, err => {
-          this.errorMessage = err.message
-          this.step = 'error'
-          this.canRetry = true
+        .catch(err => {
+          if (err instanceof ApplicationBootError) {
+            this.errorMessage = err.message
+            this.step = 'error'
+            this.canRetry = true
+          } else {
+            throw err
+          }
         })
       }
     }

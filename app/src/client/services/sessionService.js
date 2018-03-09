@@ -9,7 +9,6 @@ import { logger, warn, debug, info } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 
-var schedule = require('node-schedule')
 
 import { Domain, Category } from '@/models'
 
@@ -52,6 +51,7 @@ class SessionService extends EventEmitter {
      */
     this.categoryWaitLists = {}
 
+    this.sessionPollInterval = null
   }
 
   async start () {
@@ -234,14 +234,18 @@ class SessionService extends EventEmitter {
   }
 
   _startSessionPoll () {
-    // API.getSessions()
-    //       .then(ses => this._handleRetrievedSessions(ses))
-    schedule.scheduleJob('*/2 * * * * *', () => {
+    if (this.sessionPollInterval != null) {
+      return;
+    }
+    this.sessionPollInterval = setInterval(() => {
       if (Object.keys(this.pendingSessions).length > 0) {
         API.getSessions()
           .then(ses => this._handleRetrievedSessions(ses))
+      } else {
+        clearInterval(this.sessionPollInterval)
+        this.sessionPollInterval = null
       }
-    })
+    }, 2 * 1000)
   }
 }
 

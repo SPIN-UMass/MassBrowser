@@ -85,9 +85,13 @@ function yalerProxy(socket, address, port, proxyReady) {
 
 function cachebrowse(socket, address, port, proxyReady) {
   return cacheManager.newCacheConnection(socket, address, port, proxyReady)
-  .catch(errors.NotCacheBrowsableError, err => {
-    warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
-    return yalerProxy(socket, address, port, proxyReady)
+  .catch(err => {
+    if (err instanceof errors.NotCacheBrowsableError) {
+      warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
+      return yalerProxy(socket, address, port, proxyReady)
+    } else {
+      throw err
+    }
   })
 }
 

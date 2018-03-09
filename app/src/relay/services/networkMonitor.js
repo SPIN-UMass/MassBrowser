@@ -1,4 +1,3 @@
-import schedule from 'node-schedule'
 import API from '@/api'
 import config from '@utils/config'
 import { relayManager } from '@/services'
@@ -18,6 +17,7 @@ class NetworkMonitor {
     this.isServerConnected = false
 
     this.natConnection = null
+    this.keepAliveInterval = null;
   }
 
   async start() {
@@ -31,10 +31,8 @@ class NetworkMonitor {
 
     await natConnection.connect()
 
-    setTimeout(() => { this._sendKeepAlive() }, 500)
-    schedule.scheduleJob('*/30 * * * * *', () => {
-      this._sendKeepAlive()
-    })
+    setTimeout(() => this._sendKeepAlive(), 500)
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 30 * 1000)    
   }
 
   waitForNetworkStatus() {

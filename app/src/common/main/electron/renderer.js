@@ -5,7 +5,6 @@ import VueRouter from 'vue-router'
 import VueMask from 'v-mask'
 // import Vuex from 'vuex'
 
-import Promise from 'bluebird'
 import ToggleButton from 'vue-js-toggle-button'
 
 // import storeConfig from '@/store'
@@ -32,9 +31,6 @@ import 'vue-awesome/icons/thumbs-down'
 import App from '@common/views/App'
 
 export function initializeRendererProcess(routes) {
-  // Overwrite native Promise implementation with Bluebird's
-  window.Promise = Promise;
-
   Vue.use(Electron)
   Vue.use(Resource)
   Vue.use(VueRouter)

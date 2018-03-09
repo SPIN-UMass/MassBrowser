@@ -9,7 +9,6 @@ tls.connect = function (...args) {
 import API from '@/api'
 
 import Raven from '@utils/raven'
-import Promise from 'bluebird'
 import { InvalidInvitationCodeError } from '@utils/errors'
 import { info, error } from '@utils/log'
 import config from '@utils/config'
@@ -19,8 +18,6 @@ import { registrationService } from '@/services'
 import { statusManager, autoUpdater } from '@common/services'
 import bootRelay from '@/boot'
 import { store } from '@utils/store'
-
-global.Promise = Promise
 
 // Raven
 //   .smartConfig({'role': 'relay'})

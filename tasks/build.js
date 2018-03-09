@@ -60,20 +60,47 @@ async function askTargets() {
   }
 }
 
+async function askPlatforms() {
+  let answers = await inquirer.prompt([
+    {
+      type: 'checkbox',
+      name: 'platforms',
+      message: 'Select platforms',
+      choices: [
+        {name: 'OSX', value: 'm'},
+        {name: 'Windows', value: 'w'},
+        {name: 'Linux', value: 'l'}
+      ]
+    }
+  ])
+
+  return answers.platforms.join('')
+}
+
 
 async function buildForTarget(target) {
   let config = yaml.safeLoad(await fs.readFile(`tasks/electron-builder/${target}.yml`))
   
+  let platforms = await askPlatforms()
+  if (!platforms) {
+    console.log("No platforms selected")
+    process.exit(0)
+  }
+
   console.log(format(target, 'Packing...', BLUE))
   del.sync(targetInfo[target].del)
   await pack(targetInfo[target].config)
 
   console.log(format(target, 'Building...', BLUE))
-  await run(`build -mw --em.main=./dist/${target}/electron.main.js --em.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
+  await run(`build -${platforms} --em.main=./dist/${target}/electron.main.js --em.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
 
   console.log(format(target, 'Renaming release files...', BLUE))
-  await fs.move(`build/${target}/latest.yml`, `build/${target}/${target}.yml`, { overwrite: true })
-  await fs.move(`build/${target}/latest-mac.yml`, `build/${target}/${target}-mac.yml`, { overwrite: true })
+  if (platforms.indexOf('m') >= 0) {
+    await fs.move(`build/${target}/latest-mac.yml`, `build/${target}/${target}-mac.yml`, { overwrite: true })
+  }
+  if (platforms.indexOf('w') >= 0) {
+    await fs.move(`build/${target}/latest.yml`, `build/${target}/${target}.yml`, { overwrite: true })
+  }
 }
 
 function pack (config) {
