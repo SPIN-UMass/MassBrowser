@@ -82,10 +82,11 @@ class RelayAPI extends CommonAPI {
     return this.transport.delete('/relay/category/' + categoryID)
   }
 
-  async sendFeedback(content, rating) {
+  async sendFeedback(content, rating, logs) {
     return await this.transport.post('/relay/feedback', {
       content,
-      rating
+      rating,
+      logs
     })
   }
 }

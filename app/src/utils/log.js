@@ -3,6 +3,14 @@ import winston from 'winston'
 import config from '@utils/config'
 import { getDataDir } from '@utils'
 import path from 'path'
+import fs from 'fs'
+import shell from 'shelljs'
+
+const logDir = path.join(getDataDir(), "logs")
+    if (!fs.existsSync(logDir)) {
+      shell.mkdir('-p', logDir);
+    }
+const logpath = path.join(logDir, config.role + ".log")
 
 class BrowserConsoleTransport extends winston.Transport {
   constructor (options) {
@@ -54,16 +62,19 @@ if (config.isDebug || (config.isDevelopment && config.isElectronRendererProcess)
   ]
 
   if (config.log.file) {
-    const logpath = path.join(getDataDir(), config.role + ".log")
     transports.push(new (winston.transports.File)({
       filename: logpath,
       colorize: true,
       prettyPrint: true,
       depth: 2,
-      humanReadableUnhandledException: true,
       showLevel: true,
-      timestamp: false,
-      json: false
+      timestamp: true,
+      json: false,
+      maxFiles: 5, 
+      maxsize: 1000000,
+      tailable: true,
+      handleExceptions: true,
+      humanReadableUnhandledException: true
     }))
   }
 
@@ -97,6 +108,15 @@ info = logger.info
 warn = logger.warn
 debug = logger.debug
 error = logger.error
+
+export function readLogs(count) {
+  if (!config.log.file) {
+    return ''
+  }
+
+  count = count || 100
+  return shell.tail({"-n": count}, logpath)
+}
 
 export default logger
 

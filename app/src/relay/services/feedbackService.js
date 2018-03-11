@@ -5,16 +5,20 @@ import config from '@utils/config'
 import api from '@/api'
 import path from 'path'
 import fs from 'fs-extra'
-import { info, error, warn } from '@utils/log'
+import { info, error, warn, readLogs } from '@utils/log'
 
 class FeedbackService {
   constructor() {
   }
 
-  async sendFeedback(content, rating) {
+  async sendFeedback(content, rating, includeLogs) {
+    let logs = '';
+    if (includeLogs) {
+      logs = readLogs(200)
+    }
     try {
       info('Sending user feedback to server')
-      await api.sendFeedback(content, rating)
+      await api.sendFeedback(content, rating, logs)
       return true
     } catch(e) {
       if (e.logAndReport) {

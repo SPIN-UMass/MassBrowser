@@ -5,19 +5,23 @@
       p {{ alert.message }}
     .container
       .row#feedback-header
-        .col-xs-12 Feedback  
-      .row#feedback-msg
-        .col-xs-12 Help us improve by giving us your feedback.
+        .col-xs-12 Feedback
+      .row(style="margin-bottom: 10px;")
+        .col-xs-12
+          span#feedback-msg Help us improve by giving us your feedback.
+          #feedback-experience
+            .exp-item.negative(v-on:click="selectRate(1)" v-bind:class="{ active: rate === 1 }")
+                icon(name="thumbs-down" scale=2)
+            .exp-item.positive(v-on:click="selectRate(2)" :class="{ active: rate === 2 }")
+                icon(name="thumbs-up" scale=2)
       .row#feedback-input-container
         .col-xs-12
             textarea.form-control#feedback-input(rows="4" v-model="content" :class="{ invalid: !contentValid }")
-      .row#feedback-experience(style="text-align:center")
-        //- .col-xs-6(style="margin-top: 5px") Rate your experience
-        //- .col-xs-5
-        .exp-item.negative(v-on:click="selectRate(1)" v-bind:class="{ active: rate === 1 }")
-            icon(name="thumbs-down" scale=2)
-        .exp-item.positive(v-on:click="selectRate(2)" :class="{ active: rate === 2 }")
-            icon(name="thumbs-up" scale=2)
+      .row#log-settings(style='text-align: left')
+          input#includeLogs(type="checkbox" v-model="includeLogs")
+          label(for="includeLogs") Send logs with feedback
+
+          
       .row#submit-container
         .col-xs-12
             button.btn.btn-block.btn-info(v-on:click="submit()") Submit Feedback
@@ -41,6 +45,7 @@
           rate: null,
           content: '',
           contentValid: true,
+          includeLogs: true,
           alert: null
       }
     },
@@ -58,7 +63,7 @@
             return
           }
           this.contentValid = true
-          const success = await feedbackService.sendFeedback(this.content, this.rate)
+          const success = await feedbackService.sendFeedback(this.content, this.rate, this.includeLogs)
           if (success) {
             this.showAlert('success', 'Feedback Sent', 'Thank you for providing the feedback')  
           } else {
@@ -86,12 +91,12 @@
     padding: 0px 0px;
     background: white;
     height: $content_height;
-    padding: 20px 40px;
+    padding: 10px 40px;
 
     .status-alert {
       position: absolute;
       z-index: 1000;
-      width: 330px;
+      width: 400px;
 
       .title {
         margin-bottom: 10px;
@@ -119,8 +124,9 @@
     }
 
     #feedback-experience {
-        margin-top: 5px;
+        margin-left: 20px;
         font-weight: bold;
+        display: inline;
         .exp-item {
             display: inline;
 
@@ -147,8 +153,15 @@
         }
     }
 
+    #log-settings {
+      margin-top: 10px;
+      margin-left: 5px;
+      label {
+        margin-left: 10px;
+      }
+    }
     #submit-container {
-        margin-top: 5px;
+        margin-top: 10px;
         padding: 0px 80px;
         .btn {
             height: 30px;
