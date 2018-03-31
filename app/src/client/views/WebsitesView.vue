@@ -7,22 +7,49 @@
       p Choose which websites you want to use MassBrowser for. 
       p Enable proxying for a website if that website is censored for you.
 
-    .toolbar
-      .form-group
-        input#search.form-control(type="text", autocomplete="off", placeholder="Search Website...", v-model='searchQuery')
-      .website-list
-        table.table
-          tbody
-            tr(v-for="item in websites")
-              td.name {{item.name}}
-              td.toggle #[website-toggle.toggle(:website="item")]
+
+    .tab-base
+      ul.nav.nav-tabs
+        li(v-for="category in categories" v-bind:class="{ active: selectedCategory === category.id }")
+          a(v-on:click="selectedCategory=category.id")
+            span.tab-label {{category.name}}
+      .tab-content
+        .toolbar.form-inline
+          .form-group
+            input#search.form-control(type="text", autocomplete="off", placeholder="Search Website...", v-model='searchQuery')
+          .website-list
+            table.table
+              tbody
+                tr(v-for="item in websites")
+                  td.name {{item.name}}
+                  td.toggle #[website-toggle.toggle(:website="item")]
+          .request-website-hint-container(v-if="websites.length <= 2")
+            p Can't find the website you're looking for?
+            a(v-on:click="websiteRequest.showModal=true") Request support for a website
+
+    .modal-container(v-if='websiteRequest.showModal')
+      .modal-backdrop.fade(:class="{in: websiteRequest.showModal}")
+      .modal.fade(style='display: block' role='dialog' :class="{in: websiteRequest.showModal}")
+        .modal-dialog
+          .modal-content
+            .modal-header
+              button.close(v-on:click='websiteRequest.showModal=false') #[span x]
+              .modal-title Request Website Support
+            .modal-body(class="{'has-error': websiteRequest.hasError}")
+              p Enter website address below
+              input.form-control(type="text" placeholder="e.g. https://facebook.com" v-model="websiteRequest.value")
+            .modal-footer
+              button.btn.btn-danger(v-on:click='websiteRequest.showModal=false') Cancel
+              button.btn.btn-primary(v-on:click='submitWebsiteRequest') Submit Request
 </template>
 
 <script>
   import Website from '@/models/Website'
+  import Category from '@/models/Category'
   import { getService } from '@utils/remote'
 
   const KVStore = getService('kvstore')
+  const websiteSupportService = getService('website-support')
 
   let allWebsites
 
@@ -57,16 +84,28 @@
     data () {
       return {
         websites: [],
+        categories: [],
+        selectedCategory: null,
         searchQuery: '',
-        helpStage: 0
+        helpStage: 0,
+        websiteRequest: {
+          showModal: false,
+          value: '',
+          hasError: false
+        }
       }
     },
     components: {
       'website-toggle': WebsiteToggle
     },
     async created () {
-      this.websites = await Website.find({thirdParty: false}) 
+      allWebsites = await Website.find({thirdParty: false})
+      this.websites = allWebsites
       
+      let categories = await Category.find({parent: null})
+      categories = categories.filter(c => c.name !== 'Third Parties')
+      this.categories = [{name: 'All categories', id: null}].concat(categories)
+
       let helpDone = await KVStore.get('websites-page-help-finished')
       if (!helpDone) {
         this.helpStage = 1
@@ -75,18 +114,34 @@
     },
     watch: {
       'searchQuery': function(val) {
-        this.filterList(val)
+        this.filterList(val, this.selectedCategory)
+      },
+      'selectedCategory': function(val) {
+        this.filterList(this.searchQuery, val)
       }
     },
     methods: {
-      filterList(query) {
-        if (query === '') {
-          this.websites = allWebsites
-          return
-        }
-        
+      filterList(query, category) {
         query = query.toLowerCase()
-        this.websites = allWebsites.filter(w => w.name.toLowerCase().indexOf(query) !== -1)
+        this.websites = allWebsites.filter(w => 
+          (!query || w.name.toLowerCase().indexOf(query) !== -1) && 
+          (!category || w.category === category)
+        )
+      },
+      submitWebsiteRequest() {
+        let value = this.websiteRequest.value
+        if (!value.startsWith('http')) {
+          value = 'http://' + value
+        }
+        try {
+          const url = new URL(value)
+          websiteSupportService.requestWebsiteSupport(url.host)
+          this.websiteRequest.showModal = false
+          this.websiteRequest.value = ''
+          this.websiteRequest.hasError = false
+        } catch (e) {
+          this.websiteRequest.hasError = true 
+        }
       }
     }
   }
@@ -105,6 +160,44 @@
       left: 0;
       right: 0;
       cursor: pointer;
+    }
+
+    .nav.nav-tabs {
+      display: block;
+      float: left;
+      width: 28%;
+      height: $content-height;
+      overflow: auto;
+
+      li {
+        float: none;
+        
+        a {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .tab-base {
+      margin: 0px;
+    }
+
+    .tab-icon {
+      font-size: 1em;
+      margin-right: 10px;
+      color: #888;
+    }
+
+    .tab-label {
+      font-size: 14px;
+    }
+
+    .tab-content {
+      display: block;
+      float: left;    
+      height: $content_height;
+      width: 72%;
+      padding: 0px 10px;
     }
 
     .toolbar {
@@ -131,7 +224,7 @@
     }
     
     .website-list {
-      height: $content_height - $toolbar_height;
+      max-height: $content_height - $toolbar_height - 5px;
       overflow: auto;
 
       td.name {
@@ -143,6 +236,28 @@
           float: right;
         }
       }
+    }
+
+    .request-website-hint-container {
+      margin-bottom: 150px;
+      text-align: center;
+
+      font-size: 15px;
+      font-weight: 500;
+      color: #bbb;
+      a {
+        cursor: pointer;
+      }
+    }
+
+    .modal-backdrop.in {
+      opacity: 0.5;
+    }
+    .modal-dialog {
+      min-width: 80%;
+    }
+    .modal-body {
+      min-height: 70px;
     }
   }
   

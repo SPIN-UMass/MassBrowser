@@ -82,6 +82,11 @@ class ClientAPI extends CommonAPI {
     })
   }
 
+  async requestWebsiteSupport(hostname) {
+    return await this.transport.post('/website/request', {
+      hostname
+    })    
+  }
 }
 
 const API = new ClientAPI()

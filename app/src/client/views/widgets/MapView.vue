@@ -25,20 +25,32 @@
         return this.$store.state.sessions 
       }
     },
-    mounted () {
+    created() {
+     
+    },
+    async mounted () {
       map = createMap(this.$refs.mapdiv)
       map.bubbles(this.pins)
       
-      this.addSelfPin()
+      await this.addSelfPin()
+
+      let self = this
+
+      this.$store.watch(state => state.sessions, (state) => {
+        // console.log("CHANGE")
+        return self.updateSessions(self.$store.state.sessions)
+      }, { deep:true })
+
+      self.updateSessions(self.$store.state.sessions)
     },
-    watch: {
-      sessions: {
-        handler(sessions) {
-          return this.updateSessions(sessions)
-        },
-        deep: true
-      }
-    },
+    // watch: {
+    //   sessions: {
+    //     handler(sessions) {
+    //       return this.updateSessions(sessions)
+    //     },
+    //     deep: true
+    //   }
+    // },
     methods: {
       addPin(pin) {
         this.pins.push(pin)
@@ -64,11 +76,22 @@
           if (!session.id) {
             continue
           }
+
           if (this.pinMap[session.id] === undefined) {
-            let loc = await getLocationForIP(session.ip)
+            let loc = await getLocationForIP('178.62.241.153')//session.ip)
             let pin = new Pin(session.id, loc.longitude, loc.latitude)
-            this.addPin(pin)
-            this.addArc(new Arc(this.selfPin, pin))
+            
+            // setTimeout(() => {
+              this.addPin(pin) 
+            // }, 100)
+            // console.log(this.pins)
+            // setTimeout(() => {
+              console.log("AAAAAAA")
+              console.log(this.selfPin)
+              console.log(pin)
+              this.addArc(new Arc(this.selfPin, pin))
+            // }, 500)
+            
           }
         }
       }
@@ -120,6 +143,7 @@
         self: 'green'
       },
       bubblesConfig: {
+        animate: false,
         borderWidth: 0,
         borderOpacity: 1,
         borderColor: '#FFFFFF',

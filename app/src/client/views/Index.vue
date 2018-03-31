@@ -6,8 +6,8 @@
         ul
           li(:class="{active: currentTab==='home'}")
             router-link(to='/client') home
-          //- li(:class="{active: currentTab==='websites'}")
-          //-   router-link(to='/client/websites') websites
+          li(:class="{active: currentTab==='websites'}")
+            router-link(to='/client/websites') websites
           li(:class="{active: currentTab==='feedback'}")
             router-link(to='/client/feedback') feedback
           li(:class="{active: currentTab==='settings'}")
@@ -59,7 +59,7 @@
 
 
   $title_font_size: 20px;
-  $nav_font_size: 16px;
+  $nav_font_size: 15px;
 
   #m-container {
     height: $application_height;
@@ -107,7 +107,7 @@
       a {
         display: block;
         text-align: center;
-        padding: 5px 16px;
+        padding: 5px 9px;
         text-decoration: none;
         
         color: #bbb;    
