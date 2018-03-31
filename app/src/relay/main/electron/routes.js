@@ -32,7 +32,7 @@ export default [
       {
         path: '/relay/feedback',
         name: 'feedback',
-        component: require('@/views/Feedback')
+        component: require('@common/views/Feedback')
       },
       {
         path: '/relay/settings',

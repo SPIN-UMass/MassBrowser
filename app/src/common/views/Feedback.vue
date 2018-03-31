@@ -66,6 +66,7 @@
           const success = await feedbackService.sendFeedback(this.content, this.rate, this.includeLogs)
           if (success) {
             this.showAlert('success', 'Feedback Sent', 'Thank you for providing the feedback')  
+            this.content = ''
           } else {
             this.showAlert('danger', 'Unsuccessful', "Unfortunately we were not able to submit the feedback, please try again later")
           }

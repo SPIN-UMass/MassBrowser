@@ -73,6 +73,15 @@ class ClientAPI extends CommonAPI {
     // TODO:
     //return this.transport.get('/client/stun', data).then(r => r.data.allowed_categories)
   }
+
+  async sendFeedback(content, rating, logs) {
+    return await this.transport.post('/client/feedback', {
+      content,
+      rating,
+      logs
+    })
+  }
+
 }
 
 const API = new ClientAPI()

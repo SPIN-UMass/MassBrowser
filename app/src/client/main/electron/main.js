@@ -3,8 +3,8 @@ import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
 
 import { statusManager } from '@common/services/statusManager'
-import { autoUpdater, autoLauncher, dockHider } from '@common/services'
 import { syncService, registrationService } from '@/services'
+import { autoUpdater, autoLauncher, dockHider, feedbackService } from '@common/services'
 import KVStore from '@utils/kvstore'
 import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
@@ -19,6 +19,7 @@ remote.registerService('autoupdate', autoUpdater)
 remote.registerService('autoLaunch', autoLauncher)
 remote.registerService('dockHider', dockHider)
 remote.registerService('kvstore', KVStore)
+remote.registerService('feedback', feedbackService)
 
 
 // let requireControllerFilter = require.context('@/controllers', true, /\.js$/)

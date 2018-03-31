@@ -41,6 +41,11 @@ export default [
         name: 'websites'
       },
       {
+        path: '/client/feedback',
+        name: 'feedback',
+        component: require('@common/views/Feedback')
+      },
+      {
         path: '/client/settings',
         component: require('@/views/settings/SettingsView'),
         name: 'settings',
