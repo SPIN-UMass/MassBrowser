@@ -52,6 +52,7 @@ class SessionService extends EventEmitter {
     this.categoryWaitLists = {}
 
     this.sessionPollInterval = null
+    
   }
 
   async start () {
@@ -126,6 +127,7 @@ class SessionService extends EventEmitter {
       }
 
       storeUpdateSession(sessionInfo, 'pending')
+      this._startSessionPoll()
     })
   }
 
