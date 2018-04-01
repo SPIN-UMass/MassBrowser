@@ -26,6 +26,7 @@ import 'vue-awesome/icons/check-circle'
 import 'vue-awesome/icons/question-circle'
 import 'vue-awesome/icons/thumbs-up'
 import 'vue-awesome/icons/thumbs-down'
+import 'vue-awesome/icons/firefox'
 
 
 import App from '@common/views/App'
