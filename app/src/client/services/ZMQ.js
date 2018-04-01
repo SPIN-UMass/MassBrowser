@@ -65,9 +65,8 @@ class _ZMQListener {
 
       }
     })
-    
     }
-    catch {
+    catch(e) {
       this.validSessions.delete(session)
       this.onDisconnect(session)
     }

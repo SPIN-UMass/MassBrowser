@@ -116,11 +116,11 @@ async function checkTargetBuilds(config) {
     let target = targets[i]
     let productName = (await readBuildConfig(target)).productName
 
-    if (!(await fs.pathExists(`./build/${target}/${target}.yml`))) {
+    if (!(await fs.pathExists(`./build/${target}/${target}-mac.yml`))) {
       continue
     }
 
-    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${target}.yml`))
+    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${target}-mac.yml`))
     if (releaseInfo.version === version) {
       availableTargets.push(target)
     }
