@@ -1,6 +1,10 @@
-export * from './autoUpdater'
-export * from './statusManager'
-export * from './SyncService'
-export * from './autoLauncher'
-export * from './dockHider'
-export * from './feedbackService'
+import config from '@utils/config'
+
+module.exports = {
+    ...require('./autoUpdater'),
+    ...require('./statusManager'),
+    ...require('./SyncService'),
+    ...(config.isElectronProcess ? require('./feedbackService') : {}),
+    ...(config.isElectronProcess ? require('./autoLauncher') : {}),
+    ...(config.isElectronProcess ? require('./dockHider') : {})
+}
