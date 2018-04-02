@@ -6,6 +6,7 @@ import { connectionManager } from '@/net/connectionManager'
 import { RelayConnection } from '@/net/RelayConnection'
 import { DomainConnection } from './DomainConnection'
 import { pendMgr } from './PendingConnections'
+import {sessionService} from '@/services/sessionService'
 
 export class Session extends EventEmitter {
   constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
@@ -58,6 +59,8 @@ export class Session extends EventEmitter {
     relay.on('close', () => {
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
+      console.log('Calling to remove session')
+      sessionService._handleClosedSessions(this)
     })
 
     this.connected = true
@@ -96,10 +99,15 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
+      console.log("test closed")
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
 
     })
+
+
+    
+
     relay.sessionFounded(this).then(()=>{
       this.listener_resolve()
     }).catch((err)=>{

@@ -109,6 +109,7 @@ class SessionService extends EventEmitter {
     })
 
     return new Promise(async (resolve, reject) => {
+      debug(`Requesting for new session`)
       let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
@@ -164,6 +165,14 @@ class SessionService extends EventEmitter {
    * 
    * Resolves pending sessions with the newly created sessions
    */
+
+  _handleClosedSessions(session) {
+    console.log(this.sessions)
+    let index = this.sessions.indexOf(session)
+    this.sessions.splice(index,1)
+    console.log(this.sessions)
+  }
+
   async _handleRetrievedSessions(sessionInfos) {
     if (sessionInfos === undefined) {
       return

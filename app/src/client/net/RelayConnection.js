@@ -83,6 +83,16 @@ export class RelayConnection extends EventEmitter {
       this.cipher.decrypt(data)
     })
 
+    socket.on('error',(err)=>{
+      console.log('error', err)
+
+    })
+
+    socket.on('end',()=>{
+      console.log('ending relay socket')
+      this.emit('close')
+    })
+
     return socket
   }
 
