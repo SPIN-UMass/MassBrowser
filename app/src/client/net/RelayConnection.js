@@ -84,7 +84,13 @@ export class RelayConnection extends EventEmitter {
     })
 
     socket.on('error',(err)=>{
-      console.log('error', err)
+      console.log('socket error', err)
+      if (!socket.writable) {
+        console.log('socket is not writable')
+        this.emit('close')
+
+
+      }
 
     })
 
