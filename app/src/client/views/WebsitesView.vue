@@ -10,11 +10,11 @@
 
     .tab-base
       ul.nav.nav-tabs
-        li(v-for="category in categories" v-bind:class="{ active: selectedCategory === category.id }")
-          a(v-on:click="selectedCategory=category.id")
+        li(v-for="category in categories" v-bind:class="{ active: selectedCategory.id === category.id }")
+          a(v-on:click="selectedCategory=category")
             span.tab-label {{category.name}}
       .tab-container
-        .tab-content
+        .tab-content(v-if="selectedCategory.name !== 'Tor'")
           .toolbar.form-inline
             .form-group
               input#search.form-control(type="text", autocomplete="off", placeholder="Search Website...", v-model='searchQuery')
@@ -27,7 +27,11 @@
             .request-website-hint-container(v-if="websites.length <= 2")
               p Can't find the website you're looking for?
               a(v-on:click="websiteRequest.showModal=true") Request support for a website
-        .website-footer #[a(v-on:click="websiteRequest.showModal=true") Request support for a website]
+        .tor-container(v-if="selectedCategory.name === 'Tor'")
+            p To use MassBrowser with Tor, configure the proxy in your TorBrowser to the following settings
+            img(:src="torImage" width="350")
+        .website-footer(v-if="selectedCategory.name !== 'Tor'")
+           a(v-on:click="websiteRequest.showModal=true") Request support for a website
     .modal-container(v-if='websiteRequest.showModal')
       .modal-backdrop.fade(:class="{in: websiteRequest.showModal}")
       .modal.fade(style='display: block' role='dialog' :class="{in: websiteRequest.showModal}")
@@ -48,6 +52,7 @@
   import Website from '@/models/Website'
   import Category from '@/models/Category'
   import { getService } from '@utils/remote'
+  import torImage from '@assets/images/tor_settings.png'
 
   const KVStore = getService('kvstore')
   const websiteSupportService = getService('website-support')
@@ -86,9 +91,10 @@
       return {
         websites: [],
         categories: [],
-        selectedCategory: null,
+        selectedCategory: {name: '', id: null},
         searchQuery: '',
         helpStage: 0,
+        torImage,
         websiteRequest: {
           showModal: false,
           value: '',
@@ -253,6 +259,17 @@
       color: #bbb;
       a {
         cursor: pointer;
+      }
+    }
+
+    .tor-container {
+      height: $content-height;
+      background-color: white;
+      text-align: center;
+      padding: 20px 0px;
+      font-weight: 500;
+      img {
+        margin-top: 20px;
       }
     }
 
