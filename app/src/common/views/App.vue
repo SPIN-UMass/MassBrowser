@@ -29,7 +29,7 @@
       this.checkForUpdate()
     },
     methods: {
-      checkForUpdate () {
+      async checkForUpdate () {
         AutoUpdater.checkForUpdates()
         .then(updateAvailable => {
           if (!updateAvailable) {
@@ -43,6 +43,8 @@
           )
         })
         .then(shouldUpdate => shouldUpdate ? this.downloadUpdate() : null)
+
+        setInterval(() => this.checkForUpdate(), 1000 * 60 * 60)
       },
       downloadUpdate () {
         AutoUpdater.downloadUpdate()

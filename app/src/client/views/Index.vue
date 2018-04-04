@@ -48,7 +48,6 @@
       })
 
       syncService.syncAll()
-      autoUpdater.checkForUpdates()
     }
   }
 </script>
