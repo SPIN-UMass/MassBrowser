@@ -13,7 +13,7 @@
           | #[router-link(to='/relay/feedback').action-link Feedback]
     #m-client-help-box
       p Select the websites you want to browse in the #[router-link(to="/client/websites") Websites] page
-      p Open #[a(v-on:click="openFirefox") #[icon(name='firefox')] Firefox]  to start browsing with MassBrowser
+      p See #[a(v-on:click="openInstructions") Instructions], or open #[a(v-on:click="openFirefox") #[icon(name='firefox')] Firefox]  to start browsing with MassBrowser
         
     //- MapView#map
     //- GraphView#graph hello
@@ -47,6 +47,9 @@
     methods: {
       async openFirefox() {
         await opn('http://google.com', {app: 'firefox'})
+      },
+      async openInstructions() {
+        await opn('http://massbrowser.cs.umass.edu')
       }
     }
   }
