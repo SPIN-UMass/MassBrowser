@@ -33,11 +33,13 @@ function onWindowCreated(window) {
   debug("Window created")
   remote.setWebContents(window.webContents)
   currentWindow = window
+  dockHider.windowOpened()
 }
 
 function onWindowClosed() {
   currentWindow = null
   remote.setWebContents(null)
+  dockHider.windowClosed()
 }
 
 process.on('uncaughtException', (err) => {
