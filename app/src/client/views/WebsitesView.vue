@@ -13,20 +13,21 @@
         li(v-for="category in categories" v-bind:class="{ active: selectedCategory === category.id }")
           a(v-on:click="selectedCategory=category.id")
             span.tab-label {{category.name}}
-      .tab-content
-        .toolbar.form-inline
-          .form-group
-            input#search.form-control(type="text", autocomplete="off", placeholder="Search Website...", v-model='searchQuery')
-          .website-list
-            table.table
-              tbody
-                tr(v-for="item in websites")
-                  td.name {{item.name}}
-                  td.toggle #[website-toggle.toggle(:website="item")]
-          .request-website-hint-container(v-if="websites.length <= 2")
-            p Can't find the website you're looking for?
-            a(v-on:click="websiteRequest.showModal=true") Request support for a website
-
+      .tab-container
+        .tab-content
+          .toolbar.form-inline
+            .form-group
+              input#search.form-control(type="text", autocomplete="off", placeholder="Search Website...", v-model='searchQuery')
+            .website-list
+              table.table
+                tbody
+                  tr(v-for="item in websites")
+                    td.name {{item.name}}
+                    td.toggle #[website-toggle.toggle(:website="item")]
+            .request-website-hint-container(v-if="websites.length <= 2")
+              p Can't find the website you're looking for?
+              a(v-on:click="websiteRequest.showModal=true") Request support for a website
+        .website-footer #[a(v-on:click="websiteRequest.showModal=true") Request support for a website]
     .modal-container(v-if='websiteRequest.showModal')
       .modal-backdrop.fade(:class="{in: websiteRequest.showModal}")
       .modal.fade(style='display: block' role='dialog' :class="{in: websiteRequest.showModal}")
@@ -151,6 +152,7 @@
   @import '~@/views/styles/settings.scss';
 
   $toolbar_height: 34px;
+  $toolbar_footer_height: 24px;
 
   .p-websites {
     .alert.help {
@@ -192,11 +194,15 @@
       font-size: 14px;
     }
 
-    .tab-content {
-      display: block;
-      float: left;    
+    .tab-container {
       height: $content_height;
+      display: block;
+      float: left;
       width: 72%;
+    }
+
+    .tab-content {
+      height: $content_height - $toolbar_footer_height;
       padding: 0px 10px;
     }
 
@@ -224,7 +230,7 @@
     }
     
     .website-list {
-      max-height: $content_height - $toolbar_height - 5px;
+      max-height: $content_height - $toolbar_height - $toolbar_footer_height - 5px;
       overflow: auto;
 
       td.name {
@@ -247,6 +253,23 @@
       color: #bbb;
       a {
         cursor: pointer;
+      }
+    }
+
+    .website-footer {
+      height: $toolbar_footer_height;
+      font-size: 13px;
+      font-weight: 500;
+      background-color: #fefefe;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      padding: 2px 10px;
+      a {
+        float: right;
+        cursor: pointer;
+        &:hover {
+          color: #f48f42;
+        }
       }
     }
 
