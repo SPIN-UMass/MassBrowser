@@ -132,7 +132,7 @@
         query = query.toLowerCase()
         this.websites = allWebsites.filter(w => 
           (!query || w.name.toLowerCase().indexOf(query) !== -1) && 
-          (!category || w.category === category)
+          (!category || !category.id || w.category === category.id)
         )
       },
       submitWebsiteRequest() {

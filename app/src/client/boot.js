@@ -16,7 +16,7 @@ import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
 
 import API from '@/api'
 
-import { statusManager } from '@common/services/statusManager'
+import { statusManager, autoLauncher } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
@@ -81,6 +81,10 @@ export default async function bootClient () {
       await syncService.syncAll()
       status.clear()
     }
+
+    status = statusManager.info('Finalizing')
+    autoLauncher.initialize()
+    status.clear()
 
     await store.commit('completeBoot')
 

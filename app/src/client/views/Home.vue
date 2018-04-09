@@ -9,8 +9,8 @@
       .alert.alert-primary.status-box.running
         h4 You can close this window now! 
         p.de-emph #[strong MassBrowser] will continue running in the background.
-        p.de-emph You can also change your #[router-link(to='/relay/settings').action-link Settings] or give us 
-          | #[router-link(to='/relay/feedback').action-link Feedback]
+        p.de-emph You can also change your #[router-link(to='/client/settings').action-link Settings] or give us 
+          | #[router-link(to='/client/feedback').action-link Feedback]
     #m-client-help-box
       p Select the websites you want to browse in the #[router-link(to="/client/websites") Websites] page
       p See #[a(v-on:click="openInstructions") Instructions], or open #[a(v-on:click="openFirefox") #[icon(name='firefox')] Firefox]  to start browsing with MassBrowser
