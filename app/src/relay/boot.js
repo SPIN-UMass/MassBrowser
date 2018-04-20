@@ -63,7 +63,7 @@ export default async function bootRelay() {
     await syncService.syncAll()
     status.clear()
 
-    let status = statusManager.info('Syncing allowed categories')
+    status = statusManager.info('Syncing allowed categories')
     await syncService.syncAllowedCategories()
     const enabledCategories = await Category.find({enabled: true})
     if (!enabledCategories.length) {
