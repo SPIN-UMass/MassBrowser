@@ -57,12 +57,11 @@ export default async function bootRelay() {
     // otherwise sync will after the client has started to avoid
     // having delay on each run
     let isFirstSync = await syncService.isFirstSync()
-    if (isFirstSync) {
-      debug('It is first boot, syncing database')
-      let status = statusManager.info('Syncing database')
-      await syncService.syncAll()
-      status.clear()
-    }
+
+    debug('It is first boot, syncing database')
+    let status = statusManager.info('Syncing database')
+    await syncService.syncAll()
+    status.clear()
 
     let status = statusManager.info('Syncing allowed categories')
     await syncService.syncAllowedCategories()
