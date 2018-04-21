@@ -1,6 +1,6 @@
 {
   "name": "MassBrowser",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "P2P Proxy",
   "config": {
     "client": {
@@ -22,10 +22,11 @@
     },
     "relay": {
       "appName": "MassBuddy",
-      "natEnabled": true,
+      "natEnabled": false,
       "port": 8040,
       "domainfrontable": false,
       "domainfrontPort": 8083,
+      "keepAliveInterval": 30,
       "tor": {
         "listURL": "https://media.yaler.co/torlist",
         "listUpdateInterval": 432000000

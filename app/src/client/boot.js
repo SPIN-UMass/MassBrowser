@@ -2,7 +2,6 @@
  * Created by milad on 4/11/17.
  */
 
-
 import crypto from 'crypto'
 
 import Raven from '@utils/raven'
@@ -38,7 +37,7 @@ export default async function bootClient () {
 
   try {
     await store.ready
-    
+
     let client = await registrationService.getRegisteredUser()
     if (!client) {
       throw new ApplicationBootError('Client not registered')
@@ -87,13 +86,12 @@ export default async function bootClient () {
     status.clear()
 
     await store.commit('completeBoot')
-
   } catch (err) {
-    handleBootError(err) 
+    handleBootError(err)
   }
 }
 
-function handleBootError(err) {
+function handleBootError (err) {
   if (err instanceof AuthenticationError) {
     err.logAndReport()
     throw new ApplicationBootError('Server authentication failed, please contact support for help', false)

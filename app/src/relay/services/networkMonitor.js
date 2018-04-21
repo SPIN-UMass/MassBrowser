@@ -17,10 +17,10 @@ class NetworkMonitor {
     this.isServerConnected = false
 
     this.natConnection = null
-    this.keepAliveInterval = null;
+    this.keepAliveInterval = null
   }
 
-  async start() {
+  async start () {
     let natConnection = this.natConnection = new NATConnectivityConnection(
       config.echoServer.host,
       config.echoServer.port
@@ -32,13 +32,13 @@ class NetworkMonitor {
     await natConnection.connect()
 
     setTimeout(() => this._sendKeepAlive(), 500)
-    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 30 * 1000)    
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
   }
 
-  waitForNetworkStatus() {
+  waitForNetworkStatus () {
     return new Promise((resolve, reject) => {
       this.natConnection.once('net-update', data => resolve(data))
-    })  
+    })
   }
 
   getPublicAddress () {

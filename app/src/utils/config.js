@@ -19,6 +19,7 @@ const defaultConfig = {
     },
     natEnabled: true,
     port: 8040   /* Only used if natEnabled is false */,
+    keepAliveInterval: 30,
     stunServer: {
       host: 'stun2.l.google.com',
       port: 19302

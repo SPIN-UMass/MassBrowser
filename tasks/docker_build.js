@@ -42,14 +42,15 @@ function initializeDockerBuild() {
     if (packageJson.config.relay.natEnabled) {
       return inquirer.prompt([{
         type: 'confirm',
-        name: 'disableNat',
-        message: 'Docker build does not work with NAT, disable NAT?'
+        name: 'continue',
+        default: false,
+        message: 'Docker build does not work with NAT but you have NAT enabled in package.json, do you want to continue? (y/N)'
       }])
       .then(answer => {
-        if (answer.disableNat) {
-          return packageJson
-        } else {
+        if (!answer.continue) {
           process.exit(0)
+        } else {
+          return packageJson;
         }
       })
     } else {
@@ -62,14 +63,17 @@ function initializeDockerBuild() {
     packageJson.config.relay.natEnabled = false
     let defaultPort = packageJson.config.relay.port
     return inquirer.prompt([{
-      name: 'port',
-      message: 'Enter the port relays would be run on',
-      default: defaultPort,
-      validate: port => /^[0-9]+$/.test(port) || 'Invalid port'
+      name: 'continue',
+      message: 'Relay configured to be run on port ' + defaultPort + ' is this ok?',
+      default: true,
+      type: 'confirm'
     }])
     .then(answer => {
-      packageJson.config.relay.port = answer.port
-      return packageJson
+      if (!answer.continue) {
+        process.exit(0)
+      } else {
+        return packageJson
+      }
     })
   })
   .then(packageJson => {
@@ -123,7 +127,7 @@ function publishImage(config) {
       {
         name: 'username',
         message: 'Enter docker username',
-        default: 'yaler',
+        default: 'massbrowser',
       },
       {
         name: 'password',

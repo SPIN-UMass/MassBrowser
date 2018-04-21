@@ -1,22 +1,15 @@
-FROM ubuntu:latest
+FROM node:9
+
 ARG relay_port
 
 WORKDIR /relay
 
-RUN apt-get update
-RUN apt-get install -y curl
-
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install nodejs
-
-RUN npm install -g yarn pm2
+COPY package.json .
+RUN yarn install
 
 COPY relay.js .
-COPY package.json .
-
-RUN yarn install
 
 EXPOSE $relay_port
 
-CMD ["pm2-docker", "relay.js"]
+CMD ["node", "relay.js"]
 

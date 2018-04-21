@@ -36,6 +36,8 @@ export default async function bootRelay() {
     let auth = await API.authenticate(relay.id, relay.password)
     status.clear()
 
+    debug(`Relay authenticated with id ${relay.id}`)
+
     status = statusManager.info('Connecting to WebSocket server')
     let transport = new WebSocketTransport(
       `${config.websocketURL}/api/?session_key=${auth.session_key}`,
@@ -96,7 +98,11 @@ export default async function bootRelay() {
     }
 
     status = statusManager.info('Finalizing')
-    autoLauncher.initialize()
+
+    if (config.isElectronProcess) {
+      autoLauncher.initialize()
+    }
+
     status.clear()
 
     store.commit('completeBoot')
@@ -130,7 +136,7 @@ export default async function bootRelay() {
 
 async function waitForInternet(attempt=0) {
   const http = new HttpTransport();
-  
+
   try {
     let response = await http.get('http://httpbin.org/ip');
     if (response.status == 200) {
@@ -144,7 +150,7 @@ async function waitForInternet(attempt=0) {
       return;
     }
   } catch(e) {}
-  
+
   /* Sleep from 2 to 7 seconds */
   await sleep(2000 + Math.min(5000, attempt * 1000))
   return waitForInternet(attempt + 1)
