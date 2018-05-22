@@ -23,53 +23,69 @@ class _ZMQListener {
     console.log('Connected TO ZMQ servers')
   }
 
+  testConnection(session) {
+    return new Promise(resolve => {
+      setTimeout(()=>{
+    
+    try {
+      console.log(session)
+      var desc = {
+        'readkey': Buffer.from(session.read_key, 'base64'),
+        'readiv': Buffer.from(session.read_iv, 'base64'),
+        'writekey': Buffer.from(session.write_key, 'base64'),
+        'writeiv': Buffer.from(session.write_iv, 'base64'),
+        'token': Buffer.from(session.token, 'base64')
+      }
+      this.validSessions.add(session)
+      var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
+      _session.connect().then(() => {
+        console.log('Session Connected')
+        
+  
+  
+        connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
+          if (this.validSessions.has(session)) {
+            this.validSessions.delete(session)
+            _session.connection.end()
+            this.onConnect(session)
+          }
+        }, () => {
+          if (this.validSessions.has(session)) {
+            this.validSessions.delete(session)
+            _session.connection.end()
+            this.onDisconnect(session)
+  
+          }
+        })
+      }).catch((err) => {
+        if (this.validSessions.has(session)) {
+          this.validSessions.delete(session)
+          this.onDisconnect(session)
+  
+        }
+      })
+      }
+      catch(e) {
+        this.validSessions.delete(session)
+        this.onDisconnect(session)
+      }
+    },1000)})
+  }
+
+
   onRequest (data) {
     
 
     
     let session = JSON.parse(data.toString())
-    try {
-    console.log(session)
-    var desc = {
-      'readkey': Buffer.from(session.read_key, 'base64'),
-      'readiv': Buffer.from(session.read_iv, 'base64'),
-      'writekey': Buffer.from(session.write_key, 'base64'),
-      'writeiv': Buffer.from(session.write_iv, 'base64'),
-      'token': Buffer.from(session.token, 'base64')
-    }
-    this.validSessions.add(session)
-    var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
-    _session.connect().then(() => {
-      console.log('Session Connected')
-      
-
-
-      connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
-        if (this.validSessions.has(session)) {
-          this.validSessions.delete(session)
-          _session.connection.end()
-          this.onConnect(session)
-        }
-      }, () => {
-        if (this.validSessions.has(session)) {
-          this.validSessions.delete(session)
-          _session.connection.end()
-          this.onDisconnect(session)
-
-        }
-      })
-    }).catch((err) => {
-      if (this.validSessions.has(session)) {
-        this.validSessions.delete(session)
-        this.onDisconnect(session)
-
-      }
-    })
-    }
-    catch(e) {
-      this.validSessions.delete(session)
+    testConnection(session).then(()=>{
+      console.log("session received")
+    },()=>{
+      console.log("session received but rejected")
       this.onDisconnect(session)
-    }
+    })
+
+
   }
 
   onDisconnect (session) {
