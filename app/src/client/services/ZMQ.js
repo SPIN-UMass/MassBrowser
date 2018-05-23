@@ -27,7 +27,7 @@ class _ZMQListener {
   testConnection(session) {
     console.log('Session received')
     return new Promise((resolve, reject) => {
-      setTimeout(()=>{reject('timeout')},10000)
+      //setTimeout(()=>{reject('timeout')},10000)
     
     try {
       console.log(session)
@@ -81,7 +81,7 @@ class _ZMQListener {
 
     
     let session = JSON.parse(data.toString())
-    testConnection(session).then(()=>{
+    this.testConnection(session).then(()=>{
       console.log("session received")
     },()=>{
       console.log("session received but rejected")
