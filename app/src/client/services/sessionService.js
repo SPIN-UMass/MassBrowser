@@ -7,7 +7,7 @@ import API from '@/api'
 import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
-import { store } from '@utils/store'
+//import { store } from '@utils/store'
 
 
 import { Domain, Category } from '@/models'
@@ -103,7 +103,7 @@ class SessionService extends EventEmitter {
     let catIDs = categories.map(c => c.id)
 
     catIDs.forEach(category => {
-      if (!this.categoryWaitLists[category]) {
+      if (!this.categorstoreyWaitLists[category]) {
         this.categoryWaitLists[category] = []
       }
     })
@@ -174,7 +174,7 @@ class SessionService extends EventEmitter {
   }
 
   async _handleRetrievedSessions(sessionInfos) {
-    if (sessionInfos === undefined) {
+    if (sessionInfos ==store) {
       return
     }
 
@@ -261,15 +261,15 @@ class SessionService extends EventEmitter {
 }
 
 function storeUpdateSession(session, state) {
-  store.commit('updateSession', {
-    id: session.id,
-    ip: session.relay.ip,
-    state: state
-  })
+  // store.commit('updateSession', {
+  //   id: session.id,
+  //   ip: session.relay.ip,
+  //   state: state
+  // })
 }
 
 function storeRemoveSession(session) {
-  store.commit('removeSession', {id: session.id})
+  //store.commit('removeSession', {id: session.id})
 }
 
 

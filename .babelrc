@@ -8,6 +8,9 @@
     "console": {
       "presets": ["latest", "stage-0"]
     },
+    "control": {
+      "presets": ["latest", "stage-0"]
+    },
     "electron-main": {
       "presets": ["latest", "stage-0"]
     },

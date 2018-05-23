@@ -9,6 +9,7 @@ let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
 const zeromq = require('zeromq')
 class _ZMQListener {
   constructor () {
+    console.log("starting ZMQ")
     this.requests = zeromq.socket('pull')
     this.results = zeromq.socket('push')
     this.validSessions = new Set()
