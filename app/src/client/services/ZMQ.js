@@ -25,8 +25,9 @@ class _ZMQListener {
   }
 
   testConnection(session) {
-    return new Promise(resolve => {
-      setTimeout(()=>{
+    console.log('Session received')
+    return new Promise((resolve, reject) => {
+      setTimeout(()=>{reject('timeout')},10000)
     
     try {
       console.log(session)
@@ -70,7 +71,8 @@ class _ZMQListener {
         this.validSessions.delete(session)
         this.onDisconnect(session)
       }
-    },1000)})
+      resolve
+    })
   }
 
 

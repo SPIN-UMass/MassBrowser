@@ -11,7 +11,7 @@
     "relay": "cross-env NODE_ENV=production node ./app/dist/relay/relay.js",
     "client:dev": "cross-env NODE_ENV=development node ./app/dist/client/client.js",
     "relay:dev": "cross-env NODE_ENV=development node ./app/dist/relay/relay.js",
-    "client:control": "cross-env NODE_ENV=development node ./app/dist/client/control.js",
+    "client:control": "NODE_ENV=development node ./app/dist/client/control.js",
     "docker": "node ./tasks/docker_build.js"
   },
   "author": "Hadi Zolfaghari <hadi@cs.umass.edu>",
