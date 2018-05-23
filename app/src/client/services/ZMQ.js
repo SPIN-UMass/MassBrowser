@@ -71,7 +71,7 @@ class _ZMQListener {
         this.validSessions.delete(session)
         this.onDisconnect(session)
       }
-      resolve
+      resolve()
     })
   }
 
