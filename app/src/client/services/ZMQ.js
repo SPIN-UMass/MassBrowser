@@ -53,6 +53,7 @@ class _ZMQListener {
           }
         }, () => {
           if (this.validSessions.has(session)) {
+            console.log('session failed happend')
             this.validSessions.delete(session)
             _session.connection.end()
             this.onDisconnect(session)
@@ -60,6 +61,7 @@ class _ZMQListener {
           }
         })
       }).catch((err) => {
+        console.log('session error happend',e)
         if (this.validSessions.has(session)) {
           this.validSessions.delete(session)
           this.onDisconnect(session)
@@ -68,6 +70,7 @@ class _ZMQListener {
       })
       }
       catch(e) {
+        console.log('error happend',e)
         this.validSessions.delete(session)
         this.onDisconnect(session)
       }
