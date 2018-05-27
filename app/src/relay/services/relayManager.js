@@ -160,8 +160,10 @@ class RelayManager {
     try {
       if (this.isRelayServerRunning) {
         await this._stopRelayServer() 
+        debug(`Relay stopped`)
       } 
       await this._startRelayServer()
+      debug(`Relay started`)
     } catch(err) {
       warn(err)
     }
