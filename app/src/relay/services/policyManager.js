@@ -16,8 +16,8 @@ class PolicyManager {
 
     if (ipRegex.test(host)) {
       /* IP hosts are only allowed for Tor destinations */
-      const torCategory = Category.find({name: 'Tor'})
-      const telegramCategory = Category.find({name: 'Messaging'})
+      const torCategory = (await Category.find({name: 'Tor'}))[0]
+      const telegramCategory = (await Category.find({name: 'Messaging'}))[0]
       if (torCategory.enabled && torService.isTorIP(host)) {
         debug('Tor Relay')
       }
