@@ -12,6 +12,7 @@ export class TCPRelay {
     this.upLimit = upLimit
     this.downLimit = downLimit
     this._server = null
+    this.connection_list=[]
   }
 
   async start() {
@@ -23,13 +24,14 @@ export class TCPRelay {
       upPipe.on('error', (err) => {})
       var downPipe = this.downLimit.throttle()
       downPipe.on('error', (err) => {})
-  
+      this.connection_list.push(socket)
       socket.pipe(upPipe)
       downPipe.pipe(socket)
   
       var recver = new ConnectionReceiver(upPipe, downPipe, socket, this.authenticator)
       socket.on('error', (err) => {
         console.log('socket error', err.message)
+        this.connection_list.splice(this.connection_list.indexOf(socket), 1)
         recver.closeConnections()
         socket.unpipe(upPipe)
         downPipe.unpipe(socket)
@@ -38,6 +40,7 @@ export class TCPRelay {
       })
       socket.on('end', () => {
         console.log('socket ending')
+        this.connection_list.splice(this.connection_list.indexOf(socket), 1)
         recver.closeConnections()
   
         socket.unpipe(upPipe)
@@ -67,6 +70,10 @@ export class TCPRelay {
   async stop() {
     if (this._server) {
       return new Promise((resolve, reject) => {
+        this.connection_list.forEach((soc,index,arr)=>{
+          soc.destroy()
+          debug(`killing client soc`)
+        })
         this._server.close(() => {
           resolve()
         })
