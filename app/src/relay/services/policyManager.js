@@ -20,10 +20,12 @@ class PolicyManager {
       const telegramCategory = (await Category.find({name: 'Messaging'}))[0]
       if (torCategory.enabled && torService.isTorIP(host)) {
         debug('Tor Relay')
+        return
       }
       else if ( telegramCategory.enabled && telegramService.isTelegramIP(host))
       {
         debug('Telegram IP')
+        return 
       }
       else{
         throw new errors.InvalidHostError('IP based filtering only supported for Tor and Telegram')
