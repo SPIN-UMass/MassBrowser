@@ -15,7 +15,7 @@ import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
 
 import API from '@/api'
 
-import { statusManager, autoLauncher } from '@common/services'
+import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
@@ -53,6 +53,29 @@ export default async function bootClient () {
     status = statusManager.info('Server connection established')
     await API.clientUp()
     status.clear()
+    
+    if (await torService.requiresDownload()) {
+      status = statusManager.info('Downloading Tor list')
+      await torService.downloadTorList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Tor list')
+    await torService.loadTorList()
+    status.clear()
+
+    if (await telegramService.requiresDownload()) {
+      status = statusManager.info('Downloading Telegram list')
+      await telegramService.downloadTelegramList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Telegram list')
+    await telegramService.loadTelegramList()
+    status.clear()
+
+
+
+
+
 
     status = statusManager.info('Connecting to relay')
     await sessionService.start()

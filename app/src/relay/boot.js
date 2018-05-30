@@ -3,8 +3,8 @@ import config from '@utils/config'
 import { sleep } from '@utils'
 import { debug, error, warn } from '@utils/log'
 import { Raven } from '@utils/raven'
-import { statusManager, autoLauncher } from '@common/services'
-import { syncService, relayManager, networkMonitor, registrationService, torService } from '@/services'
+import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
+import { syncService, relayManager, networkMonitor, registrationService } from '@/services'
 import { DomainFrontedRelay } from '@/net'
 import { HttpTransport, WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
@@ -83,6 +83,17 @@ export default async function bootRelay() {
     status = statusManager.info('Loading Tor list')
     await torService.loadTorList()
     status.clear()
+
+
+    if (await telegramService.requiresDownload()) {
+      status = statusManager.info('Downloading Telegram list')
+      await telegramService.downloadTelegramList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Telegram list')
+    await telegramService.loadTelegramList()
+    status.clear()
+
 
     status = statusManager.info('Starting Relay')
     relayManager.startRelay()
