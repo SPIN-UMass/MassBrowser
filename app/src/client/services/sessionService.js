@@ -8,6 +8,7 @@ import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
+import { torService, telegramService } from '@common/services'
 
 
 import { Domain, Category } from '@/models'
@@ -27,6 +28,8 @@ let CDN = 3
  * is rejected then we will remove the category from the waitlists.
  *
  */
+const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
+
 class SessionService extends EventEmitter {
   constructor () {
     super()
@@ -60,11 +63,36 @@ class SessionService extends EventEmitter {
     this._startSessionPoll()
   }
 
+  
   async assignRelay (host, port) {
-    let domain = await Domain.findDomain(host)
-    let category = (await (await domain.getWebsite()).getCategory())
+    if (ipRegex.test(host)) {
+      let torCategory = (await Category.find({name: 'Tor'}))[0]
+      
+      let telegramCategory =  (await Category.find({name: 'Messaging'}))[0]
+      
+      
+      if ( torService.isTorIP(host)) {
+        var category = torCategory
+        debug(`mmmm Assigning session for ${host} of category ${category.name}`) 
+      }
+      else if (  telegramService.isTelegramIP(host))
+      {
+        var category = telegramCategory
+        debug(`mmmm Assigning session for ${host} of category ${category.name}`) 
+      }
+      else{
+      debug(`Assigning session for ${host} of failed`) 
+      return
+      }
+      
 
-    debug(`Assigning session for ${domain} of category ${category.name}`) 
+    }
+    else{
+      let domain = await Domain.findDomain(host)
+      var category = (await (await domain.getWebsite()).getCategory())
+    }
+    debug("herrere")
+    debug(`Assigning session for ${host} of category ${category.name}`) 
     let session = await this.assignSessionForCategory(category)
     return session.connection
   }

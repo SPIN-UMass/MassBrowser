@@ -8,6 +8,7 @@ import { policyManager } from '@/services'
 import { debug, info, warn, error } from '@utils/log'
 import * as errors from '@utils/errors'
 import config from '@utils/config'
+import { torService, telegramService } from '@common/services'
 
 const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
@@ -23,6 +24,10 @@ export function startClientSocks (mhost, mport) {
 
   function onConnection (socket, port, address, proxyReady) {
     if (ipRegex.test(address)) {
+      if (torService.isTorIP(address)  || telegramService.isTelegramIP(address))
+      {
+        return yalerProxy(socket,address,port,proxyReady)
+      }
       return sendToNoHostHandler(socket, address, port, proxyReady)
     }
 
