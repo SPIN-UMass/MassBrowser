@@ -58,6 +58,18 @@ export class CommonAPI {
       }
     ).then(r => r.data.results)
   }
+
+  async getPrivacyPolicyVersion() {
+    const privacyPolicyVersionUrl = config.isRelay
+      ? 'https://massbrowser.cs.umass.edu/privacy/relay-privacy-version'
+      : 'https://massbrowser.cs.umass.edu/privacy/client-privacy-version'
+
+    const response = await fetch(privacyPolicyVersionUrl)
+    if (response.ok) {
+      return await response.text()
+    }
+    return 0
+  }
 }
 
 const API = new CommonAPI()
