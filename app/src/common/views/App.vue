@@ -12,18 +12,17 @@
   import PrivacyPolicyModal from '@common/widgets/PrivacyPolicyModal'
   import { showConfirmDialog } from '@common/utils'
   import config from '@utils/config'
-  import API from '@/api'
 
   import { getService } from '@utils/remote'
 
   const AutoUpdater = getService('autoupdate')
+  const privacyPolicyService = getService('privacy-policy')
 
   export default {
     data () {
       return {
         showPrivacyPolicyModal: false,
-        isUpdatedPrivacyPolicyVersion: false,
-        privacyPolicyVersion: null
+        isUpdatedPrivacyPolicyVersion: false
       }
     },
     components: {
@@ -54,19 +53,18 @@
         setInterval(() => this.checkForUpdate(), 1000 * 60 * 60)
       },
       async checkPrivacyPolicy () {
-        const privacyPolicyVersion = await API.getPrivacyPolicyVersion()
-        const latestAcceptedVersion = localStorage.getItem('latest-accepted-privacy-policy-version')
-        this.privacyPolicyVersion = privacyPolicyVersion
+        const notificationRequired = await privacyPolicyService.isPrivacyPolicyNotificationRequired()
 
-        if (latestAcceptedVersion == null || privacyPolicyVersion > latestAcceptedVersion) {
-          this.showPrivacyPolicyModal = true
-        } else {
+        this.showPrivacyPolicyModal = notificationRequired > 0
+        this.isUpdatedPrivacyPolicyVersion = notificationRequired === 2
+
+        if (!notificationRequired) {
           this.checkForUpdate()
         }
       },
       privacyPolicyAccepted () {
         this.showPrivacyPolicyModal = false
-        localStorage.setItem('latest-accepted-privacy-policy-version', this.privacyPolicyVersion)
+        privacyPolicyService.privacyPolicyAccepted()
       },
       downloadUpdate () {
         AutoUpdater.downloadUpdate()

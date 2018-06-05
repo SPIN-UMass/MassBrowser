@@ -1,5 +1,6 @@
 import { HttpTransport } from '@utils/transport'
 import config from '@utils/config'
+import { error } from '@utils/log'
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
@@ -59,16 +60,18 @@ export class CommonAPI {
     ).then(r => r.data.results)
   }
 
-  async getPrivacyPolicyVersion() {
+  async getPrivacyPolicyVersion () {
     const privacyPolicyVersionUrl = config.isRelay
       ? 'https://massbrowser.cs.umass.edu/privacy/relay-privacy-version'
       : 'https://massbrowser.cs.umass.edu/privacy/client-privacy-version'
 
-    const response = await fetch(privacyPolicyVersionUrl)
-    if (response.ok) {
-      return await response.text()
+    const response = await this.transport.get(privacyPolicyVersionUrl)
+    try {
+      return await response.data
+    } catch (e) {
+      error(e)
+      return 0
     }
-    return 0
   }
 }
 
