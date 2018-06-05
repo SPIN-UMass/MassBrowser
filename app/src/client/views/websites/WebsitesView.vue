@@ -23,13 +23,13 @@
                 tbody
                   tr(v-for="item in websites")
                     td.name {{item.name}}
-                    td.toggle #[website-toggle.toggle(:website="item")]
+                    td.toggle(v-if='!specialWebsites[item.name]') #[website-toggle.toggle(:website="item")]
+                    td.special-website-link-container(v-if='specialWebsites[item.name]')
+                      .special-website-link(v-on:click='selectedWebsiteInstructions = item.name') Click here for instructions
             .request-website-hint-container(v-if="websites.length <= 2")
               p Can't find the website you're looking for?
               a(v-on:click="websiteRequest.showModal=true") Request support for a website
-        .tor-container(v-if="selectedCategory.name === 'Tor'")
-            p To use MassBrowser with Tor, configure the proxy in your TorBrowser to the following settings
-            img(:src="torImage" width="350")
+        tor-view.special-category(v-if="selectedCategory.name === 'Tor'")
         .website-footer(v-if="selectedCategory.name !== 'Tor'")
            a(v-on:click="websiteRequest.showModal=true") Request support for a website
     .modal-container(v-if='websiteRequest.showModal')
@@ -46,44 +46,31 @@
             .modal-footer
               button.btn.btn-danger(v-on:click='websiteRequest.showModal=false') Cancel
               button.btn.btn-primary(v-on:click='submitWebsiteRequest') Submit Request
+    website-instructions-modal(
+      v-if="selectedWebsiteInstructions != null"
+      :website='selectedWebsiteInstructions'
+      :website-component='specialWebsites[selectedWebsiteInstructions]'
+      :onClose='closeWebsiteInstructions'
+    )
 </template>
 
 <script>
+  import WebsiteToggle from './WebsiteToggle'
+  import WebsiteInstructionsModal from './WebsiteInstructionsModal'
+  import TorView from './Tor'
+  import TelegramView from './TelegramView'
+
   import Website from '@/models/Website'
   import Category from '@/models/Category'
   import { getService } from '@utils/remote'
-  import torImage from '@assets/images/tor_settings.png'
 
   const KVStore = getService('kvstore')
   const websiteSupportService = getService('website-support')
 
   let allWebsites
 
-  const WebsiteToggle = {
-    render: function(h) {
-      return h('toggle-button', { 
-        props: {
-          width: 100,
-          value: this.website.enabled,
-          labels: this.label
-        },
-        on: {
-          change: this.onChange 
-        }
-      })
-    },
-    props: ['website'],
-    data() {
-      return {
-        label: {checked: 'Proxy', unchecked: "Don't Proxy"}
-      }
-    },
-    methods: {
-      onChange: function(e) {
-        this.website.enabled = e.value
-        Website.update({id: this.website.id}, {$set: {enabled: this.website.enabled}})
-      }
-    }
+  const specialWebsites = {
+    'Telegram': TelegramView
   }
 
   export default {
@@ -94,7 +81,8 @@
         selectedCategory: {name: '', id: null},
         searchQuery: '',
         helpStage: 0,
-        torImage,
+        specialWebsites,
+        selectedWebsiteInstructions: null,
         websiteRequest: {
           showModal: false,
           value: '',
@@ -103,12 +91,14 @@
       }
     },
     components: {
-      'website-toggle': WebsiteToggle
+      'website-toggle': WebsiteToggle,
+      'tor-view': TorView,
+      'website-instructions-modal': WebsiteInstructionsModal
     },
     async created () {
       allWebsites = await Website.find({thirdParty: false})
       this.websites = allWebsites
-      
+  
       let categories = await Category.find({parent: null})
       categories = categories.filter(c => c.name !== 'Third Parties')
       this.categories = [{name: 'All categories', id: null}].concat(categories)
@@ -116,26 +106,26 @@
       let helpDone = await KVStore.get('websites-page-help-finished')
       if (!helpDone) {
         this.helpStage = 1
-         KVStore.set('websites-page-help-finished', true)
+        KVStore.set('websites-page-help-finished', true)
       }
     },
     watch: {
-      'searchQuery': function(val) {
+      'searchQuery': function (val) {
         this.filterList(val, this.selectedCategory)
       },
-      'selectedCategory': function(val) {
+      'selectedCategory': function (val) {
         this.filterList(this.searchQuery, val)
       }
     },
     methods: {
-      filterList(query, category) {
+      filterList (query, category) {
         query = query.toLowerCase()
-        this.websites = allWebsites.filter(w => 
-          (!query || w.name.toLowerCase().indexOf(query) !== -1) && 
+        this.websites = allWebsites.filter(w =>
+          (!query || w.name.toLowerCase().indexOf(query) !== -1) &&
           (!category || !category.id || w.category === category.id)
         )
       },
-      submitWebsiteRequest() {
+      submitWebsiteRequest () {
         let value = this.websiteRequest.value
         if (!value.startsWith('http')) {
           value = 'http://' + value
@@ -147,8 +137,11 @@
           this.websiteRequest.value = ''
           this.websiteRequest.hasError = false
         } catch (e) {
-          this.websiteRequest.hasError = true 
+          this.websiteRequest.hasError = true
         }
+      },
+      closeWebsiteInstructions () {
+        this.selectedWebsiteInstructions = null
       }
     }
   }
@@ -262,16 +255,25 @@
       }
     }
 
-    .tor-container {
+    .special-category {
       height: $content-height;
       background-color: white;
-      text-align: center;
       padding: 20px 0px;
-      font-weight: 500;
-      img {
-        margin-top: 20px;
+    }
+
+    td.special-website-link-container {
+      text-align: right;
+      .special-website-link {
+        display: inline;
+        color: #1b6d85;
+        font-weight: bold;
+        cursor: pointer;
+        &:hover {
+          color: #1a8ad2;
+        }
       }
     }
+
 
     .website-footer {
       height: $toolbar_footer_height;
