@@ -47,6 +47,8 @@ class ClientAPI extends CommonAPI {
 
         // Sesion not found
         return null
+      },(err)=>{
+        return null
       })
   }
 

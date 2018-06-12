@@ -10,7 +10,7 @@ import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
 
-
+let TEST_URL="backend.yaler.co"
 import { Domain, Category } from '@/models'
 
 let TCP_CLIENT = 0
@@ -55,12 +55,15 @@ class SessionService extends EventEmitter {
     this.categoryWaitLists = {}
 
     this.sessionPollInterval = null
+
+    this.sessionHeartInterval = null
     
   }
 
   async start () {
     connectionManager.setRelayAssigner(this)
     this._startSessionPoll()
+    this._startSessionHeart()
   }
 
   
@@ -99,20 +102,26 @@ class SessionService extends EventEmitter {
 
   async assignSessionForCategory(category) {
     // Search through active sessions to find session which allows category
+    debug(`Searching sessions for ${category.name}`)
     for (var i = 0; i < this.sessions.length; i++) {
       if (this.sessions[i].allowedCategories.has(category.id)) {
+        debug(`Sessions for ${category.name} Assigned`)
         return this.sessions[i]
       }
     }
   
     // Check category waitlists to see if the category already has a pending session
+    
+    
     if (category && this.categoryWaitLists[category.id]) {
+      debug(`Pending sessions for ${category.name}`)
       return new Promise((resolve, reject) => {
         this.categoryWaitLists[category.id].push(session => {
           resolve(session)
         })
       })
     }
+    debug(`Sessions for ${category.name} requested to be created`)
 
     return this.createSession(category)
   }
@@ -141,6 +150,11 @@ class SessionService extends EventEmitter {
       let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
+        catIDs.forEach(category => {
+          if (this.categoryWaitLists[category]) {
+            delete this.categoryWaitLists[category]
+          }
+        })
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
       }
 
@@ -274,7 +288,7 @@ class SessionService extends EventEmitter {
 
   _startSessionPoll () {
     if (this.sessionPollInterval != null) {
-      return;
+      return
     }
     this.sessionPollInterval = setInterval(() => {
       if (Object.keys(this.pendingSessions).length > 0) {
@@ -286,7 +300,35 @@ class SessionService extends EventEmitter {
       }
     }, 2 * 1000)
   }
+
+  _startSessionHeart () {
+    if (this.sessionHeartInterval) {
+      return
+    }
+    
+    this.sessionHeartInterval = setInterval(() => this.sessionHeartBeat(), 30 * 1000)
+  }
+
+  async testSession(session) {
+    debug(`testing session ${session.id}`)
+    connectionManager.testConnect(TEST_URL,80,session.connection,()=>{
+      debug(`Session ${session.id} is still valid`)
+    },()=>{
+      debug(`Session ${session.id} is dead`)
+    })
+
+
+  }
+  sessionHeartBeat() {
+    for (var i = 0; i < this.sessions.length; i++) {
+      this.testSession(this.sessions[i])
+    }
+
+
+  }
 }
+
+
 
 function storeUpdateSession(session, state) {
   store.commit('updateSession', {
