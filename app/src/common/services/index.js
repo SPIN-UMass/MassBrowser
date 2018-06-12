@@ -6,6 +6,7 @@ module.exports = {
     ...require('./SyncService'),
     ...require('./torService'),
     ...require('./telegramService'),
+    ...require('./privacyPolicy'),
     ...(config.isElectronProcess ? require('./feedbackService') : {}),
     ...(config.isElectronProcess ? require('./autoLauncher') : {}),
     ...(config.isElectronProcess ? require('./dockHider') : {})

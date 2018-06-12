@@ -15,6 +15,7 @@ export default {
     browserIntegrationComplete: new RendererCachedPersistedState(false),
     autoLaunchEnabled: new RendererCachedPersistedState(false),
     dockIconVisible: new RendererCachedPersistedState(false),
+    latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null)
   },
   mutations: {
     changeStatus(state, status) {
@@ -51,6 +52,9 @@ export default {
     },
     changeDockIconVisible(state, visible) {
       state.dockIconVisible = visible
+    },
+    setLatestAcceptedPrivacyPolicyVersion(state, version) {
+      state.latestAcceptedPrivacyPolicyVersion = version
     }
   }
 }

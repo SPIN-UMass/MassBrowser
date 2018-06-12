@@ -20,6 +20,7 @@ export default {
     uploadLimit: new RendererCachedPersistedState(0),
     relayPort: new RendererCachedPersistedState(fromConfig('port')),
     openAccess: new RendererCachedPersistedState(true),
+    latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null),
     isRelayReachable: false,
     isServerConnected: false,
     publicAddress: {},
@@ -75,6 +76,9 @@ export default {
     },
     changeDockIconVisible(state, visible) {
       state.dockIconVisible = visible
+    },
+    setLatestAcceptedPrivacyPolicyVersion(state, version) {
+      state.latestAcceptedPrivacyPolicyVersion = version
     }
   }
 }

@@ -37,7 +37,7 @@ export default [
       },
       {
         path: '/client/websites',
-        component: require('@/views/WebsitesView'),
+        component: require('@/views/websites/WebsitesView'),
         name: 'websites'
       },
       {
