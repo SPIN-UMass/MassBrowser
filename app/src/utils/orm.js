@@ -47,6 +47,12 @@ function _createModel (name, schemaModel, datastore, options) {
       this.model = Model
       this._new_instance = true
       this._cached_transformer = null
+
+      this._schema.forEach(k => {
+        if (this[k] instanceof RelationField) {
+          this[k] = this[k].default || null;
+        }
+      })
     }
 
     static get name () {
@@ -228,7 +234,8 @@ export function createModel (name, schemaModel, options) {
 }
 
 export class RelationField {
-  constructor (relatedModel) {
+  constructor (relatedModel, dflt) {
     this.relatedModel = relatedModel
+    this.default = dflt || null
   }
 }

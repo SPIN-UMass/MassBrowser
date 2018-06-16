@@ -4,7 +4,7 @@
       button.close(data-dismiss="alert" v-on:click="helpStage = 0")
         i.pci-cross.pci-circle
       strong Need Help?
-      p Choose which websites you want to use MassBrowser for. 
+      p Choose which websites you want to use MassBrowser for.
       p Enable proxying for a website if that website is censored for you.
 
 
