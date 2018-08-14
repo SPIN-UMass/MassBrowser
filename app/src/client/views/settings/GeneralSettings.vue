@@ -10,7 +10,7 @@
               p {{ errorMessage }}
         .row
           .col-xs-8
-            label Launch MassBuddy on startup
+            label Launch MassBrowser on startup
           .col-xs-4.align-right
             toggle-button.toggle(:labels= {
             checked: 'Yes',
