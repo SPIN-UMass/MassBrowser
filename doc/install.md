@@ -42,6 +42,6 @@ yarn run client:dev
 ### GUI
 
 ``` sh
-GUI -> yarn run dev:relay
-GUI -> yarn run dev:client
+yarn run dev:relay
+yarn run dev:client
 ```
