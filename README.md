@@ -20,6 +20,7 @@ npm run lint
 # run webpack in production
 npm run pack
 ```
+
+Information on buiding it on a Linux machine can be found [here](https://github.com/SPIN-UMass/MassBrowser/blob/master/doc/install.md).
+
 More information can be found [here](https://massbrowser.cs.umass.edu).
-
-
