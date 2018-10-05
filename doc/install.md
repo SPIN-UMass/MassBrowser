@@ -61,4 +61,4 @@ yarn run dev:client
 
 ## More operations
 
-For more operations on the Massbrowser, see the *scripts* section of [package.json](package.json).
+For more operations on the Massbrowser, see the *scripts* section of [package.json](../package.json).
