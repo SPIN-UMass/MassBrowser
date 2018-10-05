@@ -58,3 +58,7 @@ yarn run client:dev
 yarn run dev:relay
 yarn run dev:client
 ```
+
+## More operations
+
+For more operations on the Massbrowser, see the *scripts* section of [package.json](package.json).
