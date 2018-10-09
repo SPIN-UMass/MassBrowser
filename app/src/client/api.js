@@ -25,7 +25,7 @@ class ClientAPI extends CommonAPI {
       if (err instanceof PermissionDeniedError) {
         throw new InvalidInvitationCodeError('Invalid Invitation Code')
       }
-      throw err         
+      throw err
     })
   }
 
@@ -41,7 +41,7 @@ class ClientAPI extends CommonAPI {
   requestSession (categories) {
     return this.transport.post(
       CLIENT_URL + '/' + this.userID + SESSION_URL, {
-        
+
         'categories': categories
       }
     )
@@ -92,7 +92,7 @@ class ClientAPI extends CommonAPI {
   async requestWebsiteSupport(hostname) {
     return await this.transport.post('/website/request', {
       hostname
-    })    
+    })
   }
 }
 
