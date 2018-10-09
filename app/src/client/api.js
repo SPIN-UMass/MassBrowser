@@ -84,7 +84,10 @@ class ClientAPI extends CommonAPI {
   }
 
   async sendFeedback(content, rating, logs) {
-    return await this.transport.post('/client/feedback', {
+      // Without the await, the value returned is a promise. With the
+      // await, it will wait untill getting a value from
+      // tranpsort.post function
+      return await this.transport.post('/client/feedback', {
       content,
       rating,
       logs
