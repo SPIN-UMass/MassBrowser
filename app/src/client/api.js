@@ -2,6 +2,9 @@ import { CommonAPI } from '@common/api'
 import { PermissionDeniedError, InvalidInvitationCodeError } from '@utils/errors'
 import config from '@utils/config'
 import { error, debug } from '@utils/log'
+// @ above means the root of the project (MassBrowser/app/scr)
+// It is implemented by a babel plugin:
+// https://github.com/entwicklerstube/babel-plugin-root-import
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
