@@ -18,7 +18,9 @@ class ClientAPI extends CommonAPI {
         'invitation_code': invitationCode
       }
     )
-    .then(r => r.data)
+    .then(r => r.data)          // r, as a parameter of an arrow
+                                // function, will be the value of what
+                                // returned by this.transport.post()
     .catch(err => {
       if (err instanceof PermissionDeniedError) {
         throw new InvalidInvitationCodeError('Invalid Invitation Code')
