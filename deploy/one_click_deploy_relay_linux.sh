@@ -39,10 +39,10 @@ fi
 cd MassBrowser
 
 # build MassBrowser
-yarn
+yarn | tee "$log_name"
 
 # TODO: need to escape from the result
-yarn run watch
+yarn run watch | tee "$log_name"
 
 # run proxy
-yarn run relay:dev &
+yarn run relay:dev | tee "$log_name" &
