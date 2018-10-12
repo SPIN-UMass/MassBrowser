@@ -52,6 +52,8 @@ class TorService {
     this.ipSet.clear()
     const torList = (await fs.readFile(torFilePath)).toString()
     const torIPs = torList.split(/\r?\n/)
+    // This regex does not match IPv6 addresses which does exist on
+    // the list
     const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
     torIPs.forEach(ip => ipRegex.test(ip) ? this.ipSet.add(ip) : null)
     log.debug(`Loaded ${this.ipSet.size} Tor addresses`)
