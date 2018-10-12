@@ -35,9 +35,9 @@ class CacheProxy {
         warn("Cachebrowser proxy server already running")
         resolve()
       }
-      
+
       let started = false
-      
+
       this.proxyserver = tls.createServer(this.proxyoptions, (socket) => {
         // console.log('new Connection')
         this.handleCacheSocket(socket)
@@ -89,6 +89,15 @@ class CacheProxy {
     // console.log(this.connectionlist)
     delete this.connectionlist[socket.remotePort]
 
+    // Note that tls.connect is a modified wrapper function around
+    // what is used in the standard tls library. It is core of the
+    // domain-fronting technique but it is queit simple: the modified
+    // function will remove the servername field from the
+    // cachesocketoptions beofore performing a standard tls.connect so
+    // that the sensitive servername which was in the cleartext form
+    // in the TLS handshake will not be observed by the censor any
+    // more. The modified tls.connect we used is from
+    // /app/src/client/main/console.js
     let proxysocket = tls.connect(cachesocketoptions, () => {
       proxysocket.on('data', (d) => {
         socket.write(d)
