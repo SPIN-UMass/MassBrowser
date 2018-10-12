@@ -1,4 +1,11 @@
-# Install dependencies
+# One-click-deploy relay on a Linux server
+
+``` bash
+wget https://raw.githubusercontent.com/SPIN-UMass/MassBrowser/master/deploy/one_click_deploy_relay_linux.sh -O one_click_deploy_relay_linux.sh
+bash one_click_deploy_relay_linux.sh
+```
+
+# Manual Installation
 
 ## Node.js
 
@@ -10,6 +17,12 @@ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
+For Redhat:
+``` sh
+curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
+sudo yum -y install nodejs
+```
+
 ## Yarn
 
 ``` sh
@@ -17,7 +30,7 @@ npm install -g yarn
 
 ```
 
-# MassBrowser
+## MassBrowser
 
 ## Clone
 ``` sh
@@ -45,3 +58,7 @@ yarn run client:dev
 yarn run dev:relay
 yarn run dev:client
 ```
+
+## More operations
+
+For more operations on the Massbrowser, see the *scripts* section of [package.json](../package.json).
