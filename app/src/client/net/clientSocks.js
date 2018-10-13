@@ -23,6 +23,7 @@ export function startClientSocks (mhost, mport) {
   }
 
   function onConnection (socket, port, address, proxyReady) {
+    // Handle torService and telegramService via yalerProxy
     if (ipRegex.test(address)) {
       if (torService.isTorIP(address)  || telegramService.isTelegramIP(address))
       {
@@ -31,15 +32,37 @@ export function startClientSocks (mhost, mport) {
       return sendToNoHostHandler(socket, address, port, proxyReady)
     }
 
-    if (address === config.web.domain || 
+    // Check if the request is to the Web Panel by checking domain
+    // name or IP:port
+    if (address === config.web.domain ||
         ((address === '127.0.0.1' || address === 'localhost') && port == config.web.port)) {
       return sendToWebPanel(socket, address, port, proxyReady)
     }
 
+    //
     policyManager.getDomainPolicy(address, port)
     .then((proxyType) => {
       debug(`New socks connection to ${address}:${port} using policy '${proxyType}'`)
-      
+
+      // Notice that every connection to use a yalerProxy or
+      // cachebrowser has to be included by the policyManager already,
+      // otherwiser, the connection will be send to the so-called
+      // regualrProxy which is actually direct connection. So far, the
+      // developers have been manually upload all the policies online,
+      // but there are still two questions remain:
+
+      // first, shall we set a mechanism to let report those domians
+      // that are redirected to the regularPorxy so that we know what
+      // domain should be added by the developer to the policy
+      // manaager?
+
+      // second, users may not aware their connections to potentially
+      // sensitive websites are sending directly, without any further
+      // protection. While it is better for usability because a
+      // unknown domain does not have to be censored so it may work,
+      // will it be better to have an option for user that says " I
+      // want all my traffic goes through either a proxy or an
+      // encryptionh HTTPS channel but never direct connection"?
       if (proxyType === policyManager.POLICY_YALER_PROXY) {
         return yalerProxy(socket, address, port, proxyReady)
       } else if (proxyType === policyManager.POLICY_CACHEBROWSE) {
@@ -50,7 +73,7 @@ export function startClientSocks (mhost, mport) {
     })
     .catch(err => {
       if (err instanceof errors.InvalidHostError) {
-        error(err.message) 
+        error(err.message)
       } else if (err instanceof errors.NoRelayAvailableError) {
         warn('No relay was found for new session, terminating connection')
         socket.end()
@@ -148,8 +171,8 @@ function regularProxy (socket, address, port, proxyReady) {
 
   proxy.on('close', function (had_error) {
     try {
-      if (hadError) { 
-        error(`socks connection close unexpectedly ${address} ${port}`) 
+      if (hadError) {
+        error(`socks connection close unexpectedly ${address} ${port}`)
       }
       socket.close()
     } catch (err) {
@@ -161,7 +184,7 @@ function regularProxy (socket, address, port, proxyReady) {
 function sendToWebPanel(socket, address, port, proxyReady) {
   if (port === 443) {
     debug(`Forwarding webpanel cachebrowser request ${address}:${port}`)
-    return cachebrowse(socket, 'yaler.co', port, proxyReady)  
+    return cachebrowse(socket, 'yaler.co', port, proxyReady)
   } else {
     debug("Forwarding request to webpanel")
     return regularProxy(socket, '127.0.0.1', config.web.port, proxyReady)
