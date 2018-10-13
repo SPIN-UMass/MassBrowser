@@ -107,10 +107,13 @@ export function startClientSocks (mhost, mport) {
   })
 }
 
+// yalerProxy is the connection to Mass buddies. The name origins from
+// the reverse of relay :)
 function yalerProxy(socket, address, port, proxyReady) {
   return connectionManager.newClientConnection(socket, address, port, proxyReady)
 }
 
+// cachebrowse does not need the help of Mass buddies
 function cachebrowse(socket, address, port, proxyReady) {
   return cacheManager.newCacheConnection(socket, address, port, proxyReady)
   .catch(err => {
@@ -123,6 +126,8 @@ function cachebrowse(socket, address, port, proxyReady) {
   })
 }
 
+// regularProxy is actually a direct connection attempt to the desired
+// dst. It is called a proxy because it is a local proxy.
 function regularProxy (socket, address, port, proxyReady) {
   var proxy = net.createConnection({port: port, host: address}, proxyReady)
   var localAddress, localPort
