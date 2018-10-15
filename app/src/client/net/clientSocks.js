@@ -55,6 +55,8 @@ export function startClientSocks (mhost, mport) {
       // that are redirected to the regularPorxy so that we know what
       // domain should be added by the developer to the policy
       // manaager?
+      // A: Yes. This can be a nice feature. But be careful with privacy
+      // and UX issue.
 
       // second, users may not aware their connections to potentially
       // sensitive websites are sending directly, without any further
@@ -63,6 +65,7 @@ export function startClientSocks (mhost, mport) {
       // will it be better to have an option for user that says " I
       // want all my traffic goes through either a proxy or an
       // encryptionh HTTPS channel but never direct connection"?
+      // A: This is not very good for usability.
       if (proxyType === policyManager.POLICY_YALER_PROXY) {
         return yalerProxy(socket, address, port, proxyReady)
       } else if (proxyType === policyManager.POLICY_CACHEBROWSE) {
