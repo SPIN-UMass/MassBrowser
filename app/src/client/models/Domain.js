@@ -60,8 +60,12 @@ class DomainSchema {
         })
     }
 
+    // lookup the requested domainname from the database
     return Domain.find({name: domainName})
       .then(domains => {
+        // if it couldn't be found in the database, try to query with
+        // its subdomain. For example, if cs.umass.edu can't be found,
+        // try umass.edu instead.
         if (!domains.length) {
           return trySubdomain()
         }
