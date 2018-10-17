@@ -70,6 +70,8 @@ export function startClientSocks (mhost, mport) {
         return yalerProxy(socket, address, port, proxyReady)
       } else if (proxyType === policyManager.POLICY_CACHEBROWSE) {
         return cachebrowse(socket, address, port, proxyReady)
+      } else if (proxyType === policyManager.POLICY_VANILLA_PROXY) {
+        return regularProxy(socket, address, port, proxyReady)
       } else {
         return regularProxy(socket, address, port, proxyReady)
       }
