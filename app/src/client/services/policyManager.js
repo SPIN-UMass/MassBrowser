@@ -27,7 +27,7 @@ class PolicyManager extends EventEmitter {
       // return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
       .then(domain => {
-        if (!domain) {
+        if (!domain) {        // if a domain is not available in the DB
           return resolve(this.POLICY_VANILLA_PROXY)
         }
 
@@ -37,17 +37,26 @@ class PolicyManager extends EventEmitter {
             return resolve(this.POLICY_VANILLA_PROXY)
           }
 
-          // TODO Check if it is blocked in region
+          // TODO Check if it is blocked in region. For now, we assume
+          // all the websites that are not in the domain DB to be
+          // blocked.
           var blockedInRegion = true
 
+          // For better usability, we let all the wesibtes that are
+          // not block to use direct connection.
           if (!blockedInRegion) {
             return resolve(this.POLICY_VANILLA_PROXY)
           }
 
+          // If the website is blocked but does not support ssl, it
+          // wouldn't be able to take the advanatage of
+          // CDNBrowsing. Therefore, we need the help from Mass
+          // Buddies.
           if (!domain.ssl) {
             return resolve(this.POLICY_YALER_PROXY)
           }
-          
+
+          // If it does support ssl, check if it supports CDNBrowsing.
           domain.getCDN()
           .then(cdn => {
             if (cdn == null || !cdn.cachebrowsable) {
