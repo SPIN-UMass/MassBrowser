@@ -392,4 +392,3 @@ function proxyReady4 () {
 }
 
 export const createServer = createSocksServer
-
