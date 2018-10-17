@@ -5,7 +5,7 @@ wget https://raw.githubusercontent.com/SPIN-UMass/MassBrowser/master/deploy/one_
 bash one_click_deploy_relay_linux.sh
 ```
 
-# Manual Installation
+# Install Dependencies
 
 ## Node.js
 
@@ -28,6 +28,13 @@ sudo yum -y install nodejs
 ``` sh
 npm install -g yarn
 
+```
+
+## libXScrnSaver
+
+For Redhat:
+``` sh
+sudo yum -y install libXScrnSaver
 ```
 
 ## MassBrowser
