@@ -48,9 +48,13 @@ class DomainSchema {
       let subdomain = domainName.substring(0, firstDot)
       let maindomain = domainName.substring(firstDot + 1)
 
+      // Note that this is a recursive query with subdomain extracted
+      // in each call until a matching domain is found or until the
+      // domainname is ''
       return Domain.find({name: maindomain})
         .then(domains => {
           for (let i = 0; i < domains.length; i++) {
+            // Q: Why do we need to match with subdomianRegex?
             if (domains[i].subdomainRegex.test(subdomain)) {
               return domains[i]
             }
@@ -61,6 +65,9 @@ class DomainSchema {
     }
 
     // lookup the requested domainname from the database
+
+    // Domain.find will return a list of objects whose name field is
+    // domainName
     return Domain.find({name: domainName})
       .then(domains => {
         // if it couldn't be found in the database, try to query with
@@ -70,14 +77,17 @@ class DomainSchema {
           return trySubdomain()
         }
 
-        // Find an exact match which has no subdomains
+        // When a list of objects are returned, find an exact match
+        // which has no subdomains
         for (let i = 0; i < domains.length; i++) {
           if (!domains[i].subdomain) {
             return domains[i]
           }
         }
 
-        // Find an exact match whose subdomain matches an empty string
+        // If we couldn't find an object without a subdomain field,
+        // try finding an exact match whose subdomain matches an empty
+        // string instead
         for (let i = 0; i < domains.length; i++) {
           if (domains[i].subdomainRegex.test('')) {
             return domains[i]
