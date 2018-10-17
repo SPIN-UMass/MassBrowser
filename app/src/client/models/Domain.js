@@ -45,6 +45,7 @@ class DomainSchema {
         return null
       }
 
+      // i.e. split cs.umass.edu into sc. and umass.edu
       let subdomain = domainName.substring(0, firstDot)
       let maindomain = domainName.substring(firstDot + 1)
 
@@ -55,6 +56,18 @@ class DomainSchema {
         .then(domains => {
           for (let i = 0; i < domains.length; i++) {
             // Q: Why do we need to match with subdomianRegex?
+
+            // A: the subdomainRegex is an attributes of domain
+            // object, therefore, when writing a rule in the DB, we do
+            // not have to write all the possible subdomains, rather,
+            // we write a regex instead. From the above example, we
+            // have splited cs.umass.edu into cs. and umass.edu adn
+            // query the DB with umass.edu. Assuming we have gotten a
+            // list of domain objects, we need to figure out if any of
+            // them contains a subdomainRegex that allow we have such
+            // a subdomain along withthe maindomain. That is to say,
+            // even if umass.edu object is found in database, doesn't
+            // mewmewmew.umass.edu is allowed.
             if (domains[i].subdomainRegex.test(subdomain)) {
               return domains[i]
             }
