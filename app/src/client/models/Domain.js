@@ -66,8 +66,8 @@ class DomainSchema {
             // list of domain objects, we need to figure out if any of
             // them contains a subdomainRegex that allow we have such
             // a subdomain along withthe maindomain. That is to say,
-            // even if umass.edu object is found in database, doesn't
-            // necessarily mean mewmewmew.umass.edu is allowed.
+            // even if umass.edu object is found in database, we still
+            // need to test if cs.umass.edu is allowed in the rule.
             if (domains[i].subdomainRegex.test(subdomain)) {
               return domains[i]
             }
