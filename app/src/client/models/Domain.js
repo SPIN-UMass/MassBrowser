@@ -49,9 +49,13 @@ class DomainSchema {
       let subdomain = domainName.substring(0, firstDot)
       let maindomain = domainName.substring(firstDot + 1)
 
-      // Note that this is a recursive query with subdomain extracted
-      // in each call until a matching domain is found or until the
-      // domainname is ''
+      // Q: should we do a recursive query with subdomain extracted in
+      // each call until a matching domain is found or until the
+      // domainname is ''? Right now, if the domainname is
+      // massbrowser.cs.umass.edu, and the length of query result is
+      // 0, we then call trySubdomain which will try querying
+      // cs.umass.edu instead. But what if cs.umass.edu is not found,
+      // but we do have a rule for umass.edu availble?
       return Domain.find({name: maindomain})
         .then(domains => {
           for (let i = 0; i < domains.length; i++) {
