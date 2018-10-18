@@ -26,7 +26,7 @@ class PolicyManager extends EventEmitter {
       }
       // return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
-      .then(domain => {
+        .then(domain => {
         if (!domain) {        // if a domain is not available in the DB
           return resolve(this.POLICY_VANILLA_PROXY)
         }
