@@ -14,4 +14,6 @@ Want to be a tester?  [here](/doc/test_instruction.md) is the doc you may find h
 
 Are you ready to dev?  [here](/doc/test_instruction.md) is the doc to get you started.
 
+## More about MassBrowser
+
 More information can be found [here](https://massbrowser.cs.umass.edu).
