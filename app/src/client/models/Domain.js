@@ -15,21 +15,39 @@ class DomainSchema {
     this._regex_cache = null
   }
 
+  // The 'subdomain' attribute of domain object is actually part of a
+  // regex rule. With the help of the getter function subdomainRegex,
+  // it will form a complete regex. For example, the subdomain
+  // attribute of a domain object is 'cs', then it is processed into
+  // regex '^cs$'. If the subdomain attribute doesn't exist, we write
+  // regex to match empty string '^$'
+
+  // Note that We do NOT assume the existence of subdomain attribute
+  // in a domain object. We do caching for better performance and
+  // saving memory.
   get subdomainRegex () {
     if (this._regex_cache) {
       return this._regex_cache
     }
 
-    let regex = globalRegexCache[this.subdomain]
-    if (regex) {
-      return regex
+    const globalRegexCache['SUB_FOR_UNDEFINED'] =  new RegExp('^$')
+    var regex
+
+    // check if this.subdomain really exist
+    if(!this.subdomain){
+      regex = globalRegexCache['SUB_FOR_UNDEFINED']
     }
-
-    regex = new RegExp('^' + (this.subdomain || '') + '$')
-
-    globalRegexCache[this.subdomain] = regex
+    else{
+      regex = globalRegexCache[this.subdomain]
+      if (regex) {
+        return regex
+      }
+      else{
+        regex = new RegExp('^' + this.subdomain + '$')
+        globalRegexCache[this.subdomain] = regex
+      }
+    }
     this._regex_cache = regex
-
     return regex
   }
 
