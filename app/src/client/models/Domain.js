@@ -36,10 +36,13 @@ class DomainSchema {
        return regex
     }
 
+    // create a new regex since it's not in the cache
     regex = new RegExp('^' + (this.subdomain || '') + '$')
-    globalRegexCache[this.subdomain] = regex
 
+    // save cache
+    globalRegexCache[this.subdomain] = regex
     this._regex_cache = regex
+
     return regex
   }
 
