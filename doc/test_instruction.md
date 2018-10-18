@@ -36,20 +36,43 @@ MassBrowser uses different censorship circumvention strategy based on the domain
 
 Vanilla proxy is actually letting client connect to the website directly.
 
-`www.baidu.com` is under vanilla proxy policy and is uncensored. The output should be similar to:
+`www.baidu.com` is under vanilla proxy policy and is uncensored.
+
+Apart from using MassBrowser to test it, we can also use curl from commandline:
+
+```sh
+curl -x socks5h://localhost:7080 https://www.baidu.com
+```
+
+The output should be similar to:
 
     debug: New socks connection to www.baidu.com:443 using policy 'vanilla_proxy'
 
-
 ### CacheBrowsing
 
-`cnn.com` is accessible with CacheBrowsing. The output should be similar to:
+`cnn.com` is accessible with CacheBrowsing.
+
+Apart from using MassBrowser to test it, we can also use curl from commandline:
+
+```sh
+curl -x socks5h://localhost:7080 https://cdn.cnn.com
+```
+
+The output should be similar to:
 
     debug: New socks connection to cdn.cnn.com:443 using policy 'cachebrowse'
 
 ### Mass Buddies
 
-`www.youtube.com` is accessible with the help of Mass Buddies, which are also known as yaler proxies. The output should be similar to:
+`www.youtube.com` is accessible with the help of Mass Buddies, which are also known as yaler proxies.
+
+Apart from using MassBrowser to test it, we can also use curl from commandline:
+
+```sh
+curl -x socks5h://localhost:7080 https://www.youtube.com
+```
+
+The output should be similar to:
 
     debug: New socks connection to www.youtube.com:443 using policy 'yaler_proxy'
     debug: Assigning session for www.youtube.com of category Video Streaming
