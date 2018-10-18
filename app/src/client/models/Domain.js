@@ -44,7 +44,7 @@ class DomainSchema {
           // if it couldn't be found in the database, try to query with
           // its subdomain. For example, if cs.umass.edu can't be found,
           // try umass.edu insteada.
-          if (domains.length===0) {
+          if (!domains.length) {
           // Extract subdomain
             var firstDot = maindomain.indexOf('.')
             if (firstDot == -1) {
