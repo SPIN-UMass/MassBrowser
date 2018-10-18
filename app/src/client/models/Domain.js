@@ -22,31 +22,23 @@ class DomainSchema {
   // regex '^cs$'. If the subdomain attribute doesn't exist, we write
   // regex to match empty string '^$'
 
-  // Note that We do NOT assume the existence of subdomain attribute
+  // Note that we do NOT assume the existence of subdomain attribute
   // in a domain object. We do caching for better performance and
   // saving memory.
   get subdomainRegex () {
+    // retrieve cache first
     if (this._regex_cache) {
       return this._regex_cache
     }
-
-    const globalRegexCache['SUB_FOR_UNDEFINED'] =  new RegExp('^$')
-    var regex
-
-    // check if this.subdomain really exist
-    if(!this.subdomain){
-      regex = globalRegexCache['SUB_FOR_UNDEFINED']
+    // if this.subdomain is undefined, then it will return undefined as well
+    var regex = globalRegexCache[this.subdomain]
+    if (regex) {
+       return regex
     }
-    else{
-      regex = globalRegexCache[this.subdomain]
-      if (regex) {
-        return regex
-      }
-      else{
-        regex = new RegExp('^' + this.subdomain + '$')
-        globalRegexCache[this.subdomain] = regex
-      }
-    }
+
+    regex = new RegExp('^' + (this.subdomain || '') + '$')
+    globalRegexCache[this.subdomain] = regex
+
     this._regex_cache = regex
     return regex
   }
