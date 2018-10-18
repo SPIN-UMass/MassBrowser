@@ -12,7 +12,7 @@ Want to be a tester?  [here](/doc/test_instruction.md) is the doc you may find h
 
 ## Ready to dev
 
-Are you ready to dev?  [here](/doc/test_instruction.md) is the doc to get you started.
+Are you ready to dev?  [here](/doc/ready_to_dev.md) is the doc to get you started.
 
 ## More about MassBrowser
 
