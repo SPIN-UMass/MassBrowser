@@ -36,7 +36,7 @@ MassBrowser uses different censorship circumvention strategy based on the domain
 
 Vanilla proxy is actually letting client connect to the website directly.
 
-`ww.baidu.com` is under vanilla proxy policy and is uncensored. The output should be similar to:
+`www.baidu.com` is under vanilla proxy policy and is uncensored. The output should be similar to:
 
     debug: New socks connection to www.baidu.com:443 using policy 'vanilla_proxy'
 
