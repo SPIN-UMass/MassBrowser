@@ -58,7 +58,7 @@ class DomainSchema {
           // Domain.find()
 
           // very useful debugging info
-          console.log("Function call Domain.find(", maindomain, ") returns: ", domains)
+          // console.log("Function call Domain.find(", maindomain, ") returns: ", domains)
 
           // if it couldn't be found in the database, try to query with
           // its subdomain. For example, if cs.umass.edu can't be found,
@@ -91,7 +91,7 @@ class DomainSchema {
             // we shoud prefer matching cs rule first in this case.
             if (domains[i].subdomainRegex.test(subdomain)) {
               // very useful debugging info
-              console.log("Returns the final matching domain object: ", domains[i])
+              // console.log("Returns the final matching domain object: ", domains[i])
               return domains[i]
             }
 
