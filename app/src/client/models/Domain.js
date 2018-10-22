@@ -94,23 +94,6 @@ class DomainSchema {
               // console.log("Returns the final matching domain object: ", domains[i])
               return domains[i]
             }
-
-            // // When a list of objects are returned, find an exact match
-            // // which has no subdomains
-            // for (let i = 0; i < domains.length; i++) {
-            //   if (!domains[i].subdomain) {
-            //     return domains[i]
-            //   }
-            // }
-
-            // // If we couldn't find an object without a subdomain field,
-            // // try finding an exact match whose subdomain matches an empty
-            // // string instead
-            // for (let i = 0; i < domains.length; i++) {
-            //   if (domains[i].subdomainRegex.test('')) {
-            //     return domains[i]
-            //   }
-            // }
           }
           return null
         })                      // end .then
