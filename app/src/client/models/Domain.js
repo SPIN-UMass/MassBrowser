@@ -54,6 +54,8 @@ class DomainSchema {
     const findDomainRec = (subdomain, maindomain) => {
       return Domain.find({name: maindomain})
         .then(domains => {
+          // domains is an array of domains objects returned by the
+          // Domain.find()
           // if it couldn't be found in the database, try to query with
           // its subdomain. For example, if cs.umass.edu can't be found,
           // try umass.edu insteada.
