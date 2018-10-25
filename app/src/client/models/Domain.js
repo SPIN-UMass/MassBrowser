@@ -69,6 +69,7 @@ class DomainSchema {
             if (firstDot == -1) {
               return null
             }
+
             // i.e. split cs.umass.edu into cs and umass.edu
             subdomain = maindomain.substring(0, firstDot)
             maindomain = maindomain.substring(firstDot + 1)
