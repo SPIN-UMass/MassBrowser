@@ -9,6 +9,8 @@ import { certificateManager } from './certManager'
 import config from '@utils/config'
 import { debug, info, warn } from '@utils/log'
 import { CacheBrowserError } from '@utils/errors'
+import API from '@/api'
+const globalDNSCache = {}
 
 class CacheProxy {
 
@@ -61,17 +63,23 @@ class CacheProxy {
     })
   }
 
-  resovleURL (addr) {
+  resolveURL (addr) {
     return new Promise((resolve, reject) => {
-      dns.lookup(addr, (err, address, family) => {
-        if (err) { reject(err) } else { resolve([address, 'www.test.com']) }
+      API.resolveURL(addr).then((r)=>{
+        if (r){
+          resolve([r,"www.test.com"])
+        }
+        reject("URL NOT FOUND")
+
+      },(err)=>{
+        reject(err)
       })
     })
   }
 
   registerConnection (clientport, addr, port, proxyReady) {
     this.connectionlist[clientport] = [addr, port]
-    this.resovleURL(addr).then((data) => {
+    this.resolveURL(addr).then((data) => {
       this.connectionlist[clientport] = [data[0], port, data[1]]
       proxyReady()
     })

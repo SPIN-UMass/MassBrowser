@@ -8,6 +8,7 @@ import { error, debug } from '@utils/log'
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
+const globalDNSCache = {}
 
 class ClientAPI extends CommonAPI {
   registerClient (invitationCode) {
@@ -99,6 +100,29 @@ class ClientAPI extends CommonAPI {
       hostname
     })
   }
+
+  async resolveURL(URL) {
+    let resolved_ip = globalDNSCache[URL]
+    if (resolved_ip) {
+      return resolved_ip
+    }
+    try{
+      let response = await this.transport.post(CLIENT_URL + '/resolve',
+      {
+        'url': URL
+      })
+      if (response.status == 200) {
+        globalDNSCache[URL]= response.data.IP
+        return response.data.IP
+      }
+      return null
+    }
+    catch (err) {
+      debug(`Cannot connect to server`,err)
+      return null
+    }
+  }
+
 }
 
 const API = new ClientAPI()

@@ -65,7 +65,9 @@ export class HttpTransport extends Transport {
 
     return axios.request(options)
     .catch(r => this.handleNetworkError({url: path, data: data}, r))
-    .then(r => this.handleResponse({url: path, data: data}, r))
+    .then(r => this.handleResponse({url: path, data: data}, r),(err)=>{
+      debug(" cannot load address"+path,err)
+    })
   }
 
   _setHeaders (config) {
