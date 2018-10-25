@@ -74,6 +74,10 @@ export default async function bootClient () {
 
 
 
+   
+
+
+
 
 
 
@@ -97,15 +101,17 @@ export default async function bootClient () {
     await Promise.all([webPanelService.start(), noHostHandlerService.start()])
     status.clear()
 
-    if (await syncService.isFirstSync()) {
-      debug('It is first boot, syncing database')
-      status = statusManager.info('Syncing database')
-      await syncService.syncAll()
-      status.clear()
-    }
-
+    
+    
+    status = statusManager.info('Syncing database')
+    await syncService.syncAll()
+    status.clear()
+  
+    
     status = statusManager.info('Finalizing')
+    if (config.isElectronProcess) {
     autoLauncher.initialize()
+    }
     status.clear()
 
     await store.commit('completeBoot')

@@ -6,6 +6,10 @@
           router-link(to='/client/settings/general') 
             icon.tab-icon(name='cogs')
             span.tab-label General
+        li(v-bind:class="{ active: currentTab === 'settings-categories' }")
+          router-link(to='/client/settings/categories') 
+            icon.tab-icon(name='globe')
+            span.tab-label Buddying   Websites 
         //- li(v-bind:class="{ active: currentTab === 'settings-websites' }")
         //-   router-link(to='/client/settings/websites') 
         //-     icon.tab-icon(name='globe')

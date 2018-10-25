@@ -57,6 +57,11 @@ export default [
             component: require('@/views/settings/GeneralSettings')
           },
           {
+            path: '/client/settings/categories',
+            name: 'settings-categories',
+            component: require('@/views/settings/CategorySettings')
+          },
+          {
             path: '/client/settings/websites',
             name: 'settings-websites',
             component: require('@/views/settings/WebsiteSettings')
