@@ -100,7 +100,7 @@ function _createModel (name, schemaModel, datastore, options) {
     }
 
     static update () {
-      // console.log("[DATABASE] <update> " + this.name)
+      // console.log("[DATABASE] <update> " + this.name,arguments)
       return this._promisize(datastore.update, arguments)
     }
 
@@ -175,10 +175,10 @@ function _createModel (name, schemaModel, datastore, options) {
           if (!doc) {
             return insert()
           }
-
+            
           var changed = this._schema.reduce((r, k) => r || (doc[k] !== this[k]), false)
           if (changed) {
-            return this.constructor.update({_id: this._id}, this.toObject())
+            return this.constructor.update({_id: doc._id}, this.toObject())
           }
 
           return this
