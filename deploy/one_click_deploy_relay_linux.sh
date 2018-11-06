@@ -18,7 +18,7 @@ elif [ -f /etc/redhat-release ]; then
     echo "This is RedHat based distro" | tee -a "$log_name"
     # update and install dependencies
     sudo yum update && sudo yum -y upgrade
-    sudo yum -y install curl git gcc-c++ make
+    sudo yum -y install curl git gcc-c++ make libXScrnSaver
     # install nodejs: https://nodejs.org/en/download/package-manager/
     sudo yum -y install nodejs
     curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
