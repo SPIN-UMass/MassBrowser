@@ -115,7 +115,7 @@ function _createModel (name, schemaModel, datastore, options) {
      * Assigns the values in a JSON object to the model while applying field name transformations
      * You can define JSON field name transformations in your model by implementing a getter named
      * 'transform' which returns an object
-     * 
+     *
      * ```
      * get transform() {
      *  return {
@@ -138,7 +138,7 @@ function _createModel (name, schemaModel, datastore, options) {
           } else if (typeof transform[key] === 'object') {
             this[transform[key].name] = transform[key].value(json[key])
           } else {
-            error(`Invalid transformation defined in model ${name} for field ${key}`) 
+            error(`Invalid transformation defined in model ${name} for field ${key}`)
             this[key] = json[key]
           }
         }
