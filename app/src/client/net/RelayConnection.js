@@ -71,15 +71,19 @@ export class RelayConnection extends EventEmitter {
     var desc = this.desc
     console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
+      //debug(`DECRYPTING`)
       this.emit('data', d)
     }, () => {
+      debug(`ERROR DECRYPTING`)
       this.emit('close')
+      
       this.socket.end()
     })
 
     this.socket = socket
     this.cipher = cipher
     socket.on('data', (data) => {
+      //debug(`Decrypting DATA`)
       this.cipher.decrypt(data)
     })
 

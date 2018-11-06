@@ -47,15 +47,19 @@ class ConnectionManager {
         }
       }
     }
-    if (CMD === 'D') {
+    else if (CMD === 'D') {
       // console.log(this.ClientConnections);
       if (lastconid in this.clientConnections) {
         this.clientConnections[lastconid].write(data)
       }
     }
-    if (CMD === 'C') {
+    else if (CMD === 'C') {
       this.cleanClose(lastconid)
     }
+    else {
+      debug(`ERRRORR ERROR ERROR IN PARSING ${CMD},${size},${data}`)
+    }
+    
   }
 
   cleanClose (conid) {

@@ -10,6 +10,7 @@ import KVStore from '@utils/kvstore'
 import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { HttpTransport } from '@utils/transport'
+import { Category } from '@/models'
 
 import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
 
@@ -107,7 +108,17 @@ export default async function bootClient () {
     await syncService.syncAll()
     status.clear()
   
-    
+
+    status = statusManager.info('Syncing allowed categories')
+    await syncService.syncAllowedCategories()
+    const enabledCategories = await Category.find({enabled: true})
+    if (!enabledCategories.length) {
+      warn('You have 0 categories enabled, users will not be able to connect')
+    } else {
+      debug(`You have ${enabledCategories.length} categories enabled`)
+    }
+    status.clear()
+
     status = statusManager.info('Finalizing')
     if (config.isElectronProcess) {
     autoLauncher.initialize()

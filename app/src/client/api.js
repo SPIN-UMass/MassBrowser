@@ -122,6 +122,23 @@ class ClientAPI extends CommonAPI {
       return null
     }
   }
+  getAllowedCategories () {
+    var data = {}
+    return this.transport.get('/client/categories', data).then(r => r.data.allowed_categories)
+  }
+
+  setAllowedCategories (categories) {
+    var data = {'allowed_categories': categories}
+    return this.transport.post('/client/categories', data).then(r => r.data.allowed_categories)
+  }
+
+  allowCategory(categoryID) {
+    return this.transport.put('/client/category/' + categoryID)
+  }
+
+  disallowCategory(categoryID) {
+    return this.transport.delete('/client/category/' + categoryID)
+  }
 
 }
 
