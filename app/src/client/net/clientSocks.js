@@ -87,7 +87,8 @@ export function startClientSocks (mhost, mport) {
         warn("Connection failed")
         error(err)
       }
-      /* TODO atleast report errors which are not smart to sentry (errors which are we are sure aren't handled) */
+      /* TODO at least report errors which are not smart to sentry
+       * (errors which are we are sure aren't handled) */
     })
   }
 
