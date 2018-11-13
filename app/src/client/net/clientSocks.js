@@ -173,6 +173,7 @@ function regularProxy (socket, address, port, proxyReady) {
     }
   })
 
+  // listen to 'error' for further debugging
   proxy.on('error', function (err) {
     // console.log('Ignore proxy error');
   })
