@@ -158,16 +158,16 @@ function regularProxy (socket, address, port, proxyReady) {
   socket.on('data', function (d) {
     // If the application tries to send data before the proxy is ready, then that is it's own problem.
     try {
-      // console.log('sending ' + d.length + ' bytes to proxy');
+      // console.log('sending ' + d.length + ' bytes to proxy')
       if (!proxy.write(d)) {
+        // when failed to write data received by the socket to the
+        // proxy, we need to throttle back the traffic from socket for
+        // now.
         socket.pause()
-
-        proxy.on('drain', function () {
-          socket.resume()
-        })
-        setTimeout(function () {
-          socket.resume()
-        }, 100)
+        // listen on 'drain' event to resume socket
+        proxy.on('drain', function () { socket.resume() })
+        // resume socket later
+        setTimeout(function () { socket.resume() }, 100)
       }
     } catch (err) {
     }
