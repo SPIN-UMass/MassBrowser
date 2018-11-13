@@ -48,8 +48,8 @@ export function startClientSocks (mhost, mport) {
       // cachebrowser has to be included by the policyManager already,
       // otherwiser, the connection will be send to the so-called
       // regualrProxy which is actually direct connection. So far, the
-      // developers have been manually upload all the policies online,
-      // but there are still two questions remain:
+      // developers have been manually uploading all the policies
+      // online, but there are still two questions remain:
 
       // first, shall we set a mechanism to let report those domians
       // that are redirected to the regularPorxy so that we know what
@@ -58,13 +58,14 @@ export function startClientSocks (mhost, mport) {
       // A: Yes. This can be a nice feature. But be careful with privacy
       // and UX issue.
 
-      // second, users may not aware their connections to potentially
-      // sensitive websites are sending directly, without any further
-      // protection. While it is better for usability because a
-      // unknown domain does not have to be censored so it may work,
-      // will it be better to have an option for user that says " I
-      // want all my traffic goes through either a proxy or an
-      // encryptionh HTTPS channel but never direct connection"?
+      // second, users may not be aware that their connections to
+      // potentially sensitive websites are sent directly, without any
+      // further protection. While it is better for usability because
+      // an unknown domain does not have to be censored (so it may be
+      // accessible through direct connection), will it be better to
+      // have an option for user that says " I want all my traffic
+      // goes through either a proxy or an encryptionh HTTPS channel
+      // but never direct connection"?
       // A: This is not very good for usability.
       if (proxyType === policyManager.POLICY_YALER_PROXY) {
         return yalerProxy(socket, address, port, proxyReady)
