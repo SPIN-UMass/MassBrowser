@@ -10,7 +10,6 @@ import * as errors from '@utils/errors'
 import config from '@utils/config'
 import { torService, telegramService } from '@common/services'
 
-const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
 export function startClientSocks (mhost, mport) {
   var HOST = mhost,
@@ -24,7 +23,7 @@ export function startClientSocks (mhost, mport) {
 
   function onConnection (socket, port, address, proxyReady) {
     // Handle torService and telegramService via yalerProxy
-    if (ipRegex.test(address)) {
+    if (net.isIP(address)) {    // net.isIP() will return 0 or 4 or 6
       if (torService.isTorIP(address)  || telegramService.isTelegramIP(address))
       {
         return yalerProxy(socket,address,port,proxyReady)
