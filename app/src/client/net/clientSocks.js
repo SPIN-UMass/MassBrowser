@@ -183,7 +183,7 @@ function regularProxy (socket, address, port, proxyReady) {
 
   proxy.on('close', function (had_error) {
     try {
-      if (hadError) {
+      if (hadError) {           // Q: where is hadError defined?
         error(`socks connection close unexpectedly ${address} ${port}`)
       }
       socket.close()
