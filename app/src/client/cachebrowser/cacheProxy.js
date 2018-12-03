@@ -10,7 +10,6 @@ import config from '@utils/config'
 import { debug, info, warn } from '@utils/log'
 import { CacheBrowserError } from '@utils/errors'
 import API from '@/api'
-const globalDNSCache = {}
 
 class CacheProxy {
 

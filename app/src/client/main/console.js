@@ -77,7 +77,7 @@ async function main() {
 
     try {
       debug(`Registerting client with invitation code: ${args.invitationCode}`)
-      const client = await registrationService.registerClient(args.invitationCode)
+      const client = await registrationService.registerClient(args.invitationCode)    
       debug(`Client registered with ID ${client.id}`)
     } catch(e) {
       if (e instanceof InvalidInvitationCodeError) {
@@ -85,12 +85,15 @@ async function main() {
         process.exit(1)
       } else {
         throw e
-      }
+      }     
     }
   }
 
   info('Booting MassBrowser client...')
+  
   bootClient()
+
+  
 }
 
 

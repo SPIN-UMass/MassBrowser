@@ -1,4 +1,4 @@
-import { CommonAPI } from '@common/api'
+ import { CommonAPI } from '@common/api'
 import config from '@utils/config'
 import KVStore from '@utils/kvstore'
 
