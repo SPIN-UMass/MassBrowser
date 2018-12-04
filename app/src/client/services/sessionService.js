@@ -28,7 +28,7 @@ let CDN = 3
  * is rejected then we will remove the category from the waitlists.
  *
  */
-const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
+const net = require('net')
 
 class SessionService extends EventEmitter {
   constructor () {
@@ -57,7 +57,7 @@ class SessionService extends EventEmitter {
     this.sessionPollInterval = null
 
     this.sessionHeartInterval = null
-    
+
   }
 
   async start () {
@@ -66,36 +66,32 @@ class SessionService extends EventEmitter {
     this._startSessionHeart()
   }
 
-  
-  async assignRelay (host, port) {
-    if (ipRegex.test(host)) {
-      let torCategory = (await Category.find({name: 'Tor'}))[0]
-      
-      let telegramCategory =  (await Category.find({name: 'Messaging'}))[0]
-      
-      
-      if ( torService.isTorIP(host)) {
-        var category = torCategory
-        
-      }
-      else if (  telegramService.isTelegramIP(host))
-      {
-        var category = telegramCategory
-        
-      }
-      else{
-      debug(`Assigning session for ${host} of failed`) 
-      return
-      }
-      
 
+  async assignRelay (host, port) {
+    // figure out the corresponding category of the host(domain/IP)
+    if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
+      let torCategory = (await Category.find({name: 'Tor'}))[0]
+
+      let telegramCategory =  (await Category.find({name: 'Messaging'}))[0]
+
+      if (torService.isTorIP(host)) {
+        var category = torCategory
+      }
+      else if (telegramService.isTelegramIP(host)) {
+        var category = telegramCategory
+      }
+      else {
+        debug(`Assigning session for ${host} of failed`)
+        return
+      }
     }
-    else{
+    else {
       let domain = await Domain.findDomain(host)
       var category = (await (await domain.getWebsite()).getCategory())
     }
-    
-    debug(`Assigning session for ${host} of category ${category.name}`) 
+
+    debug(`Assigning session for ${host} of category ${category.name}`)
+    // assign a session based on the category of the requested host
     let session = await this.assignSessionForCategory(category)
     return session.connection
   }
@@ -109,10 +105,10 @@ class SessionService extends EventEmitter {
         return this.sessions[i]
       }
     }
-  
+
     // Check category waitlists to see if the category already has a pending session
-    
-    
+
+
     if (category && this.categoryWaitLists[category.id]) {
       debug(`Pending sessions for ${category.name}`)
       return new Promise((resolve, reject) => {
@@ -136,7 +132,7 @@ class SessionService extends EventEmitter {
    * the corresponding Relay
    */
   async createSession(categories) {
-    categories = Array.isArray(categories) ? categories : [categories] 
+    categories = Array.isArray(categories) ? categories : [categories]
     let catIDs = categories.map(c => c.id)
 
     catIDs.forEach(category => {
@@ -204,7 +200,7 @@ class SessionService extends EventEmitter {
 
   /**
    * Is called when accepted sessions are received from the server
-   * 
+   *
    * Resolves pending sessions with the newly created sessions
    */
 
@@ -222,7 +218,7 @@ class SessionService extends EventEmitter {
 
     let validSessionInfos = this._filterValidSessions(sessionInfos)
 
-    for (let sessionInfo of validSessionInfos) {    
+    for (let sessionInfo of validSessionInfos) {
       var desc = {
         'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
         'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
@@ -305,7 +301,7 @@ class SessionService extends EventEmitter {
     if (this.sessionHeartInterval) {
       return
     }
-    
+
     this.sessionHeartInterval = setInterval(() => this.sessionHeartBeat(), 30 * 1000)
   }
 
