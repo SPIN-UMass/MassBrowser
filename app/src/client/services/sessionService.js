@@ -68,6 +68,7 @@ class SessionService extends EventEmitter {
 
 
   async assignRelay (host, port) {
+    // figure out the corresponding category of the host(domain/IP)
     if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
       let torCategory = (await Category.find({name: 'Tor'}))[0]
 
@@ -90,6 +91,7 @@ class SessionService extends EventEmitter {
     }
 
     debug(`Assigning session for ${host} of category ${category.name}`)
+    // assign a session based on the category of the requested host
     let session = await this.assignSessionForCategory(category)
     return session.connection
   }
