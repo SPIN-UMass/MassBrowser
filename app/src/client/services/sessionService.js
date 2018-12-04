@@ -28,7 +28,7 @@ let CDN = 3
  * is rejected then we will remove the category from the waitlists.
  *
  */
-const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
+const net = require('net')
 
 class SessionService extends EventEmitter {
   constructor () {
@@ -68,7 +68,7 @@ class SessionService extends EventEmitter {
 
   
   async assignRelay (host, port) {
-    if (ipRegex.test(host)) {
+    if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
       let torCategory = (await Category.find({name: 'Tor'}))[0]
       
       let telegramCategory =  (await Category.find({name: 'Messaging'}))[0]
