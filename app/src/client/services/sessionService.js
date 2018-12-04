@@ -73,24 +73,18 @@ class SessionService extends EventEmitter {
 
       let telegramCategory =  (await Category.find({name: 'Messaging'}))[0]
 
-
-      if ( torService.isTorIP(host)) {
+      if (torService.isTorIP(host)) {
         var category = torCategory
-
       }
-      else if (  telegramService.isTelegramIP(host))
-      {
+      else if (telegramService.isTelegramIP(host)) {
         var category = telegramCategory
-
       }
-      else{
-      debug(`Assigning session for ${host} of failed`)
-      return
+      else {
+        debug(`Assigning session for ${host} of failed`)
+        return
       }
-
-
     }
-    else{
+    else {
       let domain = await Domain.findDomain(host)
       var category = (await (await domain.getWebsite()).getCategory())
     }
