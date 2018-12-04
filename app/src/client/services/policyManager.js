@@ -19,6 +19,8 @@ class PolicyManager extends EventEmitter {
    */
   getDomainPolicy (host, port) {
     return new Promise((resolve, reject) => {
+      const net = require('net');
+
       if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
         return reject(new errors.InvalidHostError('IP based filtering not supported'))
       }
