@@ -18,10 +18,8 @@ class PolicyManager extends EventEmitter {
    * applied to the host
    */
   getDomainPolicy (host, port) {
-    const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
-
     return new Promise((resolve, reject) => {
-      if (ipRegex.test(host)) {
+      if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
         return reject(new errors.InvalidHostError('IP based filtering not supported'))
       }
       // return resolve(this.POLICY_YALER_PROXY)
