@@ -12,16 +12,13 @@ var net = require('net'),
   SOCKS_VERSION5 = 5,
   SOCKS_VERSION4 = 4,
   USERPASS,
-  /*
-   * Authentication methods
-   ************************
-   * o  X'00' NO AUTHENTICATION REQUIRED
-   * o  X'01' GSSAPI
-   * o  X'02' USERNAME/PASSWORD
-   * o  X'03' to X'7F' IANA ASSIGNED
-   * o  X'80' to X'FE' RESERVED FOR PRIVATE METHODS
-   * o  X'FF' NO ACCEPTABLE METHODS
-   */
+  // o  X'00' NO AUTHENTICATION REQUIRED
+  // o  X'01' GSSAPI
+  // o  X'02' USERNAME/PASSWORD
+  // o  X'03' to X'7F' IANA ASSIGNED
+  // o  X'80' to X'FE' RESERVED FOR PRIVATE METHODS
+  // o  X'FF' NO ACCEPTABLE METHODS
+
   AUTHENTICATION = {
     NOAUTH: 0x00,
     GSSAPI: 0x01,
@@ -50,6 +47,26 @@ var net = require('net'),
     DNS: 0x03,
     IP_V6: 0x04
   },
+    /*
+    5.  Addressing
+
+   In an address field (DST.ADDR, BND.ADDR), the ATYP field specifies
+   the type of address contained within the field:
+
+          o  X'01'
+
+   the address is a version-4 IP address, with a length of 4 octets
+
+          o  X'03'
+
+   the address field contains a fully-qualified domain name.  The first
+   octet of the address field contains the number of octets of name that
+   follow, there is no terminating NUL octet.
+
+          o  X'04'
+
+   the address is a version-6 IP address, with a length of 16 octets.
+    */
   Address = {
     read: function (buffer, offset) {
       if (buffer[offset] == ATYP.IP_V4) {
@@ -60,11 +77,15 @@ var net = require('net'),
         return buffer.slice(buffer[offset + 1], buffer[offset + 1 + 16])
       }
     },
+    // Note that the size value returned here is the number of bytes
+    // taken by the address field. For example, when address is a
+    // domain name, it starts with 1 byte indicating the length of the
+    // domain and we still count that byte as part of the size.
     sizeOf: function (buffer, offset) {
       if (buffer[offset] == ATYP.IP_V4) {
         return 4
       } else if (buffer[offset] == ATYP.DNS) {
-        return buffer[offset + 1]
+        return 1 + buffer[offset + 1]
       } else if (buffer[offset] == ATYP.IP_V6) {
         return 16
       }
@@ -72,13 +93,14 @@ var net = require('net'),
   },
   Port = {
     read: function (buffer, offset) {
-      if (buffer[offset] == ATYP.IP_V4) {
-        return buffer.readUInt16BE(8)
-      } else if (buffer[offset] == ATYP.DNS) {
-        return buffer.readUInt16BE(5 + buffer[offset + 1])
-      } else if (buffer[offset] == ATYP.IP_V6) {
-        return buffer.readUInt16BE(20)
-      }
+      return buffer.readUInt16BE(offset)
+      // if (buffer[offset] == ATYP.IP_V4) {
+      //   return buffer.readUInt16BE(offset + Address.sizeOf(buffer, offset))
+      // } else if (buffer[offset] == ATYP.DNS) {
+      //   return buffer.readUInt16BE(offset + Address.sizeOf(buffer, offset))
+      // } else if (buffer[offset] == ATYP.IP_V6) {
+      //   return buffer.readUInt16BE(offset + Address.sizeOf(buffer, offset))
+      // }
     }
   }
 
@@ -97,7 +119,7 @@ function createSocksServer (cb, userpass, on_start) {
   })
   socksServer.on('connection', function (socket) {
     info('CONNECTED %s:%d', socket.remoteAddress, socket.remotePort)
-    initSocksConnection.bind(socket)(cb)
+    initSocksConnection.bind(socket)(cb) // Q: what does this mean?
   })
   return socksServer
 }
@@ -127,15 +149,18 @@ function initSocksConnection (on_accept) {
 
   // do a handshake
   this.handshake = handshake.bind(this)
+  // After the handshake "the client and server then enter a
+  // method-specific sub-negotiation".
   this.on_accept = on_accept // No bind. We want 'this' to be the server, like it would be for net.createServer
   this.once('data', this.handshake)
 }
 
 function handshake (chunk) {
   // SOCKS Version 4/5 is the only support version
+
   if (chunk[0] == SOCKS_VERSION5) {
     this.socksVersion = SOCKS_VERSION5
-    this.handshake5 = handshake5.bind(this)
+    this.handshake5 = handshake5.bind(this) // what does bind mean?
     this.handshake5(chunk)
   } else if (chunk[0] == SOCKS_VERSION4) {
     this.socksVersion = SOCKS_VERSION4
@@ -149,6 +174,20 @@ function handshake (chunk) {
 
 // SOCKS5
 function handshake5 (chunk) {
+  // RFC 1928: https://tools.ietf.org/html/rfc1928
+  // The client connects to the server, and sends a version
+  // identifier/method selection message:
+
+  //                 +----+----------+----------+
+  //                 |VER | NMETHODS | METHODS  |
+  //                 +----+----------+----------+
+  //                 | 1  |    1     | 1 to 255 |
+  //                 +----+----------+----------+
+
+  // The VER field is set to X'05' for this version of the protocol.
+  // The NMETHODS field contains the number of method identifier
+  // octets that appear in the METHODS field.
+
   var method_count = 0
 
   // SOCKS Version 5 is the only support version
@@ -157,6 +196,7 @@ function handshake5 (chunk) {
     this.end()
     return
   }
+
   // Number of authentication methods
   method_count = chunk[1]
 
@@ -167,15 +207,44 @@ function handshake5 (chunk) {
   }
   log('Supported auth methods: %j', this.auth_methods)
 
+  // The VER field is set to X'05' for this version of the protocol.
+  // The NMETHODS field contains the number of method identifier
+  // octets that appear in the METHODS field.
+
+  // The server selects from one of the methods given in METHODS, and
+  // sends a METHOD selection message:
+
+  //                       +----+--------+
+  //                       |VER | METHOD |
+  //                       +----+--------+
+  //                       | 1  |   1    |
+  //                       +----+--------+
+
+  // If the selected METHOD is X'FF', none of the methods listed by
+  // the client are acceptable, and the client MUST close the
+  // connection.
+
+  // The values currently defined for METHOD are:
+
+  //        o  X'00' NO AUTHENTICATION REQUIRED
+  //        o  X'01' GSSAPI
+  //        o  X'02' USERNAME/PASSWORD
+  //        o  X'03' to X'7F' IANA ASSIGNED
+  //        o  X'80' to X'FE' RESERVED FOR PRIVATE METHODS
+  //        o  X'FF' NO ACCEPTABLE METHODS
+
   var resp = new Buffer(2)
   resp[0] = 0x05
 
+  // Note: only X'00', X'02', X'FF' are implemented for now.
+  // RFC 1928: Compliant implementations MUST support GSSAPI and
+  // SHOULD support USERNAME/PASSWORD authentication methods.
   // user/pass auth
   if (USERPASS) {
     if (this.auth_methods.indexOf(AUTHENTICATION.USERPASS) > -1) {
       log('Handing off to handleAuthRequest')
-      this.handleAuthRequest = handleAuthRequest.bind(this)
-      this.once('data', this.handleAuthRequest)
+      this.handleAuthRequest = handleAuthRequest.bind(this) // Q: what's this
+      this.once('data', this.handleAuthRequest)             // Q: whats this?
       resp[1] = AUTHENTICATION.USERPASS
       this.write(resp)
     } else {
@@ -319,6 +388,43 @@ function handleAuthRequest (chunk) {
 }
 
 function handleConnRequest (chunk) {
+  /*
+  4.  Requests
+
+     Once the method-dependent subnegotiation has completed, the client
+     sends the request details.  If the negotiated method includes
+     encapsulation for purposes of integrity checking and/or
+     confidentiality, these requests MUST be encapsulated in the method-
+     dependent encapsulation.
+
+     The SOCKS request is formed as follows:
+
+          +----+-----+-------+------+----------+----------+
+          |VER | CMD |  RSV  | ATYP | DST.ADDR | DST.PORT |
+          +----+-----+-------+------+----------+----------+
+          | 1  |  1  | X'00' |  1   | Variable |    2     |
+          +----+-----+-------+------+----------+----------+
+
+       Where:
+
+            o  VER    protocol version: X'05'
+            o  CMD
+               o  CONNECT X'01'
+               o  BIND X'02'
+               o  UDP ASSOCIATE X'03'
+            o  RSV    RESERVED
+            o  ATYP   address type of following address
+               o  IP V4 address: X'01'
+               o  DOMAINNAME: X'03'
+               o  IP V6 address: X'04'
+            o  DST.ADDR       desired destination address
+            o  DST.PORT desired destination port in network octet
+               order
+
+     The SOCKS server will typically evaluate the request based on source
+     and destination addresses, and return one or more reply messages, as
+     appropriate for the request type.
+  */
   var cmd = chunk[1],
     address,
     port,
@@ -335,7 +441,7 @@ function handleConnRequest (chunk) {
    } */
   try {
     address = Address.read(chunk, 3)
-    port = Port.read(chunk, 3)
+    port = Port.read(chunk, 3 + Address.sizeOf(chunk, 3))
   } catch (e) {
     errorLog('socks5 handleConnRequest: Address.read ' + e)
     return
