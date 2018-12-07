@@ -425,25 +425,37 @@ function handleConnRequest (chunk) {
      and destination addresses, and return one or more reply messages, as
      appropriate for the request type.
   */
-  var cmd = chunk[1],
-    address,
-    port,
-    offset = 3
-  // Wrong version!
+
+  // Check version
   if (chunk[0] !== SOCKS_VERSION5) {
+    // In replies, second byte:
+    // o  X'01' general SOCKS server failure
     this.end(new Buffer([0x05, 0x01]))
     errorLog('socks5 handleConnRequest: wrong socks version: %d', chunk[0])
     return
-  } /* else if (chunk[2] == 0x00) {
-   this.end(util.format('%d%d', 0x05, 0x01));
-   errorLog('socks5 handleConnRequest: Mangled request. Reserved field is not null: %d', chunk[offset]);
-   return;
-   } */
+  }
+
+  var cmd = chunk[1]
+
+  // if (chunk[2] == 0x00) {
+  //  this.end(util.format('%d%d', 0x05, 0x01));
+  //  errorLog('socks5 handleConnRequest: Mangled request. Reserved field is not null: %d', chunk[offset]);
+  //  return;
+  // }
+
   try {
-    address = Address.read(chunk, 3)
-    port = Port.read(chunk, 3 + Address.sizeOf(chunk, 3))
+    var address = Address.read(chunk, 3)
   } catch (e) {
+    // Q: should we send (0x05, 0x08) ?
     errorLog('socks5 handleConnRequest: Address.read ' + e)
+    return
+  }
+
+  try {
+    var port = Port.read(chunk, 3 + Address.sizeOf(chunk, 3))
+  } catch (e) {
+    // Q: should we send (0x05, 0x08) ?
+    errorLog('socks5 handleConnRequest: Port.read ' + e)
     return
   }
 
@@ -453,6 +465,7 @@ function handleConnRequest (chunk) {
     this.request = chunk
     this.on_accept(this, port, address, proxyReady5.bind(this))
   } else {
+    // Q: should retrun 0x05, 0x07 accroding to RFC
     this.end(new Buffer([0x05, 0x01]))
     return
   }
