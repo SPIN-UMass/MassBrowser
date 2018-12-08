@@ -92,7 +92,7 @@ async function buildForTarget(target) {
   await pack(targetInfo[target].config)
 
   console.log(format(target, 'Building...', BLUE))
-  await run(`build -${platforms} --em.main=./dist/${target}/electron.main.js --em.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
+  await run(`build -${platforms} --c.extraMetadata.main=./dist/${target}/electron.main.js --c.extraMetadata.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
 
   console.log(format(target, 'Renaming release files...', BLUE))
   if (platforms.indexOf('m') >= 0) {
