@@ -103,15 +103,18 @@ class ClientAPI extends CommonAPI {
 
   async resolveURL(URL) {
     let resolved_ip = globalDNSCache[URL]
+    // return the IP corresponding to the URL if it is cached already
     if (resolved_ip) {
       return resolved_ip
     }
+    // otherwise we do a DNS-over-HTTPS
     try{
       let response = await this.transport.post(CLIENT_URL + '/resolve',
       {
         'url': URL
       })
       if (response.status == 200) {
+        // if success, cached and return the URL-IP pair
         globalDNSCache[URL]= response.data.IP
         return response.data.IP
       }
