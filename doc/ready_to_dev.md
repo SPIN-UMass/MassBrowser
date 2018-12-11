@@ -7,3 +7,7 @@ The folowing are a few most important files in MassBrowsers, which is a good pla
 - MassBrowser/app/src/client/boot.js
 - MassBrowser/app/src/client/api.js
 - MassBrowser/app/src/client/net/clientSocks.js
+
+Connection to Mass Buddies:
+- connectionmanager
+- session.js
