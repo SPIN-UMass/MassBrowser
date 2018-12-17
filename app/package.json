@@ -1,10 +1,10 @@
 {
   "name": "MassBrowser",
-  "version": "0.0.11",
+  "version": "0.0.14",
   "description": "P2P Proxy",
   "config": {
     "client": {
-      "configFoldername":"client",
+      "configFoldername": "client",
       "appName": "MassBrowser",
       "socksPort": 7080,
       "tor": {
@@ -30,7 +30,7 @@
       "noHostHandlerPort": 6422
     },
     "relay": {
-      "configFoldername":"relay",
+      "configFoldername": "relay",
       "appName": "MassBuddy",
       "natEnabled": false,
       "port": 8040,
@@ -95,13 +95,14 @@
     "connect": "^3.6.2",
     "d3": "^3",
     "electron-builder-http": "^19.18.1",
-    "electron-updater": "^2.8.1",
+    "electron-updater": "^4.0.0",
     "fs-extra": "^3.0.1",
     "geoip-lite": "^1.2.1",
     "js-yaml": "^3.9.1",
     "limiter": "^1.1.0",
     "mkdirp": "^0.5.1",
     "nedb": "^1.8.0",
+    "node-abi": "2.5.0",
     "node-forge": "^0.7.1",
     "opn": "^5.2.0",
     "randomstring": "^1.1.5",
@@ -123,8 +124,7 @@
     "vue-spinner": "^1.0.2",
     "vuex": "^2.4.0",
     "winston": "^2.3.1",
-    "ws": "^3.0.0",
-    "zeromq": "^4.4.1"
+    "ws": "^3.0.0"
   },
   "author": "ha-D <hadi@cs.umass.edu>"
 }

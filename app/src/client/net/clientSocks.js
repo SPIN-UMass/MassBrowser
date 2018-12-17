@@ -10,7 +10,6 @@ import * as errors from '@utils/errors'
 import config from '@utils/config'
 import { torService, telegramService } from '@common/services'
 
-const ipRegex = /^\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3}$/
 
 export function startClientSocks (mhost, mport) {
   var HOST = mhost,
@@ -24,7 +23,7 @@ export function startClientSocks (mhost, mport) {
 
   function onConnection (socket, port, address, proxyReady) {
     // Handle torService and telegramService via yalerProxy
-    if (ipRegex.test(address)) {
+    if (net.isIP(address)) {    // net.isIP() will return 0 or 4 or 6
       if (torService.isTorIP(address)  || telegramService.isTelegramIP(address))
       {
         return yalerProxy(socket,address,port,proxyReady)
@@ -48,8 +47,8 @@ export function startClientSocks (mhost, mport) {
       // cachebrowser has to be included by the policyManager already,
       // otherwiser, the connection will be send to the so-called
       // regualrProxy which is actually direct connection. So far, the
-      // developers have been manually upload all the policies online,
-      // but there are still two questions remain:
+      // developers have been manually uploading all the policies
+      // online, but there are still two questions remain:
 
       // first, shall we set a mechanism to let report those domians
       // that are redirected to the regularPorxy so that we know what
@@ -58,13 +57,14 @@ export function startClientSocks (mhost, mport) {
       // A: Yes. This can be a nice feature. But be careful with privacy
       // and UX issue.
 
-      // second, users may not aware their connections to potentially
-      // sensitive websites are sending directly, without any further
-      // protection. While it is better for usability because a
-      // unknown domain does not have to be censored so it may work,
-      // will it be better to have an option for user that says " I
-      // want all my traffic goes through either a proxy or an
-      // encryptionh HTTPS channel but never direct connection"?
+      // second, users may not be aware that their connections to
+      // potentially sensitive websites are sent directly, without any
+      // further protection. While it is better for usability because
+      // an unknown domain does not have to be censored (so it may be
+      // accessible through direct connection), will it be better to
+      // have an option for user that says " I want all my traffic
+      // goes through either a proxy or an encryptionh HTTPS channel
+      // but never direct connection"?
       // A: This is not very good for usability.
       if (proxyType === policyManager.POLICY_YALER_PROXY) {
         return yalerProxy(socket, address, port, proxyReady)
@@ -86,7 +86,8 @@ export function startClientSocks (mhost, mport) {
         warn("Connection failed")
         error(err)
       }
-      /* TODO atleast report errors which are not smart to sentry (errors which are we are sure aren't handled) */
+      /* TODO at least report errors which are not smart to sentry
+       * (errors which are we are sure aren't handled) */
     })
   }
 
@@ -157,21 +158,22 @@ function regularProxy (socket, address, port, proxyReady) {
   socket.on('data', function (d) {
     // If the application tries to send data before the proxy is ready, then that is it's own problem.
     try {
-      // console.log('sending ' + d.length + ' bytes to proxy');
+      // console.log('sending ' + d.length + ' bytes to proxy')
       if (!proxy.write(d)) {
+        // when failed to write data received by the socket to the
+        // proxy, we need to throttle back the traffic from socket for
+        // now.
         socket.pause()
-
-        proxy.on('drain', function () {
-          socket.resume()
-        })
-        setTimeout(function () {
-          socket.resume()
-        }, 100)
+        // listen on 'drain' event to resume socket
+        proxy.on('drain', function () { socket.resume() })
+        // resume socket later
+        setTimeout(function () { socket.resume() }, 100)
       }
     } catch (err) {
     }
   })
 
+  // listen to 'error' for further debugging
   proxy.on('error', function (err) {
     // console.log('Ignore proxy error');
   })
@@ -181,7 +183,7 @@ function regularProxy (socket, address, port, proxyReady) {
 
   proxy.on('close', function (had_error) {
     try {
-      if (hadError) {
+      if (had_error) {
         error(`socks connection close unexpectedly ${address} ${port}`)
       }
       socket.close()

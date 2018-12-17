@@ -106,7 +106,7 @@ export class Session extends EventEmitter {
     })
 
 
-    
+
 
     relay.sessionFounded(this).then(()=>{
       this.listener_resolve()

@@ -8,8 +8,8 @@ files:
   - "package.json"
 publish:
   provider: github
-  repo: UOIS
-  owner: srxzr
+  repo: MassBrowser
+  owner: SPIN-UMass
   protocol: https
 dmg:
   contents:

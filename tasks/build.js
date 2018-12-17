@@ -10,6 +10,7 @@ const fs = require('fs-extra')
 const yaml = require('js-yaml')
 const { YELLOW, BLUE, LABEL_DONE, greeting, run, format } = require('./utils')
 
+
 const targetInfo = {
   relay: {
     electronMain: './dist/relay/electron.main.js',
@@ -96,7 +97,7 @@ async function buildForTarget (target) {
   del.sync(targetInfo[target].del)
   await pack(targetInfo[target].config)
 
-  if (target === 'client-firefox') {
+  if (target === 'clientFirefox') {
     // await fs.copy('app/assets/firefox/latest/windows/firefox.zip', 'browser/firefox.zip', { overwrite: true })
     await run('rm -rf browser/*', YELLOW, 'command', true)
     await run('cp app/assets/firefox/latest/windows/firefox.zip browser/firefox.zip', YELLOW, 'command', true)
@@ -106,7 +107,7 @@ async function buildForTarget (target) {
   }
 
   console.log(format(target, 'Building...', BLUE))
-  await run(`build -${platforms} --em.main=${targetInfo[target].electronMain} --em.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
+  await run(`build -${platforms} --c.extraMetadata.main=${targetInfo[target].electronMain} --c.extraMetadata.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
 
   console.log(format(target, 'Renaming release files...', BLUE))
   if (platforms.indexOf('m') >= 0) {
