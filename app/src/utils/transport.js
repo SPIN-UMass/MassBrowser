@@ -6,6 +6,7 @@ import { debug, warn, error } from '~/utils/log'
 import randomstring from 'randomstring'
 
 export class Transport {
+  // Q: What does bind mean?
   constructor() {
     this.get = this.request.bind(this, 'get')
     this.post = this.request.bind(this, 'post')
@@ -60,16 +61,20 @@ export class HttpTransport extends Transport {
     }
 
     Object.assign(options, config)
-    options.validateStatus = status => true
+    options.validateStatus = status => true // Q: what's this?
     this._setHeaders(options)
 
+    // Q: how to understand .catch and .then? there is another "," in
+    // then clause, how does it execute?
+    // axios is a romise based HTTP client for the browser and node.js
     return axios.request(options)
     .catch(r => this.handleNetworkError({url: path, data: data}, r))
     .then(r => this.handleResponse({url: path, data: data}, r),(err)=>{
-      debug(" cannot load address"+path,err)
+      debug("cannot load address" + path, err)
     })
   }
 
+  // Why there is a "_" before function? private use only function?
   _setHeaders (config) {
     if (this.authToken) {
       config.headers = config.headers || {}
@@ -140,7 +145,7 @@ export class WebSocketTransport extends Transport {
   eventReceived(resp) {
     this.eventHandler(resp.event, resp.data)
   }
-  
+
   handleReconnect() {
     this.eventHandler('reconnected','')
   }
@@ -171,7 +176,7 @@ export class WebSocketTransport extends Transport {
       this.connectionMap[proto['id']] = resolve
 
       var sproto = JSON.stringify(proto)
-      
+
       this.ws.send(sproto, (err) => {
         if (err) {
           if (this.ws.readyState === WebSocket.CLOSED){
@@ -193,4 +198,3 @@ export class WebSocketTransport extends Transport {
     .then(r => this.handleResponse({url: path, data: data}, r))
   }
 }
-

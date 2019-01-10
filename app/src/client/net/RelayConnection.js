@@ -20,8 +20,7 @@ export class RelayConnection extends EventEmitter {
     this.desc = desc
     this.hasSessionID=true
     this.sessionID=''
-    this.initialBuffer =
-      this.cipher = null
+    this.cipher = null
     this.socket = null
   }
 
