@@ -19,10 +19,10 @@ class ClientAPI extends CommonAPI {
         'invitation_code': invitationCode
       }
     )
-      // r, as a parameter of an arrow function, will be the value of
-      // what returned by this.transport.post()
-      // Note that the final value returned by the registerClient
-      // function is r.data
+    // r, as a parameter of an arrow function, will be the value of
+    // what returned by this.transport.post()
+    // Note that the final value returned by the registerClient
+    // function is r.data
     .then(r => r.data)
     .catch(err => {
       if (err instanceof PermissionDeniedError) {
@@ -43,21 +43,59 @@ class ClientAPI extends CommonAPI {
 
   requestSession (categories) {
     return this.transport.post(
-      CLIENT_URL + '/' + this.userID + SESSION_URL, {
-
+      CLIENT_URL + '/' + this.userID + SESSION_URL,
+      {
         'categories': categories
       }
-    )
-      .then(r => {
-        if (r.status == 201) {
-          return r.data
-        }
+    ).then(r => {
+      if (r.status == 201) {
+        return r.data
+      }
 
-        // Sesion not found
-        return null
-      },(err)=>{
-        return null
-      })
+      // Sesion not found
+      return null
+    },(err)=>{			// how to understand this ","?
+      return null
+    })
+  }
+
+  // requestAllRelays will return all the relays that backend knows
+  requestAllRelays() {
+    return this.transport.post(
+      CLIENT_URL + '/' + 'everything',
+      ''
+    ).then(r => {
+      if (r.status == 201) {
+	return r.data
+      }
+      else{
+	console.log('Failed to get all realy information. HTTP status: ', r.status)
+	return null
+      }
+    }, (error) =>{
+      console('Failed to get all realy information. Error: ', error)
+      return null
+    })
+  }
+
+  // requestSession will talk to the backend to establish a session
+  // with the given relay
+  requestAllRelays(relayInfo) {
+    return this.transport.post(
+      CLIENT_URL + '/' + 'everything',
+      ''
+    ).then(r => {
+      if (r.status == 201) {
+	return r.data
+      }
+      else{
+	console.log('Failed to get all realy information. HTTP status: ', r.status)
+	return null
+      }
+    }, (error) =>{
+      console('Failed to get all realy information. Error: ', error)
+      return null
+    })
   }
 
   updateClientAddress (remoteIP, remotePort) {
@@ -69,7 +107,6 @@ class ClientAPI extends CommonAPI {
         'port': remotePort
       }
     ).then(r => r.data)
-
   }
 
   requestNewStunServer () {
@@ -89,10 +126,10 @@ class ClientAPI extends CommonAPI {
       // await, it will wait untill getting a value from
       // tranpsort.post function
       return await this.transport.post('/client/feedback', {
-      content,
-      rating,
-      logs
-    })
+	content,
+	rating,
+	logs
+      })
   }
 
   async requestWebsiteSupport(hostname) {
@@ -121,7 +158,7 @@ class ClientAPI extends CommonAPI {
       return null
     }
     catch (err) {
-      debug(`Cannot connect to server`,err)
+      debug(`Cannot connect to resolving server`, err)
       return null
     }
   }
