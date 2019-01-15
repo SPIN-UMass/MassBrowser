@@ -65,7 +65,7 @@
     "karma-webpack": "^2.0.1",
     "mocha": "^3.0.2",
     "multispinner": "^0.2.1",
-    "node-sass": "^4.5.3",
+    "node-sass": "^4.11.0",
     "pug": "^2.0.0-rc.1",
     "pug-loader": "^2.3.0",
     "request": "^2.81.0",

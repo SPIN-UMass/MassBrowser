@@ -96,6 +96,7 @@
     "d3": "^3",
     "electron-builder-http": "^19.18.1",
     "electron-updater": "^4.0.0",
+    "event-stream": "^4.0.1",
     "fs-extra": "^3.0.1",
     "geoip-lite": "^1.2.1",
     "js-yaml": "^3.9.1",

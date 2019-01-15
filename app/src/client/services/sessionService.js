@@ -156,6 +156,8 @@ class SessionService extends EventEmitter {
 
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
 
+      console.log('SessionInfo: ' + sessionInfo)
+
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
         reject: s => {
@@ -312,9 +314,8 @@ class SessionService extends EventEmitter {
     },()=>{
       debug(`Session ${session.id} is dead`)
     })
-
-
   }
+
   sessionHeartBeat() {
     for (var i = 0; i < this.sessions.length; i++) {
       this.testSession(this.sessions[i])
