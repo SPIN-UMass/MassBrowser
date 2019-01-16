@@ -26,6 +26,7 @@
 
   export default {
     async created () {
+      await store.ready
       let route = await getRoute()
       this.$router.push(route) 
     }

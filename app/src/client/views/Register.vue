@@ -23,6 +23,8 @@
   import { InvalidInvitationCodeError, APIError, NetworkError } from '@utils/errors'
   import { getService } from '@utils/remote'
 
+  import { store } from '@utils/store'
+
   const RegistrationService = getService('registration')
 
   const INVITATION_CODE_LENGTH = 10
@@ -30,6 +32,7 @@
 
   export default {
     data () {
+      
       return {
         status: 'prompt',
         invitationCode: null,
@@ -56,13 +59,18 @@
       }
     },
     methods: {
-      submitInvitationCode: function () {
+
+      async submitInvitationCode () {
+        await store.ready
         this.status = 'loading'
         let invitationCode = this.invitationCode.replace(/\s/g, '')
         this.invitationCode = ''
-
-        RegistrationService.registerClient(invitationCode)
-        .then(() => this.$router.push('/'))
+        await RegistrationService.registerClient(invitationCode)
+        .then((client) => {
+          
+          console.log("TTTT")
+          this.$router.push('/')
+          })
         .catch(err => {
           if (err instanceof InvalidInvitationCodeError) {
             this.errorMessage = 'Invalid invitation code'
