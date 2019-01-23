@@ -18,6 +18,8 @@ function run (command) {
   })
 }
 
+// does not work in development mode
+
 function isFirefoxVersion () {
   return fs.pathExists(path.join(process.cwd(), 'browser'))
     .then(exists => exists)
@@ -42,10 +44,6 @@ export async function addCertificateToFirefox () {
     await run(installCommand)
   }
   await store.commit('completeBrowserIntegration')
-}
-
-export function isCertificateInstalled () {
-
 }
 
 export async function openInternalBrowser (website) {
