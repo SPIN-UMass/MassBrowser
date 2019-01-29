@@ -30,7 +30,7 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed) {
     if (mainWindow === null) {
       createWindow()
     }
-  })  
+  })
 }
 
 function initializeTray() {
@@ -76,7 +76,7 @@ function initializeTray() {
           { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
       ]}
     ]));
-  }  
+  }
 }
 
 function createWindow () {
@@ -89,7 +89,7 @@ function createWindow () {
    */
   mainWindow = new BrowserWindow({
     title: config.appName,
-    height: 350,
+    height: 375,
     width: 500,
     resizable: false,
     minimizable: false,
@@ -98,12 +98,12 @@ function createWindow () {
     titleBarStyle: 'hidden'
   })
   mainWindow.runID = runID
-  
+
   mainWindow.setTitle(config.appName);
   mainWindow.loadURL(winURL)
 
   if (config.isDevelopment) {
-    mainWindow.webContents.openDevTools()  
+    mainWindow.webContents.openDevTools()
   }
 
   mainWindow.on('closed', () => {

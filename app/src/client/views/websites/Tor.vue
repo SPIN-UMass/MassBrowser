@@ -1,7 +1,7 @@
 <template lang='pug'>
   .tor-container
     p To use MassBrowser with Tor, configure the proxy in your TorBrowser to the following settings
-    img(:src="torImage" width="350")
+    img(:src="torImage")
 </template>
 
 <script>
@@ -20,6 +20,7 @@
     text-align: center;
     font-weight: 500;
     img {
+        width: 100%;
       margin-top: 20px;
     }
   }
