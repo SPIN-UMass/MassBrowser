@@ -10,7 +10,7 @@
                         router-link(to='/client/websites') websites
                     li(:class="{active: currentTab==='feedback'}")
                         router-link(to='/client/feedback') feedback
-                    li(:class="{active: currentTab==='settings'}")
+                    li(:class="{active: currentTab==='settings-general'}")
                         router-link(to='/client/settings') settings
                         //- .span(v-on:click="$router.push('client-websites')") websites
                     //- li(:class="{active: currentTab==='client-settings'}")
@@ -42,6 +42,7 @@
       StatusWidget
     },
     created () {
+      console.log(this.$router.currentRoute.name)
       this.currentTab = this.$router.currentRoute.name
       this.$router.afterEach((to, from) => {
         this.currentTab = to.name

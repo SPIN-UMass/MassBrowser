@@ -11,17 +11,24 @@
         </div>
         <div class="feedback-exp">
             <div class="feedback-exp-msg">
-                How was your experience:
+                How was your experience
             </div>
-            <div class="exp-item positive" v-on:click="selectRate(2)" :class="{ active: rate === 2 }">
-                <i class="fa fa-2x fa-thumbs-o-up" aria-hidden="true"></i>
-            </div>
-            <div class="exp-item negative" v-on:click="selectRate(1)" v-bind:class="{ active: rate === 1 }">
-                <i class="fa fa-2x fa-thumbs-o-down" aria-hidden="true"></i>
+            <div class="feedback-emojis">
+                <img src="../../../assets/images/angry.png" v-on:click="selectRate(-1)" :class="{active: rate === -1}"/>
+                <img src="../../../assets/images/neutral.png" v-on:click="selectRate(0)" :class="{active: rate === 0}"/>
+                <img src="../../../assets/images/smiling.png" v-on:click="selectRate(1)" :class="{active: rate === 1}"/>
             </div>
         </div>
         <div class="feedback-input-container">
-            <textarea class="form-control" id="feedback-input" rows="4" v-model="content" :class="{ invalid: !contentValid }"></textarea>
+            <textarea
+                    class="form-control"
+                    id="feedback-input"
+                    rows="4"
+                    v-model="content"
+                    :class="{ invalid: !contentValid }"
+                    :placeholder="rate === -1 ? 'Can you tell us more what went wrong?': rate === 0 ? 'Pocker face! seriously?' : rate === 1 ? 'We are happy that you like it, anything to improve?': 'Tell us more'"
+            >
+            </textarea>
         </div>
         <div class="feedback-log">
             <input id="includeLogs" type="checkbox" v-model="includeLogs" />
@@ -94,6 +101,31 @@
 <style scoped lang='scss'>
     @import '~@/views/styles/settings.scss';
 
+    .feedback-emojis {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        width: 100px;
+
+        img {
+            user-select: none;
+            cursor: pointer;
+            filter: grayscale(100%);
+            width: 30px;
+            height: 30px;
+
+            &.active {
+                filter: none;
+            }
+
+            &:hover {
+                filter: none;
+            }
+        }
+    }
+
     .feedback-container {
         background: white;
         height: $content_height;
@@ -103,38 +135,11 @@
         align-items: center;
 
         .feedback-exp {
+            height: 70px;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-
-            .exp-item {
-                margin: 0 5px;
-                cursor: pointer;
-                color: lightgray;
-
-                &.positive:hover {
-                    color: #14a200;
-                }
-
-                &.positive.active {
-                    color:#14a200;
-                }
-
-                &.negative {
-                    position: relative;
-                    top: 5px;
-                }
-
-                &.negative:hover {
-                    color: #94132a;
-                }
-
-                &.negative.active {
-                    color:#94132a;
-                }
-            }
         }
 
         .status-alert {
@@ -151,8 +156,8 @@
 
         .feedback-msg {
             font-weight: bold;
-            margin-bottom: 15px;
             margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         .feedback-input-container {
