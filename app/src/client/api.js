@@ -125,7 +125,7 @@ class ClientAPI extends CommonAPI {
   }
 
   clientRelayDown () {
-    return this.transport.post(CLIENT_URL + this.userID, {status: 'down'})
+    return this.transport.post(CLIENT_URL + '/' + this.userID, {status: 'down'})
   }
 
   clientRelayUp (ip, port) {
@@ -136,7 +136,7 @@ class ClientAPI extends CommonAPI {
       //'port': port,
       'fingerprint': this.fingerprint // is this ever set or some nodejs default?
     }
-    return this.transport.post(CLIENT_URL + this.userID, data)
+    return this.transport.post(CLIENT_URL + '/' + this.userID, data)
   }
 
 }
