@@ -44,7 +44,8 @@ class ClientAPI extends CommonAPI {
   requestSession (categories) {
     return this.transport.post(
       CLIENT_URL + '/' + this.userID + SESSION_URL, {
-
+        // trigger client to client proxy for testing here, adapt later
+        //'c2c':true,
         'categories': categories
       }
     )
@@ -76,7 +77,7 @@ class ClientAPI extends CommonAPI {
     var data = {}
     return new Promise((resolve, reject) => {
       resolve({
-        'ip': config.serverURL.replace('https://', ''),
+        'ip': 'dev.yaler.co',
         'port': 8823
       })
     })
@@ -121,6 +122,21 @@ class ClientAPI extends CommonAPI {
       debug(`Cannot connect to server`,err)
       return null
     }
+  }
+
+  clientRelayDown () {
+    return this.transport.post(CLIENT_URL + this.userID, {status: 'down'})
+  }
+
+  clientRelayUp (ip, port) {
+    var data = {
+      // not sure if we should send ip and port?
+      //'ip': ip,
+      'status': 'up',
+      //'port': port,
+      'fingerprint': this.fingerprint // is this ever set or some nodejs default?
+    }
+    return this.transport.post(CLIENT_URL + this.userID, data)
   }
 
 }

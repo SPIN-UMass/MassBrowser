@@ -5,6 +5,7 @@ import { debug } from '@utils/log'
 
 class ConnectionManager {
   constructor () {
+    console.log("ConnectionManager created")
     this.relayAssigner = null
     this.conid_IP_PORT={}
     this.clientConnections = {}
@@ -16,7 +17,9 @@ class ConnectionManager {
     this.lastsize = 0
     this.newconcarry = ''
   }
-
+  
+  // called from sessionService, not sure if RelayAssinger.js is used at all? Does not make much sense?
+  // so sessionService is the relayAssigner used.
   setRelayAssigner (relayAssigner) {
     this.relayAssigner = relayAssigner
   }
@@ -124,6 +127,7 @@ class ConnectionManager {
     this.connectionMaps[conid].write(conid, 'D', data)
   }
 
+  // called from clientSocks.js when browser requests connection
   newClientConnection (connection, dstip, dstport, onConnect) {
     var conid = crypto.randomBytes(2).readUInt16BE()
 

@@ -51,6 +51,19 @@ export class CommonAPI {
     ).then(r => r.data.results)
   }
 
+  // C2C sessions
+  getC2CSessions () {
+    return this.transport.get(
+      CLIENT_URL + '/' + this.userID + '/c2csessions?limit=30&status=1'
+    ).then(r => r.data.results)
+  }
+
+  getReqC2CSessions() {
+    return this.transport.get(
+        CLIENT_URL + '/' + this.userID + '/reqc2csessions?limit=30&status=1'
+    ).then(r => r.data.results)
+  }
+
   updateSessionStatus(sessionID, status) {
     return this.transport.put(
       CLIENT_URL + '/' + this.userID + '/session/' + sessionID + '/status',
@@ -58,6 +71,26 @@ export class CommonAPI {
         status: status
       }
     ).then(r => r.data.results)
+  }
+
+  updateC2CSessionStatus(sessionID, status) {
+    return this.transport.put(
+      CLIENT_URL + '/' + this.userID + '/c2csession/' + sessionID + '/status',
+      {
+        status: status
+      }
+    ).then(r => r.data.results)
+  }
+
+  // maybe generalize for client and relay, relay has currently its own version in its API
+  // up to now, this CLIENT_URL and RELAY_PATH is not generalized. 
+  keepAlive (isUP) {
+    var data = {
+      'fingerprint': this.fingerprint,
+      'status': isUP ? 'up' : 'down'
+    }
+
+    return this.transport.post(CLIENT_URL + this.userID, data)
   }
 
   async getPrivacyPolicyVersion () {
@@ -72,6 +105,30 @@ export class CommonAPI {
       error(e)
       return 0
     }
+  }
+
+  // could be used by both client and relay later. Until now, the common folder seems to be rather rarely used...
+  // not sure how backend identifies client like this?
+  getAllowedCategories () {
+    var data = {}
+    return this.transport.get(
+        CLIENT_URL + '/categories', data).then(r => r.data.allowed_categories)
+  }
+
+  setAllowedCategories (categories) {
+    var data = {'allowed_categories': categories}
+    return this.transport.post(
+        CLIENT_URL + '/categories', data).then(r => r.data.allowed_categories)
+  }
+
+  allowCategory(categoryID) {
+    return this.transport.put(
+        CLIENT_URL + '/category/' + categoryID)
+  }
+
+  disallowCategory(categoryID) {
+    return this.transport.delete(
+        CLIENT_URL + '/category/' + categoryID)
   }
 }
 

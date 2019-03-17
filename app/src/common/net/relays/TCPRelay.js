@@ -1,7 +1,7 @@
 const net = require('net')
 import fs from 'fs'
-import { ConnectionReceiver } from '@/net/ConnectionReceiver'
-import { ThrottleGroup } from '@/net/throttle'
+import { ConnectionReceiver } from '@common/net/ConnectionReceiver'
+//import { ThrottleGroup } from '@/net/throttle'
 import { debug, info } from '@utils/log'
 
 export class TCPRelay {
@@ -15,8 +15,7 @@ export class TCPRelay {
     this.connection_list=[]
   }
 
-  // Starts Relay, at the moment always TCP relay.
-  // Here, the server for incoming connections is spawned.
+  // starts Relay, at the moment always TCP relay
   async start() {
     let server = this._server = net.createServer((socket) => {
       // console.log('relay connected',
@@ -27,7 +26,6 @@ export class TCPRelay {
       var downPipe = this.downLimit.throttle()
       downPipe.on('error', (err) => {})
       this.connection_list.push(socket)
-      // pipe forwards any data from socket to upPipe and any data from downPipe to socket.
       socket.pipe(upPipe)
       downPipe.pipe(socket)
   

@@ -12,6 +12,8 @@ export class Session extends EventEmitter {
   constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
     super()
 
+    console.log("Session constructor called")
+
     this.id = id
     this.ip = ip
     this.port = port
@@ -34,7 +36,8 @@ export class Session extends EventEmitter {
     this.bytesSent = 0
     this.bytesReceived = 0
   }
-
+  
+  // called when Client should initiate connection
   connect () {
     this.changeState(Session.CONNECTING)
 
@@ -48,6 +51,7 @@ export class Session extends EventEmitter {
     relay.on('data', data => {
       connectionManager.listener(data)
       this.bytesReceived += data.length
+      // For logging the data received
       this.emit('receive', data.length)
     })
 
@@ -71,7 +75,8 @@ export class Session extends EventEmitter {
       })
       .then(() => relay)
   }
-
+  
+  // called when Relay should initiate connection
   listen () {
 
     this.changeState(Session.LISTENING)

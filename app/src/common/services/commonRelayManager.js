@@ -1,10 +1,11 @@
-import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
+import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@common/net'
 import { warn, error, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
-import { networkMonitor } from '@/services'
+import { networkMonitor } from '@common/services/networkMonitor'
+//import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
-import { ConnectionType, UNLIMITED_BANDWIDTH } from '@/constants'
+import { ConnectionType, UNLIMITED_BANDWIDTH } from '@common/constants'
 import config from '@utils/config'
 
 
@@ -14,8 +15,10 @@ import config from '@utils/config'
  * You can start/stop the relay and change upload and download
  * bandwidth limits
  */
-class RelayManager {
+export class CommonRelayManager {
   constructor () {
+    console.log("Creating CommonRelayManager")
+
     this.relayServer = null
     this.isRelayServerRunning = false
 
@@ -38,7 +41,8 @@ class RelayManager {
       } else {
         debug(`NAT mode is not enabled, running relay on port: ${this.relayPort}`)
       }   
-    })   
+    })
+    
   }
 
   setUploadLimit (limitBytes) {
@@ -115,6 +119,7 @@ class RelayManager {
 
   // called by events.js
   // Authenticator behaves similar to RelayConnection.js on client side.
+  // not used by client, I think
   onNewSessionEvent (data) {
     var desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
@@ -175,7 +180,9 @@ class RelayManager {
   }
 
   _getReachableAddress () {
+    console.log("Calling getPublicAddress()")
     let publicAddress = networkMonitor.getPublicAddress()
+    console.log("GOT PUBLIC ADDRESS from getPublicAddress()")
 
     store.commit('changePublicAddress', publicAddress)
 
@@ -197,5 +204,4 @@ class RelayManager {
   }
 }
 
-export const relayManager = new RelayManager()
-export default relayManager
+export default CommonRelayManager

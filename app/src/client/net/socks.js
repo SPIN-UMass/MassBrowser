@@ -1,5 +1,6 @@
 'use strict'
 
+// Browser to Client uses Socks.
 var net = require('net'),
   util = require('util'),
   DNS = require('dns'),

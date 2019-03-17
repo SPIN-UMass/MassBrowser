@@ -3,6 +3,8 @@ import fs from 'fs'
 import { RelayConnection } from '@/net/RelayConnection'
 import { debug, warn } from '@utils/log'
 
+// Relay initiates the connection, then this is used to listen for such
+// and incoming connection.
 export function runLocalServer (publicIP, publicPort) {
   const server = net.createServer((socket) => {
     // console.log('client connected',

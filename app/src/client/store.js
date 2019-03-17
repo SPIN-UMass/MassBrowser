@@ -1,4 +1,4 @@
-import { PersistedState, RendererCachedState, RendererCachedPersistedState } from '@utils/store'
+import { PersistedState, RendererCachedState, RendererCachedPersistedState, fromConfig } from '@utils/store'
 
 export default {
   state: {
@@ -15,7 +15,18 @@ export default {
     browserIntegrationComplete: new RendererCachedPersistedState(false),
     autoLaunchEnabled: new RendererCachedPersistedState(false),
     dockIconVisible: new RendererCachedPersistedState(false),
-    latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null)
+    latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null),
+    
+    openAccess: new RendererCachedPersistedState(true),
+    isRelayReachable: false,
+    isServerConnected: false,
+    publicAddress: {},
+    privateAddress: {},
+    publicPort: 0,
+    natEnabled: new RendererCachedPersistedState(fromConfig()),
+    downloadLimit: new RendererCachedPersistedState(0),
+    uploadLimit: new RendererCachedPersistedState(0),
+    relayPort: new RendererCachedPersistedState(fromConfig('port')),
   },
   mutations: {
     changeStatus(state, status) {
@@ -33,6 +44,33 @@ export default {
     },
     completeBrowserIntegration(state) {
       state.browserIntegrationComplete = true
+    },
+    changeOpenAccess(state, openAccess) {
+        state.openAccess = openAccess
+    },
+    changeRelayReachable(state, reachable) {
+        state.isRelayReachable = reachable
+    },
+    changeServerConnected(state, connected) {
+        state.isServerConnected = connected
+    },
+    changePublicAddress(state, address) {
+        state.publicAddress = address
+    },
+    changePrivateAddress(state, address) {
+        state.privateAddress = address
+    },
+    changeRelayPort(state, relayPort) {
+        state.relayPort = relayPort
+    },
+    changeDownloadLimit(state, limit) {
+        state.downloadLimit = limit
+    },
+    changeUploadLimit(state, limit) {
+        state.uploadLimit = limit
+    },
+    changeNatStatus(state, natEnabled) {
+        state.natEnabled = natEnabled
     },
     updateSession(state, session) {
       if (session.id in state.sessionMap) {

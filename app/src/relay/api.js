@@ -64,6 +64,8 @@ class RelayAPI extends CommonAPI {
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
 
+  // with c2c should migrate to common API, so delete later and redirect.
+  // until it is tested, I leave them here as well to not break the relay.
   getAllowedCategories () {
     var data = {}
     return this.transport.get('/relay/categories', data).then(r => r.data.allowed_categories)

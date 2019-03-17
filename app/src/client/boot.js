@@ -31,6 +31,7 @@ import { store } from '@utils/store'
 require('events').EventEmitter.prototype._maxListeners = 10000
 
 export default async function bootClient () {
+  console.log("Got to boot.js")
   statusManager.clearAll()
 
   let status
@@ -53,6 +54,7 @@ export default async function bootClient () {
     status = statusManager.info('Server connection established')
     await API.clientUp()
     status.clear()
+    console.log("clientUp went through")
     
     if (await torService.requiresDownload()) {
       status = statusManager.info('Downloading Tor list')

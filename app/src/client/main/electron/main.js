@@ -11,6 +11,8 @@ import bootClient from '@/boot'
 
 import models from '@/models' // required for bootstrapping remote models
 
+console.log("Initial main process")
+
 remote.registerService('sync', syncService)
 remote.registerService('status', statusManager)
 remote.registerService('registration', registrationService)
@@ -45,4 +47,6 @@ function onWindowClosed() {
 process.on('uncaughtException', (err) => {
   console.error(err)
 })
+
+console.log("Initial main process")
 initializeMainProcess(onWindowCreated, onWindowClosed)

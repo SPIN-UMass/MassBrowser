@@ -63,6 +63,7 @@ function parseArgs() {
 }
 
 async function main() {
+  console.log("Main called")
   const args = parseArgs()
 
   await store.ready
@@ -106,4 +107,5 @@ process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
 })
 
+console.log("Call main")
 main()

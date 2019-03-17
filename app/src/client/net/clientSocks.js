@@ -10,7 +10,7 @@ import * as errors from '@utils/errors'
 import config from '@utils/config'
 import { torService, telegramService } from '@common/services'
 
-
+// For connecting browser to client only.
 export function startClientSocks (mhost, mport) {
   var HOST = mhost,
     PORT = mport
