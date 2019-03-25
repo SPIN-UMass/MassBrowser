@@ -61,8 +61,9 @@ class ClientAPI extends CommonAPI {
       })
   }
 
+  // Called by CloudBasedConnectivity only, maybe sufficient for c2c??
   updateClientAddress (remoteIP, remotePort) {
-    debug(`Sending address info to server: ${remoteIP} ${remotePort}`)
+    debug(`updateClientAddress() called, sending address info to server: ${remoteIP} ${remotePort}`)
     return this.transport.post(
       CLIENT_URL + '/' + this.userID,
       {
@@ -74,6 +75,7 @@ class ClientAPI extends CommonAPI {
   }
 
   requestNewStunServer () {
+    debug("Calling requestNewStunServer()")
     var data = {}
     return new Promise((resolve, reject) => {
       resolve({
@@ -125,15 +127,17 @@ class ClientAPI extends CommonAPI {
   }
 
   clientRelayDown () {
+    debug("Sending clientRelayDown().")
     return this.transport.post(CLIENT_URL + '/' + this.userID, {status: 'down'})
   }
 
   clientRelayUp (ip, port) {
+    debug("Sending clienRelayUp(): " + ip + ":" + port)
     var data = {
       // not sure if we should send ip and port?
-      //'ip': ip,
+      'ip': ip,
       'status': 'up',
-      //'port': port,
+      'c2c_port': port,
       'fingerprint': this.fingerprint // is this ever set or some nodejs default?
     }
     return this.transport.post(CLIENT_URL + '/' + this.userID, data)

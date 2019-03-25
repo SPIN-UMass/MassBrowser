@@ -182,7 +182,7 @@ export class CommonRelayManager {
   _getReachableAddress () {
     console.log("Calling getPublicAddress()")
     let publicAddress = networkMonitor.getPublicAddress()
-    console.log("GOT PUBLIC ADDRESS from getPublicAddress()")
+    console.log("GOT PUBLIC ADDRESS from getPublicAddress(): " + publicAddress.ip + ":" + publicAddress.port)
 
     store.commit('changePublicAddress', publicAddress)
 

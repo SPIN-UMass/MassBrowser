@@ -13,6 +13,8 @@ import { debug } from '@utils/log'
 class NetworkMonitor {
   constructor () {
     console.log("Creating NetworkMonitor")
+    //console.log(config)
+    console.log("EchoServer: " + config.echoServer.host + " - " + config.echoServer.port)
     this.localPort = -1
     this.remotePort = -1
     this.remoteIP = ''
@@ -26,6 +28,7 @@ class NetworkMonitor {
   }
 
   async start () {
+    console.log("EchoServer config: ", config.echoServer.host, config.echoServer.port)
     let natConnection = this.natConnection = new NATConnectivityConnection(
       config.echoServer.host,
       config.echoServer.port
@@ -33,8 +36,10 @@ class NetworkMonitor {
 
     natConnection.on('net-update', data => this._onNetworkUpdate(data))
     natConnection.on('close', () => { natConnection.reconnect() })
-
+    
+    console.log("STARTING natConnection.connect()")
     await natConnection.connect()
+    console.log("DO I GET AFTER natConnection.connect()??")
 
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)

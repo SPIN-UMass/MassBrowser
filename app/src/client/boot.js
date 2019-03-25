@@ -15,7 +15,7 @@ import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
 
 import API from '@/api'
 
-import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
+import { statusManager, autoLauncher, torService, telegramService, networkMonitor } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
@@ -74,6 +74,14 @@ export default async function bootClient () {
     await telegramService.loadTelegramList()
     status.clear()
 
+    // for C2C proxying we use the relay functionality for the moment
+    // Only used for relay role of C2C proxying.
+    status = statusManager.info('Connecting to Connectivity server')
+    await networkMonitor.start()
+    status.clear()
+    status = statusManager.info('Obtaining NAT information')
+    await networkMonitor.waitForNetworkStatus()
+    status.clear()
 
 
 

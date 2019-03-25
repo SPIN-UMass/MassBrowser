@@ -1,6 +1,7 @@
 import { HttpTransport } from '@utils/transport'
 import config from '@utils/config'
 import { error } from '@utils/log'
+import { debug } from 'util';
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
@@ -53,12 +54,14 @@ export class CommonAPI {
 
   // C2C sessions
   getC2CSessions () {
+    debug("Sending getC2CSessions()")
     return this.transport.get(
       CLIENT_URL + '/' + this.userID + '/c2csessions?limit=30&status=1'
     ).then(r => r.data.results)
   }
 
   getReqC2CSessions() {
+    debug("Sending getReqC2CSessions()")
     return this.transport.get(
         CLIENT_URL + '/' + this.userID + '/reqc2csessions?limit=30&status=1'
     ).then(r => r.data.results)
@@ -74,6 +77,8 @@ export class CommonAPI {
   }
 
   updateC2CSessionStatus(sessionID, status) {
+    // edit print to work?
+    debug("Sending updateC2CSessionStatus() with ${sessionID} ${status}")
     return this.transport.put(
       CLIENT_URL + '/' + this.userID + '/c2csession/' + sessionID + '/status',
       {
@@ -84,13 +89,15 @@ export class CommonAPI {
 
   // maybe generalize for client and relay, relay has currently its own version in its API
   // up to now, this CLIENT_URL and RELAY_PATH is not generalized. 
+  
+  // Only for clientRelay now!
   keepAlive (isUP) {
     var data = {
       'fingerprint': this.fingerprint,
       'status': isUP ? 'up' : 'down'
     }
 
-    return this.transport.post(CLIENT_URL + this.userID, data)
+    return this.transport.post(CLIENT_URL + '/' + this.userID, data)
   }
 
   async getPrivacyPolicyVersion () {

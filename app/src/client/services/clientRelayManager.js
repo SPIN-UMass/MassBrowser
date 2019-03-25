@@ -30,13 +30,15 @@ export class ClientRelayManager extends CommonRelayManager {
         store.commit('changeOpenAccess', this.openAccess)
     
         if (this.openAccess) {
+          // networkManager has to be initialized before this is executed!!
+          // slightly weird architecture
           console.log("Calling _getReachableAddress()")
           let publicaddress = this._getReachableAddress()
-          debug("Send clientRelayUp()")
+          debug("Send clientRelayUp(), " + publicaddress.ip + ", " + publicaddress.port)
           API.clientRelayUp(publicaddress.ip, publicaddress.port)
           // this will create the TCPRelay from the super class
           await this._restartRelayServer()
-          statusManager.info(`Relay server started on port ${publicaddress.port}`, { timeout: true })
+          statusManager.info(`Relay server started on ip ${publicaddress.ip} on port ${publicaddress.port}`, { timeout: true })
         } else {
           // is there any other clean-up necessary? nothing else is called in relay?
           API.clientRelayDown()

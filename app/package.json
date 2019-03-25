@@ -27,7 +27,21 @@
           "host": ""
         }
       },
-      "noHostHandlerPort": 6422
+      "natEnabled": false,
+      "port": 8040,
+      "domainfrontable": false,
+      "domainfrontPort": 8083,
+      "keepAliveInterval": 30,
+      "noHostHandlerPort": 6422,
+      "domain_name": "d2td5r0tz3q2r2.cloudfront.net",
+      "stunServer": {
+        "host": "stun2.l.google.com",
+        "port": 19302
+      },
+      "echoServer": {
+        "host": "dev.yaler.co",
+        "port": 8823
+      }
     },
     "relay": {
       "configFoldername": "relay",
@@ -60,8 +74,8 @@
       "enabled": false
     },
     "dev": {
-      "serverURL": "https://dev.yaler.co",
-      "websocketURL": "wss://dev.yaler.co:443",
+      "serverURL": "http://localhost:8000",
+      "websocketURL": "wss://localhost:8000",
       "sentry": {
         "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
       },
@@ -71,8 +85,8 @@
       }
     },
     "prod": {
-      "serverURL": "https://yaler.co",
-      "websocketURL": "wss://yaler.co:443",
+      "serverURL": "https://localhost:8000",
+      "websocketURL": "wss://localhost:8000",
       "sentry": {
         "dsn": ""
       },
@@ -124,7 +138,8 @@
     "vue-spinner": "^1.0.2",
     "vuex": "^2.4.0",
     "winston": "^2.3.1",
-    "ws": "^3.0.0"
+    "ws": "^3.0.0",
+    "zeromq": "^5.1.0"
   },
   "author": "ha-D <hadi@cs.umass.edu>"
 }
