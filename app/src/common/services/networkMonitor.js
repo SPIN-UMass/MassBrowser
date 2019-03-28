@@ -37,9 +37,9 @@ class NetworkMonitor {
     natConnection.on('net-update', data => this._onNetworkUpdate(data))
     natConnection.on('close', () => { natConnection.reconnect() })
     
-    console.log("STARTING natConnection.connect()")
+    //console.log("STARTING natConnection.connect()")
     await natConnection.connect()
-    console.log("DO I GET AFTER natConnection.connect()??")
+    console.log("AFTER natConnection.connect()")
 
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
@@ -52,7 +52,7 @@ class NetworkMonitor {
   }
 
   getPublicAddress () {
-    console.log("\n\n getPublicAddress(): Do I get here?\n")
+    //console.log("\n\n getPublicAddress(): Do I get here?\n")
     return {ip: this.remoteIP, port: this.remotePort}
   }
 

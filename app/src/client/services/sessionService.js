@@ -65,6 +65,7 @@ class SessionService extends EventEmitter {
 
     // decides if client has c2c proxying activated
     this.c2c_allowed = false
+    this.c2c_sessionPollInterval = null
   }
 
   async start () {
@@ -263,7 +264,22 @@ class SessionService extends EventEmitter {
       }
 
       this.processedSessions[sessionInfo.id] = desc
-      let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, desc, sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
+      let session_ip, session_port, session_allowed_categories, session_domain_name;
+      if (sessionInfo.relay_client) {
+        session_ip = sessionInfo.relay_client.ip
+        session_port = sessionInfo.relay_client.port
+        session_allowed_categories = sessionInfo.relay_client['allowed_categories']
+        session_domain_name = null
+      } else {
+        session_ip = sessionInfo.relay.ip
+        session_port = sessionInfo.relay.port
+        session_allowed_categories = sessionInfo.relay['allowed_categories']
+        session_domain_name = sessionInfo.relay.domain_name
+      }
+      let session = new Session(sessionInfo.id, session_ip, session_port, desc, 
+        session_allowed_categories, sessionInfo.connection_type, session_domain_name)
+      //let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, desc, 
+      //  sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
 
       // accept is a method of a pending session that is called below via handle_accepted_session
       let resolve = this.pendingSessions[sessionInfo.id].accept
@@ -301,7 +317,7 @@ class SessionService extends EventEmitter {
       }
       return true
     })
-    debug(`Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  stale: ${staleCount}  duplicate: ${duplicateCount}) `)
+    debug(`Client: Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  stale: ${staleCount}  duplicate: ${duplicateCount}) `)
     return validSessionInfos
   }
 
@@ -362,6 +378,7 @@ class SessionService extends EventEmitter {
   //---------------------------------------------
 
   _C2CstartSessionPoll () {
+    debug("Starting _C2CstartSessionPoll().")
     if (!this.c2c_allowed) {
         debug('C2C Poll called, but c2c proxying is turned off.')
         return
@@ -370,10 +387,11 @@ class SessionService extends EventEmitter {
     // maybe check connectivity and reconnect here if necessary?
     // not sure as there are no checks on the client side atm.
     // does the client have to register c2c explicitly?
-    this.sessionPollInterval = setInterval(() => {
+    this.c2c_sessionPollInterval = setInterval(() => {
+        //debug("Sending C2CSessions()")
         API.getC2CSessions()
             .then(ses => this._handleCurrentC2CSessions(ses))
-        }, 2 * 1000)
+        }, 4 * 1000)
     
     if (false) {
         if (this.sessionPollInterval != null) {
@@ -424,12 +442,12 @@ class SessionService extends EventEmitter {
         // C2C Session or can this stay?
         // this has to be handled differently similar to how a relay would do it?!
         // sessionInfo is delivered from backend! So adapt it
-        _handleNewC2CSession(desc)
+        this._handleNewC2CSession(desc)
       }
   }
 
   _filterValidC2CSessions(sessionInfos) {
-    alreadyProcessedCount = 0
+    var alreadyProcessedCount = 0
     var validSessionInfos = sessionInfos.filter(session => {
       if (session.id in this.c2csessions) {
         // Client got its own session which should not happen
@@ -440,28 +458,30 @@ class SessionService extends EventEmitter {
       }
       return true
     })
-    debug(`Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  invalid: ${alreadyProcessedCount}`)
+    debug(`C2C: Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  invalid: ${alreadyProcessedCount})`)
     return validSessionInfos
   }
 
   async _handleNewC2CSession(desc) {
     try {
       // does TCP_CLIENT already work for c2c?
+      // I guess it has to be exactly reversed, so if one sends TCP_RELAY the other guy acts as a relay.
+      //console.log(desc)
       if (desc.connectionType === TCP_RELAY) {
         debug(`Connecting session [${desc.id}]`)
         // connect to client
         //data.client.ip, data.client.port, data.id
         clientRelayManager.connect(desc.client.ip, desc.client.port, desc.id)
-      } else if (sessionInfo.connectionType === TCP_CLIENT) {
+      } else if (desc.connectionType === TCP_CLIENT) {
         // guess we need new c2c session API thing?
-        API.updateC2CSessionStatus(sessionInfo.id, 'client_accepted')
+        API.updateC2CSessionStatus(desc.client.id, 'client_accepted')
         // TCPRelay should already be running like in Relay?
         clientRelayManager.addPendingConnection((desc.token), desc)
       }
     } catch (err) {
-      debug(`C2CSession [${sessionInfo.id}] connection to client failed`)
+      debug(`C2CSession [${desc.client.id}] connection to client failed`)
       // Report session failure to server
-      API.updateC2CSessionStatus(sessionInfo.id, 'failed')
+      API.updateC2CSessionStatus(desc.client.id, 'failed')
       throw err
     }
   }
@@ -470,11 +490,13 @@ class SessionService extends EventEmitter {
   activate_c2c_proxying() {
     clientRelayManager.changeAccess(true)
     this.c2c_allowed = true
+    this._C2CstartSessionPoll()
   }
 
   deactivate_c2c_procying() {
     clientRelayManager.changeAccess(false)
     this.c2c_allowed = false
+    // Session poll stops automatically as soon as c2c_allowed is false.
   }
 
 }
@@ -485,12 +507,19 @@ class SessionService extends EventEmitter {
 
 
 
-function storeUpdateSession(session, state) {
+function storeUpdateSession(sessionInfo, state) {
+  let ip = sessionInfo.relay_client ? sessionInfo.relay_client.ip : sessionInfo.relay.ip
   store.commit('updateSession', {
-    id: session.id,
-    ip: session.relay.ip,
+    id: sessionInfo.id,
+    ip: ip,
     state: state
   })
+
+  //store.commit('updateSession', {
+  //  id: session.id,
+  //  ip: session.relay.ip,
+  //  state: state
+  //})
 }
 
 function storeRemoveSession(session) {

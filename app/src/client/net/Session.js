@@ -41,6 +41,9 @@ export class Session extends EventEmitter {
   connect () {
     this.changeState(Session.CONNECTING)
 
+    // isCDN is never defined or did I overlooked it?
+    // this is not allowed to be called for C2C proxying as long as the client does not have a 
+    // domain name. But I don't expect any client to have one...
     if (this.isCDN) {
       var relay = new DomainConnection(this.domainName, this.desc)
     } else {

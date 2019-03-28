@@ -48,22 +48,22 @@ export class CommonAPI {
 
   getSessions () {
     return this.transport.get(
-      CLIENT_URL + '/' + this.userID + '/sessions?limit=50&status=1'
+      CLIENT_URL + '/' + this.userID + '/sessions?limit=50'//&status=1'
     ).then(r => r.data.results)
   }
 
-  // C2C sessions
+  // C2C sessions, status=1 does not work, not sure what status=1's purpose is.
   getC2CSessions () {
     debug("Sending getC2CSessions()")
     return this.transport.get(
-      CLIENT_URL + '/' + this.userID + '/c2csessions?limit=30&status=1'
+      CLIENT_URL + '/' + this.userID + '/c2csessions?limit=30'
     ).then(r => r.data.results)
   }
 
   getReqC2CSessions() {
     debug("Sending getReqC2CSessions()")
     return this.transport.get(
-        CLIENT_URL + '/' + this.userID + '/reqc2csessions?limit=30&status=1'
+        CLIENT_URL + '/' + this.userID + '/reqc2csessions?limit=30'
     ).then(r => r.data.results)
   }
 

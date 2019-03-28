@@ -26,13 +26,13 @@ export class ClientRelayManager extends CommonRelayManager {
         }
     
         this.openAccess = access
-        console.log("Commit open access")
+        //console.log("Commit open access")
         store.commit('changeOpenAccess', this.openAccess)
     
         if (this.openAccess) {
           // networkManager has to be initialized before this is executed!!
           // slightly weird architecture
-          console.log("Calling _getReachableAddress()")
+          //console.log("Calling _getReachableAddress()")
           let publicaddress = this._getReachableAddress()
           debug("Send clientRelayUp(), " + publicaddress.ip + ", " + publicaddress.port)
           API.clientRelayUp(publicaddress.ip, publicaddress.port)
