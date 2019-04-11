@@ -66,6 +66,7 @@ class SessionService extends EventEmitter {
     // decides if client has c2c proxying activated
     this.c2c_allowed = false
     this.c2c_sessionPollInterval = null
+    console.log("SessionService created")
   }
 
   async start () {
@@ -267,7 +268,8 @@ class SessionService extends EventEmitter {
       let session_ip, session_port, session_allowed_categories, session_domain_name;
       if (sessionInfo.relay_client) {
         session_ip = sessionInfo.relay_client.ip
-        session_port = sessionInfo.relay_client.port
+        // c2c_port used for incoming connections of clients
+        session_port = sessionInfo.relay_client.c2c_port
         session_allowed_categories = sessionInfo.relay_client['allowed_categories']
         session_domain_name = null
       } else {
@@ -286,9 +288,17 @@ class SessionService extends EventEmitter {
       delete this.pendingSessions[sessionInfo.id]
 
       try {
+        debug("Resolving retrieved session")
         await resolve(session)
-        await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
+        debug("Session resolved, flushing waitlists...")
+        if (sessionInfo.relay_client) {
+            await this._flushCategoryWaitLists(sessionInfo.relay_client['allowed_categories'] || [], session)
+        } else {
+            await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
+        }
+        //await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
       } catch(e) {
+        debug("Catched exception that in turn crashes, is this bug #1?")
         /* Refer to Bug #1 */
         (sessionInfo.relay['allowed_categories'] || []).forEach(category => {
           if (this.categoryWaitLists[category.id]) {
@@ -418,14 +428,17 @@ class SessionService extends EventEmitter {
 
       // TODO: is this robust to manipulations? I guess it's all send over TLS anyway?
       for (let sessionInfo of validSessionInfos) {
+        // readkey is readkey from client's perspective, 
+        // so for the relay_client readkey is the write_key
+        // I assume this was never documented whatsoever...read_key read_iv write_key write_iv
         var desc = {
-          'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
-          'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
-          'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
-          'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
+          'readkey': Buffer.from(sessionInfo.write_key, 'base64'),
+          'readiv': Buffer.from(sessionInfo.write_iv, 'base64'),
+          'writekey': Buffer.from(sessionInfo.read_key, 'base64'),
+          'writeiv': Buffer.from(sessionInfo.read_iv, 'base64'),
           'token': Buffer.from(sessionInfo.token, 'base64'),
           'client': sessionInfo.client,
-          'connectiontype': sessionInfo.connection_type,
+          'connectionType': sessionInfo.connection_type,
           'sessionId': sessionInfo.id
           // client data is not checked by relay either, so probably doesn't matter anyway.
           // relay explicitly saves sessionInfo.connection_type, client information etc.
@@ -436,6 +449,7 @@ class SessionService extends EventEmitter {
         // This should never happen due to _filterValidC2CSessions
         if (sessionInfo.id in this.c2csessions) {
           // TODO: give warning here
+          debug("Already handled session, but somehow it is only realized in _handleCurrentC2CSessions()")
           continue
         }
         
@@ -467,18 +481,26 @@ class SessionService extends EventEmitter {
       // does TCP_CLIENT already work for c2c?
       // I guess it has to be exactly reversed, so if one sends TCP_RELAY the other guy acts as a relay.
       //console.log(desc)
+      debug('Executing _handleNewC2CSession()')
+      //debug(desc)
       if (desc.connectionType === TCP_RELAY) {
-        debug(`Connecting session [${desc.id}]`)
+        console.log("if1")
+        debug(`Connecting session [${desc.client.id}]`)
         // connect to client
         //data.client.ip, data.client.port, data.id
-        clientRelayManager.connect(desc.client.ip, desc.client.port, desc.id)
+        clientRelayManager.connect(desc.client.ip, desc.client.port, desc.sessionId)
       } else if (desc.connectionType === TCP_CLIENT) {
-        // guess we need new c2c session API thing?
-        API.updateC2CSessionStatus(desc.client.id, 'client_accepted')
+        console.log("if2")
+        debug('Wating for client to connect [${desc.sessionId}]')
+        // addPendingConnection updates status already...
+        //API.updateC2CSessionStatus(desc.sessionId, 'client_accepted')
         // TCPRelay should already be running like in Relay?
         clientRelayManager.addPendingConnection((desc.token), desc)
+      } else {
+          debug("Unknown connection type.")
       }
     } catch (err) {
+      console.log("if3")
       debug(`C2CSession [${desc.client.id}] connection to client failed`)
       // Report session failure to server
       API.updateC2CSessionStatus(desc.client.id, 'failed')

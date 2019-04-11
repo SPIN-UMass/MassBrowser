@@ -27,9 +27,14 @@ export class Crypto {
           return
         }
         if (padsize > 0) {
-          if (data.readIntLE(31 - padsize, padsize) !== 0) {
-            this.onError()
-            return
+          let offset=0
+          while (offset < padsize){
+            if (data.readIntLE(31 - padsize+ offset, Math.min(6, padsize-offset) ) !== 0) {
+              this.onError()
+              return
+
+            }
+            offset+=6
           }
         }
         if (padsize < 31) {

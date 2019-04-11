@@ -7,6 +7,7 @@ import { RelayConnection } from '@/net/RelayConnection'
 import { DomainConnection } from './DomainConnection'
 import { pendMgr } from './PendingConnections'
 import {sessionService} from '@/services/sessionService'
+import { debug } from 'util';
 
 export class Session extends EventEmitter {
   constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
@@ -15,7 +16,9 @@ export class Session extends EventEmitter {
     console.log("Session constructor called")
 
     this.id = id
-    this.ip = ip
+    // ONLY FOR TESTING NOW
+    this.ip = "172.30.89.196"
+    //this.ip = ip
     this.port = port
     this.desc = desc
     var allowedcats = []
@@ -39,6 +42,7 @@ export class Session extends EventEmitter {
   
   // called when Client should initiate connection
   connect () {
+    debug("Trying to connect to IP " + this.ip + ", port" + this.port)
     this.changeState(Session.CONNECTING)
 
     // isCDN is never defined or did I overlooked it?

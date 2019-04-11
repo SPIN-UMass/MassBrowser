@@ -11,6 +11,7 @@ if (config.applicationInterface == 'electron') {
 
 class Store {
   constructor(storeConfig){
+    console.log("Store constructor")
     let parsedConfig = parseStoreConfig(storeConfig, config)
     this.state = parsedConfig.state
     this.stateConfig = parsedConfig.stateConfig

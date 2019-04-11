@@ -78,7 +78,7 @@ export class CommonAPI {
 
   updateC2CSessionStatus(sessionID, status) {
     // edit print to work?
-    debug("Sending updateC2CSessionStatus() with ${sessionID} ${status}")
+    debug("Sending updateC2CSessionStatus() with " + sessionID + ", " + status)
     return this.transport.put(
       CLIENT_URL + '/' + this.userID + '/c2csession/' + sessionID + '/status',
       {

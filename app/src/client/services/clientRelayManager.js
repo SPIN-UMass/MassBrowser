@@ -1,3 +1,7 @@
+/**
+ * Created by Christian Didong on 3/10/19.
+ */
+
 //import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
 import { warn, error, debug } from '@utils/log'
 import API from '@/api'
@@ -59,21 +63,24 @@ export class ClientRelayManager extends CommonRelayManager {
         }
     }
 
-    connect(clientIP, clientPort, token) {
+    connect(clientIP, clientPort, sessionId) {
+        debug('Trying to connect to client with IP [${clientIP}], Port [${clientPort}] for session [${sessionId}]')
         // in TCPRelay file...
-        connectToClient(clientIP, clientPort, token)
+        connectToClient(clientIP, clientPort, sessionId)
     }
 
     //onNewSessionEvent (data)
     addPendingConnection(token, desc) {
-        debug(`New session [${desc.id}] received for client [${desc.client.id}]`)
+        debug(`New session [${desc.sessionId}] received for client [${desc.client.id}]`)
     
-        if (desc.connectiontype === ConnectionType.TCP_CLIENT) {
+        if (desc.connectionType === ConnectionType.TCP_CLIENT) {
+            debug("Adding connection to pending connections.")
             this.authenticator.addPendingConnection((desc.token), desc)
         }
 
         // TODO maybe change
-        API.updateC2CSessionStatus(desc.id, 'relay_accepted')
+        API.updateC2CSessionStatus(desc.sessionId, 'relay_accepted')
+        debug("Waiting for client to connect ...")
     }
 
 

@@ -6,6 +6,7 @@ import { debug, info } from '@utils/log'
 
 export class TCPRelay {
   constructor(authenticator, ip, port, upLimit, downLimit) {
+    console.log("TCPRelay constructor")
     this.authenticator = authenticator
     this.ip = ip
     this.port = port
@@ -18,8 +19,8 @@ export class TCPRelay {
   // starts Relay, at the moment always TCP relay
   async start() {
     let server = this._server = net.createServer((socket) => {
-      // console.log('relay connected',
-      //   socket.authorized ? 'authorized' : 'unauthorized')
+      console.log("Incoming connectioon on TCPRelay")
+      console.log('relay connected', socket.authorized ? 'authorized' : 'unauthorized')
 
       var upPipe = this.upLimit.throttle()
       upPipe.on('error', (err) => {})
@@ -55,7 +56,7 @@ export class TCPRelay {
       let serverStarted
       
       server.listen({port: this.port, host: this.ip, exclusive: false}, () => {
-        info('TCP relay running on port', this.port)
+        info('TCP relay running on port', this.port, ', IP: ', this.ip)
         serverStarted = true
         resolve(server)
       })

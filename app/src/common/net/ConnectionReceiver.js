@@ -14,6 +14,7 @@ import { Buffer } from 'buffer';
 // Used in TCPRelay etc.
 export class ConnectionReceiver {
   constructor (socketup, socketdown, socket, authenticator) {
+    console.log("ConnectionReceiver constructor")
     this.authenticator = authenticator
     this.socketup = socketup
     this.socket = socket
@@ -47,7 +48,9 @@ export class ConnectionReceiver {
       const sessiontoken = data.slice(0, this.headersize)
       const desc = this.authenticator.authenticate(sessiontoken)
       if (desc) {
-        API.clientSessionConnected(desc.client, desc.sessionId)
+        // just for testing, we need a common superclass or an if statement or so
+        API.updateC2CSessionStatus(desc.sessionId, {status: 'used'})
+        //API.clientSessionConnected(desc.client, desc.sessionId)
         this.desciber = desc
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)

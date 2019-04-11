@@ -128,13 +128,13 @@ export class CommonRelayManager {
       'readiv': (Buffer.from(data.write_iv, 'base64')),
       'token': (Buffer.from(data.token, 'base64')),
       'client': data.client,
-      'connectiontype': data.connection_type,
+      'connectionType': data.connection_type,
       'sessionId': data.id
     }
   
     debug(`New session [${data.id}] received for client [${data.client.id}]`)
   
-    if (desc.connectiontype === ConnectionType.TCP_CLIENT) {
+    if (desc.connectionType === ConnectionType.TCP_CLIENT) {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 

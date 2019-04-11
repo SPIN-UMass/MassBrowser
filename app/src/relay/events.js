@@ -30,7 +30,7 @@ function connectClientSession (data) {
     'readiv': (Buffer.from(data.write_iv, 'base64')),
     'token': (Buffer.from(data.token, 'base64')),
     'client': data.client,
-    'connectiontype': data.connection_type,
+    'connectionType': data.connection_type,
     'sessionId': data.id
   }
 

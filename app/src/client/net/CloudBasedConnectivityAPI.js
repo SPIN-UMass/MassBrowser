@@ -12,6 +12,7 @@ import * as net from 'net'
 // Only used in boot.js on startup
 class CloudBasedConnectivityAPI extends EventEmitter {
   constructor () {
+    console.log("CloudBasedConnectivityAPI superclass constructor")
     super()
 
     console.log("CloudBasedConnectivityAPI constructor called.")
