@@ -20,11 +20,11 @@ class RelayAPI extends CommonAPI {
     return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'relay_accepted'})
   }
 
-  clientSessionConnected (client, sessionid) {
+  clientSessionConnected (sessionid, status) {
     return this.transport.put(SESSION_PATH + sessionid + '/status',  {status: 'used'})
   }
 
-  clientSessionDisconnected (client, sessionid) {
+  clientSessionDisconnected (sessionid, status) {
     debug('closing session')
     // TODO
     return new Promise((resolve, reject) => {

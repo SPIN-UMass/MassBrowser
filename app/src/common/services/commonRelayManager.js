@@ -34,7 +34,10 @@ export class CommonRelayManager {
       this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit || UNLIMITED_BANDWIDTH})
       this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
   
-      this.authenticator = new ConnectionAuthenticator()
+      this.authenticator = new ConnectionAuthenticator()     
+      
+      // Needed for TCPRelay to use correct API
+      this.is_relay_client = false
   
       if (this.natEnabled) {
         debug('NAT mode is enabled')
@@ -159,7 +162,8 @@ export class CommonRelayManager {
       localAddress.ip, 
       localAddress.port,
       this.uploadLimiter,
-      this.downloadLimiter
+      this.downloadLimiter,
+      this.is_relay_client
     )
     await server.start()
     this.isRelayServerRunning = true

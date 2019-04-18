@@ -4,8 +4,6 @@
 
 import { connectionManager, RelayConnection, Session } from '@/net'
 import { clientRelayManager } from '@/services'
-//import { clientRelayManager } from '@/net'
-//import { clientRelayManager } from '@/net/clientRelayManager'
 import API from '@/api'
 import { EventEmitter } from 'events'
 import { logger, warn, debug, info } from '@utils/log'
@@ -20,6 +18,8 @@ let TCP_CLIENT = 0
 let TCP_RELAY = 1
 let UDP = 2
 let CDN = 3
+
+let PENDING = 0
 
 /**
  * Note: Implements RelayAssigner
@@ -40,6 +40,7 @@ class SessionService extends EventEmitter {
     console.log("Creating SessionService object")
     this.sessions = []
     this.c2csessions = []
+
     this.processedSessions = {}
 
     /**
@@ -160,7 +161,6 @@ class SessionService extends EventEmitter {
 
     return new Promise(async (resolve, reject) => {
       debug(`Requesting for new session`)
-      // here, the client could also decide if he allows c2c
       let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
@@ -174,7 +174,6 @@ class SessionService extends EventEmitter {
 
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
 
-      // C2C could be redirected here for the client if necessary
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
         reject: s => {
@@ -233,10 +232,8 @@ class SessionService extends EventEmitter {
    */
 
   _handleClosedSessions(session) {
-    console.log(this.sessions)
     let index = this.sessions.indexOf(session)
     this.sessions.splice(index,1)
-    console.log(this.sessions)
   }
 
   // any session received from backend is handled by this method
@@ -280,8 +277,6 @@ class SessionService extends EventEmitter {
       }
       let session = new Session(sessionInfo.id, session_ip, session_port, desc, 
         session_allowed_categories, sessionInfo.connection_type, session_domain_name)
-      //let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, desc, 
-      //  sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
 
       // accept is a method of a pending session that is called below via handle_accepted_session
       let resolve = this.pendingSessions[sessionInfo.id].accept
@@ -296,7 +291,6 @@ class SessionService extends EventEmitter {
         } else {
             await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
         }
-        //await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
       } catch(e) {
         debug("Catched exception that in turn crashes, is this bug #1?")
         /* Refer to Bug #1 */
@@ -317,7 +311,7 @@ class SessionService extends EventEmitter {
         return false
       } else if (!(session.id in this.pendingSessions)) {
         // Report stale session to server
-        if (sessionInfo.relay_client) {
+        if (session.relay_client) {
           API.updateC2CSessionStatus(session.id, 'expired')
         } else {
           API.updateSessionStatus(session.id, 'expired')
@@ -393,40 +387,25 @@ class SessionService extends EventEmitter {
         debug('C2C Poll called, but c2c proxying is turned off.')
         return
     }
-    
-    // maybe check connectivity and reconnect here if necessary?
-    // not sure as there are no checks on the client side atm.
-    // does the client have to register c2c explicitly?
+
     this.c2c_sessionPollInterval = setInterval(() => {
-        //debug("Sending C2CSessions()")
         API.getC2CSessions()
-            .then(ses => this._handleCurrentC2CSessions(ses))
+            .then(ses => {
+                this._handleCurrentC2CSessions(ses)
+                if (!this.c2c_allowed) {
+                    clearInterval(this.c2c_sessionPollInterval)
+                }
+            })
         }, 4 * 1000)
     
-    if (false) {
-        if (this.sessionPollInterval != null) {
-        return
-        }
-        this.sessionPollInterval = setInterval(() => {
-        if (Object.keys(this.pendingC2CSessions).length > 0) {
-            API.getSessions()
-            .then(ses => this._handleRetrievedC2CSessions(ses))
-        } else {
-            clearInterval(this.sessionPollInterval)
-            this.sessionPollInterval = null
-        }
-        }, 2 * 1000)
-    }
   }
 
   async _handleCurrentC2CSessions(sessionInfos) {
-    // TODO 
     if (sessionInfos === undefined) {
         return
       }
       let validSessionInfos = this._filterValidC2CSessions(sessionInfos)
 
-      // TODO: is this robust to manipulations? I guess it's all send over TLS anyway?
       for (let sessionInfo of validSessionInfos) {
         // readkey is readkey from client's perspective, 
         // so for the relay_client readkey is the write_key
@@ -443,64 +422,57 @@ class SessionService extends EventEmitter {
           // client data is not checked by relay either, so probably doesn't matter anyway.
           // relay explicitly saves sessionInfo.connection_type, client information etc.
         }
-  
-        // debug(`sessions ${session.connection_type}`)
-        
+          
         // This should never happen due to _filterValidC2CSessions
         if (sessionInfo.id in this.c2csessions) {
-          // TODO: give warning here
           debug("Already handled session, but somehow it is only realized in _handleCurrentC2CSessions()")
           continue
         }
+        this.c2csessions.push(sessionInfo.id)
         
-        // C2C Session or can this stay?
-        // this has to be handled differently similar to how a relay would do it?!
-        // sessionInfo is delivered from backend! So adapt it
         this._handleNewC2CSession(desc)
       }
   }
 
   _filterValidC2CSessions(sessionInfos) {
     var alreadyProcessedCount = 0
+    var staleCount = 0
+
     var validSessionInfos = sessionInfos.filter(session => {
-      if (session.id in this.c2csessions) {
-        // Client got its own session which should not happen
-        // TODO: check if invalid is valid status
-        API.updateC2CSessionStatus(session.id, 'invalid')
+      
+      if (this.c2csessions.indexOf(session.id) > -1) {
+        // this prevents processing a c2csession a second times when it's currently being processed.
         alreadyProcessedCount += 1
         return false
+      } else if (session.status != PENDING) {
+          // after update this includes alreadyProcessedCount actually as well
+          staleCount += 1
+          return false
       }
       return true
     })
-    debug(`C2C: Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  invalid: ${alreadyProcessedCount})`)
+    debug(`C2C: Retrieved ${sessionInfos.length} sessions (valid: ${validSessionInfos.length}  processed: ${alreadyProcessedCount} stale: ${staleCount})`)
     return validSessionInfos
   }
 
   async _handleNewC2CSession(desc) {
     try {
-      // does TCP_CLIENT already work for c2c?
-      // I guess it has to be exactly reversed, so if one sends TCP_RELAY the other guy acts as a relay.
-      //console.log(desc)
       debug('Executing _handleNewC2CSession()')
-      //debug(desc)
       if (desc.connectionType === TCP_RELAY) {
-        console.log("if1")
         debug(`Connecting session [${desc.client.id}]`)
         // connect to client
-        //data.client.ip, data.client.port, data.id
-        clientRelayManager.connect(desc.client.ip, desc.client.port, desc.sessionId)
+        clientRelayManager.connect(desc.client.ip, desc.client.port, desc.token)
+        this._deletePendingC2CSessions(desc.sessionId)
+        // client sets c2csession in the backend to 'client_accepted', so it's not reprocessed
       } else if (desc.connectionType === TCP_CLIENT) {
-        console.log("if2")
         debug('Wating for client to connect [${desc.sessionId}]')
-        // addPendingConnection updates status already...
-        //API.updateC2CSessionStatus(desc.sessionId, 'client_accepted')
-        // TCPRelay should already be running like in Relay?
         clientRelayManager.addPendingConnection((desc.token), desc)
+        // Only save c2csessions here until they are passed to the TCPRelay
+        this._deletePendingC2CSessions(desc.sessionId)
       } else {
           debug("Unknown connection type.")
       }
     } catch (err) {
-      console.log("if3")
       debug(`C2CSession [${desc.client.id}] connection to client failed`)
       // Report session failure to server
       API.updateC2CSessionStatus(desc.client.id, 'failed')
@@ -510,15 +482,20 @@ class SessionService extends EventEmitter {
 
 
   activate_c2c_proxying() {
-    clientRelayManager.changeAccess(true)
+    clientRelayManager.changeAccess(true, true)
     this.c2c_allowed = true
     this._C2CstartSessionPoll()
   }
 
-  deactivate_c2c_procying() {
-    clientRelayManager.changeAccess(false)
+  deactivate_c2c_proxying() {
+    clientRelayManager.changeAccess(false, true)
     this.c2c_allowed = false
     // Session poll stops automatically as soon as c2c_allowed is false.
+  }
+
+  _deletePendingC2CSessions(session_id) {
+    let index = this.c2csessions.indexOf(session_id)
+    this.c2csessions.splice(index,1)
   }
 
 }
@@ -536,12 +513,6 @@ function storeUpdateSession(sessionInfo, state) {
     ip: ip,
     state: state
   })
-
-  //store.commit('updateSession', {
-  //  id: session.id,
-  //  ip: session.relay.ip,
-  //  state: state
-  //})
 }
 
 function storeRemoveSession(session) {

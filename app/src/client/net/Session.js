@@ -16,9 +16,7 @@ export class Session extends EventEmitter {
     console.log("Session constructor called")
 
     this.id = id
-    // ONLY FOR TESTING NOW
-    this.ip = "172.30.89.196"
-    //this.ip = ip
+    this.ip = ip
     this.port = port
     this.desc = desc
     var allowedcats = []

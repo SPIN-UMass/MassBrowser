@@ -5,7 +5,7 @@ import { ConnectionReceiver } from '@common/net/ConnectionReceiver'
 import { debug, info } from '@utils/log'
 
 export class TCPRelay {
-  constructor(authenticator, ip, port, upLimit, downLimit) {
+  constructor(authenticator, ip, port, upLimit, downLimit, is_relay_client) {
     console.log("TCPRelay constructor")
     this.authenticator = authenticator
     this.ip = ip
@@ -14,6 +14,7 @@ export class TCPRelay {
     this.downLimit = downLimit
     this._server = null
     this.connection_list=[]
+    this.is_relay_client = is_relay_client
   }
 
   // starts Relay, at the moment always TCP relay
@@ -30,7 +31,8 @@ export class TCPRelay {
       socket.pipe(upPipe)
       downPipe.pipe(socket)
   
-      var recver = new ConnectionReceiver(upPipe, downPipe, socket, this.authenticator)
+      var recver = new ConnectionReceiver(upPipe, downPipe, socket, this.authenticator, this.is_relay_client)
+      let sessionId = recver.sessionId
       socket.on('error', (err) => {
         console.log('socket error', err.message)
         this.connection_list.splice(this.connection_list.indexOf(socket), 1)
@@ -39,6 +41,7 @@ export class TCPRelay {
         downPipe.unpipe(socket)
         downPipe.end()
         upPipe.end()
+        
       })
       socket.on('end', () => {
         console.log('socket ending')
@@ -49,6 +52,7 @@ export class TCPRelay {
         downPipe.unpipe(socket)
         downPipe.end()
         upPipe.end()
+        
       })
     })
     
@@ -91,6 +95,12 @@ export class TCPRelay {
 }
 
 // called by events.js
+// token is the parameter, but sessionId is passed in 
+// either this is a bug or the sessionId is always passed in 
+// no, looks like a bug to me
+// TODO: fix this function, also relayManager is never imported.
+// We have to decide on whether we can import commonRelayManager 
+// as it should work with both relay and relay_client
 export function connectToClient (clientIP, clientPort, token) {
   console.log('Connecting to',clientIP,clientPort)
   const socket = net.connect({host: clientIP, port: clientPort}, (err) => {

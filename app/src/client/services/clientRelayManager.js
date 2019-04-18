@@ -2,41 +2,37 @@
  * Created by Christian Didong on 3/10/19.
  */
 
-//import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
 import { warn, error, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
 import { statusManager } from '@common/services'
 import { ConnectionType, UNLIMITED_BANDWIDTH } from '@common/constants'
-//import { connectToClient } from '@common/net/relays/TCPRelay'
-//import { CommonRelayManager } from '@common/services/commonRelayManager'
 import { connectToClient } from '@common/net/relays/TCPRelay'
 import { CommonRelayManager } from '@common/services/commonRelayManager'
 
 export class ClientRelayManager extends CommonRelayManager {
     constructor() {
-        console.log("Failing super class?")
+        console.log("Creating CommonRelayManager and ClientRelayManager...")
         super()
     }
 
-    // add own constructor of child class if necessary...
+    // overwritten to give relay_client information and change API calls 
+    async changeAccess (access, is_relay_client) {
+        debug("Changing Access for c2c proxying...")
 
-    // overwritten due to API? or should backend figure this out?
-    // /relay/ path is stupid for c2c, I guess
-    async changeAccess (access) {
-        console.log("In changeAccess()")
+        if (is_relay_client) {
+            this.is_relay_client = true
+        }
+
         if (access === this.openAccess) {
           return
         }
     
         this.openAccess = access
-        //console.log("Commit open access")
         store.commit('changeOpenAccess', this.openAccess)
     
         if (this.openAccess) {
           // networkManager has to be initialized before this is executed!!
-          // slightly weird architecture
-          //console.log("Calling _getReachableAddress()")
           let publicaddress = this._getReachableAddress()
           debug("Send clientRelayUp(), " + publicaddress.ip + ", " + publicaddress.port)
           API.clientRelayUp(publicaddress.ip, publicaddress.port)
@@ -56,17 +52,17 @@ export class ClientRelayManager extends CommonRelayManager {
     // of the existing features... TODO: check if backend can cope with clients doing this stuff...
     handleReconnect () {
         if (this.openAccess) {
-          debug(this.openAccess)
+          debug("this.openAccess called")
           let publicaddress = this._getReachableAddress()
           API.clientRelayUp(publicaddress.ip, publicaddress.port)
           this._restartRelayServer()
         }
     }
 
-    connect(clientIP, clientPort, sessionId) {
+    connect(clientIP, clientPort, token) {
         debug('Trying to connect to client with IP [${clientIP}], Port [${clientPort}] for session [${sessionId}]')
         // in TCPRelay file...
-        connectToClient(clientIP, clientPort, sessionId)
+        connectToClient(clientIP, clientPort, token)
     }
 
     //onNewSessionEvent (data)
@@ -78,7 +74,6 @@ export class ClientRelayManager extends CommonRelayManager {
             this.authenticator.addPendingConnection((desc.token), desc)
         }
 
-        // TODO maybe change
         API.updateC2CSessionStatus(desc.sessionId, 'relay_accepted')
         debug("Waiting for client to connect ...")
     }

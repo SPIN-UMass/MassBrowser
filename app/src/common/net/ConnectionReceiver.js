@@ -6,6 +6,7 @@ const net = require('net')
 import { error, debug } from '@utils/log'
 
 import { Crypto } from '@utils/crypto'
+import { HttpTransport } from '@utils/transport'
 
 import API from '@/api'
 import { Buffer } from 'buffer';
@@ -13,17 +14,28 @@ import { Buffer } from 'buffer';
 
 // Used in TCPRelay etc.
 export class ConnectionReceiver {
-  constructor (socketup, socketdown, socket, authenticator) {
+  constructor (socketup, socketdown, socket, authenticator, is_relay_client) {
     console.log("ConnectionReceiver constructor")
     this.authenticator = authenticator
+    this.sessionId = null
     this.socketup = socketup
     this.socket = socket
     this.socketdown = socketdown
+
+    // ensures that the correct API calls are used.
+    if (is_relay_client) {
+        this.is_relay_client = true
+    } else {
+        this.is_relay_client = false
+    }
+    // sadly, javascript seems to be incapable of passing references to functions
+        // that belong to an object... So I cannot pass API.updateC2CSessionStatus etc.
+
     this.socketup.on('data', (data) => {
       if (this.isAuthenticated) {
         this.crypt.decrypt(data)
       } else {
-        this.authenticate(data)
+        this.sessionId = this.authenticate(data)
       }
     })
 
@@ -38,7 +50,8 @@ export class ConnectionReceiver {
     this.headersize = 32
     this.desciber = {}
     this.initcarry = ''
-    this.connections = {}
+    this.connections = {} 
+    
   }
 
   authenticate (data) {
@@ -48,9 +61,11 @@ export class ConnectionReceiver {
       const sessiontoken = data.slice(0, this.headersize)
       const desc = this.authenticator.authenticate(sessiontoken)
       if (desc) {
-        // just for testing, we need a common superclass or an if statement or so
-        API.updateC2CSessionStatus(desc.sessionId, {status: 'used'})
-        //API.clientSessionConnected(desc.client, desc.sessionId)
+        if (this.is_relay_client) {
+            API.updateC2CSessionStatus(desc.sessionId, 'used')
+        } else {
+            API.clientSessionConnected(desc.sessionId, 'used')
+        }
         this.desciber = desc
         this.crypt = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
           this.onData(d)
@@ -59,10 +74,13 @@ export class ConnectionReceiver {
         })
         this.crypt.decrypt(data.slice(this.headersize, data.length))
         this.isAuthenticated = true
+
+        return desc.sessionId
       } else {
         this.socket.end()
       }
     }
+    return null
   }
 
   write (conid, command, data) {
@@ -149,7 +167,11 @@ export class ConnectionReceiver {
 
   closeConnections () {
     if (this.isAuthenticated) {
-      API.clientSessionDisconnected(this.desciber.client, this.desciber.sessionId)
+      if (this.is_relay_client) {
+          API.updateC2CSessionStatus(this.desciber.sessionId, 'expired')
+      } else {
+          API.clientSessionDisconnected(this.desciber.sessionId, 'expired')
+      }
     }
 
     Object.keys(this.connections).forEach((key) => {

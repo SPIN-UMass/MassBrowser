@@ -15,6 +15,7 @@ export class ConnectionAuthenticator {
     }
     return false
   }
+
 }
 
 export default ConnectionAuthenticator

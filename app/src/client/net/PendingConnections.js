@@ -4,11 +4,13 @@ class PendingConnections {
   }
   
   // connections the client waits for as they should be initiated by the relay
+  // here sessionId is used, not the token ;)
   addPendingConnection (session) {
     this.connections[session.id] = session
   }
   
   // called by RelayConnection.js when the connection is received
+  // actually sessionId...
   setPendingConnection (token,relay) {
     console.log('connection before:', this.connections)
     if (token in this.connections) {
