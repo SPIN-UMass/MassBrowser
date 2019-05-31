@@ -19,14 +19,3 @@ export function getBrowser() {
   if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
   return M[0].toLowerCase()
 }
-
-export function installCert() {
-  let certsPath = path.join(getDataDir(), '/certs/ca.pem');
-  let certName = 'MassBrowser';
-  let certDirectory = '';
-
-
-  //
-  // certdir=$(dirname ${certDB});
-  // certutil -A -n "${certificateName}" -t "TCu,Cu,Tu" -i ${certificateFile} -d sql:${certdir} --empty-password
-}

@@ -104,9 +104,12 @@ export default async function bootClient () {
     status = statusManager.info('Checking browser availability')
     await setClientVersion()
     status.clear()
-    status = statusManager.info('Installing the Cert')
-    await addCertificateToFirefox()
-    status.clear()
+    status = statusManager.info('browser:', store.state.isFirefoxIncluded)
+    if (store.state.isFirefoxIncluded) {
+      status = statusManager.info('Installing the Cert')
+      await addCertificateToFirefox()
+      status.clear()
+    }
 
     status = statusManager.info('Finalizing')
     autoLauncher.initialize()
