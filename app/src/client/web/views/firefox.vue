@@ -211,7 +211,6 @@
             this.cert.pollCertValidation = false
           })
           .catch(e => {
-            console.log('inside error')
             console.error(e)
             this.cert.success = false
           })

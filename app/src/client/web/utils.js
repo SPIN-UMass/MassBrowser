@@ -1,6 +1,3 @@
-import { getDataDir } from '../../utils'
-import path from 'path'
-
 /**
  * https://stackoverflow.com/questions/2400935/browser-detection-in-javascript
  */

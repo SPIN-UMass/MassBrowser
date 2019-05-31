@@ -42,7 +42,6 @@
       StatusWidget
     },
     created () {
-      console.log(this.$router.currentRoute.name)
       this.currentTab = this.$router.currentRoute.name
       this.$router.afterEach((to, from) => {
         this.currentTab = to.name

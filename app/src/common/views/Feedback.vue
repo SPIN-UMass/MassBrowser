@@ -63,14 +63,14 @@
       }
     },
     methods: {
-      selectRate(num) {
+      selectRate (num) {
         if (this.rate === num) {
-          this.rate = null;
+          this.rate = null
         } else {
           this.rate = num
         }
       },
-      async submit() {
+      async submit () {
         if (!this.content) {
           this.contentValid = false
           return
@@ -80,11 +80,12 @@
         if (success) {
           this.showAlert('success', 'Feedback Sent', 'Thank you for providing the feedback')
           this.content = ''
+          this.rate = null
         } else {
           this.showAlert('danger', 'Unsuccessful', "Unfortunately we were not able to submit the feedback, please try again later")
         }
       },
-      async showAlert(type, title, message) {
+      async showAlert (type, title, message) {
         this.alert = {
           type,
           title,
