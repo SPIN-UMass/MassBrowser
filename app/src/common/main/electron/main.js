@@ -89,16 +89,16 @@ function createWindow () {
    */
   mainWindow = new BrowserWindow({
     title: config.appName,
-    height: 375,
+    height: 350,
     width: 500,
     resizable: false,
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'hidden',
+    useContentSize: true
   })
   mainWindow.runID = runID
-
   mainWindow.setTitle(config.appName);
   mainWindow.loadURL(winURL)
 

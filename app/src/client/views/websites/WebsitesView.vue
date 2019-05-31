@@ -165,6 +165,7 @@
             overflow-y: scroll;
 
             .nav-item {
+                user-select: none;
                 padding: 10px;
                 display: flex;
                 align-items: center;
