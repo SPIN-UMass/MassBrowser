@@ -17,7 +17,7 @@ export class CommonAPI {
     this.transport = transport
   }
 
-  authenticate (username, password) {
+  async authenticate (username, password) {
     return this.transport.post(
       '/auth',
       {
