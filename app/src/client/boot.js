@@ -2,6 +2,8 @@
  * Created by milad on 4/11/17.
  */
 
+import { addCertificateToFirefox, setClientVersion } from './firefox'
+
 import crypto from 'crypto'
 
 import Raven from '@utils/raven'
@@ -53,7 +55,7 @@ export default async function bootClient () {
     status = statusManager.info('Server connection established')
     await API.clientUp()
     status.clear()
-    
+
     if (await torService.requiresDownload()) {
       status = statusManager.info('Downloading Tor list')
       await torService.downloadTorList()
@@ -71,11 +73,6 @@ export default async function bootClient () {
     status = statusManager.info('Loading Telegram list')
     await telegramService.loadTelegramList()
     status.clear()
-
-
-
-
-
 
     status = statusManager.info('Connecting to relay')
     await sessionService.start()
@@ -101,6 +98,15 @@ export default async function bootClient () {
       debug('It is first boot, syncing database')
       status = statusManager.info('Syncing database')
       await syncService.syncAll()
+      status.clear()
+    }
+
+    status = statusManager.info('Checking browser availability')
+    await setClientVersion()
+    status.clear()
+    if (store.state.isFirefoxIncluded) {
+      status = statusManager.info('Installing the Cert')
+      await addCertificateToFirefox()
       status.clear()
     }
 

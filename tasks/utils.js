@@ -8,26 +8,27 @@ const YELLOW = '\x1b[33m'
 const BLUE = '\x1b[34m'
 const END = '\x1b[0m'
 
-
 const LABEL_DONE = chalk.bgGreen.white(' DONE ') + ' '
 const LABEL_ERROR = chalk.bgRed.white(' ERROR ') + ' '
 const LABEL_OK = chalk.bgBlue.white(' OKAY ') + ' '
 
 let children = []
 
-function run (command, color, name) {
+function run (command, color, name, silent = false) {
   return new Promise((resolve, reject) => {
     let child = exec(command)
 
-    child.stdout.on('data', data => {
-      console.log(format(name, data, color))
-    })
+    if (!silent) {
+      child.stdout.on('data', data => {
+        console.log(format(name, data, color))
+      })
 
-    child.stderr.on('data', data => console.error(format(name, data, color)))
+      child.stderr.on('data', data => console.error(format(name, data, color)))
+    }
     child.on('exit', code => {
       exit(code)
       if (!code) {
-        resolve()  
+        resolve()
       } else {
         reject()
       }
@@ -72,7 +73,6 @@ function greeting (title, titleSplit) {
   } else console.log(chalk.yellow.bold(`\n  ${title}`))
   console.log()
 }
-
 
 module.exports = {
   greeting,
