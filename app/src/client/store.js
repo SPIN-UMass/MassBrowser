@@ -13,6 +13,7 @@ export default {
     client: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
     browserIntegrationComplete: new RendererCachedPersistedState(false),
+    isFirefoxIncluded: new RendererCachedPersistedState(false),
     autoLaunchEnabled: new RendererCachedPersistedState(false),
     dockIconVisible: new RendererCachedPersistedState(false),
     latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null)
@@ -30,6 +31,9 @@ export default {
     },
     completeBoot(state) {
       state.bootComplete = true
+    },
+    updateInternalBrowserStatus (state) {
+      state.isFirefoxIncluded = true
     },
     completeBrowserIntegration(state) {
       state.browserIntegrationComplete = true

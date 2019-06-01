@@ -5,6 +5,7 @@ I.sentry.json
 .DS_Store
 app/dist
 app/build
+browser/
 app/dist/index.html
 app/dist/main.js
 app/dist/renderer.js

@@ -10,7 +10,6 @@ import config from '@utils/config'
 import { getDataDir } from '@utils'
 import { store } from '@utils/store'
 
-
 class WebPanelService {
   constructor () {
     this.app = connect()
@@ -28,13 +27,13 @@ class WebPanelService {
   }
 
   initializeApp(app) {
-    app.use('/check-proxy', function(req, res)  {
+    app.use('/check-proxy', function (req, res) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'text/plain')
       res.end('active')
     })
 
-    app.use('/cert', function(req, res, next)  {
+    app.use('/cert', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'application/x-x509-ca-cert')
       fs.readFile(path.join(getDataDir(), 'certs/ca.pem'))
@@ -42,10 +41,10 @@ class WebPanelService {
         console.log(f)
         res.end(f)
         next()
-      })  
+      })
     })
 
-    app.use('/settings-complete', function(req, res, next)  {
+    app.use('/settings-complete', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.end('ok')
       store.commit('completeBrowserIntegration')
@@ -63,4 +62,4 @@ class WebPanelService {
 }
 
 export const webPanelService = new WebPanelService()
-export default webPanelService 
+export default webPanelService

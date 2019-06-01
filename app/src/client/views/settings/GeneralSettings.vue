@@ -1,30 +1,35 @@
 <template lang='pug'>
-  .general-settings-container
-    settings-group(title="Application Settings")
-      div(slot="help")
-        p
-      div(slot="body")
-        .row(v-if="errorMessage")
-          .col-xs-12
-            .alert.alert-pink.err-message
-              p {{ errorMessage }}
-        .row
-          .col-xs-8
-            label Launch MassBrowser on startup
-          .col-xs-4.align-right
-            toggle-button.toggle(:labels= {
-            checked: 'Yes',
-            unchecked: 'No'
-            } :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged")
-        .row(v-if="showDockHideOption")
-          .col-xs-8
-            label Show dock icon when closed
-          .col-xs-4.align-right
-            toggle-button.toggle(:labels= {
-            checked: 'Yes',
-            unchecked: 'No'
-            } :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged")
-
+    <div class="general-settings-container">
+        <settings-group title="Application Settings">
+            <div slot="help">
+            </div>
+            <div slot="body">
+                <div class="row" v-if="errorMessage">
+                    <div class="col-xs-12">
+                        <div class="alert alert-pink err-message">
+                            <p>{{ errorMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <label>Launch MassBrowser on startup</label>
+                    </div>
+                    <div class="col-xs-4 align-right">
+                        <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged"></toggle-button>
+                    </div>
+                </div>
+                <div class="row" v-if="showDockHideOption">
+                    <div class="col-xs-8">
+                        <label>Show dock icon when closed</label>
+                    </div>
+                    <div class="col-xs-4 align-right">
+                        <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged"></toggle-button>
+                    </div>
+                </div>
+            </div>
+        </settings-group>
+    </div>
 </template>
 
 <script>
@@ -53,7 +58,7 @@
       this.autoLaunchEnabled = await autoLauncher.isEnabled()
     },
     methods: {
-      async autoLaunchChanged(e) { 
+      async autoLaunchChanged(e) {
         const isEnabled = await autoLauncher.isEnabled()
         if (e.value && !isEnabled) {
           await autoLauncher.enable()
@@ -79,23 +84,23 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@/views/styles/settings.scss';
-  
-  .general-settings-container {
-    padding: 0px 0px;
+    @import '~@/views/styles/settings.scss';
 
-    .align-right {
-      text-align: right;
-    }
+    .general-settings-container {
+        padding: 0px 0px;
 
-    .align-center {
-      text-align: center;
-    }
+        .align-right {
+            text-align: right;
+        }
 
-    .err-message {
-      font-size: 12px;
-      margin-bottom: 5px;
-      padding: 5px;
+        .align-center {
+            text-align: center;
+        }
+
+        .err-message {
+            font-size: 12px;
+            margin-bottom: 5px;
+            padding: 5px;
+        }
     }
-  }
 </style>

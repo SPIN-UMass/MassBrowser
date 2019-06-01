@@ -1,10 +1,8 @@
 process.env.NODE_ENV = 'production'
 
 const Promise = require('bluebird')
-
 const chalk = require('chalk')
 const del = require('del')
-
 const webpack = require('webpack')
 const Multispinner = require('multispinner')
 const inquirer = require('inquirer')
@@ -15,10 +13,17 @@ const { YELLOW, BLUE, LABEL_DONE, greeting, run, format } = require('./utils')
 
 const targetInfo = {
   relay: {
+    electronMain: './dist/relay/electron.main.js',
     config: require('./webpack/webpack.relay.electron'),
     del: ['app/dist/relay/*', '!.gitkeep', '!assets/']
   },
   client: {
+    electronMain: './dist/client/electron.main.js',
+    config: require('./webpack/webpack.client.electron'),
+    del: ['app/dist/client/*', 'app/dist/web/*', '!.gitkeep', '!assets/']
+  },
+  clientFirefox: {
+    electronMain: './dist/client/electron.main.js',
     config: require('./webpack/webpack.client.electron'),
     del: ['app/dist/client/*', 'app/dist/web/*', '!.gitkeep', '!assets/']
   }
@@ -50,17 +55,19 @@ async function askTargets() {
       type: 'checkbox',
       name: 'targets',
       message: 'Select targets',
-      choices: ['relay', 'client']
+      choices: [
+        {name: 'relay', value: 'relay'},
+        {name: 'client', value: 'client'},
+        {name: 'client with Firefox', value: 'clientFirefox'}]
     }
   ])
-
   let targets = answers.targets
   for (let target of targets) {
     await buildForTarget(target)
   }
 }
 
-async function askPlatforms() {
+async function askPlatforms () {
   let answers = await inquirer.prompt([
     {
       type: 'checkbox',
@@ -77,13 +84,12 @@ async function askPlatforms() {
   return answers.platforms.join('')
 }
 
-
-async function buildForTarget(target) {
+async function buildForTarget (target) {
   let config = yaml.safeLoad(await fs.readFile(`tasks/electron-builder/${target}.yml`))
-  
+
   let platforms = await askPlatforms()
   if (!platforms) {
-    console.log("No platforms selected")
+    console.log('No platforms selected')
     process.exit(0)
   }
 
@@ -91,8 +97,17 @@ async function buildForTarget(target) {
   del.sync(targetInfo[target].del)
   await pack(targetInfo[target].config)
 
+  // if (target === 'clientFirefox') {
+  //   // await fs.copy('app/assets/firefox/latest/windows/firefox.zip', 'browser/firefox.zip', { overwrite: true })
+  //   await run('rm -rf browser/*', YELLOW, 'command', true)
+  //   await run('cp app/assets/firefox/latest/windows/firefox.zip browser/firefox.zip', YELLOW, 'command', true)
+  //   await run('unzip browser/firefox.zip -d ./browser', YELLOW, 'command', true)
+  //   await run('mv browser/firefox/* browser/', YELLOW, 'command', true)
+  //   await run('rm -rf browser/firefox firefox.zip', YELLOW, 'command', true)
+  // }
+
   console.log(format(target, 'Building...', BLUE))
-  await run(`build -${platforms} --c.extraMetadata.main=./dist/${target}/electron.main.js --c.extraMetadata.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
+  await run(`build -${platforms} --c.extraMetadata.main=${targetInfo[target].electronMain} --c.extraMetadata.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
 
   console.log(format(target, 'Renaming release files...', BLUE))
   if (platforms.indexOf('m') >= 0) {
