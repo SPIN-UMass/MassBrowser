@@ -18,7 +18,7 @@ function run (command) {
   })
 }
 
-function isFirefoxVersion () {
+export async function isFirefoxVersion () {
   return fs.pathExists(path.join(process.cwd(), 'browser'))
     .then(exists => exists)
 }

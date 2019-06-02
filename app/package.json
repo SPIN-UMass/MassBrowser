@@ -1,7 +1,7 @@
 {
   "name": "MassBrowser",
-  "version": "0.0.14",
-  "description": "P2P Proxy",
+  "version": "0.0.20",
+  "description": "Massbrowser",
   "config": {
     "client": {
       "configFoldername": "client",
@@ -126,5 +126,5 @@
     "winston": "^2.3.1",
     "ws": "^3.0.0"
   },
-  "author": "ha-D <hadi@cs.umass.edu>"
+  "author": "Massbrowser Team <massbrowser@cs.umass.edu>"
 }

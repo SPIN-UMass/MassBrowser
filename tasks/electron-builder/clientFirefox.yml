@@ -1,5 +1,5 @@
 appId: "co.yaler.client"
-productName: MassBrowser
+productName: MassBrowser-FirefoxBundle
 directories:
   output: build/clientFirefox
 files:
@@ -8,8 +8,8 @@ files:
   - "package.json"
 publish:
   provider: github
-  repo: UOIS
-  owner: srxzr
+  repo: MassBrowser
+  owner: SPIN-UMass
   protocol: https
 dmg:
   contents:
