@@ -23,11 +23,14 @@ function isFirefoxVersion () {
     .then(exists => exists)
 }
 
-//not being used anymore
-// export async function setClientVersion () {
-//   let isFirefoxIncluded = await isFirefoxVersion()
-//   await store.commit('updateInternalBrowserStatus', isFirefoxIncluded)
-// }
+export async function setClientVersion () {
+  if (!store.state.browserIntegrationComplete) {
+    let isFirefoxIncluded = await isFirefoxVersion()
+    if (isFirefoxIncluded) {
+      await store.commit('updateInternalBrowserStatus')
+    }
+  }
+}
 
 export async function addCertificateToFirefox () {
   let certPath = path.join(getDataDir(), 'certs/ca.pem')
@@ -44,10 +47,6 @@ export async function addCertificateToFirefox () {
 export async function openInternalBrowser (website) {
   let firefoxPath = path.join(process.cwd(), 'browser', 'firefox')
   let profilePath = path.join(process.cwd(), 'browser', 'profile')
-  try {
-    await run(`${firefoxPath} -profile "${profilePath}" ${website}`)
-  } catch (err) {
-    console.log('failed to open MassBrowser', err)
-  }
+  await run(`${firefoxPath} -profile "${profilePath}" ${website}`)
 }
 
