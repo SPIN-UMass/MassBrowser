@@ -62,12 +62,9 @@ export class HttpTransport extends Transport {
     Object.assign(options, config)
     options.data = options.data || {}
 
-    //options.validateStatus = status => true
+    options.validateStatus = status => true
     this._setHeaders(options)
     
-    if (process.platform == 'linux'){ // FOR SOME REASON IT DOESN'T WORK IN LINUX WITHOUT THIS LINE
-      console.log('REQUESTING URL ', path)
-    }
     
     
     return  axios.request(options)
