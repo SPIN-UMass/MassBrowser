@@ -32,12 +32,9 @@ class ClientAPI extends CommonAPI {
     })
   }
 
-  clientUp () {
+  async clientUp () {
     return this.transport.post(
       CLIENT_URL + '/' + this.userID,
-      {
-        'categoie': 'TBD'
-      }
     ).then(r => r.data)
   }
 

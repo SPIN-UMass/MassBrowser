@@ -26,7 +26,7 @@ export class Transport {
     throw new errors.NotImplementedError()
   }
 
-  handleResponse (request, response) {
+  async handleResponse (request, response) {
     if (response.status >= 200 && response.status < 300) {
       return response
     } else if (response.status >= 500) {
@@ -51,7 +51,7 @@ export class HttpTransport extends Transport {
     this.authToken = authToken
   }
 
-  request(method, path, data, config) {
+  async request(method, path, data, config) {
     let options = {
       url: path,
       method: method,
@@ -60,12 +60,22 @@ export class HttpTransport extends Transport {
     }
 
     Object.assign(options, config)
-    options.validateStatus = status => true
-    this._setHeaders(options)
+    options.data = options.data || {}
 
-    return axios.request(options)
-    .catch(r => this.handleNetworkError({url: path, data: data}, r))
-    .then(r => this.handleResponse({url: path, data: data}, r),(err)=>{
+    //options.validateStatus = status => true
+    this._setHeaders(options)
+    
+    if (process.platform == 'linux'){ // FOR SOME REASON IT DOESN'T WORK IN LINUX WITHOUT THIS LINE
+      console.log('REQUESTING URL ', path)
+    }
+    
+    
+    return  axios.request(options)
+    .catch((r) => {
+      return this.handleNetworkError({url: path, data: data}, r)
+    })
+    .then((r) => {
+      return this.handleResponse({url: path, data: data}, r)},(err)=>{
       debug(" cannot load address"+path,err)
     })
   }
@@ -74,6 +84,8 @@ export class HttpTransport extends Transport {
     if (this.authToken) {
       config.headers = config.headers || {}
       config.headers['Authorization'] = 'Token ' + this.authToken
+      config.headers['Content-Type'] =  'application/json'
+
     }
   }
 

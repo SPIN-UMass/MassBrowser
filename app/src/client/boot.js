@@ -53,7 +53,7 @@ export default async function bootClient () {
     status.clear()
 
     status = statusManager.info('Server connection established')
-    await API.clientUp()
+    let clientup = await API.clientUp()
     status.clear()
 
     if (await torService.requiresDownload()) {
