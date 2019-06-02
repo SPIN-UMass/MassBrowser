@@ -20,10 +20,12 @@ var screen = blessed.screen({
 })
 
 screen.title = 'MassBrowser Dev'
+process.env.BUNDLE_VERSION = 0
+console.log('has been set')
 
 let rendererHotDevProcess
 var rendererHotDevPanel = createPanel(
-  'Renderer Process - Webpack HotDev', 
+  'Renderer Process - Webpack HotDev',
   {
     top: 0,
     left: "50%",
@@ -35,14 +37,14 @@ var rendererHotDevPanel = createPanel(
       label: 'Restart',
       callback: () => {
         rendererHotDevProcess.restart()
-      }  
+      }
     }
   ]
 )
 
 let mainWatchProcess
 var mainWatchPanel = createPanel(
-  'Main Process - Webpack Watch', 
+  'Main Process - Webpack Watch',
   {
     top: "50%",
     left: "50%",
@@ -54,44 +56,44 @@ var mainWatchPanel = createPanel(
       label: 'Restart',
       callback: () => {
         mainWatchProcess.restart()
-      }  
+      }
     }
   ]
 )
 
 let mainProcess
 var mainProcessPanel = createPanel(
-  'Main Process', 
+  'Main Process',
   {
     top: 0,
     left: 0,
     width: '50%',
     height: '100%',
-  }, 
+  },
   [
     {
       label: 'Restart',
       callback: () => {
         mainProcess.restart()
-      }  
+      }
     }
   ]
 )
 
 rendererHotDevProcess = run(
-  rendererHotDevPanel, 
+  rendererHotDevPanel,
   `webpack-dev-server --hot --colors --config tasks/webpack/webpack.${TARGET}.electron.renderer.js --port ${PORT} --content-base app/dist/${TARGET}`,
   data => data.indexOf('Compiled successfully') >= 0
 )
 mainWatchProcess = run(
-  mainWatchPanel, 
+  mainWatchPanel,
   `webpack --watch --colors --config tasks/webpack/webpack.${TARGET}.electron.main.js`
 )
 
 Promise.all([rendererHotDevProcess.promise, mainWatchProcess.promise])
 .then(() =>  {
   mainProcess = run(
-    mainProcessPanel, 
+    mainProcessPanel,
     `cross-env NODE_ENV=development DEV_PORT=${PORT} electron app/dist/${TARGET}/electron.main.js`,
     null,
     'SIGKILL'
@@ -199,7 +201,7 @@ function createPanel(label, layout, controls) {
     content: '',
     bg: 'blue'
   })
-  
+
   let lastUpdate = Math.floor(new Date().getTime() / 1000)
 
   function updateTime() {
@@ -303,15 +305,15 @@ function run (panel, command, shouldResolve, killSignal) {
       return startProcess()
     }
   }
-  
+
 }
 
 function cleanup () {
   children.forEach(child => {
-    try{ 
+    try{
       treeKill(child.pid, child.killSignal)
     } catch (e) {
-      console.error(e)  
+      console.error(e)
     }
   })
 }

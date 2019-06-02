@@ -11,7 +11,7 @@
             </p>
         </div>
         <div class="m-client-open-browser" v-on:click="openFirefox">
-            <div v-if="this.$store.state.isFirefoxIncluded">
+            <div v-if="this.isFirefoxVersion === '1'">
                 Open MassBrowser
             </div>
             <div v-else >
@@ -31,6 +31,7 @@
     store,
     data () {
       return {
+        isFirefoxVersion: process.env.BUNDLE_VERSION,
         showWebsitesAlert: localStorage.getItem('homeHasBeenRunBefore') !== 'true'
       }
     },
@@ -39,8 +40,7 @@
     },
     methods: {
       async openFirefox () {
-        let isFirefoxIncluded = this.$store.state.isFirefoxIncluded
-        if (isFirefoxIncluded) {
+        if (this.isFirefoxVersion === '1') {
           await openInternalBrowser('http://google.com')
         } else {
           await opn('http://google.com', {app: 'firefox'})

@@ -97,14 +97,16 @@ async function buildForTarget (target) {
   del.sync(targetInfo[target].del)
   await pack(targetInfo[target].config)
 
-  // if (target === 'clientFirefox') {
+  process.env['BUNDLE_VERSION'] = 0
+  if (target === 'clientFirefox') {
+    process.env['BUNDLE_VERSION'] = 1
   //   // await fs.copy('app/assets/firefox/latest/windows/firefox.zip', 'browser/firefox.zip', { overwrite: true })
   //   await run('rm -rf browser/*', YELLOW, 'command', true)
   //   await run('cp app/assets/firefox/latest/windows/firefox.zip browser/firefox.zip', YELLOW, 'command', true)
   //   await run('unzip browser/firefox.zip -d ./browser', YELLOW, 'command', true)
   //   await run('mv browser/firefox/* browser/', YELLOW, 'command', true)
   //   await run('rm -rf browser/firefox firefox.zip', YELLOW, 'command', true)
-  // }
+  }
 
   console.log(format(target, 'Building...', BLUE))
   await run(`build -${platforms} --c.extraMetadata.main=${targetInfo[target].electronMain} --c.extraMetadata.name=${config.productName} --config='./tasks/electron-builder/${target}.yml'`, YELLOW, `${target}`)
