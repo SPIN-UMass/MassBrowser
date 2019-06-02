@@ -72,14 +72,14 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-end;
         user-select: none;
         cursor: default;
 
         h1 {
             margin: 0;
             padding: 5px 10px;
-            align-self: flex-end;
+
             font-size: 20px;
             color: #94132a;
             font-weight: bold;
