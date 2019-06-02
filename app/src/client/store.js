@@ -14,7 +14,7 @@ export default {
     registrationComplete: new RendererCachedPersistedState(false),
     browserIntegrationComplete: new RendererCachedPersistedState(false),
     isFirefoxIncluded: new RendererCachedPersistedState(false),
-    autoLaunchEnabled: new RendererCachedPersistedState(false),
+    autoLaunchEnabled: new RendererCachedPersistedState(true),
     dockIconVisible: new RendererCachedPersistedState(false),
     latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null)
   },
