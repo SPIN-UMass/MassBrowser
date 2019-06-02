@@ -24,11 +24,9 @@ function isFirefoxVersion () {
 }
 
 export async function setClientVersion () {
-  if (!store.state.browserIntegrationComplete) {
-    let isFirefoxIncluded = await isFirefoxVersion()
-    if (isFirefoxIncluded) {
-      await store.commit('updateInternalBrowserStatus')
-    }
+  let isFirefoxIncluded = await isFirefoxVersion()
+  if (isFirefoxIncluded) {
+    await store.commit('updateInternalBrowserStatus')
   }
 }
 
