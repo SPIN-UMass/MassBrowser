@@ -14,7 +14,7 @@
     "client:control": "NODE_ENV=development node ./app/dist/client/control.js",
     "docker": "node ./tasks/docker_build.js"
   },
-  "author": "Hadi Zolfaghari <hadi@cs.umass.edu>",
+  "author": "Massbrowser Team <massbrowser@cs.umass.edu>",
   "license": "MIT",
   "devDependencies": {
     "babel-core": "^6.8.0",

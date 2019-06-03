@@ -11,12 +11,12 @@ let windowClosedCallback
 
 const runID = Math.random().toString(36).substring(7)
 
-export function initializeMainProcess(onWindowCreated, onWindowClosed) {
+export function initializeMainProcess(onWindowCreated, onWindowClosed,additionalMenu = null) {
   windowCreatedCallback = onWindowCreated
   windowClosedCallback = onWindowClosed
 
   app.on('ready', () => {
-    initializeTray()
+    initializeTray(additionalMenu)
     createWindow()
   })
 
@@ -33,10 +33,11 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed) {
   })
 }
 
-function initializeTray() {
+function initializeTray(additionalMenu) {
   var image = nativeImage.createFromDataURL(require(`@assets/icons/${config.role}/tray.png`))
   tray = new Tray(image)
-  const contextMenu = Menu.buildFromTemplate([
+
+  var menu = [
     {
       label: `Open ${config.appName}`,
       click() {
@@ -46,14 +47,20 @@ function initializeTray() {
           mainWindow.focus()
         }
       }
-    },
-    {
+    }
+  ]
+  
+  if (additionalMenu ){
+    menu.push(additionalMenu)
+    }
+
+  menu.push(    {
       label: 'Exit',
       click() {
         app.quit()
       }
-    }
-  ])
+    })
+  const contextMenu = Menu.buildFromTemplate(menu)
 
   tray.setContextMenu(contextMenu)
 
