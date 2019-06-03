@@ -104,7 +104,8 @@ export default async function bootClient () {
     status = statusManager.info('Checking browser availability')
     await setClientVersion()
     status.clear()
-    if (store.state.isFirefoxIncluded) {
+
+    if (config.isFirefoxVersion) {
       status = statusManager.info('Installing the Cert')
       await addCertificateToFirefox()
       status.clear()

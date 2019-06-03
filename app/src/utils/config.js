@@ -40,6 +40,7 @@ function initializeConfig(options) {
   let role = (options || {}).role
   let mode = (options || {}).mode
   let isDebug = (options || {}).debug
+  let isFirefox = (options || {}).firefox
 
   if (role !== 'client' && role !== 'relay') {
     throw new Error("Invalid configuration role")
@@ -108,6 +109,10 @@ function initializeConfig(options) {
   config.isElectronProcess = config.applicationInterface === 'electron'
   
   config.version = packageJSON.version
+
+
+  config.isFirefoxVersion = config.isClient && isFirefox ==='YES'
+
   // config.appName = packageJSON.name // Now included directly in config
 
   config.isDebug = isDebug
@@ -129,7 +134,8 @@ const config = initializeConfig({
   role: process.env.ROLE,
   applicationInterface: process.env.APP_INTERFACE,
   electronProcess: process.env.ELECTRON_PROCESS,
-  debug: process.env.DEBUG
+  debug: process.env.DEBUG,
+  firefox : process.env.IS_FIREFOX
 })
 
 export default config

@@ -24,7 +24,7 @@ const targetInfo = {
   },
   clientFirefox: {
     electronMain: './dist/client/electron.main.js',
-    config: require('./webpack/webpack.client.electron'),
+    config: require('./webpack/webpack.client.electronFirefox'),
     del: ['app/dist/client/*', 'app/dist/web/*', '!.gitkeep', '!assets/']
   }
 }

@@ -4,6 +4,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import { store } from '@utils/store'
 import { getDataDir } from '@utils'
+import config from '@utils/config'
 
 function run (command) {
   return new Promise((resolve, reject) => {
@@ -19,13 +20,13 @@ function run (command) {
 }
 
 export async function isFirefoxVersion () {
-  return fs.pathExists(path.join(process.cwd(), 'browser'))
-    .then(exists => exists)
+  return config.isFirefoxVersion
 }
 
 export async function setClientVersion () {
   if (!store.state.browserIntegrationComplete) {
     let isFirefoxIncluded = await isFirefoxVersion()
+    console.log(' I AM HEREHREHRE ',isFirefoxIncluded)
     if (isFirefoxIncluded) {
       await store.commit('updateInternalBrowserStatus')
     }
