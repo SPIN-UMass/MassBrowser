@@ -2,7 +2,7 @@
  * Created by milad on 4/11/17.
  */
 
-import { addCertificateToFirefox } from './firefox'
+import { addCertificateToFirefox, setClientVersion } from './firefox'
 
 import crypto from 'crypto'
 
@@ -101,7 +101,10 @@ export default async function bootClient () {
       status.clear()
     }
 
-    if (process.env.BUNDLE_VERSION === '1' && !store.state.browserIntegrationComplete) {
+    status = statusManager.info('Checking browser availability')
+    await setClientVersion()
+    status.clear()
+    if (store.state.isFirefoxIncluded && !store.state.browserIntegrationComplete) {
       status = statusManager.info('Installing the Cert')
       await addCertificateToFirefox()
       status.clear()

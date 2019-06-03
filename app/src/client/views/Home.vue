@@ -1,7 +1,7 @@
 <template>
     <div id="m-home">
         <div class="m-title">
-            <strong>MassClient</strong> is currently running. {{this.isFirefoxIncluded}}
+            <strong>MassClient</strong> is currently running.
         </div>
         <div id="m-client-help-box">
             <p>
@@ -11,7 +11,7 @@
             </p>
         </div>
         <div class="m-client-open-browser" v-on:click="openFirefox">
-            <div v-if="this.isFirefoxIncluded">
+            <div v-if="this.$store.state.isFirefoxIncluded">
                 Open MassBrowser
             </div>
             <div v-else >
@@ -31,7 +31,6 @@
     store,
     data () {
       return {
-        isFirefoxIncluded: process.env.BUNDLE_VERSION === '1',
         showWebsitesAlert: localStorage.getItem('homeHasBeenRunBefore') !== 'true'
       }
     },
@@ -40,7 +39,8 @@
     },
     methods: {
       async openFirefox () {
-        if (this.isFirefoxIncluded) {
+        let isFirefoxIncluded = this.$store.state.isFirefoxIncluded
+        if (isFirefoxIncluded) {
           await openInternalBrowser('http://google.com')
         } else {
           await opn('http://google.com', {app: 'firefox'})

@@ -58,6 +58,7 @@
                                 img(width='300' :src="cert.image")
                         div.text-center.mar-all
                             button.cert-btn.btn.btn-success(v-on:click="installCert") Install Certificate
+                            button.proxy-btn.btn.btn-primary(v-if="cert.success!==null" v-on:click="checkCert") Check certificate
 
                     div(v-if="cert.success").text-center.pad-all
                         i.fa.fa-check-circle.fa-4x.text-success.mar-all

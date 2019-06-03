@@ -8,7 +8,7 @@ import { syncService, registrationService, websiteSupportService } from '@/servi
 import KVStore from '@utils/kvstore'
 import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
-import {openInternalBrowser} from '@/firefox'
+import {isFirefoxVersion,openInternalBrowser} from '@/firefox'
 import models from '@/models' // required for bootstrapping remote models
 
 remote.registerService('sync', syncService)
@@ -29,14 +29,14 @@ remote.registerService('privacy-policy', privacyPolicyService)
 
 let currentWindow = null
 
-function onWindowCreated (window) {
-  debug('Window created')
+function onWindowCreated(window) {
+  debug("Window created")
   remote.setWebContents(window.webContents)
   currentWindow = window
   dockHider.windowOpened()
 }
 
-function onWindowClosed () {
+function onWindowClosed() {
   currentWindow = null
   remote.setWebContents(null)
   dockHider.windowClosed()
@@ -45,19 +45,22 @@ function onWindowClosed () {
 process.on('uncaughtException', (err) => {
   console.error(err)
 })
+isFirefoxVersion().then((isBundle)=>{
+if (isBundle){
+  initializeMainProcess(onWindowCreated, onWindowClosed,{
+    label: 'Open Browser',
+    click() {
+      openInternalBrowser('http://massbrowser.cs.umass.edu/')
+    }
+  })
 
-try {
-  if (process.env.BUNDLE_VERSION === '1') {
-    initializeMainProcess(onWindowCreated, onWindowClosed, {
-      label: 'Open Browser',
-      click () {
-        openInternalBrowser('http://massbrowser.cs.umass.edu/')
-      }
-    })
-  } else {
-    initializeMainProcess(onWindowCreated, onWindowClosed)
-  }
-} catch (err) {
-  debug(err)
+}
+else {
   initializeMainProcess(onWindowCreated, onWindowClosed)
 }
+}).catch((err)=>{
+  debug(err)
+  initializeMainProcess(onWindowCreated, onWindowClosed)
+
+})
+
