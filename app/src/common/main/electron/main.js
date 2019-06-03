@@ -49,17 +49,15 @@ function initializeTray(additionalMenu) {
       }
     }
   ]
-  
-  if (additionalMenu ){
-    menu.push(additionalMenu)
-    }
-
-  menu.push(    {
+  if (additionalMenu){
+    menu[menu.length] = additionalMenu  
+  } 
+  menu[menu.length] = {
       label: 'Exit',
       click() {
         app.quit()
       }
-    })
+    }
   const contextMenu = Menu.buildFromTemplate(menu)
 
   tray.setContextMenu(contextMenu)

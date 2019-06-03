@@ -45,22 +45,22 @@ function onWindowClosed() {
 process.on('uncaughtException', (err) => {
   console.error(err)
 })
-isFirefoxVersion().then((isBundle)=>{
-if (isBundle){
-  initializeMainProcess(onWindowCreated, onWindowClosed,{
-    label: 'Open Browser',
-    click() {
-      openInternalBrowser('http://massbrowser.cs.umass.edu/')
-    }
-  })
+  // isFirefoxVersion().then((isBundle)=>{
+  // if (isBundle){
+  //   initializeMainProcess(onWindowCreated, onWindowClosed,{
+  //     label: 'Open Browser',
+  //     click() {
+  //       openInternalBrowser('http://massbrowser.cs.umass.edu/')
+  //     }
+  //   })
 
-}
-else {
+  // }
+  // else {
+  //   initializeMainProcess(onWindowCreated, onWindowClosed)
+  // }
+  // }).catch((err)=>{
+  //   debug(err)
+  //   initializeMainProcess(onWindowCreated, onWindowClosed)
+  // })
   initializeMainProcess(onWindowCreated, onWindowClosed)
-}
-}).catch((err)=>{
-  debug(err)
-  initializeMainProcess(onWindowCreated, onWindowClosed)
-
-})
 

@@ -111,8 +111,10 @@ export default async function bootClient () {
     }
 
     status = statusManager.info('Finalizing')
-    if (config.isElectronProcess)
+    if (config.isElectronProcess) {
       autoLauncher.initialize()
+    }
+
     status.clear()
 
     await store.commit('completeBoot')
