@@ -36,7 +36,7 @@ yarn run dev:client
 
 ## Helpful testing website
 
-MassBrowser uses different censorship circumvention strategy based on the domain user would like to access. Therefore, it would be helpful when you are trying to test a specific circumnvetion strategy. To do the testing, first run the MassBrowser and then try to open a website below. The ouput and degbugging information can be seen from the console.
+MassBrowser uses different censorship circumvention strategies based on the websites user would like to access. To do the testing, first run the MassBrowser and then try to open a website via curl or Firefox. The output and degbugging information can be seen from the console.
 
 ### Vanilla Proxy
 
@@ -83,7 +83,7 @@ The output from MassBrowser should be similar to:
 
 `www.youtube.com` is accessible with the help of Mass Buddies, which are also known as yaler proxies.
 
-Apart from using MassBrowser to test it, we can also use curl from commandline:
+Apart from using MassBrowser to test it, we can also use curl from command line:
 
 ```sh
 curl -x socks5h://localhost:7080 https://www.youtube.com
