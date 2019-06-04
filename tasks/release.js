@@ -106,7 +106,7 @@ async function releaseGithub() {
 }
 
 async function checkTargetBuilds(config) {
-  const targets = ['client', 'relay']
+  const targets = ['client', 'relay','clientFirefox']
   const version = config.version
 
   let promises = []
@@ -116,11 +116,11 @@ async function checkTargetBuilds(config) {
     let target = targets[i]
     let productName = (await readBuildConfig(target)).productName
 
-    if (!(await fs.pathExists(`./build/${target}/${target}-mac.yml`))) {
+    if (!(await fs.pathExists(`./build/${target}/${target}.yml`))) {
       continue
     }
 
-    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${target}-mac.yml`))
+    let releaseInfo = yaml.safeLoad(await fs.readFile(`./build/${target}/${target}.yml`))
     if (releaseInfo.version === version) {
       availableTargets.push(target)
     }
@@ -146,15 +146,22 @@ async function checkTargetBuilds(config) {
 async function getFileLists(config, targets) {
   const version = config.version
   let files = []
+  var l = []
   for (let i = 0; i < targets.length; i++) {
     let productName = (await readBuildConfig(targets[i])).productName
-    files = files.concat([
+
+    l= [
       `${targets[i]}.yml`,
-      `${targets[i]}-mac.yml`,
+      
       `${productName}-${version}.dmg`,
       `${productName}-${version}-mac.zip`,
       `${productName} Setup ${version}.exe`,
-    ].map(file => `build/${targets[i]}/${file}`))
+    ]
+    //MILAD : SHOULD BE CHANGED  
+    if (targets[i]!=='clientFirefox'){
+      l.push(`${targets[i]}-mac.yml`)
+    }
+    files = files.concat(l.map(file => `build/${targets[i]}/${file}`))
   }
   return files
 }
@@ -189,15 +196,16 @@ async function doReleaseGithub(config, filelist) {
       })
 
   const errorlist = [];
-
   const uploads = filelist.map(file => {
-      return publisher.upload(file)
+    console.log('upload this',file,publisher.upload.toString())
+    task ={}
+    task.file = file
+      return publisher.upload(task)
           .catch((err) => {
               errorlist.push(err.response ? `Failed to upload ${file}, http status code ${err.response.statusCode}` : err);
               return Promise.resolve();
           });
   });
-
   return Promise.all(uploads)
   .then(() => errorlist.forEach((err) => console.error(err)));
 }

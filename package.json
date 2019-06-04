@@ -4,6 +4,7 @@
     "build": "node --no-deprecation tasks/build.js",
     "build:clean": "cross-env BUILD_TARGET=clean node tasks/build.js",
     "dev:client": "node tasks/devRunner.js client",
+    "dev:clientfirefox": "node tasks/devRunner.js clientFirefox",
     "dev:relay": "node tasks/devRunner.js relay",
     "release": "node tasks/release.js",
     "watch": "webpack --progress --watch --config tasks/webpack/webpack.console.js",
@@ -89,6 +90,8 @@
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
+    "electron-builder-http": "^19.27.5",
+    "electron-publish": "^20.42.0",
     "node-abi": "2.5.0"
   }
 }
