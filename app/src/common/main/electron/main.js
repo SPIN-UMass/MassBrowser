@@ -39,7 +39,7 @@ function initializeTray(additionalMenu) {
 
   var menu = [
     {
-      label: `Open ${config.appName}`,
+      label: `Open Settings`,
       click() {
         if (mainWindow === null) {
           createWindow()
