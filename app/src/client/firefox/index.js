@@ -24,13 +24,10 @@ export async function isFirefoxVersion () {
 }
 
 export async function setClientVersion () {
-  if (!store.state.browserIntegrationComplete) {
     let isFirefoxIncluded = await isFirefoxVersion()
-    console.log(' I AM HEREHREHRE ',isFirefoxIncluded)
     if (isFirefoxIncluded) {
       await store.commit('updateInternalBrowserStatus')
     }
-  }
 }
 
 export async function addCertificateToFirefox () {
