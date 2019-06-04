@@ -18,10 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Several Security patches 
 - Session manager issues
-- UI scrollign 
+- UI scrolling
 - Code typos
 - Faster domain finder
-- Removing useless codes 
+- cleaning up codes 
 
 
 
