@@ -1,54 +1,41 @@
-import KVStore from '~/utils/kvstore'
-import * as util from 'util'
 import { EventEmitter } from 'events'
-
-import WebSocket from 'ws'
-import * as errors from '~/utils/errors'
-import { error, debug } from '~/utils/log'
-import config from '@utils/config'
+import { debug } from '~/utils/log'
 import * as net from 'net'
 
-
-export class NATConnectivityConnection extends EventEmitter {
-  constructor (ip, port) {
+class TCPNATConnection extends EventEmitter {
+  constructor (echoServerAddress, echoServerPort) {
     super()
-    this.ip = ip
-    this.port = port
+    this.echoServerAddress = echoServerAddress
+    this.echoServerPort = echoServerPort
 
-    this._socket = undefined
     this.isConnected = false
+    this._socket = undefined
   }
 
   connect () {
-    let promiseResolved = false
-
     return new Promise((resolve, reject) => {
-      let socket = this._socket = net.createConnection({
-        port: this.port,
-        host: this.ip,
+      let promiseResolved = false
+      this._socket = net.createConnection({
+        port: this.echoServerPort,
+        host: this.echoServerAddress,
         localPort: 10000 + Math.floor(Math.random() * (65535 - 10000)),
         exclusive: false
       })
-      
-      socket.on('connect', () => {
+
+      this._socket.on('connect', () => {
         debug('Connected to Echo Server')
-        socket.write('TEST')
-        socket.setKeepAlive(true)
+        this._socket.write('TEST')
+        this._socket.setKeepAlive(true)
         this.isConnected = true
       })
 
-
-      socket.on('data', (data) => {
+      this._socket.on('data', (data) => {
         data = data.toString()
-        let ip = data.split(':')[0]
-        let port = data.split(':')[1]
-
-        // this.respHandler([this.socket.localAddress, this.socket.localPort, ip, port])
-        this.emit('net-update', {
-          localIP: socket.localAddress,
-          localPort: socket.localPort,
-          remoteIP: ip,
-          remotePort: port
+        this.emit('tcp-net-update', {
+          localAddress: this._socket.localAddress,
+          localTCPPort: this._socket.localPort,
+          remoteAddress: data.split(':')[0],
+          remoteTCPPort: Number(data.split(':')[1])
         })
 
         if (!promiseResolved) {
@@ -57,20 +44,20 @@ export class NATConnectivityConnection extends EventEmitter {
         }
       })
 
-      socket.on('end', () => {
+      this._socket.on('end', () => {
         debug('Connectivity Server Ended')
         this.isConnected = false
         this._socket = null
       })
 
-      socket.on('close', (had_error) => {
+      this._socket.on('close', (hadError) => {
         debug('Connectivity Server Ended')
         this.isConnected = false
         this._socket = null
-        this.emit('close', had_error)
+        this.emit('close', hadError)
       })
 
-      socket.on('error', (e) => {
+      this._socket.on('error', (e) => {
         debug('Connectivity Server Error', e)
         if (e.code === 'EADDRINUSE') {
           return this.connect()
@@ -86,19 +73,18 @@ export class NATConnectivityConnection extends EventEmitter {
     })
   }
 
-  async reconnect () {
+  reconnect () {
     if (this._socket) {
       this._socket.end()
       this._socket = null
       this.isConnected = false
     }
-
     return this.connect()
   }
 
-  async keepAlive () {
+  keepAlive () {
     this._socket.write('OK')
   }
 }
 
-export default NATConnectivityConnection
+export default TCPNATConnection

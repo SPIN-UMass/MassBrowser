@@ -25,7 +25,7 @@
   export default {
     store,
     computed: mapState({
-      reachable: 'isRelayReachable',
+      reachable: 'isTCPRelayReachable',
       connected: 'isServerConnected',
     }),
   }
@@ -56,7 +56,7 @@
           .off {
             color: #f75d3f;
           }
-          
+
           .status-led {
             vertical-align: middle;
             display: inline-block;

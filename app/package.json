@@ -4,6 +4,10 @@
   "description": "MassBrowser",
   "config": {
     "client": {
+      "echoServer": {
+        "host": "dev.yaler.co",
+        "port": 8823
+      },
       "configFoldername": "client",
       "appName": "MassBrowser",
       "socksPort": 7080,
@@ -34,6 +38,7 @@
       "appName": "MassBuddy",
       "natEnabled": false,
       "port": 8040,
+      "UDPPort": 8040,
       "domainfrontable": false,
       "domainfrontPort": 8083,
       "keepAliveInterval": 30,

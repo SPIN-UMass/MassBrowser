@@ -1,22 +1,22 @@
-var net = require('net'),
-  socks = require('./socks.js')
+const net = require('net')
+const socks = require('./socks.js')
 
 import { connectionManager } from './connectionManager'
 import { cacheManager } from '@/cachebrowser'
 import { policyManager, connectionStats } from '@/services'
-
-import { debug, info, warn, error } from '@utils/log'
+import { debug, warn, error } from '@utils/log'
 import * as errors from '@utils/errors'
 import config from '@utils/config'
 import { torService, telegramService } from '@common/services'
 
-
 export function startClientSocks (mhost, mport) {
-  var HOST = mhost,
-    PORT = mport
+  var HOST = mhost
+  var PORT = mport
+
   if (typeof mhost === 'undefined') {
     HOST = '127.0.0.1'
   }
+
   if (typeof mport === 'undefined') {
     PORT = '7080'
   }
@@ -33,14 +33,10 @@ export function startClientSocks (mhost, mport) {
       return sendToNoHostHandler(socket, address, port, proxyReady)
     }
 
-    // Check if the request is to the Web Panel by checking domain
-    // name or IP:port
-    if (address === config.web.domain ||
-        ((address === '127.0.0.1' || address === 'localhost') && port == config.web.port)) {
+    if (address === config.web.domain || ((address === '127.0.0.1' || address === 'localhost') && port === config.web.port)) {
       return sendToWebPanel(socket, address, port, proxyReady)
     }
 
-    //
     policyManager.getDomainPolicy(address, port)
     .then((proxyType) => {
       debug(`New socks connection to ${address}:${port} using policy '${proxyType}'`)
@@ -117,27 +113,22 @@ export function startClientSocks (mhost, mport) {
   })
 }
 
-// yalerProxy is the connection to Mass buddies. The name origins from
-// the reverse of relay :)
-function yalerProxy(socket, address, port, proxyReady) {
+function yalerProxy (socket, address, port, proxyReady) {
   return connectionManager.newClientConnection(socket, address, port, proxyReady)
 }
 
-// cachebrowse does not need the help of Mass buddies
-function cachebrowse(socket, address, port, proxyReady) {
+function cachebrowse (socket, address, port, proxyReady) {
   return cacheManager.newCacheConnection(socket, address, port, proxyReady)
-  .catch(err => {
-    if (err instanceof errors.NotCacheBrowsableError) {
-      warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
-      return yalerProxy(socket, address, port, proxyReady)
-    } else {
-      throw err
-    }
-  })
+    .catch(err => {
+      if (err instanceof errors.NotCacheBrowsableError) {
+        warn(`Attempted to cachebrowse ${address}:${port} but it is not cachebrowsable, falling back to relay proxy`)
+        return yalerProxy(socket, address, port, proxyReady)
+      } else {
+        throw err
+      }
+    })
 }
 
-// regularProxy is actually a direct connection attempt to the desired
-// dst. It is called a proxy because it is a local proxy.
 function regularProxy (socket, address, port, proxyReady) {
   const proxy = net.createConnection({port: port, host: address}, proxyReady)
   let localAddress, localPort
@@ -147,6 +138,7 @@ function regularProxy (socket, address, port, proxyReady) {
   proxy.on('connect', () => {
     localPort = proxy.localPort
   })
+
   proxy.on('data', (d) => {
     try {
       if (!socket.write(d)) {
@@ -162,35 +154,30 @@ function regularProxy (socket, address, port, proxyReady) {
     } catch (err) {
     }
   })
+
   socket.on('data', function (d) {
-    // If the application tries to send data before the proxy is ready, then that is it's own problem.
     try {
-      // console.log('sending ' + d.length + ' bytes to proxy')
       if (!proxy.write(d)) {
-        // when failed to write data received by the socket to the
-        // proxy, we need to throttle back the traffic from socket for
-        // now.
         socket.pause()
-        // listen on 'drain' event to resume socket
         proxy.on('drain', function () { socket.resume() })
-        // resume socket later
         setTimeout(function () { socket.resume() }, 100)
       }
     } catch (err) {
+      // TODO handle err
     }
   })
 
-  // listen to 'error' for further debugging
   proxy.on('error', function (err) {
-    // console.log('Ignore proxy error');
+    error(`ignore: ${err}`)
   })
+
   socket.on('error', (err) => {
-
+    error(`ignore: ${err}`)
   })
 
-  proxy.on('close', function (had_error) {
+  proxy.on('close', function (hadError) {
     try {
-      if (had_error) {
+      if (hadError) {
         error(`socks connection close unexpectedly ${address} ${port}`)
       }
       socket.close()
@@ -199,17 +186,16 @@ function regularProxy (socket, address, port, proxyReady) {
   })
 }
 
-
-function sendToWebPanel(socket, address, port, proxyReady) {
+function sendToWebPanel (socket, address, port, proxyReady) {
   if (port === 443) {
     debug(`Forwarding webpanel cachebrowser request ${address}:${port}`)
     return cachebrowse(socket, 'yaler.co', port, proxyReady)
   } else {
-    debug("Forwarding request to webpanel")
+    debug('Forwarding request to webpanel')
     return regularProxy(socket, '127.0.0.1', config.web.port, proxyReady)
   }
 }
 
-function sendToNoHostHandler(socket, address, port, proxyReady) {
+function sendToNoHostHandler (socket, address, port, proxyReady) {
   return regularProxy(socket, '127.0.0.1', config.noHostHandlerPort, proxyReady)
 }

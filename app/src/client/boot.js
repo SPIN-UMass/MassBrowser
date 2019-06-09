@@ -1,33 +1,18 @@
-/**
- * Created by milad on 4/11/17.
- */
-
 import { addCertificateToFirefox, setClientVersion } from './firefox'
-
-import crypto from 'crypto'
-
-import Raven from '@utils/raven'
-import KVStore from '@utils/kvstore'
-
-import config from '@utils/config'
 import { debug, error } from '@utils/log'
-import { HttpTransport } from '@utils/transport'
-
-import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
-
-import API from '@/api'
-
 import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
-import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
-
+import { startClientSocks } from '@/net'
+import config from '@utils/config'
+import Raven from '@utils/raven'
+import API from '@/api'
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
   ServerError, CacheBrowserError, ApplicationBootError
 } from '@utils/errors'
-
 import { store } from '@utils/store'
+import networkManager from './net/NetworkManager'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
@@ -53,7 +38,7 @@ export default async function bootClient () {
     status.clear()
 
     status = statusManager.info('Server connection established')
-    let clientup = await API.clientUp()
+    await API.clientUp()
     status.clear()
 
     if (await torService.requiresDownload()) {
@@ -86,8 +71,12 @@ export default async function bootClient () {
     await startClientSocks('127.0.0.1', config.socksPort)
     status.clear()
 
-    status = statusManager.info('Starting Connectivity Monitor')
-    await ConnectivityConnection.startRoutine()
+    status = statusManager.info('Starting Network Manager')
+    await networkManager.start()
+    status.clear()
+
+    status = statusManager.info('Obtaining NAT information')
+    await networkManager.waitForNetworkStatus()
     status.clear()
 
     status = statusManager.info('Starting remaining services')
@@ -141,13 +130,13 @@ function handleBootError (err) {
     err.log()
     throw new ApplicationBootError('There is a problem with the server, please try again later', true)
   } else if (!(err instanceof ApplicationBootError || err instanceof InvalidInvitationCodeError)) {
-    if (err){
-    if (err.smart) {
-      err.logAndReport()
-    } else {
-      error(err)
-      Raven.captureException(err)
-    }
+    if (err) {
+      if (err.smart) {
+        err.logAndReport()
+      } else {
+        error(err)
+        Raven.captureException(err)
+      }
     }
     throw new ApplicationBootError('Failed to start Application')
   } else {

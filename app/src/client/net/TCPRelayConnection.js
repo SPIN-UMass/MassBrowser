@@ -1,27 +1,22 @@
-/**
- * Created by milad on 4/11/17.
- */
 import net from 'net'
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
-import { logger, debug, warn } from '@utils/log'
-import config from '@utils/config'
+import { debug, warn } from '@utils/log'
 import { RelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
 
-
-export class RelayConnection extends EventEmitter {
-  constructor (relayip, relayport, desc) {
+export class TCPRelayConnection extends EventEmitter {
+  constructor (relayAddress, relayPort, desc) {
     super()
 
     this.id = ''
-    this.relayip = relayip
-    this.relayport = relayport
+    this.relayip = relayAddress
+    this.relayport = relayPort
     this.desc = desc
-    this.hasSessionID=true
-    this.sessionID=''
-    this.initialBuffer =
-      this.cipher = null
+    this.hasSessionID = true
+    this.sessionID = ''
+    this.initialBuffer = null
+    this.cipher = null
     this.socket = null
   }
 
@@ -40,7 +35,6 @@ export class RelayConnection extends EventEmitter {
         // Remove connection failure callback so it isn't called
         // in case of a later error in the connection
         socket.removeListener('error', onFail)
-
         resolve(socket)
       }
 
@@ -69,7 +63,6 @@ export class RelayConnection extends EventEmitter {
 
   _initSocket (socket) {
     var desc = this.desc
-    console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
     }, () => {
@@ -83,28 +76,21 @@ export class RelayConnection extends EventEmitter {
       this.cipher.decrypt(data)
     })
 
-    socket.on('error',(err)=>{
+    socket.on('error', (err) => {
       console.log('socket error', err)
       if (!socket.writable) {
         console.log('socket is not writable')
         this.emit('close')
-
-
       }
-
     })
-
-    socket.on('end',()=>{
+    socket.on('end', () => {
       console.log('ending relay socket')
       this.emit('close')
     })
-
     return socket
   }
 
   _initRelay (socket) {
-    // console.log(this.relayip, this.relayport, 'SENDING DATA')
-
     var desc = this.desc
     var i = Math.random() * (100 - 1) + 1
     var padarr = [Buffer(desc['token'])]
@@ -112,9 +98,7 @@ export class RelayConnection extends EventEmitter {
       padarr.push(this.cipher.encryptzero())
       i -= 1
     }
-
     socket.write(Buffer.concat(padarr))
-
     return socket
   }
 
@@ -122,19 +106,15 @@ export class RelayConnection extends EventEmitter {
     this.hasSessionID = false
     this.socket = socket
 
-    const readable = (data)=>{
-        var sessionId = data.toString()
-        console.log('read session id',sessionId,sessionId.length)
-        this.hasSessionID = true
-        this.sessionID=sessionId
-
-        this.socket.removeListener('data',readable)
-
-        pendMgr.setPendingConnection(this.sessionID,this)
-
+    const readable = (data) => {
+      var sessionId = data.toString()
+      console.log('read session id', sessionId, sessionId.length)
+      this.hasSessionID = true
+      this.sessionID = sessionId
+      this.socket.removeListener('data', readable)
+      pendMgr.setPendingConnection(this.sessionID, this)
     }
-    this.socket.on('data',readable)
-
+    this.socket.on('data', readable)
   }
 
   end () {
@@ -147,14 +127,10 @@ export class RelayConnection extends EventEmitter {
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendpacket, data])
-    // console.log('writing to the relay')
     const enc = this.cipher.encrypt(b)
-    // console.log('writing to the relay enc', enc)
     this.emit('send', enc)
     this.socket.write(enc)
-    // console.log('written')
   }
-
 }
 
-export default RelayConnection
+export default TCPRelayConnection

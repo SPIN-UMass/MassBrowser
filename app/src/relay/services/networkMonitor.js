@@ -1,63 +1,98 @@
 import API from '@/api'
 import config from '@utils/config'
 import { relayManager } from '@/services'
-import { NATConnectivityConnection } from '@/net'
+import TCPNATConnection from '@common/net/TCPNATConnection'
+import UDPNATConnection from '@common/net/UDPNATConnection'
 import { store } from '@utils/store'
-import { debug } from '@utils/log'
-
+import { warn, info } from '@utils/log'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 class NetworkMonitor {
   constructor () {
-    this.localPort = -1
-    this.remotePort = -1
-    this.remoteIP = ''
-    this.localIP = ''
-
-    this.isRelayReachable = false
+    this.localTCPPort = -1
+    this.remoteTCPPort = -1
+    this.localUDPPort = -1
+    this.remoteUDPPort = -1
+    this.remoteAddress = ''
+    this.localAddress = ''
+    this.isTCPRelayReachable = false
+    this.isUDPRelayReachable = false
     this.isServerConnected = false
-
-    this.natConnection = null
+    this.TCPNATConnection = null
+    this.UDPNATConnection = null
     this.keepAliveInterval = null
+    this.isUDPNATRoutineRunning = false
   }
 
   async start () {
-    let natConnection = this.natConnection = new NATConnectivityConnection(
-      config.echoServer.host,
-      config.echoServer.port
-    )
+    await udpConnectionService.start(true)
+    this.TCPNATConnection = new TCPNATConnection(config.echoServer.host, config.echoServer.port)
+    this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
+    this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
+    await this.TCPNATConnection.connect()
 
-    natConnection.on('net-update', data => this._onNetworkUpdate(data))
-    natConnection.on('close', () => { natConnection.reconnect() })
-
-    await natConnection.connect()
+    this.UDPNATConnection = new UDPNATConnection('54.145.75.108', 8823)
+    this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
+    this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
+    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
+    udpConnectionService.on('start', () => {
+      this.UDPNATConnection.reconnect()
+    })
+    await this.UDPNATConnection.connect().then(() => {
+      this.isUDPNATRoutineRunning = true
+    })
 
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
   }
 
-  waitForNetworkStatus () {
-    return new Promise((resolve, reject) => {
-      this.natConnection.once('net-update', data => resolve(data))
+  stopUDPNATRoutine () {
+    if (this.isUDPNATRoutineRunning) {
+      this.isUDPNATRoutineRunning = false
+      this.UDPNATConnection.stop()
+    }
+  }
+
+  async startUDPNATRoutine () {
+    await this.UDPNATConnection.connect().then(() => {
+      this.isUDPNATRoutineRunning = true
     })
   }
 
+  waitForNetworkStatus () {
+    const TCPNATPromise = new Promise((resolve, reject) => {
+      this.TCPNATConnection.once('tcp-net-update', data => {
+        resolve()
+      })
+    })
+    const UDPNATPromise = new Promise((resolve, reject) => {
+      this.UDPNATConnection.once('udp-net-update', data => {
+        resolve()
+      })
+    })
+    return Promise.all([TCPNATPromise, UDPNATPromise])
+  }
+
   getPublicAddress () {
-    return {ip: this.remoteIP, port: this.remotePort}
+    return {ip: this.remoteAddress, port: this.remoteTCPPort, UDPPort: this.remoteUDPPort}
   }
 
   getPrivateAddress () {
-    return {ip: this.localIP, port: this.localPort}
+    return {ip: this.localAddress, port: this.localTCPPort, UDPPort: this.localUDPPort}
   }
 
   async _sendKeepAlive () {
-    let isRelayReachable, isServerConnected
-    
+    let isTCPRelayReachable
+    let isUDPRelayReachable
+    let isServerConnected
     try {
       let res = await API.keepAlive(relayManager.openAccess)
       isServerConnected = true
-      isRelayReachable = res.data.tcp_reachable
-    } catch(err) {
-      isRelayReachable = false
+      isTCPRelayReachable = res.data.tcp_reachable
+      isUDPRelayReachable = res.data.udp_reachable
+    } catch (err) {
+      isTCPRelayReachable = false
+      isUDPRelayReachable = false
       isServerConnected = false
     }
 
@@ -66,42 +101,57 @@ class NetworkMonitor {
       store.commit('changeServerConnected', isServerConnected)
     }
 
-    if (isRelayReachable !== this.isRelayReachable) {
-      this.isRelayReachable = isRelayReachable
-      store.commit('changeRelayReachable', isRelayReachable)
+    if (isTCPRelayReachable !== this.isTCPRelayReachable) {
+      this.isTCPRelayReachable = isTCPRelayReachable
+      store.commit('changeTCPRelayReachable', isTCPRelayReachable)
     }
 
-    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isRelayReachable}`)
+    if (isUDPRelayReachable !== this.isUDPRelayReachable) {
+      this.isUDPRelayReachable = isUDPRelayReachable
+      store.commit('changeUDPRelayReachable', isUDPRelayReachable)
+    }
 
-    if (this.natConnection.isConnected) {
-      this.natConnection.keepAlive()
+    info(`TCP Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
+    if (this.TCPNATConnection.isConnected) {
+      this.TCPNATConnection.keepAlive()
+    }
+    info(`UDP Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
+    if (this.isUDPNATRoutineRunning) {
+      this.UDPNATConnection.keepAlive()
     }
   }
 
-  _onNetworkUpdate (data) {
+  _onTCPNetworkUpdate (data) {
     let changed = false
-    
-    data.remotePort = Number(data.remotePort)
-    data.localPort = Number(data.localPort)
-
-    for (let field of ['localIP', 'localPort', 'remoteIP', 'remotePort']) {
-      changed = changed || (this[field] !== data[field])
-      this[field] = data[field]
+    if (this.localTCPPort !== data.localTCPPort || this.remoteTCPPort !== data.remoteTCPPort) {
+      changed = true
+      this.localAddress = data.localAddress
+      this.remoteAddress = data.remoteAddress
+      this.localTCPPort = data.localTCPPort
+      this.remoteTCPPort = data.remoteTCPPort
     }
-
     if (changed) {
+      warn('TCP changed')
+      console.log(data)
       relayManager.handleReconnect()
     }
   }
-  
-  // checkNatType() {
-  //   var stun = require('vs-stun')
-  //   if (this.natEnabled) {
-  //     stun.connect(config.stunServer, (err, data) => {
-  //       console.log('NAT TYPE IS', data.stun)
-  //     })
-  //   }
-  // }
+
+  _onUDPNetworkUpdate (data) {
+    let changed = false
+    if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
+      changed = true
+      this.localAddress = data.localAddress
+      this.remoteAddress = data.remoteAddress
+      this.localUDPPort = data.localUDPPort
+      this.remoteUDPPort = data.remoteUDPPort
+    }
+    if (changed) {
+      warn('UDP changed')
+      console.log(data)
+      relayManager.handleReconnect()
+    }
+  }
 }
 export const networkMonitor = new NetworkMonitor()
 export default networkMonitor

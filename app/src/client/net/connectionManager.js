@@ -1,5 +1,4 @@
 import crypto from 'crypto'
-import { RelayConnection } from './RelayConnection'
 import * as errors from '@utils/errors'
 import { debug } from '@utils/log'
 import { connectionStats } from '@/services'
@@ -7,7 +6,7 @@ import { connectionStats } from '@/services'
 class ConnectionManager {
   constructor () {
     this.relayAssigner = null
-    this.conid_IP_PORT={}
+    this.conid_IP_PORT = {}
     this.clientConnections = {}
     this.connectionMaps = {}
     this.carrylen = 0
@@ -114,7 +113,7 @@ class ConnectionManager {
   onRelayClose (relay) {
     Object.keys(this.connectionMaps).forEach((key) => {
       if (this.connectionMaps[key] === relay) {
-        console.log('closing connection')
+        // console.log('closing connection')
         this.clientConnections[key].end()
       }
     })
@@ -127,13 +126,10 @@ class ConnectionManager {
 
   newClientConnection (connection, dstip, dstport, onConnect) {
     var conid = crypto.randomBytes(2).readUInt16BE()
-
-    // debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
-
     if (!this.relayAssigner) {
       throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
     }
-    this.conid_IP_PORT[conid]= dstip
+    this.conid_IP_PORT[conid] = dstip
     this.clientConnections[conid] = connection
     this.clientConnections[conid].relayConnected = () => { onConnect() }
 
@@ -142,8 +138,7 @@ class ConnectionManager {
         .then(relay => {
           debug(`Relay [${relay.id}] assigned for connection`)
           this.connectionMaps[conid] = relay
-          var cr = String(dstip) + ':' + String(dstport)
-          // console.log('sendsize:', cr.length, cr)
+          let cr = String(dstip) + ':' + String(dstport)
           this.connectionMaps[conid].write(conid, 'N', Buffer(cr))
 
           connection.on('data', (data) => {

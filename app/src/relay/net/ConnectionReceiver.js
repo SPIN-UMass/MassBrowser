@@ -1,23 +1,17 @@
-/**
- * Created by milad on 4/12/17.
- */
 import { policyManager } from '@/services'
-const net = require('net')
-import { error, debug } from '@utils/log'
-
+import { debug } from '@utils/log'
 import { Crypto } from '@utils/crypto'
-
 import API from '@/api'
-import { Buffer } from 'buffer';
-// import { pendMgr } from './PendingConnections'
+import { Buffer } from 'buffer'
+const net = require('net')
 
 export class ConnectionReceiver {
-  constructor (socketup, socketdown, socket, authenticator) {
+  constructor (socketUp, socketDown, socket, authenticator) {
     this.authenticator = authenticator
-    this.socketup = socketup
+    this.socketUp = socketUp
     this.socket = socket
-    this.socketdown = socketdown
-    this.socketup.on('data', (data) => {
+    this.socketDown = socketDown
+    this.socketUp.on('data', (data) => {
       if (this.isAuthenticated) {
         this.crypt.decrypt(data)
       } else {
@@ -30,8 +24,8 @@ export class ConnectionReceiver {
     this.carrylen = 0
     this.carry = Buffer(0)
     this.lastcommand = ''
-    this.newconcarry=''
-    this.lastconid = ''
+    this.newconcarry = ''
+    this.lastConnectionID = ''
     this.lastsize = 0
     this.headersize = 32
     this.desciber = {}
@@ -40,11 +34,9 @@ export class ConnectionReceiver {
   }
 
   authenticate (data) {
-    // data = Buffer.concat([this.newconcarry, data]);
-    // console.log("MY DATA", data);
     if (data.length >= this.headersize) {
-      const sessiontoken = data.slice(0, this.headersize)
-      const desc = this.authenticator.authenticate(sessiontoken)
+      const sessionToken = data.slice(0, this.headersize)
+      const desc = this.authenticator.authenticate(sessionToken)
       if (desc) {
         API.clientSessionConnected(desc.client, desc.sessionId)
         this.desciber = desc
@@ -61,84 +53,80 @@ export class ConnectionReceiver {
     }
   }
 
-  write (conid, command, data) {
-    let sendpacket = Buffer(7)
-    sendpacket.writeUInt16BE(conid)
-    sendpacket.write(command, 2)
-    sendpacket.writeUInt32BE(data.length, 3)
-    if (command!=='D') {
+  write (connectionID, command, data) {
+    let sendPacket = Buffer(7)
+    sendPacket.writeUInt16BE(connectionID)
+    sendPacket.write(command, 2)
+    sendPacket.writeUInt32BE(data.length, 3)
+    if (command !== 'D') {
       debug(`Sending Down [${command}] , [${data}] , [${data.length}]`)
     }
-    const b = Buffer.concat([sendpacket, data])
-    
-    this.socketdown.write(this.crypt.encrypt(b))
-      
-    
+    const b = Buffer.concat([sendPacket, data])
+    if (this.socketDown.writable) {
+      this.socketDown.write(this.crypt.encrypt(b))
+    }
   }
 
-  newConnection (ip, port, conid) {
+  newConnection (ip, port, connectionID) {
     policyManager.getDomainPolicy(ip, port).then(() => {
       try {
         debug(`New connection to [${ip}]:[${port}]`)
-        this.connections[conid] = net.connect({host: ip, port: port}, () => {
+        this.connections[connectionID] = net.connect({host: ip, port: port}, () => {
           debug(`connected to [${ip}]`)
-          this.write(conid, 'N', Buffer(ip + ':' + String(port)))
+          this.write(connectionID, 'N', Buffer(ip + ':' + String(port)))
         })
-        this.connections[conid].on('data', (data) => {
-          this.write(conid, 'D', data)
+        this.connections[connectionID].on('data', (data) => {
+          this.write(connectionID, 'D', data)
         })
-        this.connections[conid].on('end', () => {
-          this.write(conid, 'C', Buffer(ip + ':' + String(port)))
-          delete this.connections[conid]
+        this.connections[connectionID].on('end', () => {
+          this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
+          delete this.connections[connectionID]
         })
-        this.connections[conid].on('error', () => {
+        this.connections[connectionID].on('error', () => {
           debug(`error on [${ip}]`)
-          this.write(conid, 'C', Buffer(ip + ':' + String(port)))
-          delete this.connections[conid]
+          this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
+          delete this.connections[connectionID]
         })
-      }
-      catch (err) {
-        this.write(conid, 'C', Buffer(ip + ':' + String(port)))
+      } catch (err) {
+        this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
       }
     }).catch((err) => {
-      this.write(conid, 'C', Buffer(ip + ':' + String(port)))
+      this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
       debug(err)
     })
   }
 
-  commandParser (lastconid, CMD, size, data) {
-
-    if (CMD === 'N') {
-      data=String(data)
+  commandParser (lastConnectionID, command, size, data) {
+    if (command === 'N') {
+      data = String(data)
       if (data.length === size) {
         const sp = data.split(':')
-
         const ip = sp[0]
         const port = sp[1]
         this.newconcarry = ''
-        this.newConnection(ip, port, lastconid)
+        this.newConnection(ip, port, lastConnectionID)
       } else {
         this.newconcarry += data
         if (this.newconcarry.length === size) {
           const sp = this.newconcarry.split(':')
-          this.newconcarry=''
+          this.newconcarry = ''
           const ip = sp[0]
           const port = sp[1]
-          this.newConnection(ip, port, lastconid)
+          this.newConnection(ip, port, lastConnectionID)
         }
       }
-    } else if (CMD === 'D') {
-      if (lastconid in this.connections) {
-        this.connections[lastconid].write(data)
+    } else if (command === 'D') {
+      if (lastConnectionID in this.connections) {
+        this.connections[lastConnectionID].write(data)
       }
-    } else if (CMD === 'C') {
-      if (lastconid in this.connections) {
-        this.connections[lastconid].end()
+    } else if (command === 'C') {
+      if (lastConnectionID in this.connections) {
+        this.connections[lastConnectionID].end()
       }
-    } else if (CMD === 'K') {
+    } else if (command === 'K') {
     } else {
-      if (lastconid in this.connections) {
-        this.connections[lastconid].end()
+      if (lastConnectionID in this.connections) {
+        this.connections[lastConnectionID].end()
       }
     }
   }
@@ -147,7 +135,6 @@ export class ConnectionReceiver {
     if (this.isAuthenticated) {
       API.clientSessionDisconnected(this.desciber.client, this.desciber.sessionId)
     }
-
     Object.keys(this.connections).forEach((key) => {
       this.connections[key].end()
     })
@@ -157,34 +144,32 @@ export class ConnectionReceiver {
     while (data) {
       if (this.carrylen > 0) {
         if (data.length <= this.carrylen) {
-          this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data)
+          this.commandParser(this.lastConnectionID, this.lastcommand, this.lastsize, data)
           this.carrylen -= data.length
           break
         } else {
-          this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(0, this.carrylen))
-
+          this.commandParser(this.lastConnectionID, this.lastcommand, this.lastsize, data.slice(0, this.carrylen))
           data = data.slice(this.carrylen)
-
           this.carrylen = 0
         }
       } else {
         if (this.carry.length > 0) {
-          data = Buffer.concat([this.carry , data])
+          data = Buffer.concat([this.carry, data])
           this.carry = Buffer(0)
         }
         if (data.length < 7) {
           this.carry = data
         } else {
-          this.lastconid = data.readUInt16BE(0)
+          this.lastConnectionID = data.readUInt16BE(0)
           this.lastcommand = data.toString('ascii', 2, 3)
           this.carrylen = data.readUInt32BE(3)
           this.lastsize = this.carrylen
           if ((data.length - 7) <= this.carrylen) {
-            this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(7))
+            this.commandParser(this.lastConnectionID, this.lastcommand, this.lastsize, data.slice(7))
             this.carrylen -= (data.length - 7)
             break
           } else {
-            this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(7, this.carrylen + 7))
+            this.commandParser(this.lastConnectionID, this.lastcommand, this.lastsize, data.slice(7, this.carrylen + 7))
             data = data.slice(this.carrylen + 7)
             this.carrylen = 0
           }
