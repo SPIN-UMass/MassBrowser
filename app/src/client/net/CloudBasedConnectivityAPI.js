@@ -8,6 +8,7 @@ import * as errors from '~/utils/errors'
 import { error, debug } from '~/utils/log'
 import { runLocalServer } from './incommingConnection'
 import * as net from 'net'
+import * as dgram from 'dgram'
 
 class CloudBasedConnectivityAPI extends EventEmitter {
   constructor () {
@@ -57,7 +58,7 @@ class CloudBasedConnectivityAPI extends EventEmitter {
     if (this.keepAliveInterval) {
       return
     }
-    
+
     this.keepAliveInterval = setInterval(() => this.sendKeepAlive(), 30 * 1000)
   }
 
@@ -132,6 +133,66 @@ class CloudBasedConnectivityAPI extends EventEmitter {
         } else {
           this.reconnect()
         }
+      })
+    })
+  }
+
+  connectUDP () {
+    return new Promise((resolve, reject) => {
+      this.socket = dgram.createSocket('udp4')
+      // exclusive is false by default
+      this.socket.bind({
+        port: 10000 + Math.floor(Math.random() * (65535 - 10000))
+      }, () => {
+        debug('udp socket created')
+      })
+
+      this.socket.connect(this.port, this.server, () => {
+        this.socket.send(new Buffer('TEST'), (err) => {
+          debug('error on sending test message', err)
+          this.socket.close()
+        })
+        resolve()
+      })
+
+      this.socket.on('message', (data, remote) => {
+        console.log(remote.address + ':' + remote.port +' - ' + message);
+        data = data.toString()
+        let ip = data.split(':')[0]
+        let port = data.split(':')[1]
+        this.respHandler(this.socket.address().address, this.socket.address().port, ip, port)
+      })
+
+      this.socket.on('connect', () => {
+        debug('Connected to Echo Server')
+        this.isConnected = true
+        }
+      )
+
+      this.socket.on('close', () => {
+        debug('Connectivity Server Ended')
+        this.isConnected = false
+      })
+
+      this.socket.on('error', (e) => {
+        debug('Connectivity Server Error', e)
+        if (e.code === 'EADDRINUSE') {
+
+          this.socket.close()
+        //   this.socket.listen({
+        //     port: this.port,
+        //     host: this.server,
+        //     localPort: 10000 + Math.floor(Math.random() * (65535 - 10000)),
+        //     exclusive: false
+        //   }, () => {
+        //     debug('Connected to Echo Server')
+        //     this.socket.write('TEST')
+        //     this.socket.setKeepAlive(true)
+        //     this.isConnected = true
+        //   })
+        // } else {
+        //   this.reconnect()
+        // }
       })
     })
   }
