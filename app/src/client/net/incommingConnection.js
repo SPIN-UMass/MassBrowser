@@ -1,5 +1,4 @@
 const net = require('net')
-import fs from 'fs'
 import { RelayConnection } from '@/net/RelayConnection'
 import { debug, warn } from '@utils/log'
 
@@ -21,7 +20,7 @@ export function runLocalServer (publicIP, publicPort) {
       recver.end()
     })
   })
-  
+
   return new Promise((resolve, reject) => {
     // console.log("starting server on port",publicPort)
     server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {

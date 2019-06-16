@@ -6,7 +6,7 @@ import { debug } from '@utils/log'
 class ConnectionManager {
   constructor () {
     this.relayAssigner = null
-    this.conid_IP_PORT={}
+    this.conid_IP_PORT = {}
     this.clientConnections = {}
     this.connectionMaps = {}
     this.carrylen = 0
@@ -132,7 +132,7 @@ class ConnectionManager {
     if (!this.relayAssigner) {
       throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
     }
-    this.conid_IP_PORT[conid]= dstip
+    this.conid_IP_PORT[conid] = dstip
     this.clientConnections[conid] = connection
     this.clientConnections[conid].relayConnected = () => { onConnect() }
 

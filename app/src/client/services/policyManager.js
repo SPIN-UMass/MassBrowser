@@ -42,8 +42,9 @@ class PolicyManager extends EventEmitter {
           // blocked.
           var blockedInRegion = true
 
-          // For better usability, we let all the wesibtes that are
+          // For better usability, we let all the websites that are
           // not block to use direct connection.
+
           if (!blockedInRegion) {
             return resolve(this.POLICY_VANILLA_PROXY)
           }
@@ -52,11 +53,13 @@ class PolicyManager extends EventEmitter {
           // wouldn't be able to take the advanatage of
           // CDNBrowsing. Therefore, we need the help from Mass
           // Buddies.
+
           if (!domain.ssl) {
             return resolve(this.POLICY_YALER_PROXY)
           }
 
           // If it does support ssl, check if it supports CDNBrowsing.
+
           domain.getCDN()
           .then(cdn => {
             if (cdn == null || !cdn.cachebrowsable) {

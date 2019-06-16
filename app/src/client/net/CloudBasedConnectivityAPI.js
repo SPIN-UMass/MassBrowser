@@ -38,7 +38,6 @@ class CloudBasedConnectivityAPI extends EventEmitter {
       this.restartListenerServer()
       API.updateClientAddress(remoteIP, remotePort)
     }
-
   }
 
   startRoutine () {
@@ -149,7 +148,6 @@ class CloudBasedConnectivityAPI extends EventEmitter {
         this.isServerRunning = false
         this.ListenServer = {}
       })
-
     }
   }
 
