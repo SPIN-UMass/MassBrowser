@@ -13,7 +13,6 @@ export function runLocalServer (publicIP, publicPort) {
     socket.on('error', (err) => {
       // console.log('socket error', err.message)
       recver.end()
-
     })
     socket.on('end', () => {
       // console.log('socket ending')

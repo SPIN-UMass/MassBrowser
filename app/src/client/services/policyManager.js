@@ -17,62 +17,57 @@ class PolicyManager extends EventEmitter {
    * @return A promise which resolves with the policy which should be
    * applied to the host
    */
+
   getDomainPolicy (host, port) {
     return new Promise((resolve, reject) => {
-      const net = require('net');
-
-      if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
+      const net = require('net')
+      if (net.isIP(host)) {
         return reject(new errors.InvalidHostError('IP based filtering not supported'))
       }
       // return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
         .then(domain => {
-        if (!domain) {        // if a domain is not available in the DB
-          return resolve(this.POLICY_VANILLA_PROXY)
-        }
-
-        domain.getWebsite()
-        .then(website => {
-          if (website && !website.enabled) {
+          if (!domain) {
             return resolve(this.POLICY_VANILLA_PROXY)
           }
 
-          // TODO Check if it is blocked in region. For now, we assume
-          // all the websites that are not in the domain DB to be
-          // blocked.
-          var blockedInRegion = true
+          domain.getWebsite()
+            .then(website => {
+              if (website && !website.enabled) {
+                return resolve(this.POLICY_VANILLA_PROXY)
+              }
 
-          // For better usability, we let all the websites that are
-          // not block to use direct connection.
+              // TODO Check if it is blocked in region. For now, we assume
 
-          if (!blockedInRegion) {
-            return resolve(this.POLICY_VANILLA_PROXY)
-          }
+              var blockedInRegion = true
 
-          // If the website is blocked but does not support ssl, it
-          // wouldn't be able to take the advanatage of
-          // CDNBrowsing. Therefore, we need the help from Mass
-          // Buddies.
+              if (!blockedInRegion) {
+                return resolve(this.POLICY_VANILLA_PROXY)
+              }
 
-          if (!domain.ssl) {
-            return resolve(this.POLICY_YALER_PROXY)
-          }
+              // If the website is blocked but does not support ssl, it
+              // wouldn't be able to take the advantage of
+              // CDNBrowsing. Therefore, we need the help from Mass
+              // Buddies.
 
-          // If it does support ssl, check if it supports CDNBrowsing.
+              if (!domain.ssl) {
+                return resolve(this.POLICY_YALER_PROXY)
+              }
 
-          domain.getCDN()
-          .then(cdn => {
-            if (cdn == null || !cdn.cachebrowsable) {
-              return resolve(this.POLICY_YALER_PROXY)
-            } else {
-              return resolve(this.POLICY_CACHEBROWSE)
-            }
-          })
+              // If it does support ssl, check if it supports CDNBrowsing.
+
+              domain.getCDN()
+                .then(cdn => {
+                  if (cdn == null || !cdn.cachebrowsable) {
+                    return resolve(this.POLICY_YALER_PROXY)
+                  } else {
+                    return resolve(this.POLICY_CACHEBROWSE)
+                  }
+                })
+            })
         })
-      })
     })
   }
-
 }
 
 export const policyManager = new PolicyManager()

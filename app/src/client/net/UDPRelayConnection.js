@@ -3,10 +3,11 @@ import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
 import { debug, warn } from '@utils/log'
 import config from '@utils/config'
-import { RelayConnectionError } from '@utils/errors'
+import { UDPRelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
+import * as dgram from "dgram"
 
-export class RelayConnection extends EventEmitter {
+export class UDPRelayConnection extends EventEmitter {
   constructor (relayip, relayport, desc) {
     super()
 
@@ -23,19 +24,32 @@ export class RelayConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      var socket = net.connect(this.relayport, this.relayip)
+      let socket = dgram.createSocket('udp4')
+      socket.bind({
+        port: 10000 + Math.floor(Math.random() * (65535 - 10000))
+      }, () => {
+        debug('udp socket created')
+      })
+      //
+      // this.socket.connect(this.port, this.server, () => {
+      //   this.socket.send(new Buffer('TEST'), (err) => {
+      //     debug('error on sending test message', err)
+      //     this.socket.close()
+      //   })
+      //   resolve()
+      // })
+      this.socket.connect(this.relayport, this.relayip)
 
       const onFail = (err) => {
-        warn(`Relay ${this.id} connection error: ${err.message}`)
-        reject(new RelayConnectionError(err))
+        warn(`Relay ${this.id} UDP connection error: ${err.message}`)
+        reject(new UDPRelayConnectionError(err))
       }
 
       const onSuccess = () => {
-        debug(`Relay ${this.id} connected`)
-
+        debug(`Relay ${this.id} UDP connected`)
         // Remove connection failure callback so it isn't called
         // in case of a later error in the connection
-        socket.removeListener('error', onFail)
+        // socket.removeListener('error', onFail)
         resolve(socket)
       }
 
@@ -63,13 +77,12 @@ export class RelayConnection extends EventEmitter {
   }
 
   _initSocket (socket) {
-    var desc = this.desc
-    console.log('log', desc)
-    var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
+    let desc = this.desc
+    let cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
     }, () => {
       this.emit('close')
-      this.socket.end()
+      this.socket.close()
     })
 
     this.socket = socket
@@ -93,12 +106,11 @@ export class RelayConnection extends EventEmitter {
   }
 
   _initRelay (socket) {
-    var desc = this.desc
-    var i = Math.random() * (100 - 1) + 1
-    var padarr = [Buffer(desc['token'])]
+    let i = Math.random() * (100 - 1) + 1
+    let padarr = [Buffer(this.desc['token'])]
     while (i > 0) {
       padarr.push(this.cipher.encryptzero())
-      i -= 1
+      i = i - 1
     }
     socket.write(Buffer.concat(padarr))
     return socket
@@ -120,7 +132,7 @@ export class RelayConnection extends EventEmitter {
   }
 
   end () {
-    this.socket.end()
+    this.socket.close()
   }
 
   write (conid, command, data) {
@@ -135,4 +147,4 @@ export class RelayConnection extends EventEmitter {
   }
 }
 
-export default RelayConnection
+export default UDPRelayConnection

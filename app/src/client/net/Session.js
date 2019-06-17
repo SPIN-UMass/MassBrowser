@@ -1,6 +1,3 @@
-/**
- * Created by milad on 6/29/17.
- */
 import { EventEmitter } from 'events'
 import { connectionManager } from '@/net/connectionManager'
 import { RelayConnection } from '@/net/RelayConnection'
@@ -73,7 +70,6 @@ export class Session extends EventEmitter {
   }
 
   listen () {
-
     this.changeState(Session.LISTENING)
     pendMgr.addPendingConnection(this)
     return new Promise((resolve, reject) => {
@@ -82,8 +78,7 @@ export class Session extends EventEmitter {
     })
   }
 
-  relay_connected (relay) {
-
+  relayConnected (relay) {
     this.connection = relay
     this.changeState(Session.CONNECTED)
     relay.id = this.id
@@ -99,24 +94,16 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      console.log("test closed")
+      console.log('test closed')
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
-
     })
 
-
-
-
-    relay.sessionFounded(this).then(()=>{
+    relay.sessionFounded(this).then(() => {
       this.listener_resolve()
-    }).catch((err)=>{
+    }).catch((err) => {
       this.listener_reject(err)
-
     })
-
-
-
   }
 
   changeState (state) {
