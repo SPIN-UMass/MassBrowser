@@ -1,18 +1,14 @@
-import { connectionManager, RelayConnection, Session } from '@/net'
+import { connectionManager, Session } from '@/net'
 import API from '@/api'
 import { EventEmitter } from 'events'
-import { logger, warn, debug, info } from '@utils/log'
+import { warn, debug } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
+import { ConnectionTypes } from '@/common/constants'
 
 let TEST_URL = 'backend.yaler.co'
 import { Domain, Category } from '@/models'
-
-let TCP_CLIENT = 0
-let TCP_RELAY = 1
-let UDP = 2
-let CDN = 3
 
 /**
  * Note: Implements RelayAssigner
@@ -32,14 +28,12 @@ class SessionService extends EventEmitter {
 
     this.sessions = []
     this.processedSessions = {}
-
     /**
      * Sessions which have been requested and are waiting to be accepted by the relays
      * For every pending session, a object containing two function, accept and reject,
      * will be stored with the session ID
      */
     this.pendingSessions = {}
-
     /**
      * Categories which sessions have already been requested for but have no active
      * sessions yet.
@@ -49,9 +43,7 @@ class SessionService extends EventEmitter {
      * created for that category
      */
     this.categoryWaitLists = {}
-
     this.sessionPollInterval = null
-
     this.sessionHeartInterval = null
   }
 
@@ -65,41 +57,36 @@ class SessionService extends EventEmitter {
    * net.isIP() will return 0 or 4 or 6 */
 
   async assignRelay (host, port) {
+    let category
     if (net.isIP(host)) {
       let torCategory = (await Category.find({name: 'Tor'}))[0]
-
       let telegramCategory = (await Category.find({name: 'Messaging'}))[0]
-
       if (torService.isTorIP(host)) {
-        var category = torCategory
+        category = torCategory
       } else if (telegramService.isTelegramIP(host)) {
-        var category = telegramCategory
+        category = telegramCategory
       } else {
         debug(`Assigning session for ${host} of failed`)
         return
       }
     } else {
       let domain = await Domain.findDomain(host)
-      var category = (await (await domain.getWebsite()).getCategory())
+      category = (await (await domain.getWebsite()).getCategory())
     }
 
     debug(`Assigning session for ${host} of category ${category.name}`)
-    // assign a session based on the category of the requested host
     let session = await this.assignSessionForCategory(category)
     return session.connection
   }
 
   async assignSessionForCategory (category) {
-    // Search through active sessions to find session which allows category
     debug(`Searching sessions for ${category.name}`)
-    for (var i = 0; i < this.sessions.length; i++) {
+    for (let i = 0; i < this.sessions.length; i++) {
       if (this.sessions[i].allowedCategories.has(category.id)) {
         debug(`Sessions for ${category.name} Assigned`)
         return this.sessions[i]
       }
     }
-
-    // Check category waitlists to see if the category already has a pending session
 
     if (category && this.categoryWaitLists[category.id]) {
       debug(`Pending sessions for ${category.name}`)
@@ -110,7 +97,6 @@ class SessionService extends EventEmitter {
       })
     }
     debug(`Sessions for ${category.name} requested to be created`)
-
     return this.createSession(category)
   }
 
@@ -167,10 +153,12 @@ class SessionService extends EventEmitter {
     debug(`Session [${sessionInfo.id}] accepted by relay`)
 
     try {
-      if (session.connectionType === TCP_CLIENT) {
+      if (session.connectionType === ConnectionTypes.TCP_CLIENT ||
+        session.connectionType === ConnectionTypes.UDP_CLIENT) {
         debug(`Connecting session [${sessionInfo.id}]`)
         await session.connect()
-      } else if (session.connectionType === TCP_RELAY) {
+      } else if (session.connectionType === ConnectionTypes.TCP_RELAY ||
+        session.connectionType === ConnectionTypes.UDP_RELAY) {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
         await session.listen()
       }
@@ -197,10 +185,8 @@ class SessionService extends EventEmitter {
    */
 
   _handleClosedSessions (session) {
-    // console.log(this.sessions)
     let index = this.sessions.indexOf(session)
     this.sessions.splice(index, 1)
-    // console.log(this.sessions)
   }
 
   async _handleRetrievedSessions (sessionInfos) {
@@ -218,9 +204,6 @@ class SessionService extends EventEmitter {
         'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
         'token': Buffer.from(sessionInfo.token, 'base64')
       }
-
-      // debug(`sessions ${session.connection_type}`)
-
       if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
         // TODO: give warning here
         continue
@@ -307,7 +290,7 @@ class SessionService extends EventEmitter {
   }
 
   sessionHeartBeat () {
-    for (var i = 0; i < this.sessions.length; i++) {
+    for (let i = 0; i < this.sessions.length; i++) {
       this.testSession(this.sessions[i])
     }
   }

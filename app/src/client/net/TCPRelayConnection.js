@@ -6,7 +6,7 @@ import config from '@utils/config'
 import { RelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
 
-export class RelayConnection extends EventEmitter {
+export class TCPRelayConnection extends EventEmitter {
   constructor (relayip, relayport, desc) {
     super()
 
@@ -135,4 +135,4 @@ export class RelayConnection extends EventEmitter {
   }
 }
 
-export default RelayConnection
+export default TCPRelayConnection

@@ -1,5 +1,5 @@
 const net = require('net')
-import { RelayConnection } from '@/net/RelayConnection'
+import { TCPRelayConnection } from '@/net/TCPRelayConnection'
 import { debug, warn } from '@utils/log'
 
 export function runLocalServer (publicIP, publicPort) {
@@ -8,7 +8,7 @@ export function runLocalServer (publicIP, publicPort) {
     //   socket.authorized ? 'authorized' : 'unauthorized')
     // var dd=socket.pipe(tg.throttle())
 
-    var recver = new RelayConnection()
+    var recver = new TCPRelayConnection()
     recver.relayReverse(socket)
     socket.on('error', (err) => {
       // console.log('socket error', err.message)

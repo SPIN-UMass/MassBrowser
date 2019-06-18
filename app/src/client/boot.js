@@ -20,7 +20,7 @@ import API from '@/api'
 import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
-import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
+import { startClientSocks, TCPRelayConnection, RandomRelayAssigner } from '@/net'
 
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,

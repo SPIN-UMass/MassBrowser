@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { RelayConnection } from './RelayConnection'
+import { TCPRelayConnection } from './TCPRelayConnection'
 import * as errors from '@utils/errors'
 import { debug } from '@utils/log'
 

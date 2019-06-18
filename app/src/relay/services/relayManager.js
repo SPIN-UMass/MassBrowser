@@ -4,13 +4,12 @@ import API from '@/api'
 import { store } from '@utils/store'
 import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
-import { ConnectionType, UNLIMITED_BANDWIDTH } from '@/constants'
+import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
 import config from '@utils/config'
-
 
 /**
  * Manages the relay server.
- * 
+ *
  * You can start/stop the relay and change upload and download
  * bandwidth limits
  */
@@ -24,21 +23,21 @@ class RelayManager {
     store.ready.then(() => {
       this.natEnabled = store.state.natEnabled
       this.relayPort = store.state.relayPort
-  
+
       this.uploadLimit = store.state.uploadLimit
       this.downloadLimit = store.state.downloadLimit
       this.bandwidthLimited = this.uploadLimit !== 0 || this.downloadLimit !== 0
       this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit || UNLIMITED_BANDWIDTH})
       this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
-  
+
       this.authenticator = new ConnectionAuthenticator()
-  
+
       if (this.natEnabled) {
         debug('NAT mode is enabled')
       } else {
         debug(`NAT mode is not enabled, running relay on port: ${this.relayPort}`)
-      }   
-    })   
+      }
+    })
   }
 
   setUploadLimit (limitBytes) {
@@ -58,15 +57,15 @@ class RelayManager {
     store.commit('changeNatStatus', natEnabled)
     if (restartRelay) {
       this.restartRelay()
-    }    
+    }
   }
 
   setRelayPort (relayPort, restartRelay=true) {
     this.relayPort = relayPort
     store.commit('changeRelayPort', relayPort)
     if (restartRelay) {
-      this.restartRelay()      
-    }    
+      this.restartRelay()
+    }
   }
 
   async changeAccess (access) {
@@ -88,15 +87,15 @@ class RelayManager {
     }
   }
 
-  async startRelay() {
+  async startRelay () {
     await this.changeAccess(true)
   }
 
-  async stopRelay() {
+  async stopRelay () {
     await this.changeAccess(false)
   }
 
-  async restartRelay() {
+  async restartRelay () {
     const status = statusManager.info('Restarting relay server...')
     await this.stopRelay()
     await this.startRelay()
@@ -123,10 +122,10 @@ class RelayManager {
       'connectiontype': data.connection_type,
       'sessionId': data.id
     }
-  
+
     debug(`New session [${data.id}] received for client [${data.client.id}]`)
-  
-    if (desc.connectiontype === ConnectionType.TCP_CLIENT) {
+
+    if (desc.connectiontype === ConnectionTypes.TCP_CLIENT) {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 
@@ -141,12 +140,12 @@ class RelayManager {
     }
   }
 
-  async _startRelayServer() {
+  async _startRelayServer () {
     let localAddress = this._getLocalAddress()
 
     let server = new TCPRelay(
       this.authenticator,
-      localAddress.ip, 
+      localAddress.ip,
       localAddress.port,
       this.uploadLimiter,
       this.downloadLimiter
@@ -159,12 +158,12 @@ class RelayManager {
   async _restartRelayServer () {
     try {
       if (this.isRelayServerRunning) {
-        await this._stopRelayServer() 
+        await this._stopRelayServer()
         debug(`Relay stopped`)
-      } 
+      }
       await this._startRelayServer()
       debug(`Relay started`)
-    } catch(err) {
+    } catch (err) {
       warn(err)
     }
   }
@@ -182,7 +181,7 @@ class RelayManager {
 
   _getLocalAddress () {
     let privateAddress = networkMonitor.getPrivateAddress()
-    
+
     store.commit('changePrivateAddress', privateAddress)
 
     if (this.natEnabled) {

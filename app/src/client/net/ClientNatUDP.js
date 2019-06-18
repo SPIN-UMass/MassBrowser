@@ -3,6 +3,7 @@ import API from '@/api'
 import { error, debug } from '~/utils/log'
 import { runLocalServer } from './incommingConnection'
 import * as dgram from 'dgram'
+import * as rudp from 'rudp'
 
 class ClientNatUDP extends EventEmitter {
   constructor () {
@@ -48,7 +49,6 @@ class ClientNatUDP extends EventEmitter {
     if (this.keepAliveInterval) {
       return
     }
-
     this.keepAliveInterval = setInterval(() => this.sendKeepAlive(), 30 * 1000)
   }
 
@@ -82,6 +82,7 @@ class ClientNatUDP extends EventEmitter {
         debug('udp socket created')
       })
 
+      let client = new rudp.Client(this.socket, this.server, this.port)
       this.socket.connect(this.port, this.server, () => {
         this.socket.send(new Buffer('TEST'), (err) => {
           debug('error on sending test message', err)
@@ -112,18 +113,8 @@ class ClientNatUDP extends EventEmitter {
         debug('Connectivity Server Error', e)
         if (e.code === 'EADDRINUSE') {
           this.socket.close()
-          //   this.socket.listen({
-          //     port: this.port,
-          //     host: this.server,
-          //     localPort: 10000 + Math.floor(Math.random() * (65535 - 10000)),
-          //     exclusive: false
-          //   }, () => {
-          //     debug('Connected to Echo Server')
-          //     this.socket.write('TEST')
-          //     this.socket.setKeepAlive(true)
-          //     this.isConnected = true
-          //   })
         } else {
+          this.socket.close()
           this.reconnect()
         }
       })

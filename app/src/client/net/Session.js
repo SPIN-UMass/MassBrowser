@@ -1,9 +1,11 @@
 import { EventEmitter } from 'events'
-import { connectionManager } from '@/net/connectionManager'
-import { RelayConnection } from '@/net/RelayConnection'
+import { connectionManager } from './connectionManager'
+import { TCPRelayConnection } from './TCPRelayConnection'
 import { DomainConnection } from './DomainConnection'
 import { pendMgr } from './PendingConnections'
-import {sessionService} from '@/services/sessionService'
+import { sessionService } from '../services/sessionService'
+import { ConnectionTypes } from '../../common/constants'
+import UDPRelayConnection from './UDPRelayConnection'
 
 export class Session extends EventEmitter {
   constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
@@ -13,21 +15,13 @@ export class Session extends EventEmitter {
     this.ip = ip
     this.port = port
     this.desc = desc
-    var allowedcats = []
-
-    if (allowedCategories) {
-      allowedCategories.forEach(cat => {
-        allowedcats.push(cat.id)
-      })
-    }
-
-    this.allowedCategories = new Set(allowedcats)
+    this.allowedCategories = this._initAllowedCategories(allowedCategories)
     this.connection = null
     this.connectionType = connectionType
     this.state = Session.CREATED
     this.domainName = domainName
-    this.listener_resolve = {}
-    this.listener_reject = {}
+    this.listenerResolve = {}
+    this.listenerReject = {}
     this.bytesSent = 0
     this.bytesReceived = 0
   }
@@ -35,10 +29,19 @@ export class Session extends EventEmitter {
   connect () {
     this.changeState(Session.CONNECTING)
 
-    if (this.isCDN) {
-      var relay = new DomainConnection(this.domainName, this.desc)
-    } else {
-      var relay = new RelayConnection(this.ip, this.port, this.desc)
+    let relay
+    switch (this.connectionType) {
+      case ConnectionTypes.TCP_CLIENT:
+        relay = new TCPRelayConnection(this.ip, this.port, this.desc)
+        break
+      case ConnectionTypes.UDP_CLIENT:
+        relay = new UDPRelayConnection(this.ip, this.port, this.desc)
+        break
+      case ConnectionTypes.CDN:
+        relay = new DomainConnection(this.domainName, this.desc)
+        break
+      default:
+        relay = new TCPRelayConnection(this.ip, this.port, this.desc)
     }
 
     relay.id = this.id
@@ -73,8 +76,8 @@ export class Session extends EventEmitter {
     this.changeState(Session.LISTENING)
     pendMgr.addPendingConnection(this)
     return new Promise((resolve, reject) => {
-      this.listener_resolve = resolve
-      this.listener_reject = reject
+      this.listenerResolve = resolve
+      this.listenerReject = reject
     })
   }
 
@@ -94,21 +97,30 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      console.log('test closed')
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
     })
 
     relay.sessionFounded(this).then(() => {
-      this.listener_resolve()
+      this.listenerResolve()
     }).catch((err) => {
-      this.listener_reject(err)
+      this.listenerReject(err)
     })
   }
 
   changeState (state) {
     this.state = state
     this.emit('state-changed', state)
+  }
+
+  _initAllowedCategories (allowedCategories) {
+    let allowedCategoriesArray = []
+    if (allowedCategories) {
+      allowedCategories.forEach(cat => {
+        allowedCategoriesArray.push(cat.id)
+      })
+    }
+    return new Set(allowedCategoriesArray)
   }
 
   static get CREATED () { return 'created' }
