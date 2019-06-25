@@ -122,8 +122,8 @@ export class UDPRelayConnection extends EventEmitter {
     sendPacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendPacket, data])
     const enc = this.cipher.encrypt(b)
-    this.emit('send', enc)
     this.client.send(enc)
+    this.emit('send', enc)
   }
 }
 
