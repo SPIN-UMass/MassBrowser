@@ -57,6 +57,7 @@ class ClientAPI extends CommonAPI {
       })
   }
 
+  // TODO add client access protocol like TCP or UDP
   updateClientAddress (remoteIP, remotePort) {
     debug(`Sending address info to server: ${remoteIP} ${remotePort}`)
     return this.transport.post(
@@ -67,6 +68,15 @@ class ClientAPI extends CommonAPI {
       }
     ).then(r => r.data)
 
+  }
+
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': config.serverURL.replace('https://', ''),
+        'port': 8823
+      })
+    })
   }
 
   requestNewStunServer () {

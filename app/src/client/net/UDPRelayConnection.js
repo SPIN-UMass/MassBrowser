@@ -1,19 +1,18 @@
-import net from 'net'
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
 import { debug, warn } from '@utils/log'
 import config from '@utils/config'
 import { UDPRelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
-import * as dgram from "dgram"
+import * as dgram from 'dgram'
 
 export class UDPRelayConnection extends EventEmitter {
-  constructor (relayip, relayport, desc) {
+  constructor (relayIP, relayPort, desc) {
     super()
 
     this.id = ''
-    this.relayip = relayip
-    this.relayport = relayport
+    this.relayip = relayIP
+    this.relayport = relayPort
     this.desc = desc
     this.hasSessionID = true
     this.sessionID = ''
@@ -121,7 +120,7 @@ export class UDPRelayConnection extends EventEmitter {
     this.socket = socket
 
     const readable = (data) => {
-      var sessionId = data.toString()
+      let sessionId = data.toString()
       console.log('read session id', sessionId, sessionId.length)
       this.hasSessionID = true
       this.sessionID = sessionId

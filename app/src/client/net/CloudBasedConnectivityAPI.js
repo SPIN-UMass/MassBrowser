@@ -159,7 +159,7 @@ class CloudBasedConnectivityAPI extends EventEmitter {
       }).catch((err) => {
         this.errorHandler(err)
       })
-    } else if (this.ListenServer.address().port !== this.localIP) {
+    } else if (this.ListenServer.address().port !== this.localPort) {
       this.stopListenServer()
       runLocalServer(this.localIP, this.localPort).then((server) => {
         this.isServerRunning = true
@@ -171,5 +171,5 @@ class CloudBasedConnectivityAPI extends EventEmitter {
   }
 
 }
-var ConnectivityConnection = new CloudBasedConnectivityAPI()
+let ConnectivityConnection = new CloudBasedConnectivityAPI()
 export default ConnectivityConnection

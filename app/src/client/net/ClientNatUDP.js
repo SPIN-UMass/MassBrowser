@@ -1,9 +1,8 @@
 import { EventEmitter } from 'events'
 import API from '@/api'
-import { error, debug } from '~/utils/log'
-import { runLocalServer } from './incommingConnection'
+import { debug } from '~/utils/log'
+import { runLocalUDPServer } from './incommingUDPConnection'
 import * as dgram from 'dgram'
-import * as rudp from 'rudp'
 
 class ClientNatUDP extends EventEmitter {
   constructor () {
@@ -14,12 +13,13 @@ class ClientNatUDP extends EventEmitter {
     this.isConnected = false
     this.autoConnect = false
     this.routineStatus = false
-    this.ListenServer = {}
+    this.ListenServer = null
     this.localIP = ''
     this.isServerRunning = false
     this.remoteIP = ''
     this.localPort = 0
     this.remotePort = 0
+
     this.keepAliveInterval = null
   }
 
@@ -49,14 +49,15 @@ class ClientNatUDP extends EventEmitter {
     if (this.keepAliveInterval) {
       return
     }
+
     this.keepAliveInterval = setInterval(() => this.sendKeepAlive(), 30 * 1000)
   }
 
-  // TODO request for new udp stun server
+  // TODO run stun server on serverURL
   checkStunServer () {
     return new Promise((resolve, reject) => {
       if (this.port === 0) {
-        API.requestNewStunServer().then((data) => {
+        API.requestNewUDPStunServer().then((data) => {
           this.server = data.ip
           this.port = data.port
           this.connect()
@@ -82,7 +83,6 @@ class ClientNatUDP extends EventEmitter {
         debug('udp socket created')
       })
 
-      let client = new rudp.Client(this.socket, this.server, this.port)
       this.socket.connect(this.port, this.server, () => {
         this.socket.send(new Buffer('TEST'), (err) => {
           debug('error on sending test message', err)
@@ -92,7 +92,6 @@ class ClientNatUDP extends EventEmitter {
       })
 
       this.socket.on('message', (data, remote) => {
-        console.log(remote.address + ':' + remote.port + ' - ' + data)
         data = data.toString()
         let ip = data.split(':')[0]
         let port = data.split(':')[1]
@@ -111,12 +110,7 @@ class ClientNatUDP extends EventEmitter {
 
       this.socket.on('error', (e) => {
         debug('Connectivity Server Error', e)
-        if (e.code === 'EADDRINUSE') {
-          this.socket.close()
-        } else {
-          this.socket.close()
-          this.reconnect()
-        }
+        this.reconnect()
       })
     })
   }
@@ -130,25 +124,23 @@ class ClientNatUDP extends EventEmitter {
 
   stopListenServer () {
     if (this.isServerRunning) {
-      this.ListenServer.close(() => {
-        this.isServerRunning = false
-        this.ListenServer = {}
-      })
+      this.ListenServer.close()
+      this.isServerRunning = false
+      this.ListenServer = null
     }
   }
 
   restartListenerServer () {
     if (!this.isServerRunning) {
-      runLocalServer(this.localIP, this.localPort).then((server) => {
-        // TODO what is OBFS server ?
+      runLocalUDPServer(this.localIP, this.localPort).then((server) => {
         this.isOBFSServerRunning = true
         this.ListenServer = server
       }).catch((err) => {
         this.errorHandler(err)
       })
-    } else if (this.ListenServer.address().port !== this.localIP) {
+    } else if (this.ListenServer.address().port !== this.localPort) {
       this.stopListenServer()
-      runLocalServer(this.localIP, this.localPort).then((server) => {
+      runLocalUDPServer(this.localIP, this.localPort).then((server) => {
         this.isServerRunning = true
         this.ListenServer = server
       }).catch((err) => {
@@ -156,7 +148,7 @@ class ClientNatUDP extends EventEmitter {
       })
     }
   }
-
 }
+
 let ClientNatUDPObj = new ClientNatUDP()
 export default ClientNatUDPObj
