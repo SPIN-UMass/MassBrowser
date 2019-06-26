@@ -1,10 +1,9 @@
 import API from '@/api'
 import config from '@utils/config'
 import { relayManager } from '@/services'
-import { NATConnectivityConnection } from '@/net'
+import { TCPNATConnection } from '@/net'
 import { store } from '@utils/store'
 import { debug } from '@utils/log'
-
 
 class NetworkMonitor {
   constructor () {
@@ -16,12 +15,14 @@ class NetworkMonitor {
     this.isRelayReachable = false
     this.isServerConnected = false
 
-    this.natConnection = null
+    this.TCPNATConnection = null
     this.keepAliveInterval = null
+
+    this.UDPNATConnection = null
   }
 
   async start () {
-    let natConnection = this.natConnection = new NATConnectivityConnection(
+    let natConnection = this.TCPNATConnection = new TCPNATConnection(
       config.echoServer.host,
       config.echoServer.port
     )
@@ -37,7 +38,7 @@ class NetworkMonitor {
 
   waitForNetworkStatus () {
     return new Promise((resolve, reject) => {
-      this.natConnection.once('net-update', data => resolve(data))
+      this.TCPNATConnection.once('net-update', data => resolve(data))
     })
   }
 
@@ -51,12 +52,11 @@ class NetworkMonitor {
 
   async _sendKeepAlive () {
     let isRelayReachable, isServerConnected
-    
     try {
       let res = await API.keepAlive(relayManager.openAccess)
       isServerConnected = true
       isRelayReachable = res.data.tcp_reachable
-    } catch(err) {
+    } catch (err) {
       isRelayReachable = false
       isServerConnected = false
     }
@@ -72,28 +72,24 @@ class NetworkMonitor {
     }
 
     debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isRelayReachable}`)
-
-    if (this.natConnection.isConnected) {
-      this.natConnection.keepAlive()
+    if (this.TCPNATConnection.isConnected) {
+      this.TCPNATConnection.keepAlive()
     }
   }
 
   _onNetworkUpdate (data) {
     let changed = false
-    
     data.remotePort = Number(data.remotePort)
     data.localPort = Number(data.localPort)
-
     for (let field of ['localIP', 'localPort', 'remoteIP', 'remotePort']) {
       changed = changed || (this[field] !== data[field])
       this[field] = data[field]
     }
-
     if (changed) {
       relayManager.handleReconnect()
     }
   }
-  
+
   // checkNatType() {
   //   var stun = require('vs-stun')
   //   if (this.natEnabled) {

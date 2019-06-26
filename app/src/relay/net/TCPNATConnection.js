@@ -1,15 +1,8 @@
-import KVStore from '~/utils/kvstore'
-import * as util from 'util'
 import { EventEmitter } from 'events'
-
-import WebSocket from 'ws'
-import * as errors from '~/utils/errors'
-import { error, debug } from '~/utils/log'
-import config from '@utils/config'
+import { debug } from '~/utils/log'
 import * as net from 'net'
 
-
-export class NATConnectivityConnection extends EventEmitter {
+export class TCPNATConnection extends EventEmitter {
   constructor (ip, port) {
     super()
     this.ip = ip
@@ -20,16 +13,15 @@ export class NATConnectivityConnection extends EventEmitter {
   }
 
   connect () {
-    let promiseResolved = false
-
     return new Promise((resolve, reject) => {
+      let promiseResolved = false
       let socket = this._socket = net.createConnection({
         port: this.port,
         host: this.ip,
         localPort: 10000 + Math.floor(Math.random() * (65535 - 10000)),
         exclusive: false
       })
-      
+
       socket.on('connect', () => {
         debug('Connected to Echo Server')
         socket.write('TEST')
@@ -37,13 +29,11 @@ export class NATConnectivityConnection extends EventEmitter {
         this.isConnected = true
       })
 
-
       socket.on('data', (data) => {
         data = data.toString()
         let ip = data.split(':')[0]
         let port = data.split(':')[1]
 
-        // this.respHandler([this.socket.localAddress, this.socket.localPort, ip, port])
         this.emit('net-update', {
           localIP: socket.localAddress,
           localPort: socket.localPort,
@@ -63,11 +53,11 @@ export class NATConnectivityConnection extends EventEmitter {
         this._socket = null
       })
 
-      socket.on('close', (had_error) => {
+      socket.on('close', (hadError) => {
         debug('Connectivity Server Ended')
         this.isConnected = false
         this._socket = null
-        this.emit('close', had_error)
+        this.emit('close', hadError)
       })
 
       socket.on('error', (e) => {
@@ -101,4 +91,4 @@ export class NATConnectivityConnection extends EventEmitter {
   }
 }
 
-export default NATConnectivityConnection
+export default TCPNATConnection

@@ -1,11 +1,10 @@
 import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
-import { warn, error, debug } from '@utils/log'
+import { warn, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
 import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
 import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
-import config from '@utils/config'
 
 /**
  * Manages the relay server.
@@ -13,23 +12,21 @@ import config from '@utils/config'
  * You can start/stop the relay and change upload and download
  * bandwidth limits
  */
+
 class RelayManager {
   constructor () {
     this.relayServer = null
     this.isRelayServerRunning = false
-
     this.openAccess = false
 
     store.ready.then(() => {
       this.natEnabled = store.state.natEnabled
       this.relayPort = store.state.relayPort
-
       this.uploadLimit = store.state.uploadLimit
       this.downloadLimit = store.state.downloadLimit
       this.bandwidthLimited = this.uploadLimit !== 0 || this.downloadLimit !== 0
       this.uploadLimiter = ThrottleGroup({rate: this.uploadLimit || UNLIMITED_BANDWIDTH})
       this.downloadLimiter = ThrottleGroup({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
-
       this.authenticator = new ConnectionAuthenticator()
 
       if (this.natEnabled) {
@@ -52,7 +49,7 @@ class RelayManager {
     this.downloadLimiter.resetRate({rate: this.downloadLimit || UNLIMITED_BANDWIDTH})
   }
 
-  changeNatStatus (natEnabled, restartRelay=true) {
+  changeNatStatus (natEnabled, restartRelay = true) {
     this.natEnabled = natEnabled
     store.commit('changeNatStatus', natEnabled)
     if (restartRelay) {
@@ -60,7 +57,7 @@ class RelayManager {
     }
   }
 
-  setRelayPort (relayPort, restartRelay=true) {
+  setRelayPort (relayPort, restartRelay = true) {
     this.relayPort = relayPort
     store.commit('changeRelayPort', relayPort)
     if (restartRelay) {
@@ -77,10 +74,10 @@ class RelayManager {
     store.commit('changeOpenAccess', this.openAccess)
 
     if (this.openAccess) {
-      let publicaddress = this._getReachableAddress()
-      API.relayUp(publicaddress.ip, publicaddress.port)
+      let publicAddress = this._getReachableAddress()
+      API.relayUp(publicAddress.ip, publicAddress.port)
       await this._restartRelayServer()
-      statusManager.info(`Relay server started on port ${publicaddress.port}`, { timeout: true })
+      statusManager.info(`Relay server started on port ${publicAddress.port}`, { timeout: true })
     } else {
       API.relayDown()
       await this._stopRelayServer()
@@ -105,8 +102,8 @@ class RelayManager {
   handleReconnect () {
     if (this.openAccess) {
       debug(this.openAccess)
-      let publicaddress = this._getReachableAddress()
-      API.relayUp(publicaddress.ip, publicaddress.port)
+      let publicAddress = this._getReachableAddress()
+      API.relayUp(publicAddress.ip, publicAddress.port)
       this._restartRelayServer()
     }
   }
@@ -132,7 +129,7 @@ class RelayManager {
     API.acceptSession(data.client, data.id)
   }
 
-  async _stopRelayServer() {
+  async _stopRelayServer () {
     if (this.isRelayServerRunning) {
       await this.relayServer.stop()
       this.isRelayServerRunning = false
@@ -140,9 +137,22 @@ class RelayManager {
     }
   }
 
-  async _startRelayServer () {
+  async _startUDPRelayServer () {
     let localAddress = this._getLocalAddress()
+    let server = new TCPRelay(
+      this.authenticator,
+      localAddress.ip,
+      localAddress.port,
+      this.uploadLimiter,
+      this.downloadLimiter
+    )
+    await server.start()
+    this.isRelayServerRunning = true
+    this.relayServer = server
+  }
 
+  async _startTCPRelayServer () {
+    let localAddress = this._getLocalAddress()
     let server = new TCPRelay(
       this.authenticator,
       localAddress.ip,
@@ -161,7 +171,7 @@ class RelayManager {
         await this._stopRelayServer()
         debug(`Relay stopped`)
       }
-      await this._startRelayServer()
+      await this._startTCPRelayServer()
       debug(`Relay started`)
     } catch (err) {
       warn(err)
@@ -170,9 +180,7 @@ class RelayManager {
 
   _getReachableAddress () {
     let publicAddress = networkMonitor.getPublicAddress()
-
     store.commit('changePublicAddress', publicAddress)
-
     if (this.natEnabled) {
       return {ip: publicAddress.ip, port: publicAddress.port}
     }
@@ -181,9 +189,7 @@ class RelayManager {
 
   _getLocalAddress () {
     let privateAddress = networkMonitor.getPrivateAddress()
-
     store.commit('changePrivateAddress', privateAddress)
-
     if (this.natEnabled) {
       return {ip: privateAddress.ip, port: privateAddress.port}
     }
