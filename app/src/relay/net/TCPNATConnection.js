@@ -34,7 +34,7 @@ export class TCPNATConnection extends EventEmitter {
         let ip = data.split(':')[0]
         let port = data.split(':')[1]
 
-        this.emit('net-update', {
+        this.emit('tcp-net-update', {
           localIP: socket.localAddress,
           localPort: socket.localPort,
           remoteIP: ip,
