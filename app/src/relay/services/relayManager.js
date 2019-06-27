@@ -37,7 +37,7 @@ class RelayManager {
       if (this.natEnabled) {
         debug('NAT mode is enabled')
       } else {
-        debug(`NAT mode is not enabled, running relay on port: ${this.relayPort}`)
+        debug(`NAT mode is not enabled, running relay on port: ${this.TCPRelayPort}`)
       }
     })
   }
