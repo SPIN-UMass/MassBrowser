@@ -16,14 +16,14 @@ class NetworkMonitor {
     this.remoteAddress = ''
     this.localAddress = ''
 
-    this.isRelayReachable = false
+    this.isTCPRelayReachable = false
+    this.isUDPRelayReachable = false
     this.isServerConnected = false
 
     this.TCPNATConnection = null
-    this.TCPKeepAliveInterval = null
-
-    this.UDPKeepAliveInterval = null
     this.UDPNATConnection = null
+
+    this.keepAliveInterval = null
   }
 
   async start () {
@@ -31,69 +31,44 @@ class NetworkMonitor {
     this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
-    setTimeout(() => this._sendTCPKeepAlive(), 500)
-    this.TCPKeepAliveInterval = setInterval(() => this._sendTCPKeepAlive(), config.keepAliveInterval * 1000)
 
     this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
     await this.UDPNATConnection.connect()
-    setTimeout(() => this._sendUDPKeepAlive(), 500)
-    this.UDPKeepAliveInterval = setInterval(() => this._sendUDPKeepAlive(), config.keepAliveInterval * 1000)
+
+    setTimeout(() => this._sendKeepAlive(), 500)
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
   }
 
   waitForNetworkStatus () {
     return new Promise((resolve, reject) => {
-      this.TCPNATConnection.once('tcp-net-update', data => resolve(data))
-      this.UDPNATConnection.once('udp-net-update', data => resolve(data)) //wtf?
+      this.TCPNATConnection.once('tcp-net-update', data => data).then((TCPData) => {
+        this.UDPNATConnection.once('udp-net-update', UDPData => resolve({TCPData, UDPData}))
+      })
     })
   }
 
   getPublicAddress () {
-    return {ip: this.remoteAddress, port: this.remoteTCPPort}
+    return {ip: this.remoteAddress, port: this.remoteTCPPort, UDPPort: this.remoteUDPPort}
   }
 
   getPrivateAddress () {
-    return {ip: this.localAddress, port: this.localTCPPort}
+    return {ip: this.localAddress, port: this.localTCPPort, UDPPort: this.localUDPPort}
   }
 
-  async _sendUDPKeepAlive () {
-    // let isRelayReachable
-    // let isServerConnected
-    // try {
-    //   let res = await API.keepAlive(relayManager.openAccess)
-    //   isServerConnected = true
-    //   isRelayReachable = res.data.tcp_reachable
-    // } catch (err) {
-    //   isRelayReachable = false
-    //   isServerConnected = false
-    // }
-    //
-    // if (isServerConnected !== this.isServerConnected) {
-    //   this.isServerConnected = isServerConnected
-    //   store.commit('changeServerConnected', isServerConnected)
-    // }
-    //
-    // if (isRelayReachable !== this.isRelayReachable) {
-    //   this.isRelayReachable = isRelayReachable
-    //   store.commit('changeRelayReachable', isRelayReachable)
-    // }
-    //
-    // debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isRelayReachable}`)
-    // if (this.TCPNATConnection.isConnected) {
-    //   this.TCPNATConnection.keepAlive()
-    // }
-  }
-
-  async _sendTCPKeepAlive () {
-    let isRelayReachable
+  async _sendKeepAlive () {
+    let isTCPRelayReachable
+    let isUDPRelayReachable
     let isServerConnected
     try {
       let res = await API.keepAlive(relayManager.openAccess)
       isServerConnected = true
-      isRelayReachable = res.data.tcp_reachable
+      isTCPRelayReachable = res.data.tcp_reachable
+      isUDPRelayReachable = res.data.udp_reachable
     } catch (err) {
-      isRelayReachable = false
+      isTCPRelayReachable = false
+      isUDPRelayReachable = false
       isServerConnected = false
     }
 
@@ -102,15 +77,22 @@ class NetworkMonitor {
       store.commit('changeServerConnected', isServerConnected)
     }
 
-    if (isRelayReachable !== this.isRelayReachable) {
-      this.isRelayReachable = isRelayReachable
-      store.commit('changeRelayReachable', isRelayReachable)
+    if (isTCPRelayReachable !== this.isTCPRelayReachable) {
+      this.isTCPRelayReachable = isTCPRelayReachable
+      store.commit('changeTCPRelayReachable', isTCPRelayReachable)
     }
 
-    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isRelayReachable}`)
+    if (isUDPRelayReachable !== this.isUDPRelayReachable) {
+      this.isUDPRelayReachable = isUDPRelayReachable
+      store.commit('changeUDPRelayReachable', isUDPRelayReachable)
+    }
+
+    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
     if (this.TCPNATConnection.isConnected) {
       this.TCPNATConnection.keepAlive()
     }
+    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
+    this.UDPNATConnection.keepAlive()
   }
 
   _onTCPNetworkUpdate (data) {

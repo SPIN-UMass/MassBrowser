@@ -1,4 +1,4 @@
-import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
+import { UDPRelay, TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
 import { warn, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
@@ -7,7 +7,7 @@ import { statusManager } from '@common/services'
 import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
 
 /**
- * Manages the relay server.
+ * Manages the relay servers.
  *
  * You can start/stop the relay and change upload and download
  * bandwidth limits
@@ -15,13 +15,18 @@ import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
 
 class RelayManager {
   constructor () {
-    this.relayServer = null
-    this.isRelayServerRunning = false
+    this.TCPRelayServer = null
+    this.isTCPRelayServerRunning = false
+
+    this.UDPRelayServer = null
+    this.isUDPRelayServerRunning = false
+
     this.openAccess = false
 
     store.ready.then(() => {
       this.natEnabled = store.state.natEnabled
-      this.relayPort = store.state.relayPort
+      this.TCPRelayPort = store.state.TCPRelayPort
+      this.UDPRelayPort = store.state.UDPRelayPort
       this.uploadLimit = store.state.uploadLimit
       this.downloadLimit = store.state.downloadLimit
       this.bandwidthLimited = this.uploadLimit !== 0 || this.downloadLimit !== 0
@@ -57,9 +62,17 @@ class RelayManager {
     }
   }
 
-  setRelayPort (relayPort, restartRelay = true) {
-    this.relayPort = relayPort
-    store.commit('changeRelayPort', relayPort)
+  setTCPRelayPort (port, restartRelay = true) {
+    this.TCPRelayPort = port
+    store.commit('changeTCPRelayPort', port)
+    if (restartRelay) {
+      this.restartRelay()
+    }
+  }
+
+  setUDPRelayPort (port, restartRelay = true) {
+    this.UDPRelayPort = port
+    store.commit('changeUDPRelayPort', port)
     if (restartRelay) {
       this.restartRelay()
     }
@@ -75,12 +88,15 @@ class RelayManager {
 
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
-      API.relayUp(publicAddress.ip, publicAddress.port)
-      await this._restartRelayServer()
-      statusManager.info(`Relay server started on port ${publicAddress.port}`, { timeout: true })
+      API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
+      await this._restartTCPRelayServer()
+      await this._restartUDPRelayServer()
+      statusManager.info(`TCP Relay server started on port ${publicAddress.port}`, { timeout: true })
+      statusManager.info(`UDP Relay server started on port ${publicAddress.UDPPort}`, { timeout: true })
     } else {
       API.relayDown()
-      await this._stopRelayServer()
+      await this._stopTCPRelayServer()
+      await this._stopUDPRelayServer()
     }
   }
 
@@ -93,7 +109,7 @@ class RelayManager {
   }
 
   async restartRelay () {
-    const status = statusManager.info('Restarting relay server...')
+    const status = statusManager.info('Restarting relay servers...')
     await this.stopRelay()
     await this.startRelay()
     status.clear()
@@ -101,10 +117,11 @@ class RelayManager {
 
   handleReconnect () {
     if (this.openAccess) {
-      debug(this.openAccess)
+      debug('open access: ', this.openAccess)
       let publicAddress = this._getReachableAddress()
-      API.relayUp(publicAddress.ip, publicAddress.port)
-      this._restartRelayServer()
+      API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
+      this._restartTCPRelayServer()
+      this._restartUDPRelayServer()
     }
   }
 
@@ -122,33 +139,41 @@ class RelayManager {
 
     debug(`New session [${data.id}] received for client [${data.client.id}]`)
 
-    if (desc.connectiontype === ConnectionTypes.TCP_CLIENT) {
+    if (desc.connectiontype === ConnectionTypes.TCP_CLIENT || desc.connectiontype === ConnectionTypes.UDP_CLIENT) {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 
     API.acceptSession(data.client, data.id)
   }
 
-  async _stopRelayServer () {
-    if (this.isRelayServerRunning) {
-      await this.relayServer.stop()
-      this.isRelayServerRunning = false
-      this.relayServer = null
+  async _stopUDPRelayServer () {
+    if (this.isUDPRelayServerRunning) {
+      await this.UDPRelayServer.stop()
+      this.isUDPRelayServerRunning = false
+      this.UDPRelayServer = null
+    }
+  }
+
+  async _stopTCPRelayServer () {
+    if (this.isTCPRelayServerRunning) {
+      await this.TCPRelayServer.stop()
+      this.isTCPRelayServerRunning = false
+      this.TCPRelayServer = null
     }
   }
 
   async _startUDPRelayServer () {
     let localAddress = this._getLocalAddress()
-    let server = new TCPRelay(
+    let server = new UDPRelay(
       this.authenticator,
       localAddress.ip,
-      localAddress.port,
+      localAddress.UDPPort,
       this.uploadLimiter,
       this.downloadLimiter
     )
     await server.start()
-    this.isRelayServerRunning = true
-    this.relayServer = server
+    this.isUDPRelayServerRunning = true
+    this.UDPRelayServer = server
   }
 
   async _startTCPRelayServer () {
@@ -161,15 +186,28 @@ class RelayManager {
       this.downloadLimiter
     )
     await server.start()
-    this.isRelayServerRunning = true
-    this.relayServer = server
+    this.isTCPRelayServerRunning = true
+    this.TCPRelayServer = server
   }
 
-  async _restartRelayServer () {
+  async _restartUDPRelayServer () {
     try {
-      if (this.isRelayServerRunning) {
-        await this._stopRelayServer()
-        debug(`Relay stopped`)
+      if (this.isUDPRelayServerRunning) {
+        await this._stopUDPRelayServer()
+        debug(`UDP Relay stopped`)
+      }
+      await this._startUDPRelayServer()
+      debug(`UDP Relay started`)
+    } catch (err) {
+      warn(err)
+    }
+  }
+
+  async _restartTCPRelayServer () {
+    try {
+      if (this.isTCPRelayServerRunning) {
+        await this._stopTCPRelayServer()
+        debug(`TCP Relay stopped`)
       }
       await this._startTCPRelayServer()
       debug(`Relay started`)
@@ -182,18 +220,18 @@ class RelayManager {
     let publicAddress = networkMonitor.getPublicAddress()
     store.commit('changePublicAddress', publicAddress)
     if (this.natEnabled) {
-      return {ip: publicAddress.ip, port: publicAddress.port}
+      return {ip: publicAddress.ip, port: publicAddress.port, UDPPort: publicAddress.UDPPort}
     }
-    return {ip: publicAddress.ip, port: this.relayPort}
+    return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
   }
 
   _getLocalAddress () {
     let privateAddress = networkMonitor.getPrivateAddress()
     store.commit('changePrivateAddress', privateAddress)
     if (this.natEnabled) {
-      return {ip: privateAddress.ip, port: privateAddress.port}
+      return {ip: privateAddress.ip, port: privateAddress.port, UDPPort: privateAddress.UDPPort}
     }
-    return {ip: '0.0.0.0', port: this.relayPort}
+    return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
   }
 }
 
