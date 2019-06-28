@@ -1,23 +1,17 @@
-/**
- * Created by milad on 4/12/17.
- */
 import { policyManager } from '@/services'
-const net = require('net')
-import { error, debug } from '@utils/log'
-
+import { debug } from '@utils/log'
 import { Crypto } from '@utils/crypto'
-
 import API from '@/api'
-import { Buffer } from 'buffer';
-// import { pendMgr } from './PendingConnections'
+import { Buffer } from 'buffer'
+const net = require('net')
 
 export class ConnectionReceiver {
-  constructor (socketup, socketdown, socket, authenticator) {
+  constructor (socketUp, socketDown, socket, authenticator) {
     this.authenticator = authenticator
-    this.socketup = socketup
+    this.socketUp = socketUp
     this.socket = socket
-    this.socketdown = socketdown
-    this.socketup.on('data', (data) => {
+    this.socketDown = socketDown
+    this.socketUp.on('data', (data) => {
       if (this.isAuthenticated) {
         this.crypt.decrypt(data)
       } else {
@@ -30,7 +24,7 @@ export class ConnectionReceiver {
     this.carrylen = 0
     this.carry = Buffer(0)
     this.lastcommand = ''
-    this.newconcarry=''
+    this.newconcarry = ''
     this.lastconid = ''
     this.lastsize = 0
     this.headersize = 32
@@ -40,11 +34,9 @@ export class ConnectionReceiver {
   }
 
   authenticate (data) {
-    // data = Buffer.concat([this.newconcarry, data]);
-    // console.log("MY DATA", data);
     if (data.length >= this.headersize) {
-      const sessiontoken = data.slice(0, this.headersize)
-      const desc = this.authenticator.authenticate(sessiontoken)
+      const sessionToken = data.slice(0, this.headersize)
+      const desc = this.authenticator.authenticate(sessionToken)
       if (desc) {
         API.clientSessionConnected(desc.client, desc.sessionId)
         this.desciber = desc
@@ -66,14 +58,11 @@ export class ConnectionReceiver {
     sendpacket.writeUInt16BE(conid)
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
-    if (command!=='D') {
+    if (command !== 'D') {
       debug(`Sending Down [${command}] , [${data}] , [${data.length}]`)
     }
     const b = Buffer.concat([sendpacket, data])
-    
-    this.socketdown.write(this.crypt.encrypt(b))
-      
-    
+    this.socketDown.write(this.crypt.encrypt(b))
   }
 
   newConnection (ip, port, conid) {
@@ -96,8 +85,7 @@ export class ConnectionReceiver {
           this.write(conid, 'C', Buffer(ip + ':' + String(port)))
           delete this.connections[conid]
         })
-      }
-      catch (err) {
+      } catch (err) {
         this.write(conid, 'C', Buffer(ip + ':' + String(port)))
       }
     }).catch((err) => {
@@ -107,12 +95,10 @@ export class ConnectionReceiver {
   }
 
   commandParser (lastconid, CMD, size, data) {
-
     if (CMD === 'N') {
-      data=String(data)
+      data = String(data)
       if (data.length === size) {
         const sp = data.split(':')
-
         const ip = sp[0]
         const port = sp[1]
         this.newconcarry = ''
@@ -121,7 +107,7 @@ export class ConnectionReceiver {
         this.newconcarry += data
         if (this.newconcarry.length === size) {
           const sp = this.newconcarry.split(':')
-          this.newconcarry=''
+          this.newconcarry = ''
           const ip = sp[0]
           const port = sp[1]
           this.newConnection(ip, port, lastconid)
@@ -147,7 +133,6 @@ export class ConnectionReceiver {
     if (this.isAuthenticated) {
       API.clientSessionDisconnected(this.desciber.client, this.desciber.sessionId)
     }
-
     Object.keys(this.connections).forEach((key) => {
       this.connections[key].end()
     })
@@ -162,14 +147,12 @@ export class ConnectionReceiver {
           break
         } else {
           this.commandParser(this.lastconid, this.lastcommand, this.lastsize, data.slice(0, this.carrylen))
-
           data = data.slice(this.carrylen)
-
           this.carrylen = 0
         }
       } else {
         if (this.carry.length > 0) {
-          data = Buffer.concat([this.carry , data])
+          data = Buffer.concat([this.carry, data])
           this.carry = Buffer(0)
         }
         if (data.length < 7) {

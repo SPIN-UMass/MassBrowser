@@ -164,30 +164,28 @@ class RelayManager {
 
   async _startUDPRelayServer () {
     let localAddress = this._getLocalAddress()
-    let server = new UDPRelay(
+    this.UDPRelayServer = new UDPRelay(
       this.authenticator,
       localAddress.ip,
       localAddress.UDPPort,
       this.uploadLimiter,
       this.downloadLimiter
     )
-    await server.start()
+    await this.UDPRelayServer.start()
     this.isUDPRelayServerRunning = true
-    this.UDPRelayServer = server
   }
 
   async _startTCPRelayServer () {
     let localAddress = this._getLocalAddress()
-    let server = new TCPRelay(
+    this.TCPRelayServer = new TCPRelay(
       this.authenticator,
       localAddress.ip,
       localAddress.port,
       this.uploadLimiter,
       this.downloadLimiter
     )
-    await server.start()
+    await this.TCPRelayServer.start()
     this.isTCPRelayServerRunning = true
-    this.TCPRelayServer = server
   }
 
   async _restartUDPRelayServer () {
