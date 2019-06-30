@@ -2,7 +2,7 @@ import { ConnectionReceiver } from '@/net/ConnectionReceiver'
 import { debug, info } from '@utils/log'
 import { relayManager } from '../../services'
 import * as dgram from 'dgram'
-import * as rudp from 'rudp'
+import * as rudp from '../../../common/rudp'
 
 export class UDPRelay {
   constructor (authenticator, address, port, upLimit, downLimit) {
@@ -26,45 +26,44 @@ export class UDPRelay {
       this.server = new rudp.Server(serverSocket)
       this.server.on('connection', (connection) => {
         this.connectionList.push(connection)
+        let upPipe = this.upLimit.throttle()
+        upPipe.on('error', (err) => { debug(err) })
+        let downPipe = this.downLimit.throttle()
+        downPipe.on('error', (err) => { debug(err) })
+        this.connectionList.push(connection)
+        connection.pipe(upPipe)
+        downPipe.pipe(connection)
+        let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
-      })
-      // let upPipe = this.upLimit.throttle()
-      // upPipe.on('error', (err) => { debug(err) })
-      // let downPipe = this.downLimit.throttle()
-      // downPipe.on('error', (err) => { debug(err) })
-      // this.connectionList.push(socket)
-      // socket.pipe(upPipe)
-      // downPipe.pipe(socket)
+        connection.on('error', (err) => {
+          console.log('socket error', err.message)
+          this.connectionList.splice(this.connectionList.indexOf(connection), 1)
+          receiver.closeConnections()
+          connection.unpipe(upPipe)
+          downPipe.unpipe(connection)
+          downPipe.end()
+          upPipe.end()
+        })
 
-      let recver = new ConnectionReceiver(upPipe, downPipe, socket, this.authenticator)
-      socket.on('error', (err) => {
-        console.log('socket error', err.message)
-        this.connectionList.splice(this.connectionList.indexOf(socket), 1)
-        recver.closeConnections()
-        socket.unpipe(upPipe)
-        downPipe.unpipe(socket)
-        downPipe.end()
-        upPipe.end()
-      })
-
-      socket.on('end', () => {
-        console.log('socket ending')
-        this.connectionList.splice(this.connectionList.indexOf(socket), 1)
-        recver.closeConnections()
-        socket.unpipe(upPipe)
-        downPipe.unpipe(socket)
-        downPipe.end()
-        upPipe.end()
+        // connection.on('end', () => {
+        //   console.log('socket ending')
+        //   this.connectionList.splice(this.connectionList.indexOf(socket), 1)
+        //   recver.closeConnections()
+        //   socket.unpipe(upPipe)
+        //   downPipe.unpipe(socket)
+        //   downPipe.end()
+        //   upPipe.end()
+        // })
       })
 
       let serverStarted
-      server.on('listening', () => {
+      serverSocket.on('listening', () => {
         info('UDP running on port', this.port)
         serverStarted = true
-        resolve(server)
+        resolve(this.server)
       })
 
-      server.on('error', (e) => {
+      serverSocket.on('error', (e) => {
         if (!serverStarted) {
           reject(e)
         }
@@ -75,10 +74,7 @@ export class UDPRelay {
   async stop () {
     if (this.server) {
       return new Promise((resolve, reject) => {
-        this.connectionList.forEach((soc, index, arr) => {
-          soc.destroy()
-          debug(`killing client soc`)
-        })
+        this.connectionList = []
         this.server.close(() => {
           resolve()
         })
@@ -104,28 +100,29 @@ export function connectToClient (clientAddress, clientPort, token) {
   myDown.on('error', (err) => { debug(err) })
 
   client.send(token)
-  socket.pipe(myUp)
-  myDown.pipe(socket)
 
-  let recver = new ConnectionReceiver(myUp, myDown, socket)
+  client.pipe(myUp)
+  myDown.pipe(client)
+
+  let receiver = new ConnectionReceiver(myUp, myDown, socket)
 
   socket.on('error', (err) => {
     console.log('socket error', err.message)
-    recver.closeConnections()
-    socket.unpipe(myUp)
-    myDown.unpipe(socket)
+    receiver.closeConnections()
+    client.unpipe(myUp)
+    myDown.unpipe(client)
     myDown.end()
     myUp.end()
   })
-  socket.on('end', () => {
-    console.log('socket ending')
-    recver.closeConnections()
-
-    socket.unpipe(myUp)
-    myDown.unpipe(socket)
-    myDown.end()
-    myUp.end()
-  })
+  // socket.on('end', () => {
+  //   console.log('socket ending')
+  //   receiver.closeConnections()
+  //
+  //   socket.unpipe(myUp)
+  //   myDown.unpipe(socket)
+  //   myDown.end()
+  //   myUp.end()
+  // })
 }
 
 export default UDPRelay
