@@ -25,16 +25,16 @@ export class UDPRelay {
 
       this.server = new rudp.Server(serverSocket)
       this.server.on('connection', (connection) => {
-        this.connectionList.push(connection)
+        this.connectionList.push(connection) // not sure about this
         let upPipe = this.upLimit.throttle()
         upPipe.on('error', (err) => { debug(err) })
         let downPipe = this.downLimit.throttle()
         downPipe.on('error', (err) => { debug(err) })
-        this.connectionList.push(connection)
-        connection.pipe(upPipe)
+        connection.pipe(upPipe) // connection should be stream for doing this
         downPipe.pipe(connection)
         let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
+        // the connection should emit the error I think it is not doing that right now
         connection.on('error', (err) => {
           console.log('socket error', err.message)
           this.connectionList.splice(this.connectionList.indexOf(connection), 1)
@@ -101,10 +101,10 @@ export function connectToClient (clientAddress, clientPort, token) {
 
   client.send(token)
 
-  client.pipe(myUp)
+  client.pipe(myUp) // for this again the client needs to be able to stream
   myDown.pipe(client)
 
-  let receiver = new ConnectionReceiver(myUp, myDown, socket)
+  let receiver = new ConnectionReceiver(myUp, myDown, client)
 
   socket.on('error', (err) => {
     console.log('socket error', err.message)
