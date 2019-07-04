@@ -25,12 +25,12 @@ export class UDPRelay {
 
       this.server = new rudp.Server(serverSocket)
       this.server.on('connection', (connection) => {
-        this.connectionList.push(connection) // not sure about this
+        this.connectionList.push(connection)
         let upPipe = this.upLimit.throttle()
         upPipe.on('error', (err) => { debug(err) })
         let downPipe = this.downLimit.throttle()
         downPipe.on('error', (err) => { debug(err) })
-        connection.pipe(upPipe) // connection should be stream for doing this
+        connection.pipe(upPipe)
         downPipe.pipe(connection)
         let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
