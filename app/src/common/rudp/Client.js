@@ -38,3 +38,7 @@ Client.prototype.send = function (data) {
 Client.prototype.close = function () {
   this._packetSender.send(Packet.createFinishPacket());
 };
+
+Client.prototype.getConnection = function () {
+  return this._connection;
+}
