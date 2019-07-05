@@ -57,7 +57,7 @@ export class UDPRelay {
 
       let serverStarted
       serverSocket.on('listening', () => {
-        info('UDP running on port', this.port)
+        info('UDP relay running on port', this.port)
         serverStarted = true
         resolve(this.server)
       })

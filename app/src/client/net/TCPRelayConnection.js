@@ -2,17 +2,16 @@ import net from 'net'
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
 import { debug, warn } from '@utils/log'
-import config from '@utils/config'
 import { RelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
 
 export class TCPRelayConnection extends EventEmitter {
-  constructor (relayip, relayport, desc) {
+  constructor (relayAddress, relayPort, desc) {
     super()
 
     this.id = ''
-    this.relayip = relayip
-    this.relayport = relayport
+    this.relayip = relayAddress
+    this.relayport = relayPort
     this.desc = desc
     this.hasSessionID = true
     this.sessionID = ''

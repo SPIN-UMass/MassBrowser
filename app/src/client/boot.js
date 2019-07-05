@@ -1,7 +1,3 @@
-/**
- * Created by milad on 4/11/17.
- */
-
 import { addCertificateToFirefox, setClientVersion } from './firefox'
 
 import crypto from 'crypto'
@@ -13,14 +9,15 @@ import config from '@utils/config'
 import { debug, error } from '@utils/log'
 import { HttpTransport } from '@utils/transport'
 
-import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
+import TCPConnectivityConnection from '@/net/TCPConnectivityAPI'
+import UDPConnectivityConnection from '@/net/UDPConnectivityAPI'
 
 import API from '@/api'
 
 import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
-import { startClientSocks, TCPRelayConnection, RandomRelayAssigner } from '@/net'
+import { startClientSocks } from '@/net'
 
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
@@ -86,8 +83,12 @@ export default async function bootClient () {
     await startClientSocks('127.0.0.1', config.socksPort)
     status.clear()
 
-    status = statusManager.info('Starting Connectivity Monitor')
-    await ConnectivityConnection.startRoutine()
+    status = statusManager.info('Starting TCP Connectivity Monitor')
+    await TCPConnectivityConnection.startRoutine()
+    status.clear()
+
+    status = statusManager.info('Starting UDP Connectivity Monitor')
+    await UDPConnectivityConnection.startRoutine()
     status.clear()
 
     status = statusManager.info('Starting remaining services')
