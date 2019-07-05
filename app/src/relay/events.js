@@ -1,7 +1,6 @@
 import { debug, warn } from '~/utils/log'
 import { relayManager } from '@/services'
 import { connectToClient } from '@/net/relays/TCPRelay'
-import { pendMgr } from '~/relay/net/PendingConnections'
 
 const handlers = {
   'new-session': data => relayManager.onNewSessionEvent(data),
@@ -35,6 +34,6 @@ function connectClientSession (data) {
     'sessionId': data.id
   }
 
-  pendMgr.addPendingConnection((desc.token), desc)
+  // pendMgr.addPendingConnection((desc.token), desc)
   connectToClient(data.client.ip, data.client.port, data.id)
 }
