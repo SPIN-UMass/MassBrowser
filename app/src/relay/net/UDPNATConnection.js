@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { debug } from '~/utils/log'
 import * as dgram from 'dgram'
 
-export class NATConnectivityConnection extends EventEmitter {
+export class UDPNATConnection extends EventEmitter {
   constructor (echoServerAddress, echoServerPort) {
     super()
     this.echoServerAddress = echoServerAddress
@@ -83,4 +83,4 @@ export class NATConnectivityConnection extends EventEmitter {
   }
 }
 
-export default NATConnectivityConnection
+export default UDPNATConnection
