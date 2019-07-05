@@ -121,15 +121,6 @@ class NetworkMonitor {
       relayManager.handleReconnect()
     }
   }
-
-  // checkNatType() {
-  //   var stun = require('vs-stun')
-  //   if (this.natEnabled) {
-  //     stun.connect(config.stunServer, (err, data) => {
-  //       console.log('NAT TYPE IS', data.stun)
-  //     })
-  //   }
-  // }
 }
 export const networkMonitor = new NetworkMonitor()
 export default networkMonitor

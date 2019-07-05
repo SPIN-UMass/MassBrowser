@@ -17,8 +17,7 @@ export class UDPNATConnection extends EventEmitter {
       this.socket.bind(10000 + Math.floor(Math.random() * (65535 - 10000)))
       this.socket.connect(this.echoServerPort, this.echoServerAddress, () => {
         debug('Connected to Echo Server using UDP')
-        let testMessage = Buffer.from('TEST')
-        this.socket.send(testMessage, (err) => {
+        this.socket.send(Buffer.from('TEST'), (err) => {
           if (err) {
             debug('Failed to send the test message to the Echo server: ', err)
           }
@@ -43,7 +42,6 @@ export class UDPNATConnection extends EventEmitter {
             promiseResolved = true
             resolve()
           }
-          this.socket = null
         } catch (err) {
           debug('Something went wrong while parsing the data,', err)
         }
@@ -77,8 +75,7 @@ export class UDPNATConnection extends EventEmitter {
   async keepAlive () {
     this.socket.connect(this.echoServerPort, this.echoServerAddress, () => {
       debug('Connected to Echo Server using UDP')
-      let testMessage = Buffer.from('OK')
-      this.socket.send(testMessage)
+      this.socket.send(Buffer.from('OK'))
     })
   }
 }
