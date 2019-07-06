@@ -14,12 +14,12 @@ export function eventHandler (event, data) {
   if (handler) {
     handler(data)
   } else {
-    warn(`Recieved event for unregistered event type '${event}'`)
+    warn(`Received event for unregistered event type '${event}'`)
   }
 }
 
 function reconnected (data) {
-  debug('WS reconnected, refresshing info')
+  debug('WS reconnected, refreshing info')
   relayManager.handleReconnect()
 }
 
@@ -36,6 +36,6 @@ function connectClientSession (data) {
   }
 
   // pendMgr.addPendingConnection((desc.token), desc)
-  // add if to use UPD or TCP
+  // TODO condition for calling the correct function should be added here to use UPD or TCP
   connectToClientTCP(data.client.ip, data.client.port, data.id)
 }
