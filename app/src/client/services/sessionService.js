@@ -5,7 +5,7 @@ import { warn, debug } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
-import { ConnectionTypes } from '@/common/constants'
+import { ConnectionTypes } from '@common/constants'
 
 let TEST_URL = 'backend.yaler.co'
 import { Domain, Category } from '@/models'

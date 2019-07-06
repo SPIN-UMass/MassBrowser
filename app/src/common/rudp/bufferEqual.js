@@ -1,5 +1,3 @@
-
-var buffertools = require('buffertools')
-module.exports = function bufferEqual(a, b) {
-  return buffertools.compare(a, b) === 0
+module.exports = function bufferEqual (a, b) {
+  return Buffer.compare(a, b) === 0
 }
