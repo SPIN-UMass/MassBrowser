@@ -83,14 +83,10 @@ class UDPConnectivityAPI extends EventEmitter {
         info('UDP socket created')
       })
 
-      this.socket.connect(this.echoServerPort, this.echoServerAddress, () => {
-        this.socket.send(Buffer.from('TEST'), (err) => {
-          debug('Error on sending UDP test message to Echo server', err)
-          this.socket.close()
-        })
-        resolve()
+      this.socket.send(Buffer.from('TEST'), this.echoServerPort, this.echoServerAddress, (err) => {
+        debug('Error on sending UDP test message to Echo server', err)
+        this.socket.close()
       })
-
       this.socket.on('message', (data, remote) => {
         data = data.toString()
         let remoteAddress = data.split(':')[0]
@@ -112,6 +108,8 @@ class UDPConnectivityAPI extends EventEmitter {
         debug('UDP Connectivity Server Error', e)
         this.reconnect()
       })
+
+      resolve()
     })
   }
 

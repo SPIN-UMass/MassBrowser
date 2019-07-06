@@ -15,14 +15,11 @@ export class UDPNATConnection extends EventEmitter {
       let promiseResolved = false
       this.socket = dgram.createSocket('udp4')
       this.socket.bind(10000 + Math.floor(Math.random() * (65535 - 10000)))
-      this.socket.connect(this.echoServerPort, this.echoServerAddress, () => {
-        debug('Connected to Echo Server using UDP')
-        this.socket.send(Buffer.from('TEST'), (err) => {
-          if (err) {
-            debug('Failed to send the test message to the Echo server: ', err)
-          }
-          debug('Test message sent to the Echo server')
-        })
+      this.socket.send(Buffer.from('TEST'), this.echoServerPort, this.echoServerAddress, (err) => {
+        if (err) {
+          debug('Failed to send the test message to the Echo server: ', err)
+        }
+        debug('Test message sent to the Echo server')
       })
 
       this.socket.on('message', (data) => {
@@ -47,7 +44,7 @@ export class UDPNATConnection extends EventEmitter {
         }
       })
 
-      this.socket('error', (err) => {
+      this.socket.on('error', (err) => {
         debug('UDP Connectivity Server Error', err)
         if (err.code === 'EADDRINUSE') {
           return this.connect()
@@ -73,10 +70,7 @@ export class UDPNATConnection extends EventEmitter {
   }
 
   async keepAlive () {
-    this.socket.connect(this.echoServerPort, this.echoServerAddress, () => {
-      debug('Connected to Echo Server using UDP')
-      this.socket.send(Buffer.from('OK'))
-    })
+    this.socket.send(Buffer.from('OK'), this.echoServerPort, this.echoServerAddress)
   }
 }
 
