@@ -3,6 +3,7 @@ import { debug, warn } from '@utils/log'
 import { TCPRelayConnection } from './TCPRelayConnection'
 import { UDPRelayConnection } from './UDPRelayConnection'
 import * as dgram from 'dgram'
+import * as rudp from '@common/rudp'
 
 export function runLocalTCPServer (publicIP, publicPort) {
   const server = net.createServer((socket) => {
@@ -21,10 +22,10 @@ export function runLocalTCPServer (publicIP, publicPort) {
     server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
       resolve(server)
     })
-    debug('Relay started on ', publicPort)
+    debug('TCP Relay started on ', publicPort)
     server.on('error', (e) => {
       if (e.code === 'EADDRINUSE') {
-        warn('Relay address in use, retrying...')
+        warn('TCP Relay address in use, retrying...')
         setTimeout(() => {
           server.close()
           server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
@@ -36,34 +37,39 @@ export function runLocalTCPServer (publicIP, publicPort) {
   })
 }
 
-export function runLocalUDPServer (publicIP, publicPort) {
+export function runLocalUDPServer (publicAddress, publicPort) {
   return new Promise((resolve, reject) => {
     let socket = dgram.createSocket('udp4')
-    socket.bind(publicPort, publicIP, () => {
-      debug('Relay started on ', publicPort)
-      resolve(socket)
+
+    socket.bind(publicPort, publicAddress, () => {
+      debug('UDP Relay started on ', publicPort)
     })
 
-    let receiver = new UDPRelayConnection()
-    receiver.relayReverse(socket)
-
     socket.on('error', err => {
-      debug('udp socket error, ', err)
-
+      debug('UDP Relay socket error, ', err)
       if (err.code === 'EADDRINUSE') {
-        warn('Relay address in use, retrying...')
+        warn('UDP Relay address in use, retrying...')
         setTimeout(() => {
           socket.close()
-          socket.bind(publicPort, publicIP, () => {
-            resolve(socket)
+          socket.bind(publicPort, publicAddress, () => {
+            resolve(new rudp.Server(socket))
           })
         }, 1000)
       }
-      receiver.end()
     })
 
-    socket.on('close', () => {
-      receiver.end()
+    let server = new rudp.Server(socket)
+    server.on('connection', connection => {
+      let receiver = new UDPRelayConnection()
+      receiver.relayReverse(connection)
+      connection.on('error', (err) => {
+        debug('Local UDP Server error: ', err)
+        receiver.end()
+      })
+      connection.on('end', () => {
+        receiver.end()
+      })
     })
+    resolve(server)
   })
 }

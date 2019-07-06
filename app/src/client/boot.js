@@ -1,29 +1,18 @@
 import { addCertificateToFirefox, setClientVersion } from './firefox'
-
-import crypto from 'crypto'
-
-import Raven from '@utils/raven'
-import KVStore from '@utils/kvstore'
-
-import config from '@utils/config'
 import { debug, error } from '@utils/log'
-import { HttpTransport } from '@utils/transport'
-
-import TCPConnectivityConnection from '@/net/TCPConnectivityAPI'
-import UDPConnectivityConnection from '@/net/UDPConnectivityAPI'
-
-import API from '@/api'
-
 import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
 import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks } from '@/net'
-
+import config from '@utils/config'
+import Raven from '@utils/raven'
+import UDPConnectivityConnection from '@/net/UDPConnectivityAPI'
+import TCPConnectivityConnection from '@/net/TCPConnectivityAPI'
+import API from '@/api'
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
   ServerError, CacheBrowserError, ApplicationBootError
 } from '@utils/errors'
-
 import { store } from '@utils/store'
 
 // TODO: examine
@@ -50,7 +39,7 @@ export default async function bootClient () {
     status.clear()
 
     status = statusManager.info('Server connection established')
-    let clientup = await API.clientUp()
+    await API.clientUp()
     status.clear()
 
     if (await torService.requiresDownload()) {

@@ -4,13 +4,13 @@ import { debug, warn } from '@utils/log'
 import { UDPRelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
 import * as dgram from 'dgram'
-import * as rudp from 'rudp'
+import * as rudp from '@common/rudp'
 
 export class UDPRelayConnection extends EventEmitter {
-  constructor (relayIP, relayPort, desc) {
+  constructor (relayAddress, relayPort, desc) {
     super()
     this.id = ''
-    this.relayIP = relayIP
+    this.relayAddress = relayAddress
     this.relayPort = relayPort
     this.desc = desc
     this.client = null
@@ -26,11 +26,12 @@ export class UDPRelayConnection extends EventEmitter {
       let socket = dgram.createSocket('udp4')
 
       if (this.client === null) {
-        this.client = new rudp.Client(socket, this.relayIP, this.relayPort)
+        this.client = new rudp.Client(socket, this.relayAddress, this.relayPort)
       }
 
-      socket.connect(this.relayPort, this.relayIP) // I'm not sure if this is necessary
       this.client.send(Buffer.from('TEST'))
+      let connection = this.client.getConnection()
+
       const onFail = (err) => {
         warn(`Relay ${this.id} UDP connection error: ${err.message}`)
         reject(new UDPRelayConnectionError(err))
@@ -39,12 +40,12 @@ export class UDPRelayConnection extends EventEmitter {
       const onSuccess = () => {
         debug(`Relay ${this.id} UDP connected`)
         socket.removeListener('error', onFail)
-        resolve(socket)
+        resolve(connection)
       }
 
       socket.once('connect', onSuccess)
       socket.once('error', onFail)
-      resolve()
+      resolve(connection)
     })
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
@@ -53,10 +54,10 @@ export class UDPRelayConnection extends EventEmitter {
   sessionFounded (session) {
     return new Promise((resolve, reject) => {
       this.desc = session.desc
-      this.relayIP = session.ip
-      this.relayPort = session.port
+      this.relayip = session.ip
+      this.relayport = session.port
       this._initSocket(this.socket)
-      this._initRelay()
+      this._initRelay(this.socket)
       resolve()
     })
   }
@@ -67,33 +68,39 @@ export class UDPRelayConnection extends EventEmitter {
       this.emit('data', d)
     }, () => {
       this.emit('close')
-      this.socket.close()
+      this.socket.end()
     })
 
     this.socket = socket
     this.cipher = cipher
-    this.client.on('data', (data) => {
+    socket.on('data', (data) => {
       this.cipher.decrypt(data)
     })
 
     socket.on('error', (err) => {
-      debug('UDP relay connection socket error', err)
+      console.log('socket error', err)
+      if (!socket.writable) {
+        console.log('socket is not writable')
+        this.emit('close')
+      }
     })
-
-    socket.on('close', () => {
+    socket.on('end', () => {
       console.log('ending relay socket')
       this.emit('close')
     })
+    return socket
   }
 
-  _initRelay () {
+  _initRelay (socket) {
+    let desc = this.desc
     let i = Math.random() * (100 - 1) + 1
-    let padarr = [Buffer(this.desc['token'])]
+    let padarr = [Buffer(desc['token'])]
     while (i > 0) {
       padarr.push(this.cipher.encryptzero())
-      i = i - 1
+      i -= 1
     }
-    this.client.send(Buffer.concat(padarr))
+    socket.write(Buffer.concat(padarr))
+    return socket
   }
 
   relayReverse (socket) {
@@ -102,7 +109,6 @@ export class UDPRelayConnection extends EventEmitter {
 
     const readable = (data) => {
       let sessionId = data.toString()
-      console.log('read session id', sessionId, sessionId.length)
       this.hasSessionID = true
       this.sessionID = sessionId
       this.socket.removeListener('data', readable)
@@ -112,7 +118,7 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   end () {
-    this.socket.close()
+    this.socket.end()
   }
 
   write (connectionID, command, data) {
@@ -122,8 +128,8 @@ export class UDPRelayConnection extends EventEmitter {
     sendPacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendPacket, data])
     const enc = this.cipher.encrypt(b)
-    this.client.send(enc)
     this.emit('send', enc)
+    this.socket.write(enc)
   }
 }
 

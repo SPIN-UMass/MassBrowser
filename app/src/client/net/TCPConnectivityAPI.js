@@ -72,7 +72,6 @@ class TCPConnectivityAPI extends EventEmitter {
     this.checkStunServer().then(() => {
       this.socket.write('TEST')
     })
-
   }
 
   connect () {

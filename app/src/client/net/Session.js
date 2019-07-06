@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events'
 import { connectionManager } from './connectionManager'
-import { TCPRelayConnection } from './TCPRelayConnection'
 import { DomainConnection } from './DomainConnection'
 import { pendMgr } from './PendingConnections'
 import { sessionService } from '../services/sessionService'
 import { ConnectionTypes } from '../../common/constants'
-import UDPRelayConnection from './UDPRelayConnection'
+import { TCPRelayConnection } from './TCPRelayConnection'
+import { UDPRelayConnection } from './UDPRelayConnection'
 
 export class Session extends EventEmitter {
   constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
