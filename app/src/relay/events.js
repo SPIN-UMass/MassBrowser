@@ -1,6 +1,7 @@
 import { debug, warn } from '~/utils/log'
 import { relayManager } from '@/services'
-import { connectToClient } from '@/net/relays/TCPRelay'
+import { connectToClientTCP } from '@/net/relays/TCPRelay'
+// import { connectToClientUDP } from '@/net/relays/UDPRelay'
 
 const handlers = {
   'new-session': data => relayManager.onNewSessionEvent(data),
@@ -23,7 +24,7 @@ function reconnected (data) {
 }
 
 function connectClientSession (data) {
-  var desc = {
+  let desc = {
     'writekey': (Buffer.from(data.read_key, 'base64')),
     'writeiv': (Buffer.from(data.read_iv, 'base64')),
     'readkey': (Buffer.from(data.write_key, 'base64')),
@@ -35,5 +36,6 @@ function connectClientSession (data) {
   }
 
   // pendMgr.addPendingConnection((desc.token), desc)
-  connectToClient(data.client.ip, data.client.port, data.id)
+  // add if to use UPD or TCP
+  connectToClientTCP(data.client.ip, data.client.port, data.id)
 }

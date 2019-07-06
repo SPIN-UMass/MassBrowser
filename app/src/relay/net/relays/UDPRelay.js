@@ -88,7 +88,7 @@ export class UDPRelay {
   }
 }
 
-export function connectToClient (clientAddress, clientPort, token) {
+export function connectToClientUDP (clientAddress, clientPort, token) {
   console.log('Connecting to', clientAddress, clientPort, ' using UDP')
   let socket = dgram.createSocket('udp4')
   let client = new rudp.Client(socket, clientAddress, clientPort)
