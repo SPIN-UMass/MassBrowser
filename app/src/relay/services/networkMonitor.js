@@ -3,7 +3,7 @@ import config from '@utils/config'
 import { relayManager } from '@/services'
 import { TCPNATConnection, UDPNATConnection } from '@/net'
 import { store } from '@utils/store'
-import { debug } from '@utils/log'
+import { info } from '@utils/log'
 
 class NetworkMonitor {
   constructor () {
@@ -32,7 +32,8 @@ class NetworkMonitor {
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
 
-    this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
+    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
+    this.UDPNATConnection = new UDPNATConnection('128.119.245.46', 8040)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
     await this.UDPNATConnection.connect()
@@ -42,11 +43,17 @@ class NetworkMonitor {
   }
 
   waitForNetworkStatus () {
-    return new Promise((resolve, reject) => {
-      this.TCPNATConnection.once('tcp-net-update', data => data).then((TCPData) => {
-        this.UDPNATConnection.once('udp-net-update', UDPData => resolve({TCPData, UDPData}))
+    const TCPNATPromise = new Promise((resolve, reject) => {
+      this.TCPNATConnection.once('tcp-net-update', data => {
+        resolve()
       })
     })
+    const UDPNATPromise = new Promise((resolve, reject) => {
+      this.UDPNATConnection.once('udp-net-update', data => {
+        resolve()
+      })
+    })
+    return Promise.all([TCPNATPromise, UDPNATPromise])
   }
 
   getPublicAddress () {
@@ -87,11 +94,11 @@ class NetworkMonitor {
       store.commit('changeUDPRelayReachable', isUDPRelayReachable)
     }
 
-    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
+    info(`TCP Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
     if (this.TCPNATConnection.isConnected) {
       this.TCPNATConnection.keepAlive()
     }
-    debug(`Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
+    info(`UDP Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
     this.UDPNATConnection.keepAlive()
   }
 

@@ -37,7 +37,7 @@ class RelayAPI extends CommonAPI {
     var data = {
       'ip': ip,
       'status': 'up',
-      'tcp_port': TCPPort,
+      'port': TCPPort,
       'udp_port': UDPPort,
       'fingerprint': this.fingerprint
     }

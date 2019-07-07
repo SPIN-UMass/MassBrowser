@@ -17,14 +17,14 @@ export class UDPRelay {
 
   async start () {
     return new Promise((resolve, reject) => {
-      let serverSocket = dgram.createSocket('udp4')
-      serverSocket.bind({
+      this.server = dgram.createSocket('udp4')
+      this.server.bind({
         port: this.port,
         address: this.address
       })
 
-      this.server = new rudp.Server(serverSocket)
-      this.server.on('connection', (connection) => {
+      let rudpServer = new rudp.Server(this.server)
+      rudpServer.on('connection', (connection) => {
         this.connectionList.push(connection)
         let upPipe = this.upLimit.throttle()
         upPipe.on('error', (err) => { debug(err) })
@@ -56,13 +56,13 @@ export class UDPRelay {
       })
 
       let serverStarted
-      serverSocket.on('listening', () => {
+      this.server.on('listening', () => {
         info('UDP relay running on port', this.port)
         serverStarted = true
         resolve(this.server)
       })
 
-      serverSocket.on('error', (e) => {
+      this.server.on('error', (e) => {
         if (!serverStarted) {
           reject(e)
         }
