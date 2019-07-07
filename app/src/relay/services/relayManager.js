@@ -101,7 +101,6 @@ class RelayManager {
   }
 
   async startRelay () {
-    debug('START ################')
     await this.changeAccess(true)
   }
 

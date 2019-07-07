@@ -30,9 +30,9 @@ export class UDPNATConnection extends EventEmitter {
 
           this.emit('udp-net-update', {
             localAddress: this.socket.address().address,
-            localPort: this.socket.address().port,
+            localUDPPort: this.socket.address().port,
             remoteAddress: remoteAddress,
-            remotePort: remotePort
+            remoteUDPPort: remotePort
           })
 
           if (!promiseResolved) {
