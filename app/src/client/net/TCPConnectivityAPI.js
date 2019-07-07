@@ -31,7 +31,7 @@ class TCPConnectivityAPI extends EventEmitter {
       this.remoteIP = remoteIP
       this.remotePort = remotePort
       this.restartListenerServer()
-      API.updateClientAddress(remoteIP, remotePort)
+      API.updateClientAddress(remoteIP, remotePort, null)
     }
   }
 

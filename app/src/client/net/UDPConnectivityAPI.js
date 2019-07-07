@@ -9,19 +9,16 @@ class UDPConnectivityAPI extends EventEmitter {
     super()
     this.echoServerAddress = ''
     this.echoServerPort = 0
-
-    this.socket = undefined
+    this.socket = null
     this.isConnected = false
     this.autoConnect = false
     this.routineStatus = false
     this.ListenServer = null
     this.isServerRunning = false
-
     this.localAddress = ''
     this.remoteAddress = ''
     this.localUDPPort = 0
     this.remoteUDPPort = 0
-
     this.keepAliveInterval = null
   }
 
@@ -32,7 +29,7 @@ class UDPConnectivityAPI extends EventEmitter {
       this.remoteAddress = remoteAddress
       this.remoteUDPPort = remotePort
       this.restartListenerServer()
-      API.updateClientAddress(remoteAddress, remotePort)
+      API.updateClientAddress(remoteAddress, null, remotePort)
     }
   }
 
@@ -57,7 +54,7 @@ class UDPConnectivityAPI extends EventEmitter {
   checkStunServer () {
     return new Promise((resolve, reject) => {
       if (this.echoServerPort === 0) {
-        API.requestNewUDPStunServer().then((data) => {
+        API.requestNewStunServer().then((data) => {
           this.echoServerAddress = data.ip
           this.echoServerPort = data.port
           this.connect()
@@ -87,6 +84,7 @@ class UDPConnectivityAPI extends EventEmitter {
         debug('Error on sending UDP test message to Echo server', err)
         this.socket.close()
       })
+
       this.socket.on('message', (data, remote) => {
         data = data.toString()
         let remoteAddress = data.split(':')[0]

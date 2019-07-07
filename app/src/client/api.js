@@ -19,17 +19,17 @@ class ClientAPI extends CommonAPI {
         'invitation_code': invitationCode
       }
     )
-      // r, as a parameter of an arrow function, will be the value of
-      // what returned by this.transport.post()
-      // Note that the final value returned by the registerClient
-      // function is r.data
-    .then(r => r.data)
-    .catch(err => {
-      if (err instanceof PermissionDeniedError) {
-        throw new InvalidInvitationCodeError('Invalid Invitation Code')
-      }
-      throw err
-    })
+    // r, as a parameter of an arrow function, will be the value of
+    // what returned by this.transport.post()
+    // Note that the final value returned by the registerClient
+    // function is r.data
+      .then(r => r.data)
+      .catch(err => {
+        if (err instanceof PermissionDeniedError) {
+          throw new InvalidInvitationCodeError('Invalid Invitation Code')
+        }
+        throw err
+      })
   }
 
   async clientUp () {
@@ -49,34 +49,29 @@ class ClientAPI extends CommonAPI {
         if (r.status == 201) {
           return r.data
         }
-
-        // Sesion not found
         return null
-      },(err)=>{
+      }, (err) => {
         return null
       })
   }
 
-  // TODO add client access protocol like TCP or UDP
-  updateClientAddress (remoteIP, remotePort) {
-    debug(`Sending address info to server: ${remoteIP} ${remotePort}`)
-    return this.transport.post(
-      CLIENT_URL + '/' + this.userID,
-      {
-        'ip': remoteIP,
-        'port': remotePort
+  updateClientAddress (remoteAddress, remoteTCPPort, remoteUDPPort) {
+    let data = {}
+    if (remoteTCPPort === null) {
+      data = {
+        'ip': remoteAddress,
+        'udp_port': remoteUDPPort
       }
-    ).then(r => r.data)
+    } else {
+      data = {
+        'ip': remoteAddress,
+        'port': remoteTCPPort
+      }
+    }
 
-  }
-
-  requestNewUDPStunServer () {
-    return new Promise((resolve, reject) => {
-      resolve({
-        'ip': config.serverURL.replace('https://', ''),
-        'port': 8823
-      })
-    })
+    debug(`Sending address info to server: ${remoteAddress} ${remoteTCPPort} ${remoteUDPPort}`)
+    return this.transport.post(
+      CLIENT_URL + '/' + this.userID, data).then(r => r.data)
   }
 
   requestNewStunServer () {
@@ -92,10 +87,10 @@ class ClientAPI extends CommonAPI {
   }
 
   async sendFeedback(content, rating, logs) {
-      // Without the await, the value returned is a promise. With the
-      // await, it will wait untill getting a value from
-      // tranpsort.post function
-      return await this.transport.post('/client/feedback', {
+    // Without the await, the value returned is a promise. With the
+    // await, it will wait untill getting a value from
+    // tranpsort.post function
+    return await this.transport.post('/client/feedback', {
       content,
       rating,
       logs
@@ -115,9 +110,9 @@ class ClientAPI extends CommonAPI {
     }
     try{
       let response = await this.transport.post(CLIENT_URL + '/resolve',
-      {
-        'url': URL
-      })
+        {
+          'url': URL
+        })
       if (response.status == 200) {
         globalDNSCache[URL]= response.data.IP
         return response.data.IP
