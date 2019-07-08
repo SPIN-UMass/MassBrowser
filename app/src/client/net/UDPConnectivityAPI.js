@@ -55,8 +55,10 @@ class UDPConnectivityAPI extends EventEmitter {
     return new Promise((resolve, reject) => {
       if (this.echoServerPort === 0) {
         API.requestNewStunServer().then((data) => {
-          this.echoServerAddress = data.ip
-          this.echoServerPort = data.port
+          // this.echoServerAddress = data.ip
+          // this.echoServerPort = data.port
+          this.echoServerAddress = '128.119.245.46'
+          this.echoServerPort = 8823
           this.connect()
           resolve()
         })
