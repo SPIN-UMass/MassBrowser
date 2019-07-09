@@ -69,23 +69,21 @@ class UDPConnectivityAPI extends EventEmitter {
 
   sendKeepAlive () {
     this.checkStunServer().then(() => {
-      this.socket.send(new Buffer('TEST'))
+      this.socket.send(Buffer.from('TEST'))
     })
   }
 
   connect () {
     return new Promise((resolve, reject) => {
-      this.socket = dgram.createSocket('udp4')
+      this.socket = {type: 'udp4', reuseAddr: true}
       this.socket.bind({
-        port: 10000 + Math.floor(Math.random() * (65535 - 10000))
+        port: 10000 + Math.floor(Math.random() * (65535 - 10000)),
+        exclusive: false
       }, () => {
         info('UDP socket created')
       })
 
-      this.socket.send(Buffer.from('TEST'), this.echoServerPort, this.echoServerAddress, (err) => {
-        debug('Error on sending UDP test message to Echo server', err)
-        this.socket.close()
-      })
+      this.socket.send(Buffer.from('TEST'), this.echoServerPort, this.echoServerAddress)
 
       this.socket.on('message', (data, remote) => {
         data = data.toString()

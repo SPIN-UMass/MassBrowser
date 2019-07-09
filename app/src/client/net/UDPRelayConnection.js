@@ -23,7 +23,7 @@ export class UDPRelayConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      let socket = dgram.createSocket('udp4')
+      let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
 
       if (this.client === null) {
         this.client = new rudp.Client(socket, this.relayAddress, this.relayPort)

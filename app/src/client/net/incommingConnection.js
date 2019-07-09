@@ -39,10 +39,10 @@ export function runLocalTCPServer (publicIP, publicPort) {
 
 export function runLocalUDPServer (publicAddress, publicPort) {
   return new Promise((resolve, reject) => {
-    let socket = dgram.createSocket('udp4')
+    let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
     let server = new rudp.Server(socket)
 
-    socket.bind(publicPort, publicAddress, () => {
+    socket.bind({ port: publicPort, address: publicAddress, exclusive: false }, () => {
       debug('UDP Relay started on ', publicPort)
     })
 
@@ -52,13 +52,15 @@ export function runLocalUDPServer (publicAddress, publicPort) {
         warn('UDP Relay address in use, retrying...')
         setTimeout(() => {
           socket.close()
-          socket.bind(publicPort, publicAddress, () => {
-            server = new rudp.Server(socket)
+          socket.bind({ port: publicPort, address: publicAddress, exclusive: false }, () => {
+            debug('UDP Relay started on ', publicPort)
             resolve(socket)
           })
+          server = new rudp.Server(socket)
         }, 1000)
       }
     })
+
     server.on('connection', connection => {
       let receiver = new UDPRelayConnection()
       receiver.relayReverse(connection)

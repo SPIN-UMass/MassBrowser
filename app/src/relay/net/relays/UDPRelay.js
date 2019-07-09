@@ -17,7 +17,7 @@ export class UDPRelay {
 
   async start () {
     return new Promise((resolve, reject) => {
-      this.server = dgram.createSocket('udp4')
+      this.server = dgram.createSocket({ type: 'udp4', reuseAddr: true })
       this.server.bind({
         port: this.port,
         address: this.address
@@ -90,7 +90,7 @@ export class UDPRelay {
 
 export function connectToClientUDP (clientAddress, clientPort, token) {
   console.log('Connecting to', clientAddress, clientPort, ' using UDP')
-  let socket = dgram.createSocket('udp4')
+  let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
   let client = new rudp.Client(socket, clientAddress, clientPort)
   let clientConnection = client.getConnection()
 
