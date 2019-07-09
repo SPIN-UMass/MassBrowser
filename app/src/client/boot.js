@@ -131,13 +131,13 @@ function handleBootError (err) {
     err.log()
     throw new ApplicationBootError('There is a problem with the server, please try again later', true)
   } else if (!(err instanceof ApplicationBootError || err instanceof InvalidInvitationCodeError)) {
-    if (err){
-    if (err.smart) {
-      err.logAndReport()
-    } else {
-      error(err)
-      Raven.captureException(err)
-    }
+    if (err) {
+      if (err.smart) {
+        err.logAndReport()
+      } else {
+        error(err)
+        Raven.captureException(err)
+      }
     }
     throw new ApplicationBootError('Failed to start Application')
   } else {

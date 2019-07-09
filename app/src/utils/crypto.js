@@ -5,8 +5,8 @@ const crypto = require('crypto')
 const alg = 'aes-256-gcm'
 export class Crypto {
   constructor (readkey, readiv, writekey, writeiv, onData, onError) {
-    console.log('readkey', readkey, 'readiv', readiv)
-    console.log('writekey', writekey, 'writeiv', writeiv)
+    // console.log('readkey', readkey, 'readiv', readiv)
+    // console.log('writekey', writekey, 'writeiv', writeiv)
     this.cipher = crypto.createCipheriv(alg, readkey, readiv)
     this.decipher = crypto.createDecipheriv(alg, writekey, writeiv)
     this.onData = onData

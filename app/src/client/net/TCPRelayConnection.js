@@ -63,7 +63,6 @@ export class TCPRelayConnection extends EventEmitter {
 
   _initSocket (socket) {
     var desc = this.desc
-    console.log('log', desc)
     var cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
     }, () => {

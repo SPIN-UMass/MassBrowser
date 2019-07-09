@@ -1,7 +1,7 @@
 import { CommonAPI } from '@common/api'
 import { PermissionDeniedError, InvalidInvitationCodeError } from '@utils/errors'
 import config from '@utils/config'
-import { error, debug } from '@utils/log'
+import { debug } from '@utils/log'
 // @ above means the root of the project (MassBrowser/app/scr)
 // It is implemented by a babel plugin:
 // https://github.com/entwicklerstube/babel-plugin-root-import
@@ -75,18 +75,17 @@ class ClientAPI extends CommonAPI {
   }
 
   requestNewStunServer () {
-    var data = {}
     return new Promise((resolve, reject) => {
       resolve({
-        'ip': config.serverURL.replace('https://', ''),
-        'port': 8823
+        'ip': config.echoServer.host,
+        'port': config.echoServer.port
       })
     })
-    // TODO:
-    //return this.transport.get('/client/stun', data).then(r => r.data.allowed_categories)
+    // var data = {}
+    // TODO: return this.transport.get('/client/stun', data).then(r => r.data.allowed_categories)
   }
 
-  async sendFeedback(content, rating, logs) {
+  async sendFeedback (content, rating, logs) {
     // Without the await, the value returned is a promise. With the
     // await, it will wait untill getting a value from
     // tranpsort.post function
@@ -97,30 +96,29 @@ class ClientAPI extends CommonAPI {
     })
   }
 
-  async requestWebsiteSupport(hostname) {
+  async requestWebsiteSupport (hostname) {
     return await this.transport.post('/website/request', {
       hostname
     })
   }
 
-  async resolveURL(URL) {
-    let resolved_ip = globalDNSCache[URL]
-    if (resolved_ip) {
-      return resolved_ip
+  async resolveURL (URL) {
+    let resolvedAddress = globalDNSCache[URL]
+    if (resolvedAddress) {
+      return resolvedAddress
     }
-    try{
+    try {
       let response = await this.transport.post(CLIENT_URL + '/resolve',
         {
           'url': URL
         })
       if (response.status == 200) {
-        globalDNSCache[URL]= response.data.IP
+        globalDNSCache[URL] = response.data.IP
         return response.data.IP
       }
       return null
-    }
-    catch (err) {
-      debug(`Cannot connect to server`,err)
+    } catch (err) {
+      debug(`Cannot connect to server`, err)
       return null
     }
   }

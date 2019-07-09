@@ -151,7 +151,6 @@ class SessionService extends EventEmitter {
 
   async _handleAcceptedSession (session, sessionInfo, resolve, reject) {
     debug(`Session [${sessionInfo.id}] accepted by relay`)
-
     try {
       if (session.connectionType === ConnectionTypes.TCP_CLIENT ||
         session.connectionType === ConnectionTypes.UDP_CLIENT) {

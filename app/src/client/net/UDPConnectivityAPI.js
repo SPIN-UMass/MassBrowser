@@ -48,6 +48,7 @@ class UDPConnectivityAPI extends EventEmitter {
     if (this.keepAliveInterval) {
       return
     }
+    this.sendKeepAlive()
     this.keepAliveInterval = setInterval(() => this.sendKeepAlive(), 30 * 1000)
   }
 
@@ -75,7 +76,7 @@ class UDPConnectivityAPI extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      this.socket = {type: 'udp4', reuseAddr: true}
+      this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
       this.socket.bind({
         port: 10000 + Math.floor(Math.random() * (65535 - 10000)),
         exclusive: false
