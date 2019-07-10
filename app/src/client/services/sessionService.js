@@ -111,16 +111,15 @@ class SessionService extends EventEmitter {
    */
 
   async createSession (categories) {
-    categories = Array.isArray(categories) ? categories : [categories]
-    let catIDs = categories.map(c => c.id)
-
-    catIDs.forEach(category => {
-      if (!this.categoryWaitLists[category]) {
-        this.categoryWaitLists[category] = []
-      }
-    })
-
     return new Promise(async (resolve, reject) => {
+      categories = Array.isArray(categories) ? categories : [categories]
+      let catIDs = categories.map(c => c.id)
+
+      catIDs.forEach(category => {
+        if (!this.categoryWaitLists[category]) {
+          this.categoryWaitLists[category] = []
+        }
+      })
       debug(`Requesting for new session`)
       let sessionInfo = await API.requestSession(catIDs)
 
@@ -152,14 +151,15 @@ class SessionService extends EventEmitter {
   async _handleAcceptedSession (session, sessionInfo, resolve, reject) {
     debug(`Session [${sessionInfo.id}] accepted by relay`)
     try {
-      if (session.connectionType === ConnectionTypes.TCP_CLIENT ||
-        session.connectionType === ConnectionTypes.UDP_CLIENT) {
+      if (session.connectionType === ConnectionTypes.TCP_CLIENT) {
         debug(`Connecting session [${sessionInfo.id}]`)
         await session.connect()
-      } else if (session.connectionType === ConnectionTypes.TCP_RELAY ||
-        session.connectionType === ConnectionTypes.UDP_RELAY) {
+      } else if (session.connectionType === ConnectionTypes.TCP_RELAY) {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
         await session.listen()
+      } else if (session.connectionType === ConnectionTypes.UDP) {
+        debug(`Connecting using UDP [${sessionInfo.id}]`)
+        // await sendUDPHello(address, port)
       }
 
       this.sessions.push(session)

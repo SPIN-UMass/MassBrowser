@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events'
-import API from '@/api'
 import { info, debug } from '~/utils/log'
-import { runLocalUDPServer } from './incommingConnection'
 import * as dgram from 'dgram'
+import API from '@/api'
 
 class UDPConnectivityAPI extends EventEmitter {
   constructor () {
@@ -11,26 +10,17 @@ class UDPConnectivityAPI extends EventEmitter {
     this.echoServerPort = 0
     this.socket = null
     this.isConnected = false
-    this.autoConnect = false
     this.routineStatus = false
-    this.ListenServer = null
     this.isServerRunning = false
-    this.localAddress = ''
-    this.remoteAddress = ''
-    this.localUDPPort = 0
-    this.remoteUDPPort = 0
     this.keepAliveInterval = null
   }
 
-  respHandler (localAddress, localPort, remoteAddress, remotePort) {
-    if (this.localUDPPort !== localPort && this.localAddress !== localAddress && this.remoteUDPPort !== remotePort && this.remoteAddress !== remoteAddress) {
-      this.localAddress = localAddress
-      this.localUDPPort = localPort
-      this.remoteAddress = remoteAddress
-      this.remoteUDPPort = remotePort
-      this.restartListenerServer()
-      API.updateClientAddress(remoteAddress, null, remotePort)
-    }
+  stopRoutine () {
+    this.socket.close()
+    this.socket = null
+    this.routineStatus = false
+    this.isConnected = false
+    clearInterval(this.keepAliveInterval)
   }
 
   startRoutine () {
@@ -88,9 +78,13 @@ class UDPConnectivityAPI extends EventEmitter {
 
       this.socket.on('message', (data, remote) => {
         data = data.toString()
-        let remoteAddress = data.split(':')[0]
-        let remotePort = data.split(':')[1]
-        this.respHandler(this.socket.address().address, this.socket.address().port, remoteAddress, remotePort)
+        let natInfo = {
+          'remoteAddress': data.split(':')[0],
+          'remoteUDPPort': data.split(':')[1],
+          'localAddress': this.socket.address().address,
+          'localUDPPort': this.socket.address().port
+        }
+        this.emit('udp-net-update', natInfo)
       })
 
       this.socket.on('connect', () => {
@@ -117,33 +111,6 @@ class UDPConnectivityAPI extends EventEmitter {
     this.connect().then(() => {
       debug('RECONNECTED CONNECTIVITY')
     })
-  }
-
-  stopListenServer () {
-    if (this.isServerRunning) {
-      this.ListenServer.close()
-      this.isServerRunning = false
-      this.ListenServer = null
-    }
-  }
-
-  restartListenerServer () {
-    if (!this.isServerRunning) {
-      runLocalUDPServer(this.localAddress, this.localUDPPort).then((server) => {
-        this.isOBFSServerRunning = true
-        this.ListenServer = server
-      }).catch((err) => {
-        this.errorHandler(err)
-      })
-    } else if (this.ListenServer.address().port !== this.localUDPPort) {
-      this.stopListenServer()
-      runLocalUDPServer(this.localAddress, this.localUDPPort).then((server) => {
-        this.isServerRunning = true
-        this.ListenServer = server
-      }).catch((err) => {
-        this.errorHandler(err)
-      })
-    }
   }
 }
 

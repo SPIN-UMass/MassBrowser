@@ -6,7 +6,6 @@ import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks } from '@/net'
 import config from '@utils/config'
 import Raven from '@utils/raven'
-import UDPConnectivityConnection from '@/net/UDPConnectivityAPI'
 import TCPConnectivityConnection from '@/net/TCPConnectivityAPI'
 import API from '@/api'
 import {
@@ -14,6 +13,7 @@ import {
   ServerError, CacheBrowserError, ApplicationBootError
 } from '@utils/errors'
 import { store } from '@utils/store'
+import udpNetworkManager from './net/UDPNetworkManager'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
@@ -76,8 +76,8 @@ export default async function bootClient () {
     await TCPConnectivityConnection.startRoutine()
     status.clear()
 
-    status = statusManager.info('Starting UDP Connectivity Monitor')
-    await UDPConnectivityConnection.startRoutine()
+    status = statusManager.info('Starting UDP Network Manager')
+    await udpNetworkManager.start()
     status.clear()
 
     status = statusManager.info('Starting remaining services')
