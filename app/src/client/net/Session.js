@@ -34,7 +34,7 @@ export class Session extends EventEmitter {
       case ConnectionTypes.TCP_CLIENT:
         relay = new TCPRelayConnection(this.ip, this.port, this.desc)
         break
-      case ConnectionTypes.UDP_CLIENT:
+      case ConnectionTypes.UDP:
         relay = new UDPRelayConnection(this.ip, this.port, this.desc)
         break
       case ConnectionTypes.CDN:

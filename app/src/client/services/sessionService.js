@@ -1,14 +1,14 @@
 import { connectionManager, Session } from '@/net'
-import API from '@/api'
 import { EventEmitter } from 'events'
 import { warn, debug } from '@utils/log'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
 import { ConnectionTypes } from '@common/constants'
-
-let TEST_URL = 'backend.yaler.co'
 import { Domain, Category } from '@/models'
+import API from '@/api'
+import udpNetworkManager from '../net/UDPNetworkManager'
+let TEST_URL = 'backend.yaler.co'
 
 /**
  * Note: Implements RelayAssigner
@@ -158,8 +158,9 @@ class SessionService extends EventEmitter {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
-        debug(`Connecting using UDP [${sessionInfo.id}]`)
-        // await sendUDPHello(address, port)
+        debug(`Starting UDP Punching for [${sessionInfo.id}]`)
+        await udpNetworkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+        await session.connect()
       }
 
       this.sessions.push(session)
