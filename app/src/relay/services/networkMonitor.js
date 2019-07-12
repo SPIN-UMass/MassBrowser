@@ -3,27 +3,24 @@ import config from '@utils/config'
 import { relayManager } from '@/services'
 import { TCPNATConnection, UDPNATConnection } from '@/net'
 import { store } from '@utils/store'
-import { info } from '@utils/log'
+import { warn, info } from '@utils/log'
+import * as dgram from 'dgram'
 
 class NetworkMonitor {
   constructor () {
     this.localTCPPort = -1
     this.remoteTCPPort = -1
-
     this.localUDPPort = -1
     this.remoteUDPPort = -1
-
     this.remoteAddress = ''
     this.localAddress = ''
-
     this.isTCPRelayReachable = false
     this.isUDPRelayReachable = false
     this.isServerConnected = false
-
     this.TCPNATConnection = null
     this.UDPNATConnection = null
-
     this.keepAliveInterval = null
+    this.isUDPNATRoutineRunning = false
   }
 
   async start () {
@@ -36,10 +33,17 @@ class NetworkMonitor {
     this.UDPNATConnection = new UDPNATConnection('128.119.245.46', 8823)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
-    await this.UDPNATConnection.connect()
+    await this.UDPNATConnection.connect().then(() => {
+      this.isUDPNATRoutineRunning = true
+    })
 
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
+  }
+
+  stopUDPNATRoutine () {
+    this.isUDPNATRoutineRunning = false
+    this.UDPNATConnection.stop()
   }
 
   waitForNetworkStatus () {
@@ -62,6 +66,36 @@ class NetworkMonitor {
 
   getPrivateAddress () {
     return {ip: this.localAddress, port: this.localTCPPort, UDPPort: this.localUDPPort}
+  }
+
+  performUDPHolePunching (address, port) {
+    return new Promise((resolve, reject) => {
+      this.stopUDPNATRoutine()
+      let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
+      socket.bind({
+        port: this.localUDPPort,
+        address: this.localAddress,
+        exclusive: false
+      })
+      let holePunchingInterval = setInterval(() => {
+        socket.send(Buffer.from('HELLO'), port, address)
+      }, 1000)
+
+      socket.on('message', (data, remote) => {
+        if (remote.address === address && remote.port === port) {
+          if (data.toString() === 'HELLO') {
+            this.isNatPunched = true
+            clearInterval(holePunchingInterval)
+            socket.close()
+            resolve()
+          }
+        }
+      })
+
+      socket.on('error', err => {
+        warn('Socket error happened while performing udp punching: ', err)
+      })
+    })
   }
 
   async _sendKeepAlive () {
@@ -99,7 +133,9 @@ class NetworkMonitor {
       this.TCPNATConnection.keepAlive()
     }
     info(`UDP Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
-    this.UDPNATConnection.keepAlive()
+    if (this.isUDPNATRoutineRunning) {
+      this.UDPNATConnection.keepAlive()
+    }
   }
 
   _onTCPNetworkUpdate (data) {

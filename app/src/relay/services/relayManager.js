@@ -127,7 +127,7 @@ class RelayManager {
   }
 
   onNewSessionEvent (data) {
-    var desc = {
+    let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
       'writeiv': (Buffer.from(data.read_iv, 'base64')),
       'readkey': (Buffer.from(data.write_key, 'base64')),
@@ -140,7 +140,7 @@ class RelayManager {
 
     debug(`New session [${data.id}] received for client [${data.client.id}]`)
 
-    if (desc.connectiontype === ConnectionTypes.TCP_CLIENT || desc.connectiontype === ConnectionTypes.UDP_CLIENT) {
+    if (desc.connectiontype === ConnectionTypes.TCP_CLIENT || desc.connectiontype === ConnectionTypes.UDP) {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 

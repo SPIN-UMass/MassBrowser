@@ -10,6 +10,11 @@ export class UDPNATConnection extends EventEmitter {
     this.socket = null
   }
 
+  stop () {
+    this.socket.close()
+    this.socket = null
+  }
+
   connect () {
     return new Promise((resolve, reject) => {
       let promiseResolved = false
