@@ -120,14 +120,12 @@ class NetworkMonitor {
 
   _onUDPNetworkUpdate (data) {
     let changed = false
-    data.remotePort = Number(data.remotePort)
-    data.localPort = Number(data.localPort)
     if (this.localUDPPort !== data.localPort || this.remoteUDPPort !== data.remotePort) {
       changed = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
-      this.localUDPPort = data.localUDPPort
-      this.remoteUDPPort = data.remoteUDPPort
+      this.localUDPPort = Number(data.localUDPPort)
+      this.remoteUDPPort = Number(data.remoteUDPPort)
     }
     if (changed) {
       relayManager.handleReconnect()
