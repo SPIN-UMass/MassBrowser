@@ -1,13 +1,12 @@
 import { EventEmitter } from 'events'
 import { info, debug } from '~/utils/log'
 import * as dgram from 'dgram'
-import API from '@/api'
 
-class UDPConnectivityAPI extends EventEmitter {
-  constructor () {
+class UDPNATConnection extends EventEmitter {
+  constructor (echoServerAddress, echoServerPort) {
     super()
-    this.echoServerAddress = ''
-    this.echoServerPort = 0
+    this.echoServerAddress = echoServerAddress
+    this.echoServerPort = echoServerPort
     this.socket = null
     this.isConnected = false
     this.routineStatus = false
@@ -42,26 +41,14 @@ class UDPConnectivityAPI extends EventEmitter {
     this.keepAliveInterval = setInterval(() => this.sendKeepAlive(), 30 * 1000)
   }
 
-  checkStunServer () {
-    return new Promise((resolve, reject) => {
-      if (this.echoServerPort === 0) {
-        API.requestNewStunServer().then((data) => {
-          // this.echoServerAddress = data.ip
-          // this.echoServerPort = data.port
-          this.echoServerAddress = '128.119.245.46'
-          this.echoServerPort = 8823
-          this.connect()
-          resolve()
-        })
-      }
-      resolve()
-    })
-  }
-
   sendKeepAlive () {
-    this.checkStunServer().then(() => {
+    if (this.isConnected && this.socket) {
       this.socket.send(Buffer.from('TEST'))
-    })
+    } else {
+      this.connect().then(() => {
+        this.socket.send(Buffer.from('TEST'))
+      })
+    }
   }
 
   connect () {
@@ -72,6 +59,7 @@ class UDPConnectivityAPI extends EventEmitter {
         exclusive: false
       }, () => {
         info('UDP socket created')
+        this.isConnected = true
       })
 
       this.socket.send(Buffer.from('TEST'), this.echoServerPort, this.echoServerAddress)
@@ -114,5 +102,4 @@ class UDPConnectivityAPI extends EventEmitter {
   }
 }
 
-let UDPConnectivityConnection = new UDPConnectivityAPI()
-export default UDPConnectivityConnection
+export default UDPNATConnection

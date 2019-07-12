@@ -1,6 +1,6 @@
-import UDPConnectivityConnection from './UDPConnectivityAPI'
+import UDPNATConnection from './UDPNATConnection'
 import * as dgram from 'dgram'
-import { debug, warn } from '@utils/log'
+import { warn } from '@utils/log'
 import API from '@/api'
 
 class UDPNetworkManager {
@@ -14,17 +14,7 @@ class UDPNetworkManager {
     this.isConnectivityActive = false
     this.socket = null
     this.isNatPunched = false
-
-    UDPConnectivityConnection.on('udp-net-update', (natInfo) => {
-      if (this.localUDPPort !== natInfo.localUDPPort && this.localAddress !== natInfo.localAddress && this.remoteUDPPort !== natInfo.remoteUDPPort && this.remoteAddress !== natInfo.remoteAddress) {
-        this.localAddress = natInfo.localAddress
-        this.localUDPPort = natInfo.localUDPPort
-        this.remoteUDPPort = natInfo.remoteUDPPort
-        this.remoteAddress = natInfo.remoteAddress
-      }
-      // this.restartLocalUDPServer()
-      API.updateClientAddress(this.remoteAddress, null, this.remoteUDPPort)
-    })
+    this.UDPNATConnection = null
   }
 
   getLocalUDPPort () {
@@ -36,19 +26,30 @@ class UDPNetworkManager {
   }
 
   async start () {
-    await UDPConnectivityConnection.startRoutine().then(() => {
+    this.UDPNATConnection = new UDPNATConnection('128.119.245.46', 8823)
+    this.UDPNATConnection.on('udp-net-update', (natInfo) => {
+      if (this.localUDPPort !== natInfo.localUDPPort && this.localAddress !== natInfo.localAddress && this.remoteUDPPort !== natInfo.remoteUDPPort && this.remoteAddress !== natInfo.remoteAddress) {
+        this.localAddress = natInfo.localAddress
+        this.localUDPPort = natInfo.localUDPPort
+        this.remoteUDPPort = natInfo.remoteUDPPort
+        this.remoteAddress = natInfo.remoteAddress
+      }
+      // this.restartLocalUDPServer()
+      API.updateClientAddress(this.remoteAddress, null, this.remoteUDPPort)
+    })
+    await this.UDPNATConnection.startRoutine().then(() => {
       this.isConnectivityActive = true
     })
   }
 
   stopConnectivity () {
-    UDPConnectivityConnection.stopRoutine()
+    this.UDPNATConnection.stopRoutine()
     this.isConnectivityActive = false
   }
 
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
-      UDPConnectivityConnection.stopRoutine()
+      this.UDPNATConnection.stopRoutine()
       let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
       let holePunchingInterval = setInterval(() => {
         socket.send(Buffer.from('HELLO'), port, address)
