@@ -9,12 +9,12 @@ function Server(socket) {
   this._connections = {};
   var self = this;
   socket.on('message', function (message, rinfo) {
-    var addressKey = rinfo.address + rinfo.port;
+    var addressKey = rinfo.address + ':' + rinfo.port;
     var connection;
     if (!self._connections[addressKey]) {
       connection = new Connection(new PacketSender(socket, rinfo.address, rinfo.port));
       self._connections[addressKey] = connection;
-      self.emit('connection', connection);
+      self.emit('connection', connection, addressKey);
     } else {
       connection = self._connections[addressKey];
     }
