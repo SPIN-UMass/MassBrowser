@@ -3,8 +3,7 @@ import config from '@utils/config'
 import { relayManager } from '@/services'
 import { TCPNATConnection, UDPNATConnection } from '@/net'
 import { store } from '@utils/store'
-import { warn, info } from '@utils/log'
-import * as dgram from 'dgram'
+import { info } from '@utils/log'
 
 class NetworkMonitor {
   constructor () {
@@ -44,6 +43,12 @@ class NetworkMonitor {
   stopUDPNATRoutine () {
     this.isUDPNATRoutineRunning = false
     this.UDPNATConnection.stop()
+  }
+
+  async startUDPNATRoutine () {
+    await this.UDPNATConnection.connect().then(() => {
+      this.isUDPNATRoutineRunning = true
+    })
   }
 
   waitForNetworkStatus () {
