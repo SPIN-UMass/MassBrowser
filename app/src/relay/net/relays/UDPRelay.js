@@ -1,4 +1,5 @@
 import { ConnectionReceiver } from '@/net/ConnectionReceiver'
+import { networkMonitor } from '@/services'
 import { debug, info } from '@utils/log'
 import * as dgram from 'dgram'
 import * as rudp from '../../../common/rudp'
@@ -12,6 +13,31 @@ export class UDPRelay {
     this.downLimit = downLimit
     this.server = null
     this._connections = {}
+    this._natPunchingList = {}
+  }
+
+  performUDPHolePunching (address, port) {
+    return new Promise((resolve, reject) => {
+      networkMonitor.stopUDPNATRoutine()
+      let holePunchingInterval = setInterval(() => {
+        this.server.send(Buffer.from('HELLO'), port, address)
+      }, 1000)
+      let addressKey = address + port
+      this._natPunchingList[addressKey] = {
+        isResolved: false,
+        holePunchingInterval,
+        resolve,
+        reject
+      }
+      setTimeout(() => {
+        if (!this._natPunchingList[addressKey].isResolved) {
+          clearInterval(holePunchingInterval)
+          reject()
+          networkMonitor.startUDPNATRoutine()
+        }
+        networkMonitor.startUDPNATRoutine()
+      }, 10000)
+    })
   }
 
   async start () {
@@ -22,23 +48,32 @@ export class UDPRelay {
         address: this.address
       })
 
-      this.server.on('message', (message, rinfo) => {
-        let addressKey = rinfo.address + rinfo.port
-        let connection
-        if (!this._connections[addressKey]) {
-          connection = new rudp.Connection(new rudp.PacketSender(this.server, rinfo.address, rinfo.port))
-          this._connections[addressKey] = connection
-          this._handleConnection(connection, addressKey)
+      this.server.on('message', (message, remoteInfo) => {
+        let addressKey = remoteInfo.address + remoteInfo.port
+        if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
+          let natPunch = this._natPunchingList[addressKey]
+          if (!natPunch.isResolved) {
+            natPunch.resolve()
+            natPunch.isResolved = true
+            clearInterval(natPunch.holePunchingInterval)
+          }
         } else {
-          connection = this._connections[addressKey]
-        }
-        let packet = new rudp.Packet(message)
-        if (packet.getIsFinish()) {
-          delete this._connections[addressKey]
-        } else {
-          setImmediate(() => {
-            connection.receive(packet)
-          })
+          let connection
+          if (!this._connections[addressKey]) {
+            connection = new rudp.Connection(new rudp.PacketSender(this.server, remoteInfo.address, remoteInfo.port))
+            this._connections[addressKey] = connection
+            this._handleConnection(connection, addressKey)
+          } else {
+            connection = this._connections[addressKey]
+          }
+          let packet = new rudp.Packet(message)
+          if (packet.getIsFinish()) {
+            delete this._connections[addressKey]
+          } else {
+            setImmediate(() => {
+              connection.receive(packet)
+            })
+          }
         }
       })
 

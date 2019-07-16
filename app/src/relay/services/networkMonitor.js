@@ -68,36 +68,6 @@ class NetworkMonitor {
     return {ip: this.localAddress, port: this.localTCPPort, UDPPort: this.localUDPPort}
   }
 
-  performUDPHolePunching (address, port) {
-    return new Promise((resolve, reject) => {
-      this.stopUDPNATRoutine()
-      let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
-      socket.bind({
-        port: this.localUDPPort,
-        address: this.localAddress,
-        exclusive: false
-      })
-      let holePunchingInterval = setInterval(() => {
-        socket.send(Buffer.from('HELLO'), port, address)
-      }, 1000)
-
-      socket.on('message', (data, remote) => {
-        if (remote.address === address && remote.port === port) {
-          if (data.toString() === 'HELLO') {
-            this.isNatPunched = true
-            clearInterval(holePunchingInterval)
-            socket.close()
-            resolve()
-          }
-        }
-      })
-
-      socket.on('error', err => {
-        warn('Socket error happened while performing udp punching: ', err)
-      })
-    })
-  }
-
   async _sendKeepAlive () {
     let isTCPRelayReachable
     let isUDPRelayReachable
