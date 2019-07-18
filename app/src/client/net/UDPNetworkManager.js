@@ -1,6 +1,6 @@
 import UDPNATConnection from './UDPNATConnection'
 import * as dgram from 'dgram'
-import { info, warn } from '@utils/log'
+import { debug, info, warn } from '@utils/log'
 import API from '@/api'
 
 class UDPNetworkManager {
@@ -53,7 +53,7 @@ class UDPNetworkManager {
   performUDPHolePunching (address, port) {
     debug(`performing punching for ${address}:${port}`)
     return new Promise((resolve, reject) => {
-      if (!address || port === 0 ) {
+      if (!address || port === 0) {
         reject()
       }
       this.stopUDPNATRoutine()

@@ -148,8 +148,8 @@ class RelayManager {
 
     // if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
     if (data.client.ip) {
-    debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
-    await networkMonitor.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
+      debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
+      await this.UDPRelayServer.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
     }
   }
 
