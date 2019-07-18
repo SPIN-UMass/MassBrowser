@@ -126,7 +126,7 @@ class RelayManager {
     }
   }
 
-  onNewSessionEvent (data) {
+  async onNewSessionEvent (data) {
     let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
       'writeiv': (Buffer.from(data.read_iv, 'base64')),
@@ -146,10 +146,10 @@ class RelayManager {
 
     API.acceptSession(data.client, data.id)
 
-    if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
-      networkMonitor.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
-    }
+    // if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
+    debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
+    await networkMonitor.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
+    // }
   }
 
   async _stopUDPRelayServer () {

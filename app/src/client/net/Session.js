@@ -32,7 +32,8 @@ export class Session extends EventEmitter {
     let relay
     switch (this.connectionType) {
       case ConnectionTypes.TCP_CLIENT:
-        relay = new TCPRelayConnection(this.ip, this.port, this.desc)
+        // relay = new TCPRelayConnection(this.ip, this.port, this.desc)
+        relay = new UDPRelayConnection(this.ip, this.port, this.desc)
         break
       case ConnectionTypes.UDP:
         relay = new UDPRelayConnection(this.ip, this.port, this.desc)
@@ -41,7 +42,8 @@ export class Session extends EventEmitter {
         relay = new DomainConnection(this.domainName, this.desc)
         break
       default:
-        relay = new TCPRelayConnection(this.ip, this.port, this.desc)
+        relay = new UDPRelayConnection(this.ip, this.port, this.desc)
+        // relay = new TCPRelayConnection(this.ip, this.port, this.desc)
     }
 
     relay.id = this.id
