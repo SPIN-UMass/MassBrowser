@@ -211,8 +211,9 @@ class SessionService extends EventEmitter {
         'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
         'token': Buffer.from(sessionInfo.token, 'base64')
       }
-      if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
+      if (sessionInfo.relay.ip !== '128.119.245.46' || sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
         // TODO: give warning here
+        console.log(sessionInfo.relay.ip)
         continue
       }
 
