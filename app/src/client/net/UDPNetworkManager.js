@@ -51,7 +51,11 @@ class UDPNetworkManager {
   }
 
   performUDPHolePunching (address, port) {
+    debug(`performing punching for ${address}:${port}`)
     return new Promise((resolve, reject) => {
+      if (!address || port === 0 ) {
+        reject()
+      }
       this.stopUDPNATRoutine()
       let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
       socket.bind({

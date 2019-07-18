@@ -115,23 +115,22 @@ class NetworkMonitor {
 
   _onTCPNetworkUpdate (data) {
     let changed = false
-    data.remoteTCPPort = Number(data.remoteTCPPort)
-    data.localTCPPort = Number(data.localTCPPort)
-    if (this.localTCPPort !== data.localTCPPort || this.remoteTCPPort !== data.remoteTCPPort) {
+    if (this.localTCPPort !== Number(data.localTCPPort) || this.remoteTCPPort !== Number(data.remoteTCPPort)) {
       changed = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
-      this.localTCPPort = data.localTCPPort
-      this.remoteTCPPort = data.remoteTCPPort
+      this.localTCPPort = Number(data.localTCPPort)
+      this.remoteTCPPort = Number(data.remoteTCPPort)
     }
     if (changed) {
+      console.log('here!!!!!!!!!!!!!!')
       relayManager.handleReconnect()
     }
   }
 
   _onUDPNetworkUpdate (data) {
     let changed = false
-    if (this.localUDPPort !== data.localPort || this.remoteUDPPort !== data.remotePort) {
+    if (this.localUDPPort !== Number(data.localUDPPort) || this.remoteUDPPort !== Number(data.remoteUDPPort)) {
       changed = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
