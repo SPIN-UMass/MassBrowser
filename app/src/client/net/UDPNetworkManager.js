@@ -86,7 +86,7 @@ class UDPNetworkManager {
 
   _onUDPNetworkUpdate (data) {
     let changed = false
-    if (this.localUDPPort !== data.localPort || this.remoteUDPPort !== data.remotePort) {
+    if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
       changed = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
@@ -94,7 +94,7 @@ class UDPNetworkManager {
       this.remoteUDPPort = Number(data.remoteUDPPort)
     }
     if (changed) {
-      API.updateClientAddress(this.remoteAddress, null, this.remoteUDPPort)
+      API.updateClientAddress(this.remoteAddress, 12123, this.remoteUDPPort)
     }
   }
 

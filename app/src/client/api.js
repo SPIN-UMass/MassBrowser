@@ -60,7 +60,8 @@ class ClientAPI extends CommonAPI {
     if (remoteTCPPort === null) {
       data = {
         'ip': remoteAddress,
-        'udp_port': remoteUDPPort
+        'udp_port': remoteUDPPort,
+        'port': remoteTCPPort
       }
     } else {
       data = {
