@@ -115,9 +115,6 @@ class NetworkMonitor {
 
   _onTCPNetworkUpdate (data) {
     let changed = false
-    console.log('tcp')
-    console.log(this.localTCPPort , Number(data.localTCPPort))
-    console.log(this.remoteTCPPort, Number(data.remoteTCPPort))
     if (this.localTCPPort !== Number(data.localTCPPort) || this.remoteTCPPort !== Number(data.remoteTCPPort)) {
       changed = true
       this.localAddress = data.localAddress
@@ -133,9 +130,6 @@ class NetworkMonitor {
 
   _onUDPNetworkUpdate (data) {
     let changed = false
-    console.log('udp')
-    console.log(this.localUDPPort , Number(data.localUDPPort))
-    console.log(this.remoteUDPPort, Number(data.remoteUDPPort))
     if (this.localUDPPort !== Number(data.localUDPPort) || this.remoteUDPPort !== Number(data.remoteUDPPort)) {
       changed = true
       this.localAddress = data.localAddress
