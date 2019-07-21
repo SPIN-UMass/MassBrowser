@@ -31,14 +31,11 @@ export class TCPNATConnection extends EventEmitter {
 
       socket.on('data', (data) => {
         data = data.toString()
-        let ip = data.split(':')[0]
-        let port = data.split(':')[1]
-
         this.emit('tcp-net-update', {
           localAddress: socket.localAddress,
           localTCPPort: socket.localPort,
-          remoteAddress: ip,
-          remoteTCPPort: port
+          remoteAddress: data.split(':')[0],
+          remoteTCPPort: Number(data.split(':')[1])
         })
 
         if (!promiseResolved) {

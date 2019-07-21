@@ -35,7 +35,7 @@ class TCPNATConnection extends EventEmitter {
           localAddress: this._socket.localAddress,
           localTCPPort: this._socket.localPort,
           remoteAddress: data.split(':')[0],
-          remoteTCPPort: data.split(':')[1]
+          remoteTCPPort: Number(data.split(':')[1])
         })
 
         if (!promiseResolved) {

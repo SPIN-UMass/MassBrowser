@@ -100,7 +100,7 @@ class NetworkManager {
     })
 
     setTimeout(() => this._sendKeepAlive(), 500)
-    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 30 * 1000)
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 5 * 1000) // what is the interval?
   }
 
   performUDPHolePunching (address, port) {
@@ -139,12 +139,12 @@ class NetworkManager {
 
   _onTCPNetworkUpdate (data) {
     let changed = false
-    if (this.localTCPPort !== Number(data.localTCPPort) || this.remoteTCPPort !== Number(data.remoteTCPPort)) {
+    if (this.localTCPPort !== data.localTCPPort || this.remoteTCPPort !== data.remoteTCPPort) {
       changed = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
-      this.localTCPPort = Number(data.localTCPPort)
-      this.remoteTCPPort = Number(data.remoteTCPPort)
+      this.localTCPPort = data.localTCPPort
+      this.remoteTCPPort = data.remoteTCPPort
     }
     if (changed) {
       this.restartListenerServer()
@@ -158,8 +158,8 @@ class NetworkManager {
       changed = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
-      this.localUDPPort = Number(data.localUDPPort)
-      this.remoteUDPPort = Number(data.remoteUDPPort)
+      this.localUDPPort = data.localUDPPort
+      this.remoteUDPPort = data.remoteUDPPort
     }
     if (changed) {
       API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort)

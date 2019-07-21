@@ -38,7 +38,7 @@ export class UDPNATConnection extends EventEmitter {
             localAddress: this.socket.address().address,
             localUDPPort: this.socket.address().port,
             remoteAddress: data.split(':')[0],
-            remoteUDPPort: data.split(':')[1]
+            remoteUDPPort: Number(data.split(':')[1])
           })
 
           if (!promiseResolved) {

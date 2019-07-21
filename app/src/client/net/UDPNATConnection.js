@@ -35,7 +35,7 @@ class UDPNATConnection extends EventEmitter {
           data = data.toString()
           this.emit('udp-net-update', {
             remoteAddress: data.split(':')[0],
-            remoteUDPPort: data.split(':')[1],
+            remoteUDPPort: Number(data.split(':')[1]),
             localAddress: this.socket.address().address,
             localUDPPort: this.socket.address().port
           })

@@ -56,23 +56,13 @@ class ClientAPI extends CommonAPI {
   }
 
   updateClientAddress (remoteAddress, remoteTCPPort, remoteUDPPort) {
-    let data = {}
-    if (remoteTCPPort === null) {
-      data = {
-        'ip': remoteAddress,
-        'udp_port': remoteUDPPort,
-        'port': remoteTCPPort
-      }
-    } else {
-      data = {
-        'ip': remoteAddress,
-        'port': remoteTCPPort
-      }
-    }
-
     debug(`Sending address info to server: ${remoteAddress} ${remoteTCPPort} ${remoteUDPPort}`)
     return this.transport.post(
-      CLIENT_URL + '/' + this.userID, data).then(r => r.data)
+      CLIENT_URL + '/' + this.userID, {
+        'ip': remoteAddress,
+        'port': remoteTCPPort,
+        'udp_port': remoteUDPPort
+      }).then(r => r.data)
   }
 
   requestNewStunServer () {
