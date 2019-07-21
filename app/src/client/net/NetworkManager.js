@@ -1,19 +1,40 @@
 import UDPNATConnection from './UDPNATConnection'
+import TCPNATConnection from './TCPNATConnection'
 import * as dgram from 'dgram'
 import { debug, info, warn } from '@utils/log'
 import API from '@/api'
+const net = require('net')
+import { TCPRelayConnection } from './TCPRelayConnection'
 
-class UDPNetworkManager {
+class NetworkManager {
   constructor () {
-    this.localUDPPort = ''
+    this.localTCPPort = -1
+    this.remoteTCPPort = -1
+    this.localUDPPort = -1
+    this.remoteUDPPort = -1
+
     this.localAddress = ''
     this.remoteAddress = ''
-    this.remoteUDPPort = ''
-    this.socket = null
+
     this.isNatPunched = false
     this.UDPNATConnection = null
+    this.TCPNATConnection = null
+
     this.keepAliveInterval = null
+
+    this.isTCPNATRoutineRunning = false
     this.isUDPNATRoutineRunning = false
+
+    this.listenerServer = {}
+    this.isServerRunning = false
+  }
+
+  startTCPNATRoutine () {
+    this.isTCPNATRoutineRunning = true
+  }
+
+  stopTCPNATRoutine () {
+    this.isTCPNATRoutineRunning = false
   }
 
   startUDPNATRoutine () {
@@ -33,19 +54,51 @@ class UDPNetworkManager {
     return this.localAddress
   }
 
+  getLocalTCPPort () {
+    return this.localTCPPort
+  }
+
   _sendKeepAlive () {
+    if (this.isTCPNATRoutineRunning) {
+      this.TCPNATConnection.keepAlive()
+      info('TCP keepalive sent')
+    }
+
     if (this.isUDPNATRoutineRunning) {
       this.UDPNATConnection.keepAlive()
       info('UDP Keepalive sent')
     }
   }
 
+  waitForNetworkStatus () {
+    const TCPNATPromise = new Promise((resolve, reject) => {
+      this.TCPNATConnection.once('tcp-net-update', data => {
+        resolve()
+      })
+    })
+    const UDPNATPromise = new Promise((resolve, reject) => {
+      this.UDPNATConnection.once('udp-net-update', data => {
+        resolve()
+      })
+    })
+    return Promise.all([TCPNATPromise, UDPNATPromise])
+  }
+
   async start () {
+    let TCPEchoServer = await API.requestNewStunServer()
+    this.TCPNATConnection = new TCPNATConnection(TCPEchoServer.ip, TCPEchoServer.port)
+    this.TCPNATConnection.on('tcp-net-update', data => { this._onTCPNetworkUpdate(data) })
+    this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
+    await this.TCPNATConnection.connect().then(() => {
+      this.startTCPNATRoutine()
+    })
+
     this.UDPNATConnection = new UDPNATConnection('128.119.245.46', 8823)
+    this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
     await this.UDPNATConnection.connect().then(() => {
       this.startUDPNATRoutine()
     })
-    this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
+
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 30 * 1000)
   }
@@ -84,6 +137,21 @@ class UDPNetworkManager {
     })
   }
 
+  _onTCPNetworkUpdate (data) {
+    let changed = false
+    if (this.localTCPPort !== Number(data.localTCPPort) || this.remoteTCPPort !== Number(data.remoteTCPPort)) {
+      changed = true
+      this.localAddress = data.localAddress
+      this.remoteAddress = data.remoteAddress
+      this.localTCPPort = Number(data.localTCPPort)
+      this.remoteTCPPort = Number(data.remoteTCPPort)
+    }
+    if (changed) {
+      this.restartListenerServer()
+      API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort)
+    }
+  }
+
   _onUDPNetworkUpdate (data) {
     let changed = false
     if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
@@ -94,30 +162,89 @@ class UDPNetworkManager {
       this.remoteUDPPort = Number(data.remoteUDPPort)
     }
     if (changed) {
-      API.updateClientAddress(this.remoteAddress, 12123, this.remoteUDPPort)
+      API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort)
+    }
+  }
+
+  stopListenServer () {
+    if (this.isServerRunning) {
+      this.listenerServer.close(() => {
+        this.isServerRunning = false
+        this.listenerServer = {}
+      })
+    }
+  }
+
+  runLocalTCPServer (publicIP, publicPort) {
+    return new Promise((resolve, reject) => {
+      const server = net.createServer((socket) => {
+        let receiver = new TCPRelayConnection()
+        receiver.relayReverse(socket)
+        socket.on('error', (err) => {
+          debug('Local TCP Server error: ', err)
+          receiver.end()
+        })
+        socket.on('end', () => {
+          receiver.end()
+        })
+      })
+      server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
+        resolve(server)
+      })
+      debug('TCP Relay started on ', publicPort)
+      server.on('error', (e) => {
+        if (e.code === 'EADDRINUSE') {
+          warn('TCP Relay address in use, retrying...')
+          setTimeout(() => {
+            server.close()
+            server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
+              resolve(server)
+            })
+          }, 1000)
+        }
+      })
+    })
+  }
+
+  restartListenerServer () {
+    if (!this.isServerRunning) {
+      this.runLocalTCPServer(this.localAddress, this.localTCPPort).then((server) => {
+        this.isOBFSServerRunning = true
+        this.listenerServer = server
+      }).catch((err) => {
+        debug(err)
+      })
+    } else if (this.listenerServer.localPort !== this.localTCPPort) {
+      this.stopListenServer()
+      this.runLocalTCPServer(this.localAddress, this.localTCPPort).then((server) => {
+        this.isServerRunning = true
+        this.listenerServer = server
+      }).catch((err) => {
+        debug(err)
+      })
     }
   }
 
   // stopLocalUDPServer () {
   //   if (this.isUDPServerRunning) {
-  //     this.ListenServer.close()
+  //     this.listenerServer.close()
   //     this.isServerRunning = false
-  //     this.ListenServer = null
+  //     this.listenerServer = null
   //   }
   // }
 
   // restartLocalUDPServer () {
   //   if (!this.isServerRunning) {
   //     this.startLocalUDPServer(this.localAddress, this.localUDPPort).then((server) => {
-  //       this.ListenServer = server
+  //       this.listenerServer = server
   //     }).catch((err) => {
   //       warn(err)
   //     })
-  //   } else if (this.ListenServer.address().port !== this.localUDPPort) {
+  //   } else if (this.listenerServer.address().port !== this.localUDPPort) {
   //     this.stopLocalUDPServer()
   //     this.startLocalUDPServer(this.localAddress, this.localUDPPort).then((server) => {
   //       this.isServerRunning = true
-  //       this.ListenServer = server
+  //       this.listenerServer = server
   //     }).catch((err) => {
   //       warn(err)
   //     })
@@ -164,6 +291,6 @@ class UDPNetworkManager {
   // }
 }
 
-let udpNetworkManager = new UDPNetworkManager()
+let networkManager = new NetworkManager()
 
-export default udpNetworkManager
+export default networkManager

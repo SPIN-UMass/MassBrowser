@@ -7,7 +7,7 @@ import { torService, telegramService } from '@common/services'
 import { ConnectionTypes } from '@common/constants'
 import { Domain, Category } from '@/models'
 import API from '@/api'
-import udpNetworkManager from '../net/UDPNetworkManager'
+import networkManager from '../net/NetworkManager'
 let TEST_URL = 'backend.yaler.co'
 
 /**

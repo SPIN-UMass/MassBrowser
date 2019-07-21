@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import { debug, warn } from '@utils/log'
 import { UDPRelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
-import udpNetworkManager from './UDPNetworkManager'
+import udpNetworkManager from './NetworkManager'
 import * as dgram from 'dgram'
 import * as rudp from '@common/rudp'
 

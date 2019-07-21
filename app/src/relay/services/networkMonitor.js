@@ -123,7 +123,6 @@ class NetworkMonitor {
       this.remoteTCPPort = Number(data.remoteTCPPort)
     }
     if (changed) {
-      console.log('here!!!!!!!!!!!!!!')
       relayManager.handleReconnect()
     }
   }
