@@ -21,21 +21,18 @@ export class UDPRelay {
       networkMonitor.stopUDPNATRoutine()
       let holePunchingInterval = setInterval(() => {
         this.server.send(Buffer.from('HELLO'), port, address)
-      }, 1000)
+      }, 5000)
       let addressKey = address + port
-      console.log(addressKey)
       this._natPunchingList[addressKey] = {
         isResolved: false,
         holePunchingInterval,
         resolve,
         reject
       }
-      console.log(this._natPunchingList)
       setTimeout(() => {
         if (!this._natPunchingList[addressKey].isResolved) {
           clearInterval(holePunchingInterval)
           reject()
-          networkMonitor.startUDPNATRoutine()
         }
         networkMonitor.startUDPNATRoutine()
       }, 10000)
@@ -53,10 +50,7 @@ export class UDPRelay {
       this.server.on('message', (message, remoteInfo) => {
         console.log('got message', message.toString())
         let addressKey = remoteInfo.address + remoteInfo.port
-        console.log(addressKey)
-        console.log(this._natPunchingList)
         if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
-          console.log('dddddddddddd')
           let natPunch = this._natPunchingList[addressKey]
           if (!natPunch.isResolved) {
             natPunch.resolve()

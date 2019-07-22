@@ -118,10 +118,10 @@ class NetworkManager {
       })
       let holePunchingInterval = setInterval(() => {
         socket.send(Buffer.from('HELLO'), port, address)
-      }, 1000)
+      }, 5000)
 
       socket.on('message', (data, remote) => {
-        console.log('got message', data.toString(), remote)
+        console.log('got message', data.toString(), remote, port)
         if (remote.address === address && remote.port === port) {
           if (data.toString() === 'HELLO') {
             this.isNatPunched = true
