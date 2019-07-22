@@ -18,7 +18,6 @@ export class UDPRelay {
 
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
-      console.log('performing punching for ', address, port)
       networkMonitor.stopUDPNATRoutine()
       let holePunchingInterval = setInterval(() => {
         this.server.send(Buffer.from('HELLO'), port, address)

@@ -153,14 +153,9 @@ class SessionService extends EventEmitter {
     try {
       if (session.connectionType === ConnectionTypes.TCP_CLIENT) {
         debug(`Connecting session [${sessionInfo.id}]`)
-        console.log(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-        if (sessionInfo.relay.udp_port !== 0) {
-          await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-          await session.connect()
-        }
+        await session.connect()
       } else if (session.connectionType === ConnectionTypes.TCP_RELAY) {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
-        await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
         debug(`Starting UDP Punching for [${sessionInfo.id}]`)
@@ -209,7 +204,7 @@ class SessionService extends EventEmitter {
         'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
         'token': Buffer.from(sessionInfo.token, 'base64')
       }
-      if (sessionInfo.relay.ip !== '128.119.245.46' || sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
+      if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
         // TODO: give warning here
         continue
       }
