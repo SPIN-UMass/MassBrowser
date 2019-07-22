@@ -51,7 +51,10 @@ export class UDPRelay {
       this.server.on('message', (message, remoteInfo) => {
         console.log('got message', message.toString())
         let addressKey = remoteInfo.address + remoteInfo.port
+        console.log(addressKey)
+        console.log(this._natPunchingList)
         if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
+          console.log('dddddddddddd')
           let natPunch = this._natPunchingList[addressKey]
           if (!natPunch.isResolved) {
             natPunch.resolve()

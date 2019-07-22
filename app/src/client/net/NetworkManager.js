@@ -121,6 +121,7 @@ class NetworkManager {
       }, 1000)
 
       socket.on('message', (data, remote) => {
+        console.log('got message', data.toString(), remote)
         if (remote.address === address && remote.port === port) {
           if (data.toString() === 'HELLO') {
             this.isNatPunched = true
