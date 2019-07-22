@@ -18,7 +18,7 @@ export class UDPRelay {
 
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
-      console.log('here', address, port)
+      console.log('performing punching for ', address, port)
       networkMonitor.stopUDPNATRoutine()
       let holePunchingInterval = setInterval(() => {
         this.server.send(Buffer.from('HELLO'), port, address)
@@ -50,7 +50,7 @@ export class UDPRelay {
       })
 
       this.server.on('message', (message, remoteInfo) => {
-        console.log('got message', message)
+        console.log('got message', message.toString())
         let addressKey = remoteInfo.address + remoteInfo.port
         if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
           let natPunch = this._natPunchingList[addressKey]

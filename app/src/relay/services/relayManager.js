@@ -140,16 +140,18 @@ class RelayManager {
 
     debug(`New session [${data.id}] received for client [${data.client.id}]`)
 
-    if (desc.connectiontype === ConnectionTypes.TCP_CLIENT || desc.connectiontype === ConnectionTypes.UDP) {
-      this.authenticator.addPendingConnection((desc.token), desc)
-    }
+    if (data.client.id === 'q7hZ0pOLg_E') {
+      if (desc.connectiontype === ConnectionTypes.TCP_CLIENT || desc.connectiontype === ConnectionTypes.UDP) {
+        this.authenticator.addPendingConnection((desc.token), desc)
+      }
 
-    API.acceptSession(data.client, data.id)
+      API.acceptSession(data.client, data.id)
 
-    // if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-    if (data.client.ip) {
-      debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
-      await this.UDPRelayServer.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
+      // if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
+      if (data.client.ip) {
+        debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
+        await this.UDPRelayServer.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
+      }
     }
   }
 

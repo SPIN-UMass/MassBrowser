@@ -13,7 +13,7 @@ function Packet(sequenceNumber, payload, synchronize, reset) {
 
     var offset = 0;
 
-    bools = segment.readUInt8(offset); offset++;
+    var bools = segment.readUInt8(offset); offset++;
     this._acknowledgement = !!(bools & 0x80);
     this._synchronize     = !!(bools & 0x40);
     this._finish          = !!(bools & 0x20);
