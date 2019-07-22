@@ -4,6 +4,7 @@ import * as dgram from 'dgram'
 import { debug, info, warn } from '@utils/log'
 import API from '@/api'
 const net = require('net')
+import * as rudp from '@common/rudp'
 import { TCPRelayConnection } from './TCPRelayConnection'
 
 class NetworkManager {
@@ -116,19 +117,18 @@ class NetworkManager {
         address: this.localAddress,
         exclusive: false
       })
+      let client = rudp.Client(socket, address, port)
       let holePunchingInterval = setInterval(() => {
-        socket.send(Buffer.from('HELLO'), port, address)
+        client.send(Buffer.from('HELLO'))
       }, 5000)
 
-      socket.on('message', (data, remote) => {
-        console.log('got message', data.toString(), remote)
-        if (remote.address === address && remote.port === Number(port)) {
-          if (data.toString() === 'HELLO') {
-            this.isNatPunched = true
-            clearInterval(holePunchingInterval)
-            socket.close()
-            resolve()
-          }
+      client.on('data', (data) => {
+        console.log(data.toString())
+        if (data.toString() === 'HELLO') {
+          this.isNatPunched = true
+          clearInterval(holePunchingInterval)
+          socket.close()
+          resolve()
         }
       })
 
