@@ -48,7 +48,6 @@ export class UDPRelay {
       })
 
       this.server.on('message', (message, remoteInfo) => {
-        console.log('got message', message.toString())
         let addressKey = remoteInfo.address + remoteInfo.port
         let connection
         if (!this._connections[addressKey]) {
@@ -105,7 +104,7 @@ export class UDPRelay {
     //     clearInterval(natPunch.holePunchingInterval)
     //   }
     connection.on('data', data => {
-      console.log(data)
+      console.log(data.toString())
     })
     let upPipe = this.upLimit.throttle()
     upPipe.on('error', (err) => { debug(err) })
