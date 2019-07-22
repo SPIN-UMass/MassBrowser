@@ -121,8 +121,8 @@ class NetworkManager {
       }, 5000)
 
       socket.on('message', (data, remote) => {
-        console.log('got message', data.toString(), remote, port)
-        if (remote.address === address && remote.port === port) {
+        console.log('got message', data.toString(), remote)
+        if (remote.address === address && remote.port === Number(port)) {
           if (data.toString() === 'HELLO') {
             this.isNatPunched = true
             clearInterval(holePunchingInterval)

@@ -50,30 +50,21 @@ export class UDPRelay {
       this.server.on('message', (message, remoteInfo) => {
         console.log('got message', message.toString())
         let addressKey = remoteInfo.address + remoteInfo.port
-        if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
-          let natPunch = this._natPunchingList[addressKey]
-          if (!natPunch.isResolved) {
-            natPunch.resolve()
-            natPunch.isResolved = true
-            clearInterval(natPunch.holePunchingInterval)
-          }
+        let connection
+        if (!this._connections[addressKey]) {
+          connection = new rudp.Connection(new rudp.PacketSender(this.server, remoteInfo.address, remoteInfo.port))
+          this._connections[addressKey] = connection
+          this._handleConnection(connection, addressKey)
         } else {
-          let connection
-          if (!this._connections[addressKey]) {
-            connection = new rudp.Connection(new rudp.PacketSender(this.server, remoteInfo.address, remoteInfo.port))
-            this._connections[addressKey] = connection
-            this._handleConnection(connection, addressKey)
-          } else {
-            connection = this._connections[addressKey]
-          }
-          let packet = new rudp.Packet(message)
-          if (packet.getIsFinish()) {
-            delete this._connections[addressKey]
-          } else {
-            setImmediate(() => {
-              connection.receive(packet)
-            })
-          }
+          connection = this._connections[addressKey]
+        }
+        let packet = new rudp.Packet(message)
+        if (packet.getIsFinish()) {
+          delete this._connections[addressKey]
+        } else {
+          setImmediate(() => {
+            connection.receive(packet)
+          })
         }
       })
 
@@ -106,6 +97,16 @@ export class UDPRelay {
   }
 
   _handleConnection (connection, addressKey) {
+    // if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
+    //   let natPunch = this._natPunchingList[addressKey]
+    //   if (!natPunch.isResolved) {
+    //     natPunch.resolve()
+    //     natPunch.isResolved = true
+    //     clearInterval(natPunch.holePunchingInterval)
+    //   }
+    connection.on('data', data => {
+      console.log(data)
+    })
     let upPipe = this.upLimit.throttle()
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downLimit.throttle()
