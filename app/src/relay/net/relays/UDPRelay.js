@@ -23,12 +23,14 @@ export class UDPRelay {
         this.server.send(Buffer.from('HELLO'), port, address)
       }, 1000)
       let addressKey = address + port
+      console.log(addressKey)
       this._natPunchingList[addressKey] = {
         isResolved: false,
         holePunchingInterval,
         resolve,
         reject
       }
+      console.log(this._natPunchingList)
       setTimeout(() => {
         if (!this._natPunchingList[addressKey].isResolved) {
           clearInterval(holePunchingInterval)
