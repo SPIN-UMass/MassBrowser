@@ -117,7 +117,7 @@ class NetworkManager {
         address: this.localAddress,
         exclusive: false
       })
-      let client = rudp.Client(socket, address, port)
+      let client = new rudp.Client(socket, address, port)
       let holePunchingInterval = setInterval(() => {
         client.send(Buffer.from('HELLO'))
       }, 5000)
