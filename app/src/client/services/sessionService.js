@@ -155,18 +155,16 @@ class SessionService extends EventEmitter {
         debug(`Connecting session [${sessionInfo.id}]`)
         console.log(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
         if (sessionInfo.relay.udp_port !== 0) {
-          await udpNetworkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+          await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
           await session.connect()
-        } else {
-          throw err
         }
       } else if (session.connectionType === ConnectionTypes.TCP_RELAY) {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
-        await udpNetworkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+        await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
         debug(`Starting UDP Punching for [${sessionInfo.id}]`)
-        await udpNetworkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+        await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
         await session.connect()
       }
 

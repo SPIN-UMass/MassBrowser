@@ -3,7 +3,7 @@ import { EventEmitter } from 'events'
 import { debug, warn } from '@utils/log'
 import { UDPRelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
-import udpNetworkManager from './NetworkManager'
+import networkManager from './NetworkManager'
 import * as dgram from 'dgram'
 import * as rudp from '@common/rudp'
 
@@ -26,8 +26,8 @@ export class UDPRelayConnection extends EventEmitter {
     return new Promise((resolve, reject) => {
       let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
       socket.bind({
-        port: udpNetworkManager.getLocalUDPPort(),
-        address: udpNetworkManager.getLocalAddress(),
+        port: networkManager.getLocalUDPPort(),
+        address: networkManager.getLocalAddress(),
         exclusive: false
       })
 
