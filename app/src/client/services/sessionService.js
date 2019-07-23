@@ -159,8 +159,10 @@ class SessionService extends EventEmitter {
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
         debug(`Starting UDP Punching for [${sessionInfo.id}]`)
-        await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-        await session.connect()
+        await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port).then(() => {
+          console.log('natpunching done!!!!!!!!!!!!!!!!!!!!')
+        })
+        // await session.connect()
       }
 
       this.sessions.push(session)
