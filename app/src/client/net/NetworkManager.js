@@ -119,12 +119,16 @@ class NetworkManager {
       })
       let client = new rudp.Client(socket, address, port)
       let holePunchingInterval = setInterval(() => {
-        client.send(Buffer.from('HELLO'))
+        try {
+          client.send(Buffer.from('HELLO'))
+        } catch (e) {
+          warn(e)
+        }
       }, 5000)
 
       client.on('data', (data) => {
-        console.log(data.toString())
         if (data.toString() === 'HELLO') {
+          console.log(data.toString())
           this.isNatPunched = true
           clearInterval(holePunchingInterval)
           client.close()

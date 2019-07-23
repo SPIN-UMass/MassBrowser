@@ -1,6 +1,6 @@
 import { ConnectionReceiver } from '@/net/ConnectionReceiver'
 import { networkMonitor } from '@/services'
-import { debug, info } from '@utils/log'
+import { warn, debug, info } from '@utils/log'
 import * as dgram from 'dgram'
 import * as rudp from '../../../common/rudp'
 
@@ -38,7 +38,11 @@ export class UDPRelay {
         connection = this._connections[addressKey]
       }
       let holePunchingInterval = setInterval(() => {
-        connection.send(Buffer.from('HELLO'))
+        try {
+          connection.send(Buffer.from('HELLO'))
+        } catch (e) {
+          warn(e)
+        }
       }, 5000)
       this._natPunchingList[addressKey] = {
         isResolved: false,
