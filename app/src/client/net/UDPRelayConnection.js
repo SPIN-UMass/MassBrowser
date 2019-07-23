@@ -107,20 +107,6 @@ export class UDPRelayConnection extends EventEmitter {
     return socket
   }
 
-  // relayReverse (socket) {
-  //   this.hasSessionID = false
-  //   this.socket = socket
-  //
-  //   const readable = (data) => {
-  //     let sessionId = data.toString()
-  //     this.hasSessionID = true
-  //     this.sessionID = sessionId
-  //     this.socket.removeListener('data', readable)
-  //     pendMgr.setPendingConnection(this.sessionID, this)
-  //   }
-  //   this.socket.on('data', readable)
-  // }
-
   end () {
     this.socket.end()
   }

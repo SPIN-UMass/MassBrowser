@@ -127,6 +127,7 @@ class NetworkManager {
         if (data.toString() === 'HELLO') {
           this.isNatPunched = true
           clearInterval(holePunchingInterval)
+          client.close()
           socket.close()
           resolve()
         }

@@ -19,11 +19,27 @@ export class UDPRelay {
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
       networkMonitor.stopUDPNATRoutine()
-      let client = new rudp.Client(this.server, address, port)
-      let holePunchingInterval = setInterval(() => {
-        client.send(Buffer.from('HELLO'))
-      }, 5000)
       let addressKey = address + port
+      let connection
+      if (!this._connections[addressKey]) {
+        connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
+        this._connections[addressKey] = connection
+        connection.on('data', data => {
+          if (data.toString() === 'HELLO') {
+            let natPunch = this._natPunchingList[addressKey]
+            if (!natPunch.isResolved) {
+              natPunch.resolve()
+              natPunch.isResolved = true
+              clearInterval(natPunch.holePunchingInterval)
+            }
+          }
+        })
+      } else {
+        connection = this._connections[addressKey]
+      }
+      let holePunchingInterval = setInterval(() => {
+        connection.send(Buffer.from('HELLO'))
+      }, 5000)
       this._natPunchingList[addressKey] = {
         isResolved: false,
         holePunchingInterval,
@@ -36,7 +52,7 @@ export class UDPRelay {
           reject()
         }
         networkMonitor.startUDPNATRoutine()
-      }, 10000)
+      }, 30000)
     })
   }
 
@@ -97,16 +113,6 @@ export class UDPRelay {
   }
 
   _handleConnection (connection, addressKey) {
-    // if (message.toString() === 'HELLO' && this._natPunchingList[addressKey]) {
-    //   let natPunch = this._natPunchingList[addressKey]
-    //   if (!natPunch.isResolved) {
-    //     natPunch.resolve()
-    //     natPunch.isResolved = true
-    //     clearInterval(natPunch.holePunchingInterval)
-    //   }
-    connection.on('data', data => {
-      console.log(data.toString())
-    })
     let upPipe = this.upLimit.throttle()
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downLimit.throttle()
@@ -114,16 +120,6 @@ export class UDPRelay {
     connection.pipe(upPipe)
     downPipe.pipe(connection)
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
-
-    // connection.on('error', (err) => {
-    //   console.log('socket error', err.message)
-    //   this.connectionList.splice(this.connectionList.indexOf(connection), 1)
-    //   receiver.closeConnections()
-    //   connection.unpipe(upPipe)
-    //   downPipe.unpipe(connection)
-    //   downPipe.end()
-    //   upPipe.end()
-    // })
 
     connection.on('end', () => {
       console.log('socket ending')
