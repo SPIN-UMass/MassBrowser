@@ -107,39 +107,39 @@ class NetworkManager {
   performUDPHolePunching (address, port) {
     debug(`performing punching for ${address}:${port}`)
     return new Promise((resolve, reject) => {
-      if (!address || port === 0) {
-        reject()
-      }
-      this.stopUDPNATRoutine()
-      let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
-      socket.bind({
-        port: this.localUDPPort,
-        address: this.localAddress,
-        exclusive: false
-      })
-      let client = new rudp.Client(socket, address, port)
-      let holePunchingInterval = setInterval(() => {
-        try {
+      try {
+        if (!address || port === 0) {
+          reject()
+        }
+        this.stopUDPNATRoutine()
+        let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
+        socket.bind({
+          port: this.localUDPPort,
+          address: this.localAddress,
+          exclusive: false
+        })
+        let client = new rudp.Client(socket, address, port)
+        let holePunchingInterval = setInterval(() => {
           client.send(Buffer.from('HELLO'))
-        } catch (e) {
-          warn(e)
-        }
-      }, 5000)
+        }, 5000)
 
-      client.on('data', (data) => {
-        if (data.toString() === 'HELLO') {
-          console.log(data.toString())
-          this.isNatPunched = true
-          clearInterval(holePunchingInterval)
-          client.close()
-          socket.close()
-          resolve()
-        }
-      })
+        client.on('data', (data) => {
+          if (data.toString() === 'HELLO') {
+            console.log(data.toString())
+            this.isNatPunched = true
+            clearInterval(holePunchingInterval)
+            client.close()
+            // socket.close()
+            resolve()
+          }
+        })
 
-      socket.on('error', err => {
-        warn('Socket error happened while performing udp punching: ', err)
-      })
+        socket.on('error', err => {
+          warn('Socket error happened while performing udp punching: ', err)
+        })
+      } catch (e) {
+        console.log('ERROR', e)
+      }
     })
   }
 
