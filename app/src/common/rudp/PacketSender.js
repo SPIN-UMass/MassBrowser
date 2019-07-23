@@ -9,6 +9,10 @@ function PacketSender(socket, address, port) {
 };
 
 PacketSender.prototype.send = function (packet) {
-  var buffer = packet.toBuffer();
-  this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+  try {
+    var buffer = packet.toBuffer();
+    this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+  } catch (e) {
+    console.log('error', e)
+  }
 };
