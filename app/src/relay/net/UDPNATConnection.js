@@ -11,8 +11,9 @@ export class UDPNATConnection extends EventEmitter {
   }
 
   stop () {
-    this.socket.close()
-    this.socket = null
+    this.socket.close(() => {
+      this.socket = null
+    })
   }
 
   connect () {

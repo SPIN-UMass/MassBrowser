@@ -41,8 +41,10 @@ class NetworkMonitor {
   }
 
   stopUDPNATRoutine () {
-    this.isUDPNATRoutineRunning = false
-    this.UDPNATConnection.stop()
+    if (this.isUDPNATRoutineRunning) {
+      this.isUDPNATRoutineRunning = false
+      this.UDPNATConnection.stop()
+    }
   }
 
   async startUDPNATRoutine () {

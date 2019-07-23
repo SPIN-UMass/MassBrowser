@@ -20,17 +20,21 @@ export class UDPRelay {
     return new Promise((resolve, reject) => {
       networkMonitor.stopUDPNATRoutine()
       let addressKey = address + port
+      if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched) {
+        resolve()
+        debug('Client nat already punched')
+      }
       let connection
       if (!this._connections[addressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
         this._connections[addressKey] = connection
         connection.on('data', data => {
           if (data.toString() === 'HELLO') {
-            console.log('got the HELLO')
             let natPunch = this._natPunchingList[addressKey]
             if (!natPunch.isResolved) {
               natPunch.resolve()
               natPunch.isResolved = true
+              natPunch.isPunched = true
               clearInterval(natPunch.holePunchingInterval)
             }
           }
@@ -47,6 +51,7 @@ export class UDPRelay {
       }, 5000)
       this._natPunchingList[addressKey] = {
         isResolved: false,
+        isPunched: false,
         holePunchingInterval,
         resolve,
         reject

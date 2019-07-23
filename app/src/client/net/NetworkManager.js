@@ -1,7 +1,7 @@
 import UDPNATConnection from './UDPNATConnection'
 import TCPNATConnection from './TCPNATConnection'
 import * as dgram from 'dgram'
-import { debug, info, warn } from '@utils/log'
+import { debug, warn } from '@utils/log'
 import API from '@/api'
 const net = require('net')
 import * as rudp from '@common/rudp'
@@ -62,12 +62,10 @@ class NetworkManager {
   _sendKeepAlive () {
     if (this.isTCPNATRoutineRunning) {
       this.TCPNATConnection.keepAlive()
-      info('TCP keepalive sent')
     }
 
     if (this.isUDPNATRoutineRunning) {
       this.UDPNATConnection.keepAlive()
-      info('UDP Keepalive sent')
     }
   }
 
