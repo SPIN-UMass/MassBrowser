@@ -26,6 +26,7 @@ export class UDPRelay {
         this._connections[addressKey] = connection
         connection.on('data', data => {
           if (data.toString() === 'HELLO') {
+            console.log('got the HELLO')
             let natPunch = this._natPunchingList[addressKey]
             if (!natPunch.isResolved) {
               natPunch.resolve()
