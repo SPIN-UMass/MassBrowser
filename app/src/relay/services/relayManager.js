@@ -82,6 +82,7 @@ class RelayManager {
     if (access === this.openAccess) {
       return
     }
+    warn('change access has been changed')
 
     this.openAccess = access
     store.commit('changeOpenAccess', this.openAccess)
@@ -89,6 +90,7 @@ class RelayManager {
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
+      warn('restarting the relays!')
       await this._restartTCPRelayServer()
       await this._restartUDPRelayServer()
       statusManager.info(`TCP Relay server started on port ${publicAddress.port}`, { timeout: true })

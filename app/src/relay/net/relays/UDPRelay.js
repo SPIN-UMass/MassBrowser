@@ -26,7 +26,6 @@ export class UDPRelay {
       }
       let connection
       if (!this._connections[addressKey]) {
-        console.log('making new connection object')
         connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
         this._connections[addressKey] = connection
         connection.once('data', data => {
