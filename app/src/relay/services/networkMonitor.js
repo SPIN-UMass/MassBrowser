@@ -141,6 +141,9 @@ class NetworkMonitor {
     }
     if (changed) {
       warn('UDP changed')
+      console.log(data)
+      console.log(this.getPrivateAddress())
+      console.log(this.getPublicAddress())
       relayManager.handleReconnect()
     }
   }
