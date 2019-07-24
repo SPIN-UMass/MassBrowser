@@ -105,11 +105,10 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   end () {
-    this.socket.end()
+    // this.socket.end()
   }
 
   write (connectionID, command, data) {
-    console.log('writable: ', this.socket.writable)
     let sendPacket = Buffer(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)

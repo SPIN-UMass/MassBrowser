@@ -74,6 +74,7 @@ export class UDPRelay {
       })
 
       this.server.on('message', (message, remoteInfo) => {
+        console.log('new message')
         let addressKey = remoteInfo.address + remoteInfo.port
         let connection
         if (!this._connections[addressKey]) {
