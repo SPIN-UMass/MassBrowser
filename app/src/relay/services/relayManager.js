@@ -118,7 +118,7 @@ class RelayManager {
   }
 
   handleReconnect () {
-    debug('open access: ', this.openAccess)
+    warn('open access: ', this.openAccess)
     if (this.openAccess) {
       debug('open access: ', this.openAccess)
       let publicAddress = this._getReachableAddress()
