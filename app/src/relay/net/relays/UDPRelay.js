@@ -58,7 +58,8 @@ export class UDPRelay {
           clearInterval(holePunchingInterval)
           reject()
         }
-        networkMonitor.startUDPNATRoutine()
+        console.log('DLLDLDLDLDLDL')
+        // networkMonitor.startUDPNATRoutine()
       }, 10000)
     })
   }
