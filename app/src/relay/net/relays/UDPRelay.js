@@ -23,44 +23,45 @@ export class UDPRelay {
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched) {
         resolve()
         debug('Client nat already punched')
-      }
-      let connection
-      if (!this._connections[addressKey]) {
-        connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
-        this._connections[addressKey] = connection
-        connection.once('data', data => {
-          if (data.toString() === 'HELLO') {
-            let natPunch = this._natPunchingList[addressKey]
-            if (!natPunch.isResolved) {
-              natPunch.resolve()
-              natPunch.isResolved = true
-              natPunch.isPunched = true
-              clearInterval(natPunch.holePunchingInterval)
-            }
-          }
-        })
       } else {
-        connection = this._connections[addressKey]
-      }
-      let holePunchingInterval = setInterval(() => {
-        warn('sending hello ')
-        connection.send(Buffer.from('HELLO'))
-      }, 5000)
-      this._natPunchingList[addressKey] = {
-        isResolved: false,
-        isPunched: false,
-        holePunchingInterval,
-        resolve,
-        reject
-      }
-      setTimeout(() => {
-        if (!this._natPunchingList[addressKey].isResolved) {
-          clearInterval(holePunchingInterval)
-          reject()
+        let connection
+        if (!this._connections[addressKey]) {
+          connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
+          this._connections[addressKey] = connection
+          connection.once('data', data => {
+            if (data.toString() === 'HELLO') {
+              let natPunch = this._natPunchingList[addressKey]
+              if (!natPunch.isResolved) {
+                natPunch.resolve()
+                natPunch.isResolved = true
+                natPunch.isPunched = true
+                clearInterval(natPunch.holePunchingInterval)
+              }
+            }
+          })
+        } else {
+          connection = this._connections[addressKey]
         }
-        console.log('DLLDLDLDLDLDL')
-        // networkMonitor.startUDPNATRoutine()
-      }, 10000)
+        let holePunchingInterval = setInterval(() => {
+          warn('sending hello ')
+          connection.send(Buffer.from('HELLO'))
+        }, 5000)
+        this._natPunchingList[addressKey] = {
+          isResolved: false,
+          isPunched: false,
+          holePunchingInterval,
+          resolve,
+          reject
+        }
+        setTimeout(() => {
+          if (!this._natPunchingList[addressKey].isResolved) {
+            clearInterval(holePunchingInterval)
+            reject()
+          }
+          console.log('DLLDLDLDLDLDL')
+          // networkMonitor.startUDPNATRoutine()
+        }, 10000)
+      }
     })
   }
 

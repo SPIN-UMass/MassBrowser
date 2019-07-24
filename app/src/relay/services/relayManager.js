@@ -118,7 +118,6 @@ class RelayManager {
   }
 
   handleReconnect () {
-    warn('open access: ', this.openAccess)
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)

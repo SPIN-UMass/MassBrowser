@@ -47,12 +47,6 @@ class NetworkMonitor {
     }
   }
 
-  async restartUDPNATRoutine (UPDPort) {
-    await this.UDPNATConnection.reconnect(UDPPort).then(() => {
-      this.isUDPNATRoutineRunning = true
-    })
-  }
-
   async startUDPNATRoutine () {
     await this.UDPNATConnection.connect().then(() => {
       this.isUDPNATRoutineRunning = true
