@@ -11,14 +11,12 @@ class UDPNATConnection extends EventEmitter {
   }
 
   stop () {
-    console.log('##############stoped')
     this.socket.close(() => {
       this.socket = null
     })
   }
 
   connect () {
-    console.log('##################, connecting')
     return new Promise((resolve, reject) => {
       this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
       this.socket.bind({
