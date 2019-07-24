@@ -3,7 +3,7 @@ import config from '@utils/config'
 import { relayManager } from '@/services'
 import { TCPNATConnection, UDPNATConnection } from '@/net'
 import { store } from '@utils/store'
-import { info } from '@utils/log'
+import { warn, info } from '@utils/log'
 
 class NetworkMonitor {
   constructor () {
@@ -125,6 +125,7 @@ class NetworkMonitor {
       this.remoteTCPPort = data.remoteTCPPort
     }
     if (changed) {
+      warn('UDP changed')
       relayManager.handleReconnect()
     }
   }
@@ -139,6 +140,7 @@ class NetworkMonitor {
       this.remoteUDPPort = data.remoteUDPPort
     }
     if (changed) {
+      warn('UDP changed')
       relayManager.handleReconnect()
     }
   }
