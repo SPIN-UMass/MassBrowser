@@ -36,7 +36,7 @@ class _ZMQListener {
           'token': Buffer.from(session.token, 'base64')
         }
         this.validSessions.add(session)
-        var _session = new Session(session.id, session.relay.ip, session.relay.port, desc, session.relay['allowed_categories'])
+        var _session = new Session(session.id, session.relay.ip, session.relay.port, session.relay.udp_port, desc, session.relay['allowed_categories'])
         _session.connect().then(() => {
           console.log('Session Connected')
           connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {

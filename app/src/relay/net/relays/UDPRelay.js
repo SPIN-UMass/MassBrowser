@@ -30,9 +30,7 @@ export class UDPRelay {
         connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
         this._connections[addressKey] = connection
         connection.once('data', data => {
-          console.log('got the data')
           if (data.toString() === 'HELLO') {
-            console.log('clearing up')
             let natPunch = this._natPunchingList[addressKey]
             if (!natPunch.isResolved) {
               natPunch.resolve()
@@ -46,6 +44,7 @@ export class UDPRelay {
         connection = this._connections[addressKey]
       }
       let holePunchingInterval = setInterval(() => {
+        warn('sending hello ')
         connection.send(Buffer.from('HELLO'))
       }, 5000)
       this._natPunchingList[addressKey] = {

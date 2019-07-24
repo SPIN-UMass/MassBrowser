@@ -8,12 +8,13 @@ import { TCPRelayConnection } from './TCPRelayConnection'
 import { UDPRelayConnection } from './UDPRelayConnection'
 
 export class Session extends EventEmitter {
-  constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
+  constructor (id, ip, port, UDPPort, desc, allowedCategories, connectionType, domainName) {
     super()
 
     this.id = id
     this.ip = ip
     this.port = port
+    this.UDPPort = UDPPort
     this.desc = desc
     this.allowedCategories = this._initAllowedCategories(allowedCategories)
     this.connection = null
@@ -35,7 +36,7 @@ export class Session extends EventEmitter {
         relay = new TCPRelayConnection(this.ip, this.port, this.desc)
         break
       case ConnectionTypes.UDP:
-        relay = new UDPRelayConnection(this.ip, this.port, this.desc)
+        relay = new UDPRelayConnection(this.ip, this.UDPPort, this.desc)
         break
       case ConnectionTypes.CDN:
         relay = new DomainConnection(this.domainName, this.desc)

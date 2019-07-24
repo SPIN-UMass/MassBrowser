@@ -140,8 +140,7 @@ class ConnectionManager {
         .then(relay => {
           debug(`Relay [${relay.id}] assigned for connection`)
           this.connectionMaps[conid] = relay
-          var cr = String(dstip) + ':' + String(dstport)
-          // console.log('sendsize:', cr.length, cr)
+          let cr = String(dstip) + ':' + String(dstport)
           this.connectionMaps[conid].write(conid, 'N', Buffer(cr))
 
           connection.on('data', (data) => {

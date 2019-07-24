@@ -1,6 +1,6 @@
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
-import { debug, warn } from '@utils/log'
+import { info, debug, warn } from '@utils/log'
 import { UDPRelayConnectionError } from '@utils/errors'
 import networkManager from './NetworkManager'
 import * as dgram from 'dgram'
@@ -23,6 +23,7 @@ export class UDPRelayConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
+      networkManager.stopUDPNATRoutine()
       let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
       socket.bind({
         port: networkManager.getLocalUDPPort(),
@@ -30,25 +31,22 @@ export class UDPRelayConnection extends EventEmitter {
         exclusive: false
       })
 
-      if (this.client === null) {
-        this.client = new rudp.Client(socket, this.relayAddress, this.relayPort)
-      }
-
       socket.on('error', err => {
         warn('UDP socket ERROR while trying to connect to relay: ', err)
       })
 
-      try {
-        this.client.send(Buffer.from('TEST'))
-        let connection = this.client.getConnection()
-        debug(`Relay ${this.id} UDP connected`)
-        resolve(connection)
-      } catch (err) {
-        if (err) {
-          warn(`Relay ${this.id} UDP connection error: ${err.message}`)
-          reject(new UDPRelayConnectionError(err))
-        }
+      if (this.client === null) {
+        this.client = new rudp.Client(socket, this.relayAddress, this.relayPort)
       }
+
+      let connection = this.client.getConnection()
+      info(`Relay ${this.id} UDP connected`)
+      resolve(connection)
+
+      socket.once('error', (err) => {
+        warn(`Relay ${this.id} UDP connection error: ${err.message}`)
+        reject(new UDPRelayConnectionError(err))
+      })
     })
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
@@ -57,8 +55,8 @@ export class UDPRelayConnection extends EventEmitter {
   sessionFounded (session) {
     return new Promise((resolve, reject) => {
       this.desc = session.desc
-      this.relayip = session.ip
-      this.relayport = session.port
+      this.relayAddress = session.ip
+      this.relayPort = session.UDPPort
       this._initSocket(this.socket)
       this._initRelay(this.socket)
       resolve()
@@ -81,14 +79,15 @@ export class UDPRelayConnection extends EventEmitter {
     })
 
     socket.on('error', (err) => {
-      console.log('socket(connection) error', err)
+      warn('socket(connection) error', err)
       if (!socket.writable) {
-        console.log('socket is not writable')
+        warn('socket is not writable')
         this.emit('close')
       }
     })
     socket.on('end', () => {
-      console.log('ending relay socket')
+      warn('########################')
+      warn('ending udp relay socket')
       this.emit('close')
     })
     return socket
