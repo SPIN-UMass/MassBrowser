@@ -85,6 +85,11 @@ export class UDPRelayConnection extends EventEmitter {
         this.emit('close')
       }
     })
+
+    socket.on('close', () => {
+      console.log('someone called close on me !')
+    })
+
     socket.on('end', () => {
       warn('ending udp relay socket')
       this.emit('close')
@@ -105,7 +110,7 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   end () {
-    // this.socket.end()
+    this.socket.end()
   }
 
   write (connectionID, command, data) {
