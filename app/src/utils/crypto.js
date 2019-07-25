@@ -23,6 +23,7 @@ export class Crypto {
         let padsize = data.readUInt8(31)
 
         if (padsize > 32) {
+          console.log('PADSIZE > 32')
           this.onError()
           return
         }
@@ -30,6 +31,7 @@ export class Crypto {
           let offset=0
           while (offset < padsize){
             if (data.readIntLE(31 - padsize+ offset, Math.min(6, padsize-offset) ) !== 0) {
+              console.log('THE OTHER ISSUE!')
               this.onError()
               return
 

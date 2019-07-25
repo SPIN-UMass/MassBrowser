@@ -130,6 +130,10 @@ export class UDPRelay {
     downPipe.pipe(connection)
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
+    connection.on('finish', () => {
+      warn('Connection closed!')
+    })
+
     connection.on('end', () => {
       console.log('socket ending')
       delete this._connections[addressKey]

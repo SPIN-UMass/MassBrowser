@@ -86,8 +86,8 @@ export class UDPRelayConnection extends EventEmitter {
       }
     })
 
-    socket.on('close', () => {
-      console.log('someone called close on me !')
+    socket.on('finish', () => {
+      console.log('FINISHED!!!!!!!!!!!!!!')
     })
 
     socket.on('end', () => {
