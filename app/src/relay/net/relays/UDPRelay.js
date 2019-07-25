@@ -132,10 +132,8 @@ export class UDPRelay {
 
     connection.on('finish', () => {
       warn('Connection closed!')
-    })
-
-    connection.on('end', () => {
       console.log('socket ending')
+      delete this._natPunchingList[addressKey]
       delete this._connections[addressKey]
       receiver.closeConnections()
       connection.unpipe(upPipe)

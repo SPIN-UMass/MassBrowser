@@ -60,7 +60,6 @@ export class Session extends EventEmitter {
     relay.on('close', () => {
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
-      console.log('Calling to remove session')
       sessionService._handleClosedSessions(this)
     })
 

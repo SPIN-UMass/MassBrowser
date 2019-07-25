@@ -112,7 +112,7 @@ class ConnectionManager {
   onRelayClose (relay) {
     Object.keys(this.connectionMaps).forEach((key) => {
       if (this.connectionMaps[key] === relay) {
-        console.log('closing connection')
+        // console.log('closing connection')
         this.clientConnections[key].end()
       }
     })

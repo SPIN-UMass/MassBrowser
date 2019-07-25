@@ -106,7 +106,7 @@ class NetworkManager {
 
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
-      console.log('punching')
+      warn(`punching [${address}:${port}]`)
       this.stopUDPNATRoutine()
       let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
       socket.bind({
@@ -122,7 +122,7 @@ class NetworkManager {
 
       client.on('data', (data) => {
         if (data.toString() === 'HELLO') {
-          this.isNatPunched = true
+          this.isNatPunched = true // TODO it should have a list of relays not just one!
           clearInterval(holePunchingInterval)
           client.close()
           resolve()

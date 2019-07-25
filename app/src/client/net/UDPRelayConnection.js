@@ -88,9 +88,6 @@ export class UDPRelayConnection extends EventEmitter {
 
     socket.on('finish', () => {
       console.log('FINISHED!!!!!!!!!!!!!!')
-    })
-
-    socket.on('end', () => {
       warn('ending udp relay socket')
       this.emit('close')
     })
@@ -124,8 +121,6 @@ export class UDPRelayConnection extends EventEmitter {
     try {
       this.socket.write(enc)
     } catch (e) {
-      console.log('writable: ', this.socket.writable)
-      console.log('#################')
       console.log(e)
     }
   }
