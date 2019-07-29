@@ -32,10 +32,11 @@ export class UDPRelay {
             if (data.toString() === 'HELLO') {
               let natPunch = this._natPunchingList[addressKey]
               if (!natPunch.isResolved) {
-                natPunch.resolve()
+                clearInterval(natPunch.holePunchingInterval)
+                clearTimeout(natPunch.timeoutFunction)
                 natPunch.isResolved = true
                 natPunch.isPunched = true
-                clearInterval(natPunch.holePunchingInterval)
+                natPunch.resolve()
               }
             }
           })
@@ -45,21 +46,20 @@ export class UDPRelay {
         let holePunchingInterval = setInterval(() => {
           connection.send(Buffer.from('HELLO'))
         }, 5000)
+        let timeoutFunction = setTimeout(() => {
+          if (this._natPunchingList[addressKey] && !this._natPunchingList[addressKey].isResolved) {
+            clearInterval(holePunchingInterval)
+            reject()
+          }
+        }, 10000)
         this._natPunchingList[addressKey] = {
           isResolved: false,
           isPunched: false,
           holePunchingInterval,
           resolve,
+          timeoutFunction,
           reject
         }
-        setTimeout(() => {
-          if (!this._natPunchingList[addressKey].isResolved) {
-            clearInterval(holePunchingInterval)
-            reject()
-          }
-          console.log('DLLDLDLDLDLDL')
-          // networkMonitor.startUDPNATRoutine()
-        }, 10000)
       }
     })
   }
@@ -130,7 +130,6 @@ export class UDPRelay {
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
     connection.on('finish', () => {
-      warn('Connection closed!')
       delete this._natPunchingList[addressKey]
       delete this._connections[addressKey]
       receiver.closeConnections()
