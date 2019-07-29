@@ -27,6 +27,10 @@ Connection.prototype.send = function (data) {
   this._sender.send(data);
 };
 
+Connection.prototype.isConnection = function (data) {
+  return true;
+}
+
 /**
  * This is the function called by `Server` and `Client` to process packets as
  * they arrive.
