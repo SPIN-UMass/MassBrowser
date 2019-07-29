@@ -121,7 +121,7 @@ export class UDPRelayConnection extends EventEmitter {
     try {
       this.socket.write(enc)
     } catch (e) {
-      console.log(e)
+      console.log('error while trying to write', e)
     }
   }
 }

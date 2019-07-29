@@ -43,7 +43,6 @@ export class UDPRelay {
           connection = this._connections[addressKey]
         }
         let holePunchingInterval = setInterval(() => {
-          warn('sending hello ')
           connection.send(Buffer.from('HELLO'))
         }, 5000)
         this._natPunchingList[addressKey] = {
