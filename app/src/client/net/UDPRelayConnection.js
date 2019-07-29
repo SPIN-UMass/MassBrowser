@@ -64,7 +64,6 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   _initSocket (socket) {
-    console.log('socket is connection:', socket.isConnection())
     let desc = this.desc
     let cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
       this.emit('data', d)
