@@ -13,10 +13,7 @@ export class UDPRelayConnection extends EventEmitter {
     this.relayAddress = relayAddress
     this.relayPort = relayPort
     this.desc = desc
-    this.client = null
-    this.hasSessionID = true
     this.sessionID = ''
-    this.initialBuffer = null
     this.cipher = null
     this.socket = null
   }
@@ -35,11 +32,21 @@ export class UDPRelayConnection extends EventEmitter {
         warn('UDP socket ERROR while trying to connect to relay: ', err)
       })
 
-      if (this.client === null) {
-        this.client = new rudp.Client(socket, this.relayAddress, this.relayPort)
-      }
+      let packetSender = new rudp.PacketSender(socket, this.relayAddress, this.relayPort)
+      let connection = new rudp.Connection(packetSender)
 
-      let connection = this.client.getConnection()
+      socket.on('message', function (message, rinfo) {
+        if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
+          return
+        }
+        let packet = new rudp.Packet(message)
+        // if (packet.getIsFinish()) {
+        //   socket.close()
+        //   return
+        // }
+        connection.receive(packet)
+      })
+
       info(`Relay ${this.id} UDP connected`)
       resolve(connection)
 

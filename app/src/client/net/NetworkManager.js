@@ -3,8 +3,8 @@ import TCPNATConnection from './TCPNATConnection'
 import * as dgram from 'dgram'
 import { debug, warn } from '@utils/log'
 import API from '@/api'
-const net = require('net')
 import * as rudp from '@common/rudp'
+const net = require('net')
 import { TCPRelayConnection } from './TCPRelayConnection'
 
 class NetworkManager {
@@ -17,7 +17,7 @@ class NetworkManager {
     this.localAddress = ''
     this.remoteAddress = ''
 
-    this.isNatPunched = false
+    this.UDPNATPunchingList = {}
     this.UDPNATConnection = null
     this.TCPNATConnection = null
 
@@ -39,6 +39,7 @@ class NetworkManager {
   }
 
   startUDPNATRoutine () {
+    // TODO
     this.isUDPNATRoutineRunning = true
   }
 
@@ -106,36 +107,64 @@ class NetworkManager {
 
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
-      warn(`punching [${address}:${port}]`)
-      this.stopUDPNATRoutine()
-      let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
-      socket.bind({
-        port: this.localUDPPort,
-        address: this.localAddress,
-        exclusive: false
-      })
-      let client = new rudp.Client(socket, address, port)
-      let holePunchingInterval = setInterval(() => {
-        warn('sending hello')
-        client.send(Buffer.from('HELLO'))
-      }, 5000)
+      let addressKey = address + port
+      if (this.UDPNATPunchingList[addressKey] && this.UDPNATPunchingList[addressKey].isPunched) {
+        resolve()
+        debug('Nat is already punched for this relay')
+      } else {
+        warn(`punching [${address}:${port}]`)
+        this.stopUDPNATRoutine()
+        let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
+        socket.bind({
+          port: this.localUDPPort,
+          address: this.localAddress,
+          exclusive: false
+        })
 
-      client.on('data', (data) => {
-        if (data.toString() === 'HELLO') {
-          this.isNatPunched = true // TODO it should have a list of relays not just one!
-          clearInterval(holePunchingInterval)
-          client.close()
-          resolve()
+        let packetSender = new rudp.PacketSender(socket, address, port)
+        let connection = new rudp.Connection(packetSender)
+
+        socket.on('message', (message, rinfo) => {
+          console.log('Im still getting messages')
+          if (rinfo.address !== address || rinfo.port !== port) {
+            return
+          }
+          let packet = new rudp.Packet(message)
+          if (packet.getIsFinish()) {
+            warn('got END')
+            socket.close()
+          }
+          connection.receive(packet)
+        })
+
+        let holePunchingInterval = setInterval(() => {
+          connection.send(Buffer.from('HELLO'))
+        }, 5000)
+
+        connection.on('data', (data) => {
+          if (data.toString() === 'HELLO') {
+            // TODO I need to close this socket
+            this.UDPNATPunchingList[addressKey].isPunched = true
+            this.UDPNATPunchingList[addressKey].isResolved = true
+            clearInterval(holePunchingInterval)
+            packetSender.send(rudp.Packet.createFinishPacket())
+            resolve()
+          }
+        })
+
+        this.UDPNATPunchingList[addressKey] = {
+          isPunched: false,
+          isResolved: false
         }
-      })
 
-      socket.on('close', () => {
-        warn('close called!')
-      })
+        socket.on('close', () => {
+          warn('close called!')
+        })
 
-      socket.on('error', err => {
-        warn('Socket error happened while performing udp punching: ', err)
-      })
+        socket.on('error', err => {
+          warn('Socket error happened while performing udp punching: ', err)
+        })
+      }
     })
   }
 

@@ -125,9 +125,6 @@ class ConnectionManager {
 
   newClientConnection (connection, dstip, dstport, onConnect) {
     var conid = crypto.randomBytes(2).readUInt16BE()
-
-    // debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
-
     if (!this.relayAssigner) {
       throw new errors.AppError('No Relay Assigner has been set for the ConnectionManager')
     }
