@@ -125,7 +125,6 @@ class NetworkManager {
         let connection = new rudp.Connection(packetSender)
 
         socket.on('message', (message, rinfo) => {
-          console.log('Im still getting messages')
           if (rinfo.address !== address || rinfo.port !== port) {
             return
           }
@@ -142,6 +141,7 @@ class NetworkManager {
         }, 5000)
 
         connection.on('data', (data) => {
+          console.log('herrrererere')
           if (data.toString() === 'HELLO') {
             // TODO I need to close this socket
             this.UDPNATPunchingList[addressKey].isPunched = true

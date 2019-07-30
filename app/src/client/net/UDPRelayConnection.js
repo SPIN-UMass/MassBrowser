@@ -36,9 +36,9 @@ export class UDPRelayConnection extends EventEmitter {
       let connection = new rudp.Connection(packetSender)
 
       socket.on('message', function (message, rinfo) {
-        if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
-          return
-        }
+        // if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
+        //   return
+        // }
         let packet = new rudp.Packet(message)
         // if (packet.getIsFinish()) {
         //   socket.close()
@@ -87,15 +87,10 @@ export class UDPRelayConnection extends EventEmitter {
 
     socket.on('error', (err) => {
       warn('socket(connection) error', err)
-      if (!socket.writable) {
-        warn('socket is not writable')
-        this.emit('close')
-      }
+      this.emit('close')
     })
 
     socket.on('finish', () => {
-      console.log('FINISHED!!!!!!!!!!!!!!')
-      warn('ending udp relay socket')
       this.emit('close')
     })
     return socket

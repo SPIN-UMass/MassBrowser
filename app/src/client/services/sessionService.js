@@ -185,9 +185,7 @@ class SessionService extends EventEmitter {
    */
 
   _handleClosedSessions (session) {
-    console.log('session removed!')
     let index = this.sessions.indexOf(session)
-    console.log(index)
     this.sessions.splice(index, 1)
   }
 
