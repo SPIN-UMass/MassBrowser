@@ -16,43 +16,43 @@ export class UDPRelayConnection extends EventEmitter {
     this.sessionID = ''
     this.cipher = null
     this.socket = null
+    this.dgramSocket = null
   }
 
   connect () {
     return new Promise((resolve, reject) => {
       networkManager.stopUDPNATRoutine()
-      let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
-      socket.bind({
+      this.dgramSocket = dgram.createSocket('udp4')
+      this.dgramSocket.bind({
         port: networkManager.getLocalUDPPort(),
         address: networkManager.getLocalAddress(),
-        exclusive: false
+        exclusive: true
       })
 
-      socket.on('error', err => {
-        warn('UDP socket ERROR while trying to connect to relay: ', err)
+      this.dgramSocket.on('error', err => {
+        warn(`Relay ${this.id} UDP connection error: ${err.message}`)
+        this.dgramSocket.close()
+        reject(new UDPRelayConnectionError(err))
       })
 
-      let packetSender = new rudp.PacketSender(socket, this.relayAddress, this.relayPort)
+      let packetSender = new rudp.PacketSender(this.dgramSocket, this.relayAddress, this.relayPort)
       let connection = new rudp.Connection(packetSender)
 
-      socket.on('message', function (message, rinfo) {
+      this.dgramSocket.on('listening', () => {
+        info(`Relay ${this.id} UDP connected`)
+        resolve(connection)
+      })
+
+      this.dgramSocket.on('message', (message, rinfo) => {
         // if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
         //   return
         // }
         let packet = new rudp.Packet(message)
         // if (packet.getIsFinish()) {
-        //   socket.close()
+        //   this.dgramSocket.close()
         //   return
         // }
         connection.receive(packet)
-      })
-
-      info(`Relay ${this.id} UDP connected`)
-      resolve(connection)
-
-      socket.once('error', (err) => {
-        warn(`Relay ${this.id} UDP connection error: ${err.message}`)
-        reject(new UDPRelayConnectionError(err))
       })
     })
       .then((socket) => this._initSocket(socket))
@@ -81,16 +81,25 @@ export class UDPRelayConnection extends EventEmitter {
 
     this.socket = socket
     this.cipher = cipher
+
+    socket.on('connection-error', () => {
+      this.dgramSocket.close(() => {
+        this.dgramSocket = null
+      })
+    })
+
     socket.on('data', (data) => {
       this.cipher.decrypt(data)
     })
 
     socket.on('error', (err) => {
       warn('socket(connection) error', err)
+      this.emit('connection-error')
       this.emit('close')
     })
 
     socket.on('finish', () => {
+      this.emit('connection-error')
       this.emit('close')
     })
     return socket

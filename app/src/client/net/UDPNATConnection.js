@@ -18,7 +18,7 @@ class UDPNATConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+      this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: false })
       this.socket.bind({
         port: 10000 + Math.floor(Math.random() * (65535 - 10000)),
         exclusive: false

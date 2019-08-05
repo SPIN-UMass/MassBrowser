@@ -15,6 +15,7 @@ util.inherits(Window, EventEmitter);
 
 Window.prototype.send = function () {
   // Our packets to send.
+  // using .slice to duplicate the this._packets
   var pkts = this._packets.slice();
 
   // The initial synchronization packet. Always send this first.
@@ -69,6 +70,7 @@ Window.prototype.send = function () {
       }
     }
 
+
     pkts.forEach(function (packet) {
       packet.on('acknowledge', onAcknowledge);
       packet.send();
@@ -96,11 +98,12 @@ module.exports = Sender;
 function Sender(packetSender) {
   this._packetSender = packetSender;
   this._windows = [];
+  this._prevBaseSequenceNumber = 0
   this._sending = null;
 }
 
 /**
- * Sends data to the remote host. 
+ * Sends data to the remote host.
  *
  * @class Sender
  * @method
@@ -119,6 +122,10 @@ Sender.prototype._push = function () {
   var self = this;
   if (!this._sending && this._windows.length) {
     this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
+    while(this._prevBaseSequenceNumber === this._baseSequenceNumber) {
+      this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
+      this._prevBaseSequenceNumber = this._baseSequenceNumber
+    }
     var window = this._windows.shift()
     var toSend = new Window(window.map(function (data, i) {
       var packet = new Packet(i + self._baseSequenceNumber, data, !i, i === window.length - 1);

@@ -27,18 +27,14 @@ Receiver.prototype.receive = function (packet) {
   }
 
   // Ignores packets that have a sequence number less than the next sequence
-  // number
-  if (!packet.getIsSynchronize() && packet.getSequenceNumber() < this._syncSequenceNumber) {
+  // number. sending the ack again
+  if (!packet.getIsSynchronize() && packet.getSequenceNumber() < this._nextSequenceNumber) {
+    this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
     return;
   }
 
   if (packet.getIsSynchronize() && !this._synced) {
     // This is the beginning of the stream.
-
-    if (packet.getSequenceNumber() === this._syncSequenceNumber) {
-      this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
-      return;
-    }
 
     // Send the packet upstream, send acknowledgement packet to end host, and
     // increment the next expected packet.
@@ -59,6 +55,11 @@ Receiver.prototype.receive = function (packet) {
     // We're done.
     return;
 
+  } else if (packet.getIsSynchronize() && this._synced && this._syncSequenceNumber === packet.getSequenceNumber()) {
+    // this will happen if the ack for sync message get lost so we will send it again
+    this._packetSender.send(Packet.createAcknowledgementPacket(packet.getSequenceNumber()));
+    // and we are done!
+    return;
   } else if (packet.getIsReset()) {
     this.emit('_reset');
     this._synced = false;
@@ -90,7 +91,6 @@ Receiver.prototype.receive = function (packet) {
   // after the current packet. If there are, then check to see if the next
   // packet is the expected packet number. If it is, then start the
   // acknowledgement process anew.
-
   var result = this._packets.insert(packet);
   if (result === LinkedList.InsertionResult.INSERTED) {
     this._pushIfExpectedSequence(packet);

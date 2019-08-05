@@ -102,6 +102,9 @@ LinkedList.prototype._insert = function (parentNode, object) {
 
   if (order <= -1) {
     var node = new Node(object);
+    if (this._currentNode.value > node.value) {
+      this._currentNode = node
+    }
     node._childNode = parentNode._childNode;
     parentNode._childNode = node;
     return InsertionResult.INSERTED;

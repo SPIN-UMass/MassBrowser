@@ -26,8 +26,17 @@ class NetworkManager {
     this.isTCPNATRoutineRunning = false
     this.isUDPNATRoutineRunning = false
 
+    this.UDPPunchingSocket = null
     this.listenerServer = {}
     this.isServerRunning = false
+  }
+
+  closeUDPPunchingSocket () {
+    if (this.UDPPunchingSocket) {
+      this.UDPPunchingSocket.close(() => {
+        this.UDPPunchingSocket = null
+      })
+    }
   }
 
   startTCPNATRoutine () {
@@ -114,24 +123,24 @@ class NetworkManager {
       } else {
         warn(`punching [${address}:${port}]`)
         this.stopUDPNATRoutine()
-        let socket = dgram.createSocket({type: 'udp4', reuseAddr: true})
-        socket.bind({
+        this.UDPPunchingSocket = dgram.createSocket({type: 'udp4', reuseAddr: false})
+        this.UDPPunchingSocket.bind({
           port: this.localUDPPort,
           address: this.localAddress,
           exclusive: false
         })
 
-        let packetSender = new rudp.PacketSender(socket, address, port)
+        let packetSender = new rudp.PacketSender(this.UDPPunchingSocket, address, port)
         let connection = new rudp.Connection(packetSender)
 
-        socket.on('message', (message, rinfo) => {
+        this.UDPPunchingSocket.on('message', (message, rinfo) => {
           if (rinfo.address !== address || rinfo.port !== port) {
             return
           }
           let packet = new rudp.Packet(message)
           if (packet.getIsFinish()) {
             warn('got END')
-            socket.close()
+            resolve()
           }
           connection.receive(packet)
         })
@@ -141,9 +150,7 @@ class NetworkManager {
         }, 5000)
 
         connection.on('data', (data) => {
-          console.log('herrrererere')
           if (data.toString() === 'HELLO') {
-            // TODO I need to close this socket
             this.UDPNATPunchingList[addressKey].isPunched = true
             this.UDPNATPunchingList[addressKey].isResolved = true
             clearInterval(holePunchingInterval)
@@ -157,11 +164,11 @@ class NetworkManager {
           isResolved: false
         }
 
-        socket.on('close', () => {
-          warn('close called!')
+        this.UDPPunchingSocket.on('close', () => {
+          debug('UDP punching socket closed!')
         })
 
-        socket.on('error', err => {
+        this.UDPPunchingSocket.on('error', err => {
           warn('Socket error happened while performing udp punching: ', err)
         })
       }

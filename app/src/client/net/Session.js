@@ -45,7 +45,6 @@ export class Session extends EventEmitter {
         relay = new TCPRelayConnection(this.ip, this.port, this.desc)
     }
 
-    console.log(`SESSION: new relay has been made for [${this.id}]`)
     relay.id = this.id
     relay.on('data', data => {
       connectionManager.listener(data)
@@ -59,7 +58,6 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      console.log(`SESSION:[${this.id}] closing!`)
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
       sessionService._handleClosedSessions(this)
