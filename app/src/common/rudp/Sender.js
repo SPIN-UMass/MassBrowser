@@ -98,7 +98,6 @@ module.exports = Sender;
 function Sender(packetSender) {
   this._packetSender = packetSender;
   this._windows = [];
-  this._prevBaseSequenceNumber = 0
   this._sending = null;
 }
 
@@ -122,10 +121,6 @@ Sender.prototype._push = function () {
   var self = this;
   if (!this._sending && this._windows.length) {
     this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
-    while(this._prevBaseSequenceNumber === this._baseSequenceNumber) {
-      this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
-      this._prevBaseSequenceNumber = this._baseSequenceNumber
-    }
     var window = this._windows.shift()
     var toSend = new Window(window.map(function (data, i) {
       var packet = new Packet(i + self._baseSequenceNumber, data, !i, i === window.length - 1);

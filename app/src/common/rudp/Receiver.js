@@ -46,7 +46,6 @@ Receiver.prototype.receive = function (packet) {
     this._synced = true;
     this._syncSequenceNumber = packet.getSequenceNumber();
 
-
     if (packet.getIsReset()) {
       this.emit('_reset');
       this._synced = false;
