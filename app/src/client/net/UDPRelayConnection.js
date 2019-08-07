@@ -44,14 +44,15 @@ export class UDPRelayConnection extends EventEmitter {
       })
 
       this.dgramSocket.on('message', (message, rinfo) => {
-        // if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
-        //   return
-        // }
+        if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
+          return
+        }
         let packet = new rudp.Packet(message)
-        // if (packet.getIsFinish()) {
-        //   this.dgramSocket.close()
-        //   return
-        // }
+        if (packet.getIsFinish()) {
+          warn('got the finish packet')
+          this.dgramSocket.close()
+          return
+        }
         connection.receive(packet)
       })
     })
@@ -82,24 +83,19 @@ export class UDPRelayConnection extends EventEmitter {
     this.socket = socket
     this.cipher = cipher
 
-    socket.on('connection-error', () => {
-      this.dgramSocket.close(() => {
-        this.dgramSocket = null
-      })
-    })
-
     socket.on('data', (data) => {
       this.cipher.decrypt(data)
     })
 
     socket.on('error', (err) => {
       warn('socket(connection) error', err)
-      this.emit('connection-error')
       this.emit('close')
     })
 
     socket.on('finish', () => {
-      this.emit('connection-error')
+      this.dgramSocket.close(() => {
+        this.dgramSocket = null
+      })
       this.emit('close')
     })
     return socket
@@ -113,6 +109,7 @@ export class UDPRelayConnection extends EventEmitter {
       padarr.push(this.cipher.encryptzero())
       i -= 1
     }
+    console.log('WRITING: ', Buffer.concat(padarr).length)
     socket.write(Buffer.concat(padarr))
     return socket
   }
@@ -131,6 +128,7 @@ export class UDPRelayConnection extends EventEmitter {
     this.emit('send', enc)
     try {
       if (this.socket.writable) {
+        console.log('WRITING: ', enc.length)
         this.socket.write(enc)
       }
     } catch (e) {

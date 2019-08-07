@@ -146,8 +146,9 @@ class RelayManager {
     API.acceptSession(data.client, data.id)
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
-      await this.UDPRelayServer.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
+      debug('got the connection not doing the punching')
+      // debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
+      // await this.UDPRelayServer.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
     }
   }
 

@@ -120,6 +120,7 @@ class SessionService extends EventEmitter {
           this.categoryWaitLists[category] = []
         }
       })
+
       debug(`Requesting for new session`)
       let sessionInfo = await API.requestSession(catIDs)
 
@@ -158,11 +159,11 @@ class SessionService extends EventEmitter {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
-        debug(`Starting UDP Punching for [${sessionInfo.id}]`)
-        await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-          .then(() => {
-            networkManager.closeUDPPunchingSocket()
-          })
+        // debug(`Starting UDP Punching for [${sessionInfo.id}]`)
+        // await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+        //   .then(() => {
+        //     networkManager.closeUDPPunchingSocket()
+        //   })
         await session.connect()
       }
 
@@ -210,6 +211,13 @@ class SessionService extends EventEmitter {
       if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
         // TODO: give warning here
         continue
+      }
+
+      for (let i = 0; i < this.sessions.length; i++) {
+        if (this.sessions[i].ip === sessionInfo.relay.ip) {
+          // it means we already have a session with this relay
+          return
+        }
       }
 
       this.processedSessions[sessionInfo.id] = desc

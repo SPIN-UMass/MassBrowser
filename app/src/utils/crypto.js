@@ -9,13 +9,14 @@ export class Crypto {
     this.onError = onError
     this.datacarry = Buffer(0)
     this.decipher.on('readable', () => {
-      var data = this.decipher.read()
+      let data = this.decipher.read()
       if (this.datacarry) {
         data = Buffer.concat([this.datacarry, data])
         this.datacarry = Buffer(0)
       }
       while (data.length > 31) {
         let padsize = data.readUInt8(31)
+        // console.log('PAD SIZE: ', padsize)
         if (padsize > 32) {
           console.log('PADSIZE > 32')
           this.onError()
@@ -70,5 +71,4 @@ export class Crypto {
   decrypt (buffer) {
     this.decipher.write(buffer)
   }
-
 }
