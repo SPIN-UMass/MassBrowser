@@ -1,10 +1,7 @@
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
 import { info, debug, warn } from '@utils/log'
-import { UDPRelayConnectionError } from '@utils/errors'
-import networkManager from './NetworkManager'
-import * as dgram from 'dgram'
-import * as rudp from '@common/rudp'
+import udpConnectionService from '@common/services'
 
 export class UDPRelayConnection extends EventEmitter {
   constructor (relayAddress, relayPort, desc) {
@@ -21,40 +18,31 @@ export class UDPRelayConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      networkManager.stopUDPNATRoutine()
-      this.dgramSocket = dgram.createSocket('udp4')
-      this.dgramSocket.bind({
-        port: networkManager.getLocalUDPPort(),
-        address: networkManager.getLocalAddress(),
-        exclusive: true
-      })
+      let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort)
+      info(`Relay ${this.id} UDP connected`)
+      resolve(connection)
+      // this.dgramSocket.on('listening', () => {
 
-      this.dgramSocket.on('error', err => {
-        warn(`Relay ${this.id} UDP connection error: ${err.message}`)
-        this.dgramSocket.close()
-        reject(new UDPRelayConnectionError(err))
-      })
-
-      let packetSender = new rudp.PacketSender(this.dgramSocket, this.relayAddress, this.relayPort)
-      let connection = new rudp.Connection(packetSender)
-
-      this.dgramSocket.on('listening', () => {
-        info(`Relay ${this.id} UDP connected`)
-        resolve(connection)
-      })
-
-      this.dgramSocket.on('message', (message, rinfo) => {
-        if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
-          return
-        }
-        let packet = new rudp.Packet(message)
-        if (packet.getIsFinish()) {
-          warn('got the finish packet')
-          this.dgramSocket.close()
-          return
-        }
-        connection.receive(packet)
-      })
+      // this.dgramSocket.on('error', err => {
+      //   warn(`Relay ${this.id} UDP connection error: ${err.message}`)
+      //   this.dgramSocket.close()
+      //   reject(new UDPRelayConnectionError(err))
+      // })
+      //   info(`Relay ${this.id} UDP connected`)
+      //   resolve(connection)
+      // })
+      // this.dgramSocket.on('message', (message, rinfo) => {
+      //   if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
+      //     return
+      //   }
+      //   let packet = new rudp.Packet(message)
+      //   if (packet.getIsFinish()) {
+      //     warn('got the finish packet')
+      //     this.dgramSocket.close()
+      //     return
+      //   }
+      //   connection.receive(packet)
+      // })
     })
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
@@ -79,7 +67,6 @@ export class UDPRelayConnection extends EventEmitter {
       this.emit('close')
       this.socket.end()
     })
-
     this.socket = socket
     this.cipher = cipher
 
@@ -93,9 +80,6 @@ export class UDPRelayConnection extends EventEmitter {
     })
 
     socket.on('finish', () => {
-      this.dgramSocket.close(() => {
-        this.dgramSocket = null
-      })
       this.emit('close')
     })
     return socket
@@ -109,7 +93,6 @@ export class UDPRelayConnection extends EventEmitter {
       padarr.push(this.cipher.encryptzero())
       i -= 1
     }
-    console.log('WRITING: ', Buffer.concat(padarr).length)
     socket.write(Buffer.concat(padarr))
     return socket
   }
@@ -126,13 +109,8 @@ export class UDPRelayConnection extends EventEmitter {
     const b = Buffer.concat([sendPacket, data])
     const enc = this.cipher.encrypt(b)
     this.emit('send', enc)
-    try {
-      if (this.socket.writable) {
-        console.log('WRITING: ', enc.length)
-        this.socket.write(enc)
-      }
-    } catch (e) {
-      console.log('error while trying to write', e)
+    if (this.socket.writable) {
+      this.socket.write(enc)
     }
   }
 }

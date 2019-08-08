@@ -26,17 +26,8 @@ class NetworkManager {
     this.isTCPNATRoutineRunning = false
     this.isUDPNATRoutineRunning = false
 
-    this.UDPPunchingSocket = null
     this.listenerServer = {}
     this.isServerRunning = false
-  }
-
-  closeUDPPunchingSocket () {
-    if (this.UDPPunchingSocket) {
-      this.UDPPunchingSocket.close(() => {
-        this.UDPPunchingSocket = null
-      })
-    }
   }
 
   startTCPNATRoutine () {
@@ -112,67 +103,6 @@ class NetworkManager {
 
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 5 * 1000) // what is the interval?
-  }
-
-  performUDPHolePunching (address, port) {
-    return new Promise((resolve, reject) => {
-      let addressKey = address + port
-      if (this.UDPNATPunchingList[addressKey] && this.UDPNATPunchingList[addressKey].isPunched) {
-        resolve()
-        debug('Nat is already punched for this relay')
-      } else {
-        warn(`punching [${address}:${port}]`)
-        this.stopUDPNATRoutine()
-        this.UDPPunchingSocket = dgram.createSocket({type: 'udp4', reuseAddr: false})
-        this.UDPPunchingSocket.bind({
-          port: this.localUDPPort,
-          address: this.localAddress,
-          exclusive: false
-        })
-
-        let packetSender = new rudp.PacketSender(this.UDPPunchingSocket, address, port)
-        let connection = new rudp.Connection(packetSender)
-
-        this.UDPPunchingSocket.on('message', (message, rinfo) => {
-          if (rinfo.address !== address || rinfo.port !== port) {
-            return
-          }
-          let packet = new rudp.Packet(message)
-          if (packet.getIsFinish()) {
-            warn('got END')
-            resolve()
-          }
-          connection.receive(packet)
-        })
-
-        let holePunchingInterval = setInterval(() => {
-          connection.send(Buffer.from('HELLO'))
-        }, 5000)
-
-        connection.on('data', (data) => {
-          if (data.toString() === 'HELLO') {
-            this.UDPNATPunchingList[addressKey].isPunched = true
-            this.UDPNATPunchingList[addressKey].isResolved = true
-            clearInterval(holePunchingInterval)
-            packetSender.send(rudp.Packet.createFinishPacket())
-            resolve()
-          }
-        })
-
-        this.UDPNATPunchingList[addressKey] = {
-          isPunched: false,
-          isResolved: false
-        }
-
-        this.UDPPunchingSocket.on('close', () => {
-          debug('UDP punching socket closed!')
-        })
-
-        this.UDPPunchingSocket.on('error', err => {
-          warn('Socket error happened while performing udp punching: ', err)
-        })
-      }
-    })
   }
 
   _onTCPNetworkUpdate (data) {
@@ -262,71 +192,6 @@ class NetworkManager {
       })
     }
   }
-
-// stopLocalUDPServer () {
-//   if (this.isUDPServerRunning) {
-//     this.listenerServer.close()
-//     this.isServerRunning = false
-//     this.listenerServer = null
-//   }
-// }
-
-// restartLocalUDPServer () {
-//   if (!this.isServerRunning) {
-//     this.startLocalUDPServer(this.localAddress, this.localUDPPort).then((server) => {
-//       this.listenerServer = server
-//     }).catch((err) => {
-//       warn(err)
-//     })
-//   } else if (this.listenerServer.address().port !== this.localUDPPort) {
-//     this.stopLocalUDPServer()
-//     this.startLocalUDPServer(this.localAddress, this.localUDPPort).then((server) => {
-//       this.isServerRunning = true
-//       this.listenerServer = server
-//     }).catch((err) => {
-//       warn(err)
-//     })
-//   }
-// }
-
-// startLocalUDPServer (publicAddress, publicPort) {
-//   return new Promise((resolve, reject) => {
-//     let socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
-//     let server = new rudp.Server(socket)
-//
-//     socket.bind({ port: publicPort, address: publicAddress, exclusive: false }, () => {
-//       debug('UDP Relay started on ', publicPort)
-//     })
-//
-//     socket.on('error', err => {
-//       debug('UDP Relay socket error, ', err)
-//       if (err.code === 'EADDRINUSE') {
-//         warn('UDP Relay address in use, retrying...')
-//         setTimeout(() => {
-//           socket.close()
-//           socket.bind({ port: publicPort, address: publicAddress, exclusive: false }, () => {
-//             debug('UDP Relay started on ', publicPort)
-//             resolve(socket)
-//           })
-//           server = new rudp.Server(socket)
-//         }, 1000)
-//       }
-//     })
-//
-//     server.on('connection', connection => {
-//       let receiver = new UDPRelayConnection()
-//       receiver.relayReverse(connection)
-//       connection.on('error', (err) => {
-//         debug('Local UDP Server error: ', err)
-//         receiver.end()
-//       })
-//       connection.on('end', () => {
-//         receiver.end()
-//       })
-//     })
-//     resolve(socket)
-//   })
-// }
 }
 
 let networkManager = new NetworkManager()
