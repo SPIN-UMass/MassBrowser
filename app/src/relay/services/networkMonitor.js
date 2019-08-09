@@ -2,7 +2,7 @@ import API from '@/api'
 import config from '@utils/config'
 import { relayManager } from '@/services'
 import { TCPNATConnection } from '@/net'
-import { UDPNATConnection } from '@common/net/UDPNATConnection'
+import UDPNATConnection from '@common/net/UDPNATConnection'
 import { store } from '@utils/store'
 import { warn, info } from '@utils/log'
 
