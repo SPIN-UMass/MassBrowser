@@ -1,4 +1,4 @@
-import UDPNATConnection from './UDPNATConnection'
+import UDPNATConnection from '@common/net/UDPNATConnection'
 import TCPNATConnection from './TCPNATConnection'
 import * as dgram from 'dgram'
 import { debug, warn } from '@utils/log'
