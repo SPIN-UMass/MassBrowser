@@ -20,7 +20,7 @@ function Packet(sequenceNumber, payload, synchronize, reset) {
     this._reset           = !!(bools & 0x10);
 
     this._sequenceNumber = segment.readUInt8(offset); offset++;
-    this._payload = new Buffer(segment.length - offset);
+    this._payload = Buffer.alloc(segment.length - offset);
     segment.copy(this._payload, 0, offset);
   } else {
     this._acknowledgement = false;
@@ -33,13 +33,13 @@ function Packet(sequenceNumber, payload, synchronize, reset) {
 };
 
 Packet.createAcknowledgementPacket = function (sequenceNumber) {
-  var packet = new Packet(sequenceNumber, new Buffer(0), false);
+  var packet = new Packet(sequenceNumber, Buffer.alloc(0), false);
   packet._acknowledgement = true;
   return packet;
 };
 
 Packet.createFinishPacket = function () {
-  var packet = new Packet(0, new Buffer(0), false, false);
+  var packet = new Packet(0, Buffer.alloc(0), false, false);
   packet._finish = true;
   return packet;
 };
@@ -75,7 +75,7 @@ Packet.prototype.getIsReset = function () {
  */
 Packet.prototype.toBuffer = function () {
   var offset = 0;
-  var retval = new Buffer(2 + this._payload.length);
+  var retval = Buffer.alloc(2 + this._payload.length);
 
   var bools = 0 + (
     (this._acknowledgement && 0x80) |

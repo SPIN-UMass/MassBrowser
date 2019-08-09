@@ -1,9 +1,9 @@
-import { ConnectionReceiver } from '@/net/ConnectionReceiver'
-import { networkMonitor } from '@/services'
+// import { ConnectionReceiver } from '@/net/ConnectionReceiver'
+// import { networkMonitor } from '@/services'
 import { warn, debug, info } from '@utils/log'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
-import { UDPRelayConnectionError } from '@utils/errors'
+// import { UDPRelayConnectionError } from '@utils/errors'
 
 export class UDPConnectionService {
   constructor (authenticator, upLimit, downLimit) {

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events'
 import { debug } from '~/utils/log'
-import udpConnectionService from '@common/services'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 class UDPNATConnection extends EventEmitter {
   constructor (echoServerAddress, echoServerPort) {

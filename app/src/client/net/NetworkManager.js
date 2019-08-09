@@ -6,6 +6,7 @@ import API from '@/api'
 import * as rudp from '@common/rudp'
 const net = require('net')
 import { TCPRelayConnection } from './TCPRelayConnection'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 class NetworkManager {
   constructor () {
@@ -87,6 +88,7 @@ class NetworkManager {
   }
 
   async start () {
+    await udpConnectionService.start()
     let TCPEchoServer = await API.requestNewStunServer()
     this.TCPNATConnection = new TCPNATConnection(TCPEchoServer.ip, TCPEchoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => { this._onTCPNetworkUpdate(data) })
