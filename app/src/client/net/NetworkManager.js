@@ -1,9 +1,7 @@
 import UDPNATConnection from '@common/net/UDPNATConnection'
-import TCPNATConnection from './TCPNATConnection'
-import * as dgram from 'dgram'
+import TCPNATConnection from '@common/net/TCPNATConnection'
 import { debug, warn } from '@utils/log'
 import API from '@/api'
-import * as rudp from '@common/rudp'
 const net = require('net')
 import { TCPRelayConnection } from './TCPRelayConnection'
 import udpConnectionService from '@common/services/UDPConnectionService'

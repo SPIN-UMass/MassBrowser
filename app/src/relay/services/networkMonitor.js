@@ -1,10 +1,11 @@
 import API from '@/api'
 import config from '@utils/config'
 import { relayManager } from '@/services'
-import { TCPNATConnection } from '@/net'
+import TCPNATConnection from '@common/net/TCPNATConnection'
 import UDPNATConnection from '@common/net/UDPNATConnection'
 import { store } from '@utils/store'
 import { warn, info } from '@utils/log'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 class NetworkMonitor {
   constructor () {
@@ -24,6 +25,7 @@ class NetworkMonitor {
   }
 
   async start () {
+    await udpConnectionService.start()
     this.TCPNATConnection = new TCPNATConnection(config.echoServer.host, config.echoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
