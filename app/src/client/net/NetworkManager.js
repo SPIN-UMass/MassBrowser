@@ -132,7 +132,6 @@ class NetworkManager {
       this.remoteUDPPort = data.remoteUDPPort
     }
     if (changed) {
-      console.log(data)
       API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort)
     }
   }

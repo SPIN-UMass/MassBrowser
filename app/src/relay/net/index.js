@@ -1,5 +1,4 @@
 export * from './TCPNATConnection'
-export * from './UDPNATConnection'
 export * from './relays'
 export * from './throttle'
 export * from './ConnectionAuthenticator'

@@ -126,7 +126,6 @@ class NetworkMonitor {
       this.remoteTCPPort = data.remoteTCPPort
     }
     if (changed) {
-      warn('UDP changed')
       relayManager.handleReconnect()
     }
   }
@@ -141,6 +140,8 @@ class NetworkMonitor {
       this.remoteUDPPort = data.remoteUDPPort
     }
     if (changed) {
+      warn('UDP changed')
+      console.log(data)
       relayManager.handleReconnect()
     }
   }
