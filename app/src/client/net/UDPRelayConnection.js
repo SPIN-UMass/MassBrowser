@@ -19,7 +19,6 @@ export class UDPRelayConnection extends EventEmitter {
   connect () {
     return new Promise((resolve, reject) => {
       let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort)
-      console.log(this.relayAddress, this.relayPort)
       info(`Relay ${this.id} UDP connected`)
       resolve(connection)
       // this.dgramSocket.on('listening', () => {

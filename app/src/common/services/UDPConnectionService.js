@@ -88,8 +88,10 @@ export class UDPConnectionService extends EventEmitter {
   _handleConnection (connection, addressKey) {
     // ignore if this is a connection to echo server
     if (connection.toEchoServer()) {
+      console.log('this is connection to echo server')
       return
     }
+    console.log('handling connection, ', addressKey)
     let upPipe = this.upLimiter.throttle()
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downLimiter.throttle()
@@ -140,6 +142,7 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.server.on('message', (message, remoteInfo) => {
+          console.log('hey')
           let addressKey = remoteInfo.address + remoteInfo.port
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           let packet = new rudp.Packet(message)
