@@ -47,6 +47,7 @@ class UDPNATConnection extends EventEmitter {
   }
 
   reconnect () {
+    console.log('reconnecting')
     if (this.socket) {
       this.socket.end()
       this.socket = null

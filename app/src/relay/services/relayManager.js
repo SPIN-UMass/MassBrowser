@@ -169,11 +169,13 @@ class RelayManager {
   }
 
   async _startUDPRelayServer () {
+    // let localAddress = this._getLocalAddress()
     udpConnectionService.setAuthenticator(this.authenticator)
     udpConnectionService.setUpLimiter(this.uploadLimiter)
     udpConnectionService.setDownLimiter(this.downloadLimiter)
     udpConnectionService.setRelayMode(true)
-    // let localAddress = this._getLocalAddress()
+    // udpConnectionService.setPort(localAddress.UDPPort)
+
     // this.UDPRelayServer = new UDPRelay(
     //   this.authenticator,
     //   localAddress.ip,
@@ -181,7 +183,7 @@ class RelayManager {
     //   this.uploadLimiter,
     //   this.downloadLimiter
     // )
-    await udpConnectionService.start()
+    // await udpConnectionService.start()
     this.isUDPRelayServerRunning = true
   }
 
@@ -230,7 +232,8 @@ class RelayManager {
     if (this.natEnabled) {
       return {ip: publicAddress.ip, port: publicAddress.port, UDPPort: publicAddress.UDPPort}
     }
-    return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
+    // return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
+    return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: publicAddress.UDPPort}
   }
 
   _getLocalAddress () {
@@ -239,7 +242,8 @@ class RelayManager {
     if (this.natEnabled) {
       return {ip: privateAddress.ip, port: privateAddress.port, UDPPort: privateAddress.UDPPort}
     }
-    return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
+    // return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
+    return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: privateAddress.UDPPort}
   }
 }
 

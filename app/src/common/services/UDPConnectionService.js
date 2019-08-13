@@ -1,6 +1,7 @@
 import { ConnectionReceiver} from '../../relay/net/ConnectionReceiver'
 // import { networkMonitor } from '@/services'
 import { warn, debug, info } from '@utils/log'
+import { store } from '@utils/store'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
 import {EventEmitter} from 'events'
@@ -14,6 +15,7 @@ export class UDPConnectionService extends EventEmitter {
     this.downLimiter = null
     this.server = null
     this.relayMode = false
+    this.port = 10000 + Math.floor(Math.random() * (65535 - 10000))
     this._connections = {}
     this._isServerRunning = false
     this._natPunchingList = {}
@@ -33,6 +35,18 @@ export class UDPConnectionService extends EventEmitter {
 
   setRelayMode (relayMode) {
     this.relayMode = relayMode
+  }
+
+  setPort (port) {
+    if (this.server) {
+      if (this.getLocalAddress().port !== port) {
+        this.port = port
+        this.emit('update')
+        this.restart()
+      }
+    } else {
+      this.port = port
+    }
   }
 
   performUDPHolePunching (address, port) {
@@ -116,39 +130,41 @@ export class UDPConnectionService extends EventEmitter {
   async start () {
     return new Promise((resolve, reject) => {
       if (this.server) {
+        debug('UDP Connection Service is already running')
         resolve()
+      } else {
+        this.server = dgram.createSocket('udp4')
+        this.server.bind({
+          port: this.port,
+          exclusive: false
+        })
+
+        this.server.on('message', (message, remoteInfo) => {
+          let addressKey = remoteInfo.address + remoteInfo.port
+          let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
+          let packet = new rudp.Packet(message)
+          if (packet.getIsFinish()) {
+            delete this._connections[addressKey]
+          } else {
+            setImmediate(() => {
+              connection.receive(packet)
+            })
+          }
+        })
+
+        this.server.on('listening', () => {
+          info('UDP Connection Service is started', this.port)
+          this._isServerRunning = true
+          resolve()
+        })
+
+        this.server.on('error', (e) => {
+          console.log('UDP Connection Service Error: ', e)
+          if (!this._isServerRunning) {
+            reject(e)
+          }
+        })
       }
-      this.server = dgram.createSocket('udp4')
-      this.server.bind({
-        port: 10000 + Math.floor(Math.random() * (65535 - 10000)),
-        exclusive: false
-      })
-
-      this.server.on('message', (message, remoteInfo) => {
-        let addressKey = remoteInfo.address + remoteInfo.port
-        let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
-        let packet = new rudp.Packet(message)
-        if (packet.getIsFinish()) {
-          delete this._connections[addressKey]
-        } else {
-          setImmediate(() => {
-            connection.receive(packet)
-          })
-        }
-      })
-
-      this.server.on('listening', () => {
-        info('UDP Connection Service is started', this.port)
-        this._isServerRunning = true
-        resolve()
-      })
-
-      this.server.on('error', (e) => {
-        console.log('UDP Connection Service Error: ', e)
-        if (!this._isServerRunning) {
-          reject(e)
-        }
-      })
     })
   }
 
@@ -158,9 +174,9 @@ export class UDPConnectionService extends EventEmitter {
         this._connections = {}
         this.server.close(() => {
           this.emit('stop')
+          this.server = null
           resolve()
         })
-        this.server = null
       }
     })
   }

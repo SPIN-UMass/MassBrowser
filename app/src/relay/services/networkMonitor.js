@@ -31,10 +31,14 @@ class NetworkMonitor {
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
 
-    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
     this.UDPNATConnection = new UDPNATConnection('128.119.245.46', 8823)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
+    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
+    udpConnectionService.on('update', () => {
+      console.log('got the update')
+      this.UDPNATConnection.reconnect()
+    })
     await this.UDPNATConnection.connect().then(() => {
       this.isUDPNATRoutineRunning = true
     })
@@ -128,6 +132,8 @@ class NetworkMonitor {
       this.remoteTCPPort = data.remoteTCPPort
     }
     if (changed) {
+      warn('TCP changed')
+      console.log(data)
       relayManager.handleReconnect()
     }
   }
