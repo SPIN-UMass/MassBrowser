@@ -13,6 +13,7 @@ export class UDPConnectionService extends EventEmitter {
     this.upLimiter = null
     this.downLimiter = null
     this.server = null
+    this.relayMode = false
     this._connections = {}
     this._isServerRunning = false
     this._natPunchingList = {}
@@ -28,6 +29,10 @@ export class UDPConnectionService extends EventEmitter {
 
   setDownLimiter (downLimiter) {
     this.downLimiter = downLimiter
+  }
+
+  setRelayMode (relayMode) {
+    this.relayMode = relayMode
   }
 
   performUDPHolePunching (address, port) {
@@ -57,7 +62,9 @@ export class UDPConnectionService extends EventEmitter {
     if (!this._connections[addressKey]) {
       connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port), toEchoServer)
       this._connections[addressKey] = connection
-      this._handleConnection(connection, addressKey)
+      if (this.relayMode) {
+        this._handleConnection(connection, addressKey)
+      }
     } else {
       connection = this._connections[addressKey]
     }

@@ -1,7 +1,7 @@
 import { Crypto } from '@utils/crypto'
 import { EventEmitter } from 'events'
 import { info, debug, warn } from '@utils/log'
-import udpConnectionService from '@common/services'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 export class UDPRelayConnection extends EventEmitter {
   constructor (relayAddress, relayPort, desc) {

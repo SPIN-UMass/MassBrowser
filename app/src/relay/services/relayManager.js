@@ -172,6 +172,7 @@ class RelayManager {
     udpConnectionService.setAuthenticator(this.authenticator)
     udpConnectionService.setUpLimiter(this.uploadLimiter)
     udpConnectionService.setDownLimiter(this.downloadLimiter)
+    udpConnectionService.setRelayMode(true)
     // let localAddress = this._getLocalAddress()
     // this.UDPRelayServer = new UDPRelay(
     //   this.authenticator,
