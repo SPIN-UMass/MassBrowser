@@ -31,7 +31,7 @@ class NetworkMonitor {
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
 
-    this.UDPNATConnection = new UDPNATConnection('dev2.yaler.co', 8823)
+    this.UDPNATConnection = new UDPNATConnection('54.145.75.108', 8823)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
     // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
