@@ -55,7 +55,7 @@ export class UDPConnectionService extends EventEmitter {
           pending: true
         }
         debug(`punching for ${address}:${port}`)
-        connection.send('HELLO')
+        connection.send(Buffer.from('HELLO'))
         resolve()
       }
     })
