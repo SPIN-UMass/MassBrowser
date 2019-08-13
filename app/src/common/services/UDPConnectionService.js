@@ -133,7 +133,6 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.server.on('message', (message, remoteInfo) => {
-          console.log(Object.keys(this._connections))
           let addressKey = remoteInfo.address + remoteInfo.port
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           let packet = new rudp.Packet(message)
