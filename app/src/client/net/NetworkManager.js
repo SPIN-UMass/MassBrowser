@@ -95,7 +95,7 @@ class NetworkManager {
       this.startTCPNATRoutine()
     })
 
-    this.UDPNATConnection = new UDPNATConnection('128.119.245.46', 8823)
+    this.UDPNATConnection = new UDPNATConnection('dev2.yaler.co', 8823)
     this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
     await this.UDPNATConnection.connect().then(() => {
       this.startUDPNATRoutine()
