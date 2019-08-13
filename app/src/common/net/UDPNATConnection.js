@@ -18,7 +18,7 @@ class UDPNATConnection extends EventEmitter {
 
   connect () {
     return new Promise((resolve, reject) => {
-      this.socket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort)
+      this.socket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, true)
       this.socket.send(Buffer.from('TEST'))
       this.socket.on('data', (data) => {
         try {

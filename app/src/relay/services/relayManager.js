@@ -5,6 +5,7 @@ import { store } from '@utils/store'
 import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
 import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 /**
  * Manages the relay servers.
@@ -18,7 +19,7 @@ class RelayManager {
     this.TCPRelayServer = null
     this.isTCPRelayServerRunning = false
 
-    this.UDPRelayServer = null
+    // this.UDPRelayServer = null
     this.isUDPRelayServerRunning = false
 
     this.openAccess = false
@@ -154,9 +155,8 @@ class RelayManager {
 
   async _stopUDPRelayServer () {
     if (this.isUDPRelayServerRunning) {
-      await this.UDPRelayServer.stop()
+      await udpConnectionService.stop()
       this.isUDPRelayServerRunning = false
-      this.UDPRelayServer = null
     }
   }
 
@@ -169,15 +169,18 @@ class RelayManager {
   }
 
   async _startUDPRelayServer () {
-    let localAddress = this._getLocalAddress()
-    this.UDPRelayServer = new UDPRelay(
-      this.authenticator,
-      localAddress.ip,
-      localAddress.UDPPort,
-      this.uploadLimiter,
-      this.downloadLimiter
-    )
-    await this.UDPRelayServer.start()
+    udpConnectionService.setAuthenticator(this.authenticator)
+    udpConnectionService.setUpLimiter(this.uploadLimiter)
+    udpConnectionService.setDownLimiter(this.downloadLimiter)
+    // let localAddress = this._getLocalAddress()
+    // this.UDPRelayServer = new UDPRelay(
+    //   this.authenticator,
+    //   localAddress.ip,
+    //   localAddress.UDPPort,
+    //   this.uploadLimiter,
+    //   this.downloadLimiter
+    // )
+    await udpConnectionService.start()
     this.isUDPRelayServerRunning = true
   }
 

@@ -1,8 +1,7 @@
 import { ConnectionReceiver } from '@/net/ConnectionReceiver'
 import { networkMonitor } from '@/services'
 import { warn, debug, info } from '@utils/log'
-import * as dgram from 'dgram'
-import * as rudp from '../../../common/rudp'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 export class UDPRelay {
   constructor (authenticator, address, port, upLimit, downLimit) {
@@ -16,94 +15,10 @@ export class UDPRelay {
     this._natPunchingList = {}
   }
 
-  performUDPHolePunching (address, port) {
-    return new Promise((resolve, reject) => {
-      networkMonitor.stopUDPNATRoutine()
-      let addressKey = address + port
-      if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched) {
-        resolve()
-        debug('Client nat already punched')
-      } else {
-        let connection
-        if (!this._connections[addressKey]) {
-          connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
-          this._connections[addressKey] = connection
-          connection.once('data', data => {
-            if (data.toString() === 'HELLO') {
-              let natPunch = this._natPunchingList[addressKey]
-              if (!natPunch.isResolved) {
-                clearInterval(natPunch.holePunchingInterval)
-                clearTimeout(natPunch.timeoutFunction)
-                natPunch.isResolved = true
-                natPunch.isPunched = true
-                natPunch.resolve()
-              }
-            }
-          })
-        } else {
-          connection = this._connections[addressKey]
-        }
-        let holePunchingInterval = setInterval(() => {
-          connection.send(Buffer.from('HELLO'))
-        }, 5000)
-        let timeoutFunction = setTimeout(() => {
-          if (this._natPunchingList[addressKey] && !this._natPunchingList[addressKey].isResolved) {
-            clearInterval(holePunchingInterval)
-            reject()
-          }
-        }, 10000)
-        this._natPunchingList[addressKey] = {
-          isResolved: false,
-          isPunched: false,
-          holePunchingInterval,
-          resolve,
-          timeoutFunction,
-          reject
-        }
-      }
-    })
-  }
-
   async start () {
     return new Promise((resolve, reject) => {
-      this.server = dgram.createSocket({ type: 'udp4', reuseAddr: true })
-      this.server.bind({
-        port: this.port,
-        address: this.address
-      })
-
-      this.server.on('message', (message, remoteInfo) => {
-        let addressKey = remoteInfo.address + remoteInfo.port
-        let connection
-        if (!this._connections[addressKey]) {
-          connection = new rudp.Connection(new rudp.PacketSender(this.server, remoteInfo.address, remoteInfo.port))
-          this._connections[addressKey] = connection
-          this._handleConnection(connection, addressKey)
-        } else {
-          connection = this._connections[addressKey]
-        }
-        let packet = new rudp.Packet(message)
-        if (packet.getIsFinish()) {
-          delete this._connections[addressKey]
-        } else {
-          setImmediate(() => {
-            connection.receive(packet)
-          })
-        }
-      })
-
-      let serverStarted
-      this.server.on('listening', () => {
-        info('UDP relay running on port', this.port)
-        serverStarted = true
-        resolve(this.server)
-      })
-
-      this.server.on('error', (e) => {
-        console.log('UDP SERVER ERROR', e)
-        if (!serverStarted) {
-          reject(e)
-        }
+      udpConnectionService.on('connection', (connection, addressKey) => {
+        this._handleConnection(connection, addressKey)
       })
     })
   }

@@ -1,65 +1,49 @@
-// import { ConnectionReceiver } from '@/net/ConnectionReceiver'
+import { ConnectionReceiver} from '../../relay/net/ConnectionReceiver'
 // import { networkMonitor } from '@/services'
 import { warn, debug, info } from '@utils/log'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
+import {EventEmitter} from 'events'
 // import { UDPRelayConnectionError } from '@utils/errors'
 
-export class UDPConnectionService {
-  constructor (authenticator, upLimit, downLimit) {
-    this.authenticator = authenticator
-    this.upLimit = upLimit
-    this.downLimit = downLimit
+export class UDPConnectionService extends EventEmitter {
+  constructor () {
+    super()
+    this.authenticator = null
+    this.upLimiter = null
+    this.downLimiter = null
     this.server = null
     this._connections = {}
     this._isServerRunning = false
     this._natPunchingList = {}
   }
 
+  setAuthenticator (authenticator) {
+    this.authenticator = authenticator
+  }
+
+  setUpLimiter (upLimiter) {
+    this.upLimiter = upLimiter
+  }
+
+  setDownLimiter (downLimiter) {
+    this.downLimiter = downLimiter
+  }
+
   performUDPHolePunching (address, port) {
     return new Promise((resolve, reject) => {
       let addressKey = address + port
-      if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched) {
+      if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
+        debug('Already punched')
         resolve()
-        debug('Client nat already punched')
-      } else {
-        let connection
-        if (!this._connections[addressKey]) {
-          connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
-          this._connections[addressKey] = connection
-          connection.once('data', data => {
-            if (data.toString() === 'HELLO') {
-              let natPunch = this._natPunchingList[addressKey]
-              if (!natPunch.isResolved) {
-                clearInterval(natPunch.holePunchingInterval)
-                clearTimeout(natPunch.timeoutFunction)
-                natPunch.isResolved = true
-                natPunch.isPunched = true
-                natPunch.resolve()
-              }
-            }
-          })
-        } else {
-          connection = this._connections[addressKey]
-        }
-        let holePunchingInterval = setInterval(() => {
-          connection.send(Buffer.from('HELLO'))
-        }, 5000)
-        let timeoutFunction = setTimeout(() => {
-          if (this._natPunchingList[addressKey] && !this._natPunchingList[addressKey].isResolved) {
-            clearInterval(holePunchingInterval)
-            reject()
-          }
-        }, 10000)
-        this._natPunchingList[addressKey] = {
-          isResolved: false,
-          isPunched: false,
-          holePunchingInterval,
-          resolve,
-          timeoutFunction,
-          reject
-        }
       }
+      let connection = this.getConnection(address, port)
+      this._natPunchingList[addressKey] = {
+        isPunched: false,
+        pending: true
+      }
+      connection.send('HELLO')
+      resolve()
     })
   }
 
@@ -67,20 +51,66 @@ export class UDPConnectionService {
     return this.server.address()
   }
 
-  getConnection (address, port) {
+  getConnection (address, port, toEchoServer) {
     let connection
     let addressKey = address + port
     if (!this._connections[addressKey]) {
-      connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port))
+      connection = new rudp.Connection(new rudp.PacketSender(this.server, address, port), toEchoServer)
       this._connections[addressKey] = connection
+      this._handleConnection(connection, addressKey)
     } else {
       connection = this._connections[addressKey]
     }
     return connection
   }
 
+  _handleConnection (connection, addressKey) {
+    // ignore if this is a connection to echo server
+    if (connection.toEchoServer()) {
+      return
+    }
+    let upPipe = this.upLimiter.throttle()
+    upPipe.on('error', (err) => { debug(err) })
+    let downPipe = this.downLimiter.throttle()
+    downPipe.on('error', (err) => { debug(err) })
+
+    connection.on('data', data => {
+      if (data.toString() === 'HELLO') {
+        if (this._natPunchingList[addressKey]) {
+          this._natPunchingList[addressKey].isPunched = true
+          this._natPunchingList[addressKey].pending = false
+        } else {
+          this._natPunchingList[addressKey] = {
+            isPunched: true
+          }
+        }
+      } else {
+        upPipe.write(data)
+      }
+    })
+
+    downPipe.on('data', data => {
+      connection.write(data)
+    })
+
+    let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
+
+    connection.on('finish', () => {
+      delete this._natPunchingList[addressKey]
+      delete this._connections[addressKey]
+      receiver.closeConnections()
+      connection.unpipe(upPipe)
+      downPipe.unpipe(connection)
+      downPipe.end()
+      upPipe.end()
+    })
+  }
+
   async start () {
     return new Promise((resolve, reject) => {
+      if (this.server) {
+        resolve()
+      }
       this.server = dgram.createSocket('udp4')
       this.server.bind({
         port: 10000 + Math.floor(Math.random() * (65535 - 10000)),
@@ -120,32 +150,13 @@ export class UDPConnectionService {
       if (this._isServerRunning) {
         this._connections = {}
         this.server.close(() => {
+          this.emit('stop')
           resolve()
         })
         this.server = null
       }
     })
   }
-  //
-  // _handleConnection (connection, addressKey) {
-  //   let upPipe = this.upLimit.throttle()
-  //   upPipe.on('error', (err) => { debug(err) })
-  //   let downPipe = this.downLimit.throttle()
-  //   downPipe.on('error', (err) => { debug(err) })
-  //   connection.pipe(upPipe)
-  //   downPipe.pipe(connection)
-  //   let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
-  //
-  //   connection.on('finish', () => {
-  //     delete this._natPunchingList[addressKey]
-  //     delete this._connections[addressKey]
-  //     receiver.closeConnections()
-  //     connection.unpipe(upPipe)
-  //     downPipe.unpipe(connection)
-  //     downPipe.end()
-  //     upPipe.end()
-  //   })
-  // }
 
   async restart () {
     await this.stop()

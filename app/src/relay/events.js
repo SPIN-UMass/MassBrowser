@@ -1,7 +1,6 @@
 import { debug, warn } from '~/utils/log'
 import { relayManager } from '@/services'
 import { connectToClientTCP } from '@/net/relays/TCPRelay'
-// import { connectToClientUDP } from '@/net/relays/UDPRelay'
 
 const handlers = {
   'new-session': data => relayManager.onNewSessionEvent(data),
