@@ -1,4 +1,4 @@
-import { UDPRelay, TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
+import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
 import { warn, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
@@ -147,9 +147,8 @@ class RelayManager {
     API.acceptSession(data.client, data.id)
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      debug('got the connection not doing the punching')
-      // debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
-      // await this.UDPRelayServer.performUDPHolePunching(data.client.ip, data.client.udp_port) // should I wait here ?
+      debug(`Performing UDP punching for client [${data.client.ip}:${data.client.udp_port}]`)
+      await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port)
     }
   }
 
@@ -169,21 +168,12 @@ class RelayManager {
   }
 
   async _startUDPRelayServer () {
-    // let localAddress = this._getLocalAddress()
+    let localAddress = this._getLocalAddress()
     udpConnectionService.setAuthenticator(this.authenticator)
     udpConnectionService.setUpLimiter(this.uploadLimiter)
     udpConnectionService.setDownLimiter(this.downloadLimiter)
     udpConnectionService.setRelayMode(true)
-    await udpConnectionService.setPort(8040)
-
-    // this.UDPRelayServer = new UDPRelay(
-    //   this.authenticator,
-    //   localAddress.ip,
-    //   localAddress.UDPPort,
-    //   this.uploadLimiter,
-    //   this.downloadLimiter
-    // )
-    // await udpConnectionService.start()
+    await udpConnectionService.setPort(localAddress.UDPPort)
     this.isUDPRelayServerRunning = true
   }
 
@@ -232,8 +222,7 @@ class RelayManager {
     if (this.natEnabled) {
       return {ip: publicAddress.ip, port: publicAddress.port, UDPPort: publicAddress.UDPPort}
     }
-    // return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
-    return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: publicAddress.UDPPort}
+    return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
   }
 
   _getLocalAddress () {
@@ -242,8 +231,7 @@ class RelayManager {
     if (this.natEnabled) {
       return {ip: privateAddress.ip, port: privateAddress.port, UDPPort: privateAddress.UDPPort}
     }
-    // return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
-    return {ip: privateAddress.ip, port: this.TCPRelayPort, UDPPort: privateAddress.UDPPort}
+    return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
   }
 }
 

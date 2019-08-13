@@ -48,14 +48,16 @@ export class UDPConnectionService extends EventEmitter {
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve()
+      } else {
+        let connection = this.getConnection(address, port)
+        this._natPunchingList[addressKey] = {
+          isPunched: false,
+          pending: true
+        }
+        debug(`punching for ${address}:${port}`)
+        connection.send('HELLO')
+        resolve()
       }
-      let connection = this.getConnection(address, port)
-      this._natPunchingList[addressKey] = {
-        isPunched: false,
-        pending: true
-      }
-      connection.send('HELLO')
-      resolve()
     })
   }
 
@@ -87,7 +89,6 @@ export class UDPConnectionService extends EventEmitter {
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downLimiter.throttle()
     downPipe.on('error', (err) => { debug(err) })
-
     connection.on('data', data => {
       if (data.toString() === 'HELLO') {
         if (this._natPunchingList[addressKey]) {

@@ -8,6 +8,7 @@ import { ConnectionTypes } from '@common/constants'
 import { Domain, Category } from '@/models'
 import API from '@/api'
 import networkManager from '../net/NetworkManager'
+import udpConnectionService from '@common/services/UDPConnectionService'
 let TEST_URL = 'backend.yaler.co'
 
 /**
@@ -159,11 +160,8 @@ class SessionService extends EventEmitter {
         API.updateSessionStatus(sessionInfo.id, 'client_accepted')
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
-        // debug(`Starting UDP Punching for [${sessionInfo.id}]`)
-        // await networkManager.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-        //   .then(() => {
-        //     networkManager.closeUDPPunchingSocket()
-        //   })
+        debug(`Starting UDP Punching for [${sessionInfo.id}]`)
+        await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
         await session.connect()
       }
 
