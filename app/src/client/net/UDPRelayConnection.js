@@ -72,7 +72,11 @@ export class UDPRelayConnection extends EventEmitter {
     this.cipher = cipher
 
     socket.on('data', (data) => {
-      this.cipher.decrypt(data)
+      if (data.toString() === 'HELLO') {
+        console.log('got the punching message')
+      } else {
+        this.cipher.decrypt(data)
+      }
     })
 
     socket.on('error', (err) => {

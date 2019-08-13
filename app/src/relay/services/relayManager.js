@@ -174,7 +174,7 @@ class RelayManager {
     udpConnectionService.setUpLimiter(this.uploadLimiter)
     udpConnectionService.setDownLimiter(this.downloadLimiter)
     udpConnectionService.setRelayMode(true)
-    // udpConnectionService.setPort(localAddress.UDPPort)
+    udpConnectionService.setPort(8040)
 
     // this.UDPRelayServer = new UDPRelay(
     //   this.authenticator,
@@ -243,7 +243,7 @@ class RelayManager {
       return {ip: privateAddress.ip, port: privateAddress.port, UDPPort: privateAddress.UDPPort}
     }
     // return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
-    return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: privateAddress.UDPPort}
+    return {ip: privateAddress.ip, port: this.TCPRelayPort, UDPPort: privateAddress.UDPPort}
   }
 }
 

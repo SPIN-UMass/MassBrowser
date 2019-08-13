@@ -37,12 +37,12 @@ export class UDPConnectionService extends EventEmitter {
     this.relayMode = relayMode
   }
 
-  setPort (port) {
+  async setPort (port) {
     if (this.server) {
       if (this.getLocalAddress().port !== port) {
         this.port = port
+        await this.restart()
         this.emit('update')
-        this.restart()
       }
     } else {
       this.port = port
