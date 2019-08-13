@@ -174,7 +174,7 @@ class RelayManager {
     udpConnectionService.setUpLimiter(this.uploadLimiter)
     udpConnectionService.setDownLimiter(this.downloadLimiter)
     udpConnectionService.setRelayMode(true)
-    udpConnectionService.setPort(8040)
+    await udpConnectionService.setPort(8040)
 
     // this.UDPRelayServer = new UDPRelay(
     //   this.authenticator,
