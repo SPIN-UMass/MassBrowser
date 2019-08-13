@@ -166,7 +166,6 @@ export class UDPConnectionService extends EventEmitter {
   async stop () {
     return new Promise((resolve, reject) => {
       if (this._isServerRunning) {
-        console.log('stopping the server')
         this._connections = {}
         this.server.close(() => {
           this.server = null
