@@ -38,15 +38,8 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   async setPort (port) {
-    if (this.server) {
-      if (this.getLocalAddress().port !== port) {
-        this.port = port
-        await this.restart()
-        this.emit('update')
-      }
-    } else {
-      this.port = port
-    }
+    this.port = port
+    await this.restart()
   }
 
   performUDPHolePunching (address, port) {
@@ -88,10 +81,8 @@ export class UDPConnectionService extends EventEmitter {
   _handleConnection (connection, addressKey) {
     // ignore if this is a connection to echo server
     if (connection.toEchoServer()) {
-      console.log('this is connection to echo server')
       return
     }
-    console.log('handling connection, ', addressKey)
     let upPipe = this.upLimiter.throttle()
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downLimiter.throttle()
@@ -158,6 +149,7 @@ export class UDPConnectionService extends EventEmitter {
         this.server.on('listening', () => {
           info('UDP Connection Service is started', this.port)
           this._isServerRunning = true
+          this.emit('start')
           resolve()
         })
 
@@ -174,19 +166,22 @@ export class UDPConnectionService extends EventEmitter {
   async stop () {
     return new Promise((resolve, reject) => {
       if (this._isServerRunning) {
+        console.log('stopping the server')
         this._connections = {}
         this.server.close(() => {
-          this.emit('stop')
           this.server = null
+          this._isServerRunning = false
           resolve()
         })
+      } else {
+        resolve()
       }
     })
   }
 
   async restart () {
     await this.stop()
-    return this.start()
+    await this.start()
   }
 }
 

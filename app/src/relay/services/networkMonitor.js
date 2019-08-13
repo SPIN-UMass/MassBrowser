@@ -35,8 +35,7 @@ class NetworkMonitor {
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
     // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
-    udpConnectionService.on('update', () => {
-      console.log('got the update')
+    udpConnectionService.on('start', () => {
       this.UDPNATConnection.reconnect()
     })
     await this.UDPNATConnection.connect().then(() => {
