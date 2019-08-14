@@ -133,8 +133,8 @@ class SessionService extends EventEmitter {
         })
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
       }
+
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
-      await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
 
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
@@ -162,6 +162,9 @@ class SessionService extends EventEmitter {
       } else if (session.connectionType === ConnectionTypes.UDP) {
         debug(`Starting UDP Punching for [${sessionInfo.id}]`)
         await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+        //   .then(() => {
+        //     networkManager.closeUDPPunchingSocket()
+        //   })
         await session.connect()
       }
 
