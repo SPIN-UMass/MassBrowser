@@ -161,7 +161,7 @@ class SessionService extends EventEmitter {
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
         debug(`Starting UDP Punching for [${sessionInfo.id}]`)
-        await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port, true)
+        // await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port, true)
         await session.connect()
       }
 

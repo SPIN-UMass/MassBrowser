@@ -145,7 +145,7 @@ class RelayManager {
     }
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port + 1)
+      // await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port + 1)
       await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port)
     }
     API.acceptSession(data.client, data.id)
