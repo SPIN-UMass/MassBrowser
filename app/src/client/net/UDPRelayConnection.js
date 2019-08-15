@@ -25,9 +25,10 @@ export class UDPRelayConnection extends EventEmitter {
       this.firstAttemptTimer = setTimeout(() => {
         debug('first attempt failed closing the connection')
         this.socket.end()
+        this.emit('close')
         debug('starting second attempt')
         let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort, false, true)
-        this._initSocket(connection).then((connection) => this._initRelay(connection))
+        this._initSocket(connection).then((socket) => this._initRelay(socket))
         debug('starting second timer')
         this.secondAttemptTimer = setTimeout(() => {
           debug('FAILED TO CONNECT DO STUFF HERE')
@@ -74,40 +75,42 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   _initSocket (socket) {
-    let desc = this.desc
-    let cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
-      this.emit('data', d)
-    }, () => {
-      this.emit('close')
-      this.socket.end()
-    })
-    this.socket = socket
-    this.cipher = cipher
+    return new Promise((resolve, reject) => {
+      let desc = this.desc
+      let cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
+        this.emit('data', d)
+      }, () => {
+        this.emit('close')
+        this.socket.end()
+      })
+      this.socket = socket
+      this.cipher = cipher
 
-    socket.on('data', (data) => {
-      if (data.toString() === 'HELLO') {
-        if (this.firstAttemptTimer) {
-          clearTimeout(this.firstAttemptTimer)
-          this.firstAttemptTimer = null
-        } else if (this.secondAttemptTimer) {
-          clearTimeout(this.secondAttemptTimer)
-          this.secondAttemptTimer = null
+      socket.on('data', (data) => {
+        if (data.toString() === 'HELLO') {
+          if (this.firstAttemptTimer) {
+            clearTimeout(this.firstAttemptTimer)
+            this.firstAttemptTimer = null
+          } else if (this.secondAttemptTimer) {
+            clearTimeout(this.secondAttemptTimer)
+            this.secondAttemptTimer = null
+          }
+          console.log('got the punching message')
+        } else {
+          this.cipher.decrypt(data)
         }
-        console.log('got the punching message')
-      } else {
-        this.cipher.decrypt(data)
-      }
-    })
+      })
 
-    socket.on('error', (err) => {
-      warn('socket(connection) error', err)
-      this.emit('close')
-    })
+      socket.on('error', (err) => {
+        warn('socket(connection) error', err)
+        this.emit('close')
+      })
 
-    socket.on('finish', () => {
-      this.emit('close')
+      socket.on('finish', () => {
+        this.emit('close')
+      })
+      resolve(socket)
     })
-    return socket
   }
 
   _initRelay (socket) {
