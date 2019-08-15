@@ -127,6 +127,11 @@ class RelayManager {
     }
   }
 
+  timeout (ms) {
+    console.log('waiting...')
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
   async onNewSessionEvent (data) {
     let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
@@ -145,7 +150,7 @@ class RelayManager {
     }
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      // await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port + 1)
+      await this.timeout(5000)
       await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port)
     }
     API.acceptSession(data.client, data.id)
