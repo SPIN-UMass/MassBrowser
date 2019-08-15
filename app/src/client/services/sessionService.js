@@ -135,7 +135,7 @@ class SessionService extends EventEmitter {
       }
 
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
-      // await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
+      await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
         reject: s => {
@@ -161,11 +161,7 @@ class SessionService extends EventEmitter {
         await session.listen()
       } else if (session.connectionType === ConnectionTypes.UDP) {
         debug(`Starting UDP Punching for [${sessionInfo.id}]`)
-        await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-        // await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port)
-        //   .then(() => {
-        //     networkManager.closeUDPPunchingSocket()
-        //   })
+        await udpConnectionService.performUDPHolePunching(sessionInfo.relay.ip, sessionInfo.relay.udp_port, true)
         await session.connect()
       }
 
