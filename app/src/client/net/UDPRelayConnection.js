@@ -12,6 +12,8 @@ export class UDPRelayConnection extends EventEmitter {
     this.desc = desc
     this.sessionID = ''
     this.cipher = null
+    this.firstAttemptTimer = null
+    this.secondAttemptTimer = null
     this.socket = null
     this.dgramSocket = null
   }
@@ -19,6 +21,18 @@ export class UDPRelayConnection extends EventEmitter {
   connect () {
     return new Promise((resolve, reject) => {
       let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort)
+      debug('started the timer for first try')
+      this.firstAttemptTimer = setTimeout(() => {
+        debug('first attempt failed closing the connection')
+        this.socket.end()
+        debug('starting second attempt')
+        let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort, false, true)
+        this._initSocket(connection).then((connection) => this._initRelay(connection))
+        debug('starting second timer')
+        this.secondAttemptTimer = setTimeout(() => {
+          debug('FAILED TO CONNECT DO STUFF HERE')
+        }, 10000)
+      }, 10000)
       info(`Relay ${this.id} UDP connected`)
       resolve(connection)
       // this.dgramSocket.on('listening', () => {
@@ -72,6 +86,13 @@ export class UDPRelayConnection extends EventEmitter {
 
     socket.on('data', (data) => {
       if (data.toString() === 'HELLO') {
+        if (this.firstAttemptTimer) {
+          clearTimeout(this.firstAttemptTimer)
+          this.firstAttemptTimer = null
+        } else if (this.secondAttemptTimer) {
+          clearTimeout(this.secondAttemptTimer)
+          this.secondAttemptTimer = null
+        }
         console.log('got the punching message')
       } else {
         this.cipher.decrypt(data)

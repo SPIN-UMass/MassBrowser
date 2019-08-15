@@ -86,6 +86,7 @@ class NetworkManager {
   }
 
   async start () {
+    udpConnectionService.setUseSecondPort(true)
     await udpConnectionService.start()
     let TCPEchoServer = await API.requestNewStunServer()
     this.TCPNATConnection = new TCPNATConnection(TCPEchoServer.ip, TCPEchoServer.port)
