@@ -177,10 +177,10 @@ export class UDPConnectionService extends EventEmitter {
     })
   }
 
-  async start (relayMode = false) {
-    this.relayMode = relayMode
+  async start (relayMode) {
+    this.relayMode = relayMode || false
     await this.startMainServer()
-    if (!this.relayMode) {
+    if (!relayMode) {
       await this.startSecondServer()
     }
   }
@@ -308,7 +308,7 @@ export class UDPConnectionService extends EventEmitter {
 
   async restart () {
     await this.stop()
-    await this.start()
+    await this.start(this.relayMode)
   }
 }
 
