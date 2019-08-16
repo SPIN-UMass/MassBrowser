@@ -17,13 +17,10 @@ export class UDPConnectionService extends EventEmitter {
     this.secondServer = null
     this.relayMode = false
     this.port = 10000 + Math.floor(Math.random() * (65535 - 10000))
-    this._mainServerConnections = {}
-    this._secondServerConnections = {}
+    this._connections = {}
     this._isMainServerRunning = false
     this._isSecondServerRunning = false
     this._natPunchingList = {}
-    this._secondNatPunchingList = {}
-    this.useSecondPort = false
   }
 
   setUseSecondPort (useSecondPort) {
@@ -52,37 +49,63 @@ export class UDPConnectionService extends EventEmitter {
     await this.restart()
   }
 
-  performUDPHolePunching (address, port, useSecondPort) {
+  performUDPHolePunchingRelay (address, port) {
     return new Promise((resolve, reject) => {
-      let addressKey = address + port
-      if (useSecondPort) {
-        if (this._secondNatPunchingList[addressKey] && this._secondNatPunchingList[addressKey].isPunched === true) {
-          debug('Already punched')
-          resolve()
-        } else {
-          let connection = this.getConnection(address, port, false, true)
-          this._secondNatPunchingList[addressKey] = {
-            isPunched: false,
-            pending: true
-          }
-          debug(`punching for ${address}:${port} using second port`)
-          connection.send(Buffer.from('HELLO'))
-          resolve()
-        }
+      let addressKey = address + port + this.port
+      if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
+        debug('Already punched')
+        resolve(this._connections[addressKey])
       } else {
-        if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
-          debug('Already punched')
-          resolve()
-        } else {
-          let connection = this.getConnection(address, port)
-          this._natPunchingList[addressKey] = {
-            isPunched: false,
-            pending: true
-          }
-          debug(`punching for ${address}:${port}`)
-          connection.send(Buffer.from('HELLO'))
-          resolve()
+        let connection = this.getConnection(address, port, false, false)
+        this._natPunchingList[addressKey] = {
+          isPunched: false
         }
+        debug(`punching for ${address}:${port}`)
+        connection.send(Buffer.from('HELLO'))
+      }
+    })
+  }
+
+  performUDPHolePunchingClient (address, port) {
+    return new Promise((resolve, reject) => {
+      let addressKey = address + port + this.port
+      let secondAddressKey = address + port + (this.port + 1)
+      if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
+        debug('Already punched')
+        resolve(this._connections[addressKey])
+      } else if (this._natPunchingList[secondAddressKey] && this._natPunchingList[secondAddressKey].isPunched === true) {
+        debug('NAT is already punched using second port')
+        resolve(this._connections[secondAddressKey])
+      } else {
+        let connection = this.getConnection(address, port, false, false)
+        let secondConnection = this.getConnection(address, port, false, true)
+        let timer = setTimeout(() => {
+          debug('NAT Punching failed')
+          connection.removeListener('data', onData)
+          secondConnection.removeListener('data', onData)
+          reject()
+        }, 10000)
+        const onData = (data, addressKey) => {
+          debug(`Relay ${this.id} connected`)
+          if (data.toString() === 'HELLO') {
+            this._natPunchingList[addressKey].isPunched = true
+            connection.removeListener('data', onData)
+            secondConnection.removeListener('data', onData)
+            clearTimeout(timer)
+            resolve(this._connections[addressKey])
+          }
+        }
+        connection.on('data', (data) => onData(data, addressKey))
+        secondConnection.on('data', data => onData(data, secondAddressKey))
+        this._natPunchingList[addressKey] = {
+          isPunched: false
+        }
+        this._natPunchingList[secondAddressKey] = {
+          isPunched: false
+        }
+        debug(`punching for ${address}:${port}`)
+        connection.send(Buffer.from('HELLO'))
+        secondConnection.send(Buffer.from('HELLO'))
       }
     })
   }
@@ -93,23 +116,24 @@ export class UDPConnectionService extends EventEmitter {
 
   getConnection (address, port, toEchoServer, useSecondPort) {
     let connection
-    let addressKey = address + port
+    let addressKey = address + port + this.port
+    let secondAddressKey = address + port + (this.port + 1)
     if (useSecondPort) {
-      if (!this._secondServerConnections[addressKey]) {
-        connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port), toEchoServer)
-        this._secondServerConnections[addressKey] = connection
+      if (!this._connections[secondAddressKey]) {
+        connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
+        this._connections[secondAddressKey] = connection
       } else {
-        connection = this._secondServerConnections[addressKey]
+        connection = this._connections[secondAddressKey]
       }
     } else {
-      if (!this._mainServerConnections[addressKey]) {
-        connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port), toEchoServer)
-        this._mainServerConnections[addressKey] = connection
-        if (this.relayMode) {
+      if (!this._connections[addressKey]) {
+        connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
+        this._connections[addressKey] = connection
+        if (this.relayMode && !toEchoServer) {
           this._handleConnection(connection, addressKey)
         }
       } else {
-        connection = this._mainServerConnections[addressKey]
+        connection = this._connections[addressKey]
       }
     }
     return connection
@@ -117,10 +141,6 @@ export class UDPConnectionService extends EventEmitter {
 
   // this function will be only used by relays
   _handleConnection (connection, addressKey) {
-    // ignore if this is a connection to echo server
-    if (connection.toEchoServer()) {
-      return
-    }
     let upPipe = this.upLimiter.throttle()
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downLimiter.throttle()
@@ -148,7 +168,7 @@ export class UDPConnectionService extends EventEmitter {
 
     connection.on('finish', () => {
       delete this._natPunchingList[addressKey]
-      delete this._mainServerConnections[addressKey]
+      delete this._connections[addressKey]
       receiver.closeConnections()
       connection.unpipe(upPipe)
       downPipe.unpipe(connection)
@@ -157,9 +177,10 @@ export class UDPConnectionService extends EventEmitter {
     })
   }
 
-  async start () {
+  async start (relayMode = false) {
+    this.relayMode = relayMode
     await this.startMainServer()
-    if (this.useSecondPort) {
+    if (!this.relayMode) {
       await this.startSecondServer()
     }
   }
@@ -177,11 +198,11 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.mainServer.on('message', (message, remoteInfo) => {
-          let addressKey = remoteInfo.address + remoteInfo.port
+          let addressKey = remoteInfo.address + remoteInfo.port + this.port
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           let packet = new rudp.Packet(message)
           if (packet.getIsFinish()) {
-            delete this._mainServerConnections[addressKey]
+            delete this._connections[addressKey]
           } else {
             setImmediate(() => {
               connection.receive(packet)
@@ -219,11 +240,11 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.secondServer.on('message', (message, remoteInfo) => {
-          let addressKey = remoteInfo.address + remoteInfo.port
+          let addressKey = remoteInfo.address + remoteInfo.port + (this.port + 1)
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, false, true)
           let packet = new rudp.Packet(message)
           if (packet.getIsFinish()) {
-            delete this._secondServerConnections[addressKey]
+            delete this._connections[addressKey]
           } else {
             setImmediate(() => {
               connection.receive(packet)
@@ -256,7 +277,7 @@ export class UDPConnectionService extends EventEmitter {
   async stopMainServer () {
     return new Promise((resolve, reject) => {
       if (this._isMainServerRunning) {
-        this._mainServerConnections = {}
+        this._connections = {}
         this.mainServer.close(() => {
           this.mainServer = null
           this._natPunchingList = {}
@@ -272,7 +293,7 @@ export class UDPConnectionService extends EventEmitter {
   async stopSecondServer () {
     return new Promise((resolve, reject) => {
       if (this._isSecondServerRunning) {
-        this._secondServerConnections = {}
+        this._connections = {}
         this.secondServer.close(() => {
           this.secondServer = null
           this._secondNatPunchingList = {}

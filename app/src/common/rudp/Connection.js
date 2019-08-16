@@ -6,10 +6,9 @@ var util = require('util');
 // TODO: have connections refuse packets when closed.
 
 module.exports = Connection;
-function Connection(packetSender, toServer) {
+function Connection(packetSender) {
   this._sender = new Sender(packetSender);
   this._receiver = new Receiver(packetSender);
-  this._toServer = toServer;
   Duplex.call(this)
 
   var self = this;
@@ -27,10 +26,6 @@ util.inherits(Connection, Duplex);
 Connection.prototype.send = function (data) {
   this._sender.send(data);
 };
-
-Connection.prototype.toEchoServer = function () {
-  return this._toServer;
-}
 
 /**
  * This is the function called by `Server` and `Client` to process packets as

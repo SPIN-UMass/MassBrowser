@@ -12,55 +12,15 @@ export class UDPRelayConnection extends EventEmitter {
     this.desc = desc
     this.sessionID = ''
     this.cipher = null
-    this.firstAttemptTimer = null
-    this.secondAttemptTimer = null
     this.socket = null
     this.dgramSocket = null
   }
 
-  connect () {
-    return new Promise((resolve, reject) => {
-      let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort)
-      debug('started the timer for first try')
-      this.firstAttemptTimer = setTimeout(() => {
-        debug('first attempt failed closing the connection')
-        this.socket.end()
-        this.emit('close')
-        debug('starting second attempt')
-        let connection = udpConnectionService.getConnection(this.relayAddress, this.relayPort, false, true)
-        this._initSocket(connection).then((socket) => this._initRelay(socket))
-        debug('starting second timer')
-        this.secondAttemptTimer = setTimeout(() => {
-          debug('FAILED TO CONNECT DO STUFF HERE')
-        }, 10000)
-      }, 10000)
-      info(`Relay ${this.id} UDP connected`)
-      resolve(connection)
-      // this.dgramSocket.on('listening', () => {
-
-      // this.dgramSocket.on('error', err => {
-      //   warn(`Relay ${this.id} UDP connection error: ${err.message}`)
-      //   this.dgramSocket.close()
-      //   reject(new UDPRelayConnectionError(err))
-      // })
-      //   info(`Relay ${this.id} UDP connected`)
-      //   resolve(connection)
-      // })
-      // this.dgramSocket.on('message', (message, rinfo) => {
-      //   if (rinfo.address !== this.relayAddress || rinfo.port !== this.relayPort) {
-      //     return
-      //   }
-      //   let packet = new rudp.Packet(message)
-      //   if (packet.getIsFinish()) {
-      //     warn('got the finish packet')
-      //     this.dgramSocket.close()
-      //     return
-      //   }
-      //   connection.receive(packet)
-      // })
-    })
+  async connect () {
+    await udpConnectionService.performUDPHolePunchingClient(this.relayAddress, this.relayPort)
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
+    info(`Relay ${this.id} UDP connected`)
   }
 
   sessionFounded (session) {
@@ -75,42 +35,33 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   _initSocket (socket) {
-    return new Promise((resolve, reject) => {
-      let desc = this.desc
-      let cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
-        this.emit('data', d)
-      }, () => {
-        this.emit('close')
-        this.socket.end()
-      })
-      this.socket = socket
-      this.cipher = cipher
-
-      socket.on('data', (data) => {
-        if (data.toString() === 'HELLO') {
-          if (this.firstAttemptTimer) {
-            clearTimeout(this.firstAttemptTimer)
-            this.firstAttemptTimer = null
-          } else if (this.secondAttemptTimer) {
-            clearTimeout(this.secondAttemptTimer)
-            this.secondAttemptTimer = null
-          }
-          console.log('got the punching message')
-        } else {
-          this.cipher.decrypt(data)
-        }
-      })
-
-      socket.on('error', (err) => {
-        warn('socket(connection) error', err)
-        this.emit('close')
-      })
-
-      socket.on('finish', () => {
-        this.emit('close')
-      })
-      resolve(socket)
+    let desc = this.desc
+    let cipher = new Crypto(desc['readkey'], desc['readiv'], desc['writekey'], desc['writeiv'], (d) => {
+      this.emit('data', d)
+    }, () => {
+      this.emit('close')
+      this.socket.end()
     })
+    this.socket = socket
+    this.cipher = cipher
+
+    socket.on('data', (data) => {
+      if (data.toString() === 'HELLO') {
+        console.log('got the punching message')
+      } else {
+        this.cipher.decrypt(data)
+      }
+    })
+
+    socket.on('error', (err) => {
+      warn('socket(connection) error', err)
+      this.emit('close')
+    })
+
+    socket.on('finish', () => {
+      this.emit('close')
+    })
+    return socket
   }
 
   _initRelay (socket) {

@@ -150,8 +150,9 @@ class RelayManager {
     }
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      await this.timeout(5000)
-      await udpConnectionService.performUDPHolePunching(data.client.ip, data.client.udp_port)
+      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port + 1)
+      await this.timeout(600)
+      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }
     API.acceptSession(data.client, data.id)
   }
@@ -176,7 +177,6 @@ class RelayManager {
     udpConnectionService.setAuthenticator(this.authenticator)
     udpConnectionService.setUpLimiter(this.uploadLimiter)
     udpConnectionService.setDownLimiter(this.downloadLimiter)
-    udpConnectionService.setRelayMode(true)
     await udpConnectionService.setPort(localAddress.UDPPort)
     this.isUDPRelayServerRunning = true
   }
