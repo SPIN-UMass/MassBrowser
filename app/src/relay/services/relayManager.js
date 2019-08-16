@@ -149,12 +149,13 @@ class RelayManager {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 
+    API.acceptSession(data.client, data.id)
+
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port + 1)
       await this.timeout(600)
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }
-    API.acceptSession(data.client, data.id)
   }
 
   async _stopUDPRelayServer () {
