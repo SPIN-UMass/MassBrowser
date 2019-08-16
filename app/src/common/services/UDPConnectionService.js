@@ -62,6 +62,7 @@ export class UDPConnectionService extends EventEmitter {
         }
         debug(`punching for ${address}:${port}`)
         connection.send(Buffer.from('HELLO'))
+        resolve()
       }
     })
   }
@@ -86,7 +87,6 @@ export class UDPConnectionService extends EventEmitter {
           reject()
         }, 10000)
         const onData = (data, addressKey) => {
-          debug(`Relay ${this.id} connected`)
           if (data.toString() === 'HELLO') {
             this._natPunchingList[addressKey].isPunched = true
             connection.removeListener('data', onData)
