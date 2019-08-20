@@ -1,6 +1,6 @@
 <template lang='pug'>
   .tor-container
-    p To use MassBrowser with Tor, configure the proxy in your TorBrowser to the following settings
+    p {{$t("WEBSITES_TOR_GUIDE")}}
     img(:src="torImage")
 </template>
 

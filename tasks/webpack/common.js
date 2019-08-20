@@ -1,6 +1,5 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const CopyPlugin = require('copy-webpack-plugin')
 const path = require('path')
 const webpack = require('webpack')
 
@@ -103,13 +102,7 @@ const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false
       'process.env.ROLE': `"${role}"`,
       'process.env.APP_INTERFACE': `"${interface}"`,
       'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
-    }),
-    new CopyPlugin([
-      {
-        from: path.join(rootDir, 'app/src/utils/locales/'),
-        to: path.join(rootDir, `app/dist/${role}/locales/`),
-      }
-    ])
+    })
   ].concat(otherPlugins || [])}
 
 

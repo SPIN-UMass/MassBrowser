@@ -3,22 +3,22 @@
     .tab-base.tab-stacked-left
       ul.nav.nav-tabs
         li(v-bind:class="{ active: currentTab === 'settings-general' }")
-          router-link(to='/client/settings/general') 
+          router-link(to='/client/settings/general')
             icon.tab-icon(name='cogs')
-            span.tab-label General
+            span.tab-label {{$t("SETTINGS_GENERAL")}}
         //- li(v-bind:class="{ active: currentTab === 'settings-websites' }")
-        //-   router-link(to='/client/settings/websites') 
+        //-   router-link(to='/client/settings/websites')
         //-     icon.tab-icon(name='globe')
         //-     span.tab-label Websites
       .tab-content
         router-view.tab-pane.fade.active.in
-          
-        
+
+
 </template>
 
 <script>
   import { store } from '@utils/store'
-  
+
   export default {
     store,
     data () {
@@ -37,7 +37,7 @@
 
 <style scoped lang='scss'>
   @import '~@/views/styles/settings.scss';
-  
+
   .settings-container {
     .nav.nav-tabs {
       width: 28%;

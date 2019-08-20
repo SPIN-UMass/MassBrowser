@@ -45,7 +45,6 @@ export function initializeRendererProcess(routes) {
 
   Vue.config.debug = true
 
-  console.log(locales)
   const i18n = new VueI18n({
     locale: 'en',
     messages: locales

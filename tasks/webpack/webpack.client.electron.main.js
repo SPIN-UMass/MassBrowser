@@ -7,8 +7,6 @@ const pkg = require('../../app/package.json')
 const webpack = require('webpack')
 const common = require('./common')
 
-
-
 let config = {
   devtool: '#source-map',
   entry: {

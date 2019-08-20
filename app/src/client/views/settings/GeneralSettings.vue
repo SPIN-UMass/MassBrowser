@@ -13,7 +13,7 @@
                 </div>
                 <div class="row">
                     <div class="col-xs-8">
-                        <label>Launch MassBrowser on startup</label>
+                        <label>{{$t("SETTINGS_GENERAL_STARTUP")}}</label>
                     </div>
                     <div class="col-xs-4 align-right">
                         <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged"></toggle-button>
@@ -21,7 +21,7 @@
                 </div>
                 <div class="row" v-if="showDockHideOption">
                     <div class="col-xs-8">
-                        <label>Show dock icon when closed</label>
+                        <label>{{$t("SETTINGS_GENERAL_SHOW_DOCK")}}</label>
                     </div>
                     <div class="col-xs-4 align-right">
                         <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged"></toggle-button>
@@ -63,12 +63,12 @@
         if (e.value && !isEnabled) {
           await autoLauncher.enable()
           if (!(await autoLauncher.isEnabled())) {
-            this.showError("Unable to configure launch on startup, it may not be supported on your system.")
+            this.showError(this.$t('ERROR_UNABLE_TO_CONFIGURE_LAUNCH_STARTUP'))
           }
         } else if (!e.value && isEnabled) {
           await autoLauncher.disable()
           if (await autoLauncher.isEnabled()) {
-            this.showError("Unable to configure launch on startup, it may not be supported on your system.")
+            this.showError(this.$t('ERROR_UNABLE_TO_CONFIGURE_LAUNCH_STARTUP'))
           }
         }
       },

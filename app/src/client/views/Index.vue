@@ -5,16 +5,13 @@
             #m-nav
                 ul
                     li(:class="{active: currentTab==='home'}")
-                        router-link(to='/client') home
+                        router-link(to='/client') {{$t("MENU_HOME")}}
                     li(:class="{active: currentTab==='websites'}")
-                        router-link(to='/client/websites') websites
+                        router-link(to='/client/websites') {{$t("MENU_WEBSITES")}}
                     li(:class="{active: currentTab==='feedback'}")
-                        router-link(to='/client/feedback') feedback
+                        router-link(to='/client/feedback') {{$t("MENU_FEEDBACK")}}
                     li(:class="{active: currentTab==='settings-general'}")
-                        router-link(to='/client/settings') settings
-                        //- .span(v-on:click="$router.push('client-websites')") websites
-                    //- li(:class="{active: currentTab==='client-settings'}")
-                    //-   a() settings
+                        router-link(to='/client/settings') {{$t("MENU_SETTINGS")}}
         #m-content
             router-view.
         #m-footer
