@@ -22,10 +22,10 @@ var app = new Vue({
   el: '#app',
   router: router,
   data: {
-    
+
   },
   created() {
     // this.browser = getBrowser()
-    
+
   }
 })

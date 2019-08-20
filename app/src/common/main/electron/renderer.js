@@ -3,6 +3,7 @@ import Electron from 'vue-electron'
 import Resource from 'vue-resource'
 import VueRouter from 'vue-router'
 import VueMask from 'v-mask'
+import VueI18n from 'vue-i18n'
 // import Vuex from 'vuex'
 
 import ToggleButton from 'vue-js-toggle-button'
@@ -27,7 +28,7 @@ import 'vue-awesome/icons/question-circle'
 import 'vue-awesome/icons/thumbs-up'
 import 'vue-awesome/icons/thumbs-down'
 import 'vue-awesome/icons/firefox'
-
+import locales from '@utils/locales'
 
 import App from '@common/views/App'
 
@@ -36,23 +37,30 @@ export function initializeRendererProcess(routes) {
   Vue.use(Resource)
   Vue.use(VueRouter)
   Vue.use(VueMask)
+  Vue.use(VueI18n)
   Vue.use(ToggleButton)
   // Vue.use(Vuex)
 
   Vue.component('icon', Icon)
 
-  
   Vue.config.debug = true
+
+  console.log(locales)
+  const i18n = new VueI18n({
+    locale: 'en',
+    messages: locales
+  })
 
   const router = new VueRouter({
     scrollBehavior: () => ({ y: 0 }),
     routes
   })
-  
+
   /* eslint-disable no-new */
   // var options = Object.assign({router}, App)
   var options = {
     router,
+    i18n,
     render: h => h(App)
   }
   new Vue(options).$mount('#app')

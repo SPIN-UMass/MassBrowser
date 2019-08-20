@@ -10,18 +10,7 @@ import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
 import {isFirefoxVersion,openInternalBrowser,setClientVersion } from '@/firefox'
 import models from '@/models' // required for bootstrapping remote models
-import * as i18n from 'i18n'
 
-i18n.configure({
-  locales: ['en', 'fa'],
-  defaultLocale: 'en',
-  directory: __dirname + '/locales/'
-})
-
-console.log(i18n.__h('NO'))
-console.log(i18n.__('Hello'))
-i18n.setLocale('fa')
-console.log(i18n.__('Hello'))
 remote.registerService('sync', syncService)
 remote.registerService('status', statusManager)
 remote.registerService('registration', registrationService)
@@ -36,7 +25,6 @@ remote.registerService('privacy-policy', privacyPolicyService)
 
 // let requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 // requireControllerFilter.keys().forEach(requireControllerFilter)
-
 
 let currentWindow = null
 

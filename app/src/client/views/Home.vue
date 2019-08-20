@@ -1,6 +1,7 @@
 <template>
     <div id="m-home">
         <div class="m-title">
+            {{ $t('Hello') }}
             <strong>MassClient</strong> is currently running.
         </div>
         <div id="m-client-help-box">
