@@ -1,5 +1,6 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 const path = require('path')
 const webpack = require('webpack')
 
@@ -68,7 +69,7 @@ const rules = [
         name: 'fonts/[name].[ext]'
       }
     }
-  }   
+  }
 ]
 
 const resolve = (target) => {
@@ -92,18 +93,24 @@ const resolve = (target) => {
 
 const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false) => {
   return [
-  
-  new webpack.NoEmitOnErrorsPlugin(),
-  new webpack.DefinePlugin({
-    'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
-    ? '"production"' 
-    : '"development"',
-    'process.env.IS_FIREFOX': isFirefox ? '"YES"' : '"NO"',
-    'process.env.ROLE': `"${role}"`,
-    'process.env.APP_INTERFACE': `"${interface}"`,
-    'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
-    }) 
-].concat(otherPlugins || [])}
+
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': process.env.NODE_ENV === 'production'
+        ? '"production"'
+        : '"development"',
+      'process.env.IS_FIREFOX': isFirefox ? '"YES"' : '"NO"',
+      'process.env.ROLE': `"${role}"`,
+      'process.env.APP_INTERFACE': `"${interface}"`,
+      'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
+    }),
+    new CopyPlugin([
+      {
+        from: path.join(rootDir, 'app/src/utils/locales/'),
+        to: path.join(rootDir, `app/dist/${role}/locales/`),
+      }
+    ])
+  ].concat(otherPlugins || [])}
 
 
 

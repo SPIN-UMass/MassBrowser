@@ -1,7 +1,7 @@
 import { initializeMainProcess } from '@common/main/electron/main'
 import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
-
+import * as path from 'path'
 import { statusManager } from '@common/services/statusManager'
 import { autoUpdater, autoLauncher, dockHider, feedbackService, privacyPolicyService } from '@common/services'
 import { syncService, registrationService, websiteSupportService } from '@/services'
@@ -10,7 +10,18 @@ import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
 import {isFirefoxVersion,openInternalBrowser,setClientVersion } from '@/firefox'
 import models from '@/models' // required for bootstrapping remote models
+import * as i18n from 'i18n'
 
+i18n.configure({
+  locales: ['en', 'fa'],
+  defaultLocale: 'en',
+  directory: __dirname + '/locales/'
+})
+
+console.log(i18n.__h('NO'))
+console.log(i18n.__('Hello'))
+i18n.setLocale('fa')
+console.log(i18n.__('Hello'))
 remote.registerService('sync', syncService)
 remote.registerService('status', statusManager)
 remote.registerService('registration', registrationService)
@@ -46,7 +57,7 @@ process.on('uncaughtException', (err) => {
   console.error(err)
 })
 
-setClientVersion () 
+setClientVersion ()
   isFirefoxVersion().then((isBundle)=>{
   if (isBundle){
     initializeMainProcess(onWindowCreated, onWindowClosed,{
@@ -64,5 +75,5 @@ setClientVersion ()
     debug(err)
     initializeMainProcess(onWindowCreated, onWindowClosed)
   })
-  
+
 
