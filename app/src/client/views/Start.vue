@@ -3,7 +3,7 @@
         .dragger
         .content
             h1 MassBrowser
-            h3 Best cencorship circumvention tool ever
+            h3 {{$t('SPLASH_MSG')}}
             router-link(to='register').btn.btn-default.btn-hover-warning.btn-lg.get-started Get Started
 </template>
 
