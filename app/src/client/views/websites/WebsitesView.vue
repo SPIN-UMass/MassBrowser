@@ -8,7 +8,7 @@
             p {{$t("WEBSITES_ENABLE_PROXY_FOR_WEBSITE")}}
         .tab-base
             .nav.nav-tabs
-                .nav-item(v-for="category in categories" v-bind:class="{ active: selectedCategory.id === category.id }" v-on:click="selectedCategory=category") {{category.name}}
+                .nav-item(v-for="category in categories" v-bind:class="{ active: selectedCategory.id === category.id }" v-on:click="selectedCategory=category") {{$t(category.name)}}
             .tab-container
                 .tab-content(v-if="selectedCategory.name !== 'Tor'")
                     .toolbar.form-inline
@@ -97,7 +97,7 @@
 
       let categories = await Category.find({parent: null})
       categories = categories.filter(c => c.name !== 'Third Parties')
-      this.categories = [{name: 'All categories', id: null}].concat(categories)
+      this.categories = [{name: this.$t('WEBSITES_ALL_CATS'), id: null}].concat(categories)
 
       let helpDone = await KVStore.get('websites-page-help-finished')
       if (!helpDone) {
