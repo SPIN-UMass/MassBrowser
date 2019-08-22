@@ -94,7 +94,7 @@
             font-family: $font_title;
             font-size: 36px;
             color: #94132a;
-            margin-top: 0px;
+            margin-top: 0;
         }
 
         .loading-container {
@@ -118,7 +118,7 @@
                 text-align: center;
                 font-size: 24px;
                 font-weight: bold;
-                padding: 9px 0px;
+                padding: 9px 0;
                 letter-spacing: 2px;
                 text-transform: uppercase;
             }
@@ -130,7 +130,7 @@
         }
         .error-container {
             margin-top: 60px;
-            padding: 0px 50px;
+            padding: 0 50px;
             #retry-btn {
                 margin-top: 30px;
                 padding: 10px 50px 30px 50px;

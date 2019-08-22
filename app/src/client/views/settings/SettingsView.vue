@@ -59,7 +59,7 @@
 
     .settings-divider {
       border-bottom: 1px solid rgba(50, 50, 50, 0.2);
-      margin: 5px 0px 10px 0px;
+      margin: 5px 0 10px 0;
     }
   }
 </style>

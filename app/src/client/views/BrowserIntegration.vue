@@ -68,7 +68,7 @@
     }
 
     .title {
-      margin-top: 0px;
+      margin-top: 0;
       padding-top: 50px;
     }
 
@@ -93,7 +93,7 @@
       margin-top: 40px;
       color:white;
       font-size: 16px;
-      padding: 0px 60px;
+      padding: 0 60px;
       border: none;
     }
 

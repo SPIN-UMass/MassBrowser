@@ -4,15 +4,15 @@
       h1 MassBuddy
       #m-nav
         ul
-          li(:class="{active: currentTab==='home'}")
-            router-link(to='/relay') home
+          li(:class="{active: currentTab ==='home'}")
+            router-link(to='/relay') {{$t('MENU_HOME')}}
           //- li(:class="{active: currentTab==='clients'}")
             //- router-link(to='/relay/clients') clients
-          li(:class="{active: currentTab==='feedback'}")
-            router-link(to='/relay/feedback') feedback
-          li(:class="{active: currentTab==='settings'}")
-            router-link(to='/relay/settings') settings
-          
+          li(:class="{active: currentTab ==='feedback'}")
+            router-link(to='/relay/feedback') {{$t('MENU_FEEDBACK')}}
+          li(:class="{active: currentTab ==='settings'}")
+            router-link(to='/relay/settings') {{$t('MENU_SETTINGS')}}
+
     #m-content
       router-view
     #m-footer
@@ -21,16 +21,16 @@
       //- .console
       //-   i.fas.fa-console
 
-      
+
 </template>
 
 <script>
-  import StatusWidget from '@common/widgets/StatusWidget'  
+  import StatusWidget from '@common/widgets/StatusWidget'
   import config from '@utils/config'
   import { getService } from '@utils/remote'
 
   const syncService = getService('sync')
-  
+
   export default {
     data () {
       return {
@@ -75,13 +75,13 @@
     background: $color_main;
     height: $header_height;
     -webkit-app-region: drag;
-    
+
     h1 {
       position: absolute;
-      left: 0px;
+      left: 0;
       top: $header_height / 2 - $title_font_size / 2;
 
-      margin: 0px;
+      margin: 0;
       padding: 5px 30px;
 
       font-size: 20px;
@@ -93,7 +93,7 @@
 
   #m-nav {
     position: absolute;
-    right: 0px;
+    right: 0;
     top: $header_height / 2 - $nav_font_size / 2;
 
     font-family: $font-menu;
@@ -104,23 +104,23 @@
         margin: 0;
         padding: 0;
     }
-  
+
     li {
       // float: left;
       display: inline-block;
-      
+
       a {
         display: block;
         text-align: center;
         padding: 5px 16px;
         text-decoration: none;
         cursor: pointer;
-        color: #bbb;    
+        color: #bbb;
         font-size: $nav_font_size;
-        
+
         &:hover {
           color: #111;
-        }    
+        }
       }
 
       &.active {
@@ -146,7 +146,7 @@
 
     border-radius: 0 0 $application_border_radius $application_border_radius;
     background: $color-main;
-    box-shadow: 0px -1px 0 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.1);
 
     .status-bar {
       float: left;

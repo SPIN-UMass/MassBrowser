@@ -134,7 +134,7 @@
 
         border-radius: 0 0 $application_border_radius $application_border_radius;
         background: $color-main;
-        box-shadow: 0px -1px 0 0 rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.1);
 
         .status-bar {
             float: left;

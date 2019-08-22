@@ -87,7 +87,7 @@
     @import '~@/views/styles/settings.scss';
 
     .general-settings-container {
-        padding: 0px 0px;
+        padding: 0 0;
 
         .align-right {
             text-align: right;

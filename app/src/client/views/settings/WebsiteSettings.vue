@@ -113,17 +113,17 @@
 
     .toolbar {
       height: $toolbar_height;
-      margin: 0px;
+      margin: 0;
 
 
       .form-group {
-        margin: 0px;
+        margin: 0;
       }
 
       #search {
         height: $toolbar_height;
         width: 100%;
-        margin: 0px;
+        margin: 0;
 
         outline: none;
         border: none !important;

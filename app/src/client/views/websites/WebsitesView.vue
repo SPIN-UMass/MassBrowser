@@ -211,13 +211,13 @@
 
 
             .form-group {
-                margin: 0px;
+                margin: 0;
             }
 
             #search {
                 height: $toolbar_height;
                 width: 100%;
-                margin: 0px;
+                margin: 0;
 
                 outline: none;
                 border: none !important;
@@ -257,7 +257,7 @@
         .special-category {
             height: $content-height;
             background-color: white;
-            padding: 20px 0px;
+            padding: 20px 0;
         }
 
         td.special-website-link-container {

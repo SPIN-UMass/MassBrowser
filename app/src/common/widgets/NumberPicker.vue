@@ -45,13 +45,13 @@
 		},
 		methods: {
 			plus: function(val) {
-				let step = typeof this.step === 'function' ? this.step(this.val) : this.step 
+				let step = typeof this.step === 'function' ? this.step(this.val) : this.step
 				let newVal = this.val + (val || step)
 				if(newVal > this.max) {
 					newVal = this.max
 				}
 				this.val = newVal
-				this.$emit('plusOrMinusClicked')				
+				this.$emit('plusOrMinusClicked')
 			},
 			minus: function(val) {
 				let step = typeof this.step === 'function' ? this.step(this.val) : this.step
@@ -74,7 +74,7 @@
 				if(newVal > this.max) {
 					this.val = this.max
         }
-        
+
         this.displayVal = this.formatter(this.val)
 			}
 		}
@@ -105,13 +105,13 @@
 		height: $number_picker_height;
 		border: none;
 		text-align: center;
-		padding: 0px 6px;
+		padding: 0 6px;
 	}
 
 	.btn-plus {
 		/* background-color: #4fc08d; */
 		background-color: #1675b2;
-	
+
 	}
 
 	.btn-plus:hover {

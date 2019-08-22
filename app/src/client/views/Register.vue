@@ -112,7 +112,7 @@
     h1 {
       font-family: $font_title;
       font-size: 36px;
-      margin-top: 0px;
+      margin-top: 0;
     }
 
     .loading-container {
@@ -136,7 +136,7 @@
         text-align: center;
         font-size: 24px;
         font-weight: bold;
-        padding: 2px 0px;
+        padding: 2px 0;
         letter-spacing: 2px;
         text-transform: uppercase;
       }
