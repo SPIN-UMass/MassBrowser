@@ -1,61 +1,58 @@
 <template>
     <div class="start-page-container">
-        <div class="dragger">
-
-        </div>
+        <div class="dragger"></div>
         <div class="start-header">
             <span class="i-nav i-prev" v-if="prevEnabled" v-on:click="prevPage">
                 <i class="fa fa-arrow-left"></i>
             </span>
-            <h1>
-                {{ appName }}
-            </h1>
+            <h1>{{ appName }}</h1>
             <span class="i-nav i-next" v-if="nextEnabled" v-on:click="nextPage">
                 <i class="fa fa-arrow-right"></i>
             </span>
         </div>
         <div class="start-content">
-            <div class="s-start" v-if="page == 'start'">
+            <div class="s-start" v-if="page === 'start'">
                 <div class="well">
-                    <p>
-                        <strong>Hey there!</strong> Thanks for using <strong>{{ appName }}</strong>.
-                    </p>
-                    <p>
-                        Since it's your first time, lets walk through a few things.
-                    </p>
+                    <i18n path="START_RELAY_WELCOME_MSG">
+                        <strong slot="appName">{{appName}}</strong>
+                    </i18n>
                 </div>
                 <button class="btn btn-info" v-on:click="nextPage">Start</button>
             </div>
-            <div class="s-sync" v-if="page == 'sync'">
+            <div class="s-sync" v-if="page === 'sync'">
                 <div class="well">
-                    <p>First, we need to sync your local database with our servers.</p>
-                    <p>Click the button below to start syncing.</p>
+                    {{$t('START_RELAY_SYNC')}}
+                    <p>
                 </div>
-                <button class="btn btn-info" v-on:click="startSync" v-if="sync.state==''">Start Download</button>
+                <button class="btn btn-info" v-on:click="startSync" v-if="sync.state==''">{{$t('START_RELAY_DOWNLOAD_BTN')}}</button>
                 <div class="progress" v-if="sync.state=='downloading'">
                     <div class="progress-bar progress-bar-info" ref="syncProgress"></div>
                 </div>
                 <p v-if="sync.state=='done'">
-                    Click on the <span><i class="fa fa-arrow-right"></i></span> icon in the top right corner to continue
+                    {{$t('START_RELAY_DONE')}}
                 </p>
             </div>
-            <div class="s-network-settings" v-if="page == 'network-settings'">
-                <div class="well well-sm">Customize your <strong>Network Settings</strong> here. Click on <span><i class="fa fa-question-circle"></i></span> for help.<br/>All settings can also be changed again later on.</div>
+            <div class="s-network-settings" v-if="page === 'network-settings'">
+                <div class="well well-sm">
+                    {{$t('START_RELAY_NETWORK_SETTINGS_HELP_MSG')}}
+                </div>
                 <div class="network-settings-container">
                     <network-settings :completeVersion="false"></network-settings>
                 </div>
             </div>
-            <div class="s-category-settings" v-if="page == 'category-settings'">
+            <div class="s-category-settings" v-if="page === 'category-settings'">
                 <div class="well well-sm">
-                    Select which types of websites you want to allow users to browser through you. Scroll down to see all options.
+                    {{$t('START_RELAY_WEBSITES_HELP_MSG')}}
                 </div>
                 <category-settings title="" :syncUpdates="false"></category-settings>
             </div>
-            <div class="s-final" v-if="page == 'final'">
+            <div class="s-final" v-if="page === 'final'">
                 <div class="well">
-                    You're all set. Click the button below to continue to {{ appName }}
+                    <i18n path="START_RELAY_ALL_SET_MSG">
+                        {{appName}}
+                    </i18n>
                 </div>
-                <button class="btn btn-success" v-on:click="finish">Continue</button>
+                <button class="btn btn-success" v-on:click="finish">{{$t('CONTINUE')}}</button>
             </div>
         </div>
     </div>
@@ -105,7 +102,7 @@
       syncProgress: 'syncProgress'
     }),
     watch: {
-      syncProgress(val) {
+      syncProgress (val) {
         if (this.$refs.syncProgress) {
           this.$refs.syncProgress.style.width = `${val}%`
         }
@@ -118,7 +115,7 @@
     created () {
     },
     methods: {
-      changePage(pageNumber) {
+      changePage (pageNumber) {
         let bConfig = pageConfig[this.page]
 
         if (bConfig.onLeave) {

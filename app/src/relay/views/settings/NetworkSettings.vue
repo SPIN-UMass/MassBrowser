@@ -248,9 +248,9 @@
 
         if (e.value) {
           await showConfirmDialog(
-            'Are you sure?',
-            'You should only use custom port settings if you are not located behind a NAT network.',
-            { yesText: 'I Understand', noText: null }
+            this.$t('SETTINGS_RELAY_CUSTOM_PORT_MODAL_TITLE'),
+            this.$t('SETTINGS_RELAY_CUSTOM_PORT_MODAL_MSG'),
+            { yesText: this.$t('SETTINGS_RELAY_CUSTOM_PORT_CONFIRM'), noText: null }
           )
         }
 
