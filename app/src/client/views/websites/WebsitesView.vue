@@ -17,7 +17,7 @@
                         .website-list
                             table.table
                                 tbody
-                                    tr(v-for="item in websites")
+                                    tr(v-for="item in websites" :key="item.name")
                                         td.name {{item.name}}
                                         td.toggle(v-if='!specialWebsites[item.name]') #[website-toggle.toggle(:website="item")]
                                         td.special-website-link-container(v-if='specialWebsites[item.name]')

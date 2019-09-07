@@ -6,7 +6,8 @@ export default {
       props: {
         width: 100,
         value: this.website.enabled,
-        labels: this.label
+        labels: this.label,
+        sync: true
       },
       on: {
         change: this.onChange
