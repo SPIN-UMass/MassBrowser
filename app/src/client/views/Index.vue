@@ -10,8 +10,10 @@
                         router-link(to='/client/websites') websites
                     li(:class="{active: currentTab==='feedback'}")
                         router-link(to='/client/feedback') feedback
-                    li(:class="{active: currentTab==='settings-general'}")
+                    li(:class="{active: currentTab.startsWith('settings')}")
                         router-link(to='/client/settings') settings
+                    li(:class="{active: currentTab.startsWith('stats')}")
+                        router-link(to='/client/stats') stats
                         //- .span(v-on:click="$router.push('client-websites')") websites
                     //- li(:class="{active: currentTab==='client-settings'}")
                     //-   a() settings

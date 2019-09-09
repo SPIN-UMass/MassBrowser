@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { RelayConnection } from './RelayConnection'
 import * as errors from '@utils/errors'
 import { debug } from '@utils/log'
+import { connectionStats } from '@/services'
 
 class ConnectionManager {
   constructor () {
@@ -156,6 +157,8 @@ class ConnectionManager {
           connection.on('error', (err) => {
             this.connectionMaps[conid].write(conid, 'C', Buffer(0))
           })
+
+          connectionStats.connectionRelayAssigned(connection, relay)
           resolve('Assigned')
         })
         .catch(err => reject(err))

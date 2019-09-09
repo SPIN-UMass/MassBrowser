@@ -3,7 +3,7 @@ var net = require('net'),
 
 import { connectionManager } from './connectionManager'
 import { cacheManager } from '@/cachebrowser'
-import { policyManager } from '@/services'
+import { policyManager, connectionStats } from '@/services'
 
 import { debug, info, warn, error } from '@utils/log'
 import * as errors from '@utils/errors'
@@ -22,6 +22,8 @@ export function startClientSocks (mhost, mport) {
   }
 
   function onConnection (socket, port, address, proxyReady) {
+    connectionStats.localSocketConnected(socket, address, port)
+
     // Handle torService and telegramService via yalerProxy
     if (net.isIP(address)) {    // net.isIP() will return 0 or 4 or 6
       if (torService.isTorIP(address)  || telegramService.isTelegramIP(address))
@@ -42,6 +44,8 @@ export function startClientSocks (mhost, mport) {
     policyManager.getDomainPolicy(address, port)
     .then((proxyType) => {
       debug(`New socks connection to ${address}:${port} using policy '${proxyType}'`)
+
+      connectionStats.socketPolicyDecided(socket, proxyType)
 
       // Notice that every connection to use a yalerProxy or
       // cachebrowser has to be included by the policyManager already,
@@ -135,8 +139,11 @@ function cachebrowse(socket, address, port, proxyReady) {
 // regularProxy is actually a direct connection attempt to the desired
 // dst. It is called a proxy because it is a local proxy.
 function regularProxy (socket, address, port, proxyReady) {
-  var proxy = net.createConnection({port: port, host: address}, proxyReady)
-  var localAddress, localPort
+  const proxy = net.createConnection({port: port, host: address}, proxyReady)
+  let localAddress, localPort
+
+  connectionStats.remoteSocketConnected(socket, proxy)
+
   proxy.on('connect', () => {
     localPort = proxy.localPort
   })

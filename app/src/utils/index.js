@@ -1,7 +1,7 @@
 import path from 'path'
 
 export function getDataDir () {
-  return process.platform === 'win32' ? 
+  return process.platform === 'win32' ?
     path.join(process.env.LOCALAPPDATA, 'MassBrowser') : path.join(process.env.HOME, '.massbrowser')
 }
 
@@ -42,4 +42,26 @@ export function sleep(amount) {
 	return new Promise((resolve, _) => {
 		setTimeout(resolve, amount)
 	})
+}
+
+const throttleMap = {}
+export function throttleCall (key, time, func) {
+	const info = throttleMap[key]
+	const now = (new Date()).getTime()
+	if (!info || (now - info.start) >= time) {
+		throttleMap[key] = {
+			start: now,
+			callScheduled: false
+		}
+		func()
+		return
+	}
+
+	if (!info.callScheduled) {
+		info.callScheduled = true
+		setTimeout(() => {
+			delete throttleMap[key]
+			func()
+		}, time - (now - info.start))
+	}
 }
