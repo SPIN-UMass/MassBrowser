@@ -1,18 +1,13 @@
-import { ConnectionReceiver } from '../../relay/net/ConnectionReceiver'
-// import { networkMonitor } from '@/services'
 import { warn, debug, info } from '@utils/log'
 import { store } from '@utils/store'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
-import {EventEmitter} from 'events'
+import { EventEmitter } from 'events'
 // import { UDPRelayConnectionError } from '@utils/errors'
 
 export class UDPConnectionService extends EventEmitter {
   constructor () {
     super()
-    this.authenticator = null
-    this.upLimiter = null
-    this.downLimiter = null
     this.mainServer = null
     this.secondServer = null
     this.relayMode = false
@@ -27,18 +22,6 @@ export class UDPConnectionService extends EventEmitter {
     this.useSecondPort = useSecondPort
   }
 
-  setAuthenticator (authenticator) {
-    this.authenticator = authenticator
-  }
-
-  setUpLimiter (upLimiter) {
-    this.upLimiter = upLimiter
-  }
-
-  setDownLimiter (downLimiter) {
-    this.downLimiter = downLimiter
-  }
-
   setRelayMode (relayMode) {
     this.relayMode = relayMode
   }
@@ -47,6 +30,24 @@ export class UDPConnectionService extends EventEmitter {
   async setPort (port) {
     this.port = port
     await this.restart()
+  }
+
+  updateNatPunchingListItem (addressKey) {
+    if (this._natPunchingList[addressKey]) {
+      this._natPunchingList[addressKey].isPunched = true
+    } else {
+      this._natPunchingList[addressKey] = {
+        isPunched: true
+      }
+    }
+  }
+
+  deleteNatPunchingListItem (addressKey) {
+    delete this._natPunchingList[addressKey]
+  }
+
+  deleteConnectionListItem (addressKey) {
+    delete this._connections[addressKey]
   }
 
   performUDPHolePunchingRelay (address, port) {
@@ -130,51 +131,13 @@ export class UDPConnectionService extends EventEmitter {
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
         this._connections[addressKey] = connection
         if (this.relayMode && !toEchoServer) {
-          this._handleConnection(connection, addressKey)
+          this.emit('relay-new-connection', connection, addressKey)
         }
       } else {
         connection = this._connections[addressKey]
       }
     }
     return connection
-  }
-
-  // this function will be only used by relays
-  _handleConnection (connection, addressKey) {
-    let upPipe = this.upLimiter.throttle()
-    upPipe.on('error', (err) => { debug(err) })
-    let downPipe = this.downLimiter.throttle()
-    downPipe.on('error', (err) => { debug(err) })
-    connection.on('data', data => {
-      if (data.toString() === 'HELLO') {
-        if (this._natPunchingList[addressKey]) {
-          this._natPunchingList[addressKey].isPunched = true
-          this._natPunchingList[addressKey].pending = false
-        } else {
-          this._natPunchingList[addressKey] = {
-            isPunched: true
-          }
-        }
-      } else {
-        upPipe.write(data)
-      }
-    })
-
-    downPipe.on('data', data => {
-      connection.write(data)
-    })
-
-    let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
-
-    connection.on('finish', () => {
-      delete this._natPunchingList[addressKey]
-      delete this._connections[addressKey]
-      receiver.closeConnections()
-      connection.unpipe(upPipe)
-      downPipe.unpipe(connection)
-      downPipe.end()
-      upPipe.end()
-    })
   }
 
   async start (relayMode) {

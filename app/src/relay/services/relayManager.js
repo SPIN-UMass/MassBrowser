@@ -6,6 +6,7 @@ import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
 import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
 import udpConnectionService from '@common/services/UDPConnectionService'
+import {ConnectionReceiver} from '../net/ConnectionReceiver'
 
 /**
  * Manages the relay servers.
@@ -18,10 +19,7 @@ class RelayManager {
   constructor () {
     this.TCPRelayServer = null
     this.isTCPRelayServerRunning = false
-
-    // this.UDPRelayServer = null
     this.isUDPRelayServerRunning = false
-
     this.openAccess = false
 
     store.ready.then(() => {
@@ -41,6 +39,8 @@ class RelayManager {
         debug(`NAT mode is not enabled, running relay on port: ${this.TCPRelayPort}`)
       }
     })
+
+    udpConnectionService.on('relay-new-connection', (connection, addressKey) => this.onNewUDPConnection(connection, addressKey))
   }
 
   setUploadLimit (limitBytes) {
@@ -158,6 +158,36 @@ class RelayManager {
     }
   }
 
+  onNewUDPConnection (connection, addressKey) {
+    let upPipe = this.uploadLimiter.throttle()
+    upPipe.on('error', (err) => { debug(err) })
+    let downPipe = this.downloadLimiter.throttle()
+    downPipe.on('error', (err) => { debug(err) })
+    connection.on('data', data => {
+      if (data.toString() === 'HELLO') {
+        udpConnectionService.updateNatPunchingListItem(addressKey)
+      } else {
+        upPipe.write(data)
+      }
+    })
+
+    downPipe.on('data', data => {
+      connection.write(data)
+    })
+
+    let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
+
+    connection.on('finish', () => {
+      udpConnectionService.deleteNatPunchingListItem(addressKey)
+      udpConnectionService.deleteConnectionListItem(addressKey)
+      receiver.closeConnections()
+      connection.unpipe(upPipe)
+      downPipe.unpipe(connection)
+      downPipe.end()
+      upPipe.end()
+    })
+  }
+
   async _stopUDPRelayServer () {
     if (this.isUDPRelayServerRunning) {
       await udpConnectionService.stop()
@@ -175,9 +205,6 @@ class RelayManager {
 
   async _startUDPRelayServer () {
     let localAddress = this._getLocalAddress()
-    udpConnectionService.setAuthenticator(this.authenticator)
-    udpConnectionService.setUpLimiter(this.uploadLimiter)
-    udpConnectionService.setDownLimiter(this.downloadLimiter)
     await udpConnectionService.setPort(localAddress.UDPPort)
     this.isUDPRelayServerRunning = true
   }
