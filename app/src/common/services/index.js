@@ -1,14 +1,19 @@
 import config from '@utils/config'
 
-module.exports = {
-    ...require('./autoUpdater'),
-    ...require('./statusManager'),
-    ...require('./SyncService'),
-    ...require('./torService'),
-    ...require('./telegramService'),
-    ...require('./privacyPolicy'),
-    ...require('./UDPConnectionService'),
-    ...(config.isElectronProcess ? require('./feedbackService') : {}),
-    ...(config.isElectronProcess ? require('./autoLauncher') : {}),
-    ...(config.isElectronProcess ? require('./dockHider') : {})
+export * from './autoUpdater'
+export * from './statusManager'
+export * from './SyncService'
+export * from './torService'
+export * from './telegramService'
+export * from './privacyPolicy'
+export * from './UDPConnectionService'
+
+export let feedbackService = {}
+export let autoLauncher = {}
+export let dockHider = {}
+
+if (config.isElectronProcess) {
+  feedbackService = require('./feedbackService').feedbackService
+  autoLauncher = require('./autoLauncher').autoLauncher
+  dockHider = require('./dockHider').dockHider
 }

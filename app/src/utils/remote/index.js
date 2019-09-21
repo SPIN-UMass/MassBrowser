@@ -1,38 +1,36 @@
 import config from '@utils/config'
 
+export let remoteModel
+export let getService
+export let remote
+export let createController
+
 if (config.applicationInterface === 'electron') {
   if (config.isElectronRendererProcess) {
-    const { remote, getService } = require('./renderer')
-
-    module.exports = {
-      getService,
-      remote,
-      createController: function(name, ctrlClass) {
-        return getService(`ctrl:${name}`)
-      },
-      remoteModel: function(name) {
-        return getService(`model:${name}`)
-      }
+    const renderer = require('./renderer')
+    getService = renderer.getService
+    remote = renderer.remote
+    createController = function(name, ctrlClass) {
+      return getService(`ctrl:${name}`)
+    }
+    remoteModel = function(name) {
+      return getService(`model:${name}`)
     }
   } else {
-    const { remote } = require('./main')
+    const main = require('./main')
 
-    module.exports = {
-      remote,
-      createController: function(name, ctrlClass) {
-        let ctrl = typeof ctrlClass === 'object' ? ctrlClass : new ctrlClass()
-        remote.registerService(`ctrl:${name}`, ctrl)
-        return ctrl
-      },
-      remoteModel: function(name, modelFactory) {
-        const model = modelFactory()
-        remote.registerService(`model:${name}`, model)
-        return model
-      }
+    remote = main.remote
+    createController = function (name, ctrlClass) {
+      let ctrl = typeof ctrlClass === 'object' ? ctrlClass : new ctrlClass()
+      remote.registerService(`ctrl:${name}`, ctrl)
+      return ctrl
+    }
+    remoteModel = function(name, modelFactory) {
+      const model = modelFactory()
+      remote.registerService(`model:${name}`, model)
+      return model
     }
   }
 } else {
-    module.exports = {
-      remoteModel: (name, modelFactory) => modelFactory()
-    }
+  remoteModel = (name, modelFactory) => modelFactory()
 }

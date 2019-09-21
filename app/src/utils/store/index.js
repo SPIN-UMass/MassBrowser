@@ -1,9 +1,11 @@
 import config from '@utils/config'
 export * from './common'
 
+export let store
+
 if (config.isElectronRendererProcess) {
-  module.exports = require('./renderer')
+  store = require('./renderer').store
 } else {
-  module.exports = require('./main')
+  store = require('./main').store
 }
 

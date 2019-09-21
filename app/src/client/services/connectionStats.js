@@ -48,8 +48,8 @@ class ConnectionStats extends EventEmitter {
     }
 
     sessionService.findHostModels(address).then(({category, website}) => {
-      connectionInfo.website = website.name
-      connectionInfo.category = category.name
+      connectionInfo.website = (website || {}).name || ''
+      connectionInfo.category = (category | {}).name || ''
       this.sendUpdate(connectionInfo)
     })
   }

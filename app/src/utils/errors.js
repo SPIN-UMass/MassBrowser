@@ -9,8 +9,9 @@ function sanitizeUrl (url) {
  * Note: All function definitions for errors must go in the constructor not in the prototype
  */
 
-export class BaseError {
+export class BaseError extends Error {
   constructor (message) {
+    super(message)
     this.smart = true
     this.name = this.constructor.name
 
@@ -48,7 +49,7 @@ export class BaseError {
   }
 }
 // Inherit from Error, this is important both for Raven and bluebird error filtering
-BaseError.prototype = Object.create(Error.prototype)
+// BaseError.prototype = Object.create(Error.prototype)
 
 export class AppError extends BaseError {}
 

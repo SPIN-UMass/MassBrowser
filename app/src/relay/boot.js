@@ -16,9 +16,9 @@ import {
 } from '@utils/errors'
 
 export default async function bootRelay () {
-  let status
-
   try {
+    let status
+
     await store.ready
 
     let relay = await registrationService.getRegisteredUser()
@@ -27,7 +27,7 @@ export default async function bootRelay () {
       throw new ApplicationBootError('Relay not registered')
     }
 
-    status = statusManager.info(`Waiting for Internet conection`)
+    status = statusManager.info(`Waiting for Internet connection`)
     await waitForInternet()
     status.clear()
 
@@ -61,7 +61,7 @@ export default async function bootRelay () {
     let isFirstSync = await syncService.isFirstSync()
 
     debug('It is first boot, syncing database')
-    let status = statusManager.info('Syncing database')
+    status = statusManager.info('Syncing database')
     await syncService.syncAll()
     status.clear()
 

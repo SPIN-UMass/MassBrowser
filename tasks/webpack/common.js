@@ -1,5 +1,6 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { VueLoaderPlugin } = require('vue-loader')
 const path = require('path')
 const webpack = require('webpack')
 
@@ -18,14 +19,24 @@ const rules = [
     use: 'vue-html-loader'
   },
   {
+    test: /\.pug$/,
+    loader: 'pug-plain-loader'
+  },
+  {
     test: /\.js$/,
     use: 'babel-loader',
     include: [ path.resolve(rootDir, 'app/src') ],
     exclude: [/node_modules/]
   },
+  // {
+  //   test: /\.json$/,
+  //   use: 'json-loader'
+  // },
   {
-    test: /\.json$/,
-    use: 'json-loader'
+    test: /\.(ts)x?$/,
+    use: 'ts-loader',
+    include: [ path.resolve(rootDir, 'app/src') ],
+    exclude: /node_modules/
   },
   {
     test: /\.node$/,
@@ -45,9 +56,11 @@ const rules = [
   },
   {
     test: /\.scss$/,
-    use: {
-      loader: 'sass-loader'
-    }
+    use: [
+      'vue-style-loader',
+      'css-loader',
+      'sass-loader'
+    ]
   },
   {
     test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -68,7 +81,7 @@ const rules = [
         name: 'fonts/[name].[ext]'
       }
     }
-  }   
+  }
 ]
 
 const resolve = (target) => {
@@ -82,7 +95,7 @@ const resolve = (target) => {
       '~': path.join(rootDir, 'app/src/'),
       'package.json': path.join(rootDir, 'app/package.json')
     },
-    extensions: ['.js', '.vue', '.json', '.css', '.node', '.scss'],
+    extensions: ['.ts', '.js', '.vue', '.json', '.css', '.node', '.scss'],
     modules: [
       path.join(rootDir, 'app/node_modules'),
       path.join(rootDir, 'node_modules')
@@ -92,17 +105,18 @@ const resolve = (target) => {
 
 const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false) => {
   return [
-  
+
   new webpack.NoEmitOnErrorsPlugin(),
   new webpack.DefinePlugin({
-    'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
-    ? '"production"' 
+    'process.env.NODE_ENV': process.env.NODE_ENV === 'production'
+    ? '"production"'
     : '"development"',
     'process.env.IS_FIREFOX': isFirefox ? '"YES"' : '"NO"',
     'process.env.ROLE': `"${role}"`,
     'process.env.APP_INTERFACE': `"${interface}"`,
     'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
-    }) 
+    }),
+    new VueLoaderPlugin()
 ].concat(otherPlugins || [])}
 
 

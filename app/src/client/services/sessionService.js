@@ -86,6 +86,9 @@ class SessionService extends EventEmitter {
       }
     } else {
       const domain = await Domain.findDomain(host)
+      if (!domain) {
+        return {}
+      }
       const website = await domain.getWebsite()
       const category = await website.getCategory()
       return { domain, website, category }
