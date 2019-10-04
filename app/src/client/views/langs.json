@@ -1,0 +1,32 @@
+{
+  "en": {
+    "locale": "en",
+    "nativeName": "English",
+    "englishName": "English"
+  },
+  "es": {
+    "locale": "es",
+    "nativeName": "Español",
+    "englishName": "Spanish"
+  },
+  "fa": {
+    "locale": "fa",
+    "nativeName": "فارسی",
+    "englishName": "Farsi"
+  },
+  "zh_CN": {
+    "locale": "zh-CN",
+    "nativeName": "中文（中国）",
+    "englishName": "Chinese Simplified (China)"
+  },
+  "zh-HK": {
+    "locale": "zh-HK",
+    "nativeName": "中文（香港）",
+    "englishName": "Chinese Traditional (Hong Kong)"
+  },
+  "zh-TW": {
+    "locale": "zh-TW",
+    "nativeName": "中文（台灣）",
+    "englishName": "Chinese Traditional (Taiwan)"
+  }
+}
