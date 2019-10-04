@@ -17,7 +17,7 @@ export default {
     autoLaunchEnabled: new RendererCachedPersistedState(true),
     dockIconVisible: new RendererCachedPersistedState(false),
     latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null),
-    language: new RendererCachedPersistedState({value: 'en', label: 'English'}),
+    language: new RendererCachedPersistedState('en'),
     country: new RendererCachedPersistedState('United States'),
     languageAndCountrySet: new RendererCachedPersistedState(false)
   },

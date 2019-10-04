@@ -8,8 +8,6 @@ import VueI18n from 'vue-i18n'
 
 import ToggleButton from 'vue-js-toggle-button'
 import vSelect from 'vue-select'
-
-import { store } from '@utils/store'
 // import { initializeStore } from '@utils/store'
 
 import '@assets/font-awesome/css/font-awesome.min.css'
@@ -34,7 +32,7 @@ import locales from '@utils/locales'
 
 import App from '@common/views/App'
 
-export function initializeRendererProcess(routes) {
+export function initializeRendererProcess (routes, lang) {
   Vue.use(Electron)
   Vue.use(Resource)
   Vue.use(VueRouter)
@@ -47,9 +45,10 @@ export function initializeRendererProcess(routes) {
   Vue.component('v-select', vSelect)
 
   Vue.config.debug = true
-  
+
+  lang = lang || 'en'
   const i18n = new VueI18n({
-    locale: store.state.language,
+    locale: lang,
     messages: locales
   })
 

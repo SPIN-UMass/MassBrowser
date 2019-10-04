@@ -19,35 +19,35 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-8">
+                    <div class="col-xs-6">
                         <label>{{$t("SETTINGS_GENERAL_STARTUP")}}</label>
                     </div>
-                    <div class="col-xs-4 align-right">
+                    <div class="col-xs-6 align-right">
                         <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged"></toggle-button>
                     </div>
                 </div>
                 <div class="row" v-if="showDockHideOption">
-                    <div class="col-xs-8">
+                    <div class="col-xs-6">
                         <label>{{$t("SETTINGS_GENERAL_SHOW_DOCK")}}</label>
                     </div>
-                    <div class="col-xs-4 align-right">
+                    <div class="col-xs-6 align-right">
                         <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged"></toggle-button>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-8">
+                    <div class="col-xs-6">
                         <label>Language Setting</label>
                     </div>
-                    <div class="col-xs-4 align-right">
+                    <div class="col-xs-6 align-right">
                         <v-select v-on:input="languageChanged" :clearable="false" label="label" :options="this.languagesList" :searchable="true">
                         </v-select>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-8">
+                    <div class="col-xs-6">
                         <label>Country Setting</label>
                     </div>
-                    <div class="col-xs-4 align-right">
+                    <div class="col-xs-6 align-right">
                         <v-select v-model="country" v-on:input="countryChanged" :clearable="false" :options="['United States', 'Iran', 'China']" :searchable="true">
                         </v-select>
                     </div>
@@ -84,17 +84,17 @@
         languagesList: []
       }
     },
-    async created() {
+    async created () {
       this.autoLaunchEnabled = await autoLauncher.isEnabled()
       this.initMessage = ''
       if (!this.$store.state.languageAndCountrySet) {
-        this.showFirstTime("Please indicate your preferred language and country")
+        this.showFirstTime('Please indicate your preferred language and country')
         store.commit('setLanguageAndCountry')
       }
       this.languagesList = this.$i18n.availableLocales.map(x => ({value: x, label: langs[x].nativeName}))
     },
     methods: {
-      async autoLaunchChanged(e) {
+      async autoLaunchChanged (e) {
         const isEnabled = await autoLauncher.isEnabled()
         if (e.value && !isEnabled) {
           await autoLauncher.enable()
@@ -108,20 +108,20 @@
           }
         }
       },
-      async languageChanged(e) {
-        store.commit('changeLanguage', e)
+      async languageChanged (e) {
+        store.commit('changeLanguage', e.value)
         this.$i18n.locale = e.value
       },
-      async countryChanged(e) {
-        store.commit('changeCountry', e) 
+      async countryChanged (e) {
+        store.commit('changeCountry', e)
       },
-      async dockVisibleChanged(e) {
+      async dockVisibleChanged (e) {
         dockHider.changeVisibility(e.value)
       },
-      showError(message) {
+      showError (message) {
         this.errorMessage = message
       },
-      showFirstTime(message) {
+      showFirstTime (message) {
         this.initMessage = message
       }
     }
