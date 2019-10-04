@@ -6,10 +6,10 @@
           router-link(to='/client/settings/general')
             icon.tab-icon(name='cogs')
             span.tab-label {{$t("SETTINGS_GENERAL")}}
-        //- li(v-bind:class="{ active: currentTab === 'settings-websites' }")
-        //-   router-link(to='/client/settings/websites')
-        //-     icon.tab-icon(name='globe')
-        //-     span.tab-label Websites
+        // li(v-bind:class="{ active: currentTab === 'settings-internationalization' }")
+        //  router-link(to='/client/settings/websites')
+        //     icon.tab-icon(name='globe')
+        //     span.tab-label Websites
       .tab-content
         router-view.tab-pane.fade.active.in
 

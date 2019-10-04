@@ -7,14 +7,16 @@ import VueI18n from 'vue-i18n'
 // import Vuex from 'vuex'
 
 import ToggleButton from 'vue-js-toggle-button'
+import vSelect from 'vue-select'
 
-// import storeConfig from '@/store'
+import { store } from '@utils/store'
 // import { initializeStore } from '@utils/store'
 
 import '@assets/font-awesome/css/font-awesome.min.css'
 import '@assets/bootstrap/css/bootstrap.min.css'
 import '@assets/nifty/nifty.min.css'
 import '@assets/fonts/neuropol.ttf'
+import 'vue-select/dist/vue-select.css'
 
 import Icon from 'vue-awesome/components/Icon'
 import 'vue-awesome/icons/globe'
@@ -42,11 +44,12 @@ export function initializeRendererProcess(routes) {
   // Vue.use(Vuex)
 
   Vue.component('icon', Icon)
+  Vue.component('v-select', vSelect)
 
   Vue.config.debug = true
-
+  
   const i18n = new VueI18n({
-    locale: 'en',
+    locale: store.state.language,
     messages: locales
   })
 
