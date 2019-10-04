@@ -91,7 +91,6 @@
         this.showFirstTime("Please indicate your preferred language and country")
         store.commit('setLanguageAndCountry')
       }
-      console.log(this.$i18n.availableLocales)
       this.languagesList = this.$i18n.availableLocales.map(x => ({value: x, label: langs[x].nativeName}))
     },
     methods: {
