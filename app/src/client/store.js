@@ -16,7 +16,10 @@ export default {
     isFirefoxIncluded: new RendererCachedPersistedState(false),
     autoLaunchEnabled: new RendererCachedPersistedState(true),
     dockIconVisible: new RendererCachedPersistedState(false),
-    latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null)
+    latestAcceptedPrivacyPolicyVersion: new RendererCachedPersistedState(null),
+    language: new RendererCachedPersistedState({value: 'en', label: 'English'}),
+    country: new RendererCachedPersistedState('United States'),
+    languageAndCountrySet: new RendererCachedPersistedState(false)
   },
   mutations: {
     changeStatus(state, status) {
@@ -59,6 +62,15 @@ export default {
     },
     setLatestAcceptedPrivacyPolicyVersion(state, version) {
       state.latestAcceptedPrivacyPolicyVersion = version
+    },
+    changeLanguage(state, language) {
+      state.language = language
+    },
+    changeCountry(state, country) {
+      state.country = country
+    },
+    setLanguageAndCountry(state) {
+      state.languageAndCountrySet = true
     }
   }
 }

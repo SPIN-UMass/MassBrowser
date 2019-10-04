@@ -11,6 +11,13 @@
                         </div>
                     </div>
                 </div>
+                <div class="row" v-if="initMessage && !errorMessage">
+                    <div class="col-xs-12">
+                        <div class="alert alert-info">
+                            <p>{{ initMessage }}</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-xs-8">
                         <label>{{$t("SETTINGS_GENERAL_STARTUP")}}</label>
@@ -27,6 +34,24 @@
                         <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged"></toggle-button>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <label>Language Setting</label>
+                    </div>
+                    <div class="col-xs-4 align-right">
+                        <v-select v-on:input="languageChanged" :clearable="false" label="label" :options="this.languagesList" :searchable="true">
+                        </v-select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <label>Country Setting</label>
+                    </div>
+                    <div class="col-xs-4 align-right">
+                        <v-select v-model="country" v-on:input="countryChanged" :clearable="false" :options="['United States', 'Iran', 'China']" :searchable="true">
+                        </v-select>
+                    </div>
+                </div>
             </div>
         </settings-group>
     </div>
@@ -37,6 +62,7 @@
   import { store } from '@utils/store'
   import { getService } from '@utils/remote'
   import { isPlatform, OSX } from '@utils'
+  import langs from '../langs.json'
 
   const autoLauncher = getService('autoLaunch')
   const dockHider = getService('dockHider')
@@ -49,13 +75,23 @@
     data () {
       return {
         errorMessage: '',
+        initMessage: '',
         autoLaunchEnabled: this.$store.state.autoLaunchEnabled,
         showDockHideOption: isPlatform(OSX),
-        dockVisible: this.$store.state.dockIconVisible
+        dockVisible: this.$store.state.dockIconVisible,
+        language: this.$store.state.language,
+        country: this.$store.state.country,
+        languagesList: []
       }
     },
     async created() {
       this.autoLaunchEnabled = await autoLauncher.isEnabled()
+      this.initMessage = ''
+      if (!this.$store.state.languageAndCountrySet) {
+        this.showFirstTime("Please indicate your preferred language and country")
+        store.commit('setLanguageAndCountry')
+      }
+      this.languagesList = this.$i18n.availableLocales.map(x => ({value: x, label: langs[x].nativeName}))
     },
     methods: {
       async autoLaunchChanged(e) {
@@ -72,11 +108,21 @@
           }
         }
       },
+      async languageChanged(e) {
+        store.commit('changeLanguage', e)
+        this.$i18n.locale = e.value
+      },
+      async countryChanged(e) {
+        store.commit('changeCountry', e) 
+      },
       async dockVisibleChanged(e) {
         dockHider.changeVisibility(e.value)
       },
       showError(message) {
         this.errorMessage = message
+      },
+      showFirstTime(message) {
+        this.initMessage = message
       }
     }
   }
