@@ -1,4 +1,5 @@
 {
+  "nativeName": "Español",
   "START_RELAY_DOWNLOAD_BTN": "Comienza a descargar",
   "START_RELAY_SYNC": "Primero, necesitamos sincronizar su base de datos local con nuestros servidores. <br> Haz clic en el botón de abajo para comenzar a sincronizar.",
   "START_RELAY_WELCOME_MSG": "<strong>¡Hola!</strong> Gracias por usar {appName}. <br> Como es tu primera vez, veamos algunas cosas.",

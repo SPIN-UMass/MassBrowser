@@ -39,7 +39,7 @@
                         <label>Language Setting</label>
                     </div>
                     <div class="col-xs-6 align-right">
-                        <v-select v-on:input="languageChanged" :clearable="false" label="label" :options="this.languagesList" :searchable="true">
+                        <v-select v-model="language" v-on:input="languageChanged" :clearable="false" label="label" :options="this.languagesList" :searchable="true">
                         </v-select>
                     </div>
                 </div>
@@ -62,7 +62,6 @@
   import { store } from '@utils/store'
   import { getService } from '@utils/remote'
   import { isPlatform, OSX } from '@utils'
-  import langs from '../langs.json'
 
   const autoLauncher = getService('autoLaunch')
   const dockHider = getService('dockHider')
@@ -79,7 +78,7 @@
         autoLaunchEnabled: this.$store.state.autoLaunchEnabled,
         showDockHideOption: isPlatform(OSX),
         dockVisible: this.$store.state.dockIconVisible,
-        language: this.$store.state.language,
+        language: {value: this.$store.state.language, label: this.$i18n.messages[this.$store.state.language].nativeName},
         country: this.$store.state.country,
         languagesList: []
       }
@@ -91,7 +90,7 @@
         this.showFirstTime('Please indicate your preferred language and country')
         store.commit('setLanguageAndCountry')
       }
-      this.languagesList = this.$i18n.availableLocales.map(x => ({value: x, label: langs[x].nativeName}))
+      this.languagesList = this.$i18n.availableLocales.map(x => ({value: x, label: this.$i18n.messages[x].nativeName}))
     },
     methods: {
       async autoLaunchChanged (e) {

@@ -1,4 +1,5 @@
 {
+  "nativeName": "中文（中国)",
   "START_RELAY_DOWNLOAD_BTN": "开始下载",
   "START_RELAY_SYNC": "首先，我们需要将您的本地数据库与服务器同步。 <br>点击下面的按钮开始同步。",
   "START_RELAY_WELCOME_MSG": "<strong>嘿！</strong>感谢您使用{appName}。 <br>由于这是您的第一次，让我们逐步讲解几件事。",

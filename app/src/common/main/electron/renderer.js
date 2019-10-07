@@ -45,7 +45,6 @@ export function initializeRendererProcess (routes, lang) {
   Vue.component('v-select', vSelect)
 
   Vue.config.debug = true
-
   lang = lang || 'en'
   const i18n = new VueI18n({
     locale: lang,
