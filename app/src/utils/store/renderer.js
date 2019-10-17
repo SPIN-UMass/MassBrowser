@@ -20,11 +20,11 @@ for (let key in stateConfig) {
   if (stateConfig[key].cache) {
     if (firstBoot && !stateConfig[key].persist) {
       localStorage.removeItem(key)
-      continue      
+      continue
     }
 
     let cachedValue = localStorage.getItem(key)
-    
+
     if (!isNaN(cachedValue)) {
       cachedValue = Number(cachedValue)
     } else if (cachedValue === 'false') {
@@ -50,11 +50,16 @@ parsedConfig.getters = storeConfig.getters
 Vue.use(Vuex)
 export const store = new Vuex.Store(parsedConfig)
 
+store._commit = store.commit
+store.commit = (name, arg) => {
+  remote.send('store.commit', {name, arg})
+}
+
 for (let key in stateConfig) {
   if (stateConfig[key].cache) {
     let k = key
     store.watch((state) => state[k], (value) => {
-      localStorage.setItem(k, value) 
+      localStorage.setItem(k, value)
     })
   }
 }
@@ -65,6 +70,6 @@ remoteStore.getState().then((remoteState) => {
 })
 
 remote.on('store.commit', (sender, details) => {
-  store.commit(details.name, details.arg)
+  store._commit(details.name, details.arg)
   remote.send('store.commit.ack', details.requestID)
 })
