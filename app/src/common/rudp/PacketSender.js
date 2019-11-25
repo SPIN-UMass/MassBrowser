@@ -6,20 +6,9 @@ function PacketSender(socket, address, port) {
   this._socket = socket;
   this._address = address;
   this._port = port;
-  this._closed = false;
-
-  var self = this;
-  this._socket.on('close', () => {
-    self._closed = true;
-  })
 };
 
 PacketSender.prototype.send = function (packet) {
   var buffer = packet.toBuffer();
-  try {
-    if (!this._closed) {
-      this._socket.send(buffer, 0, buffer.length, this._port, this._address);
-    }
-  } catch (e) {
-  }
+  this._socket.send(buffer, 0, buffer.length, this._port, this._address);
 };

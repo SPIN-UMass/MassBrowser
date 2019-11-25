@@ -1,6 +1,3 @@
-/*
- * This will split a an array-like object into chunks of length `length`.
- */
 module.exports.splitArrayLike = function (arr, length) {
   length = length || 1;
   var retval = [];
@@ -14,3 +11,11 @@ module.exports.shuffle = function (o) {
   for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
   return o;
 };
+
+module.exports.getKeyByValue = function (object, value) {
+	return Object.keys(object).find(key => object[key] === value);
+}
+
+module.exports.generateRandomNumber = function (min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}

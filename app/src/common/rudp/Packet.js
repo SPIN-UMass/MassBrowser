@@ -1,119 +1,112 @@
-var bufferEqual = require('./bufferEqual');
+var constants = require('./constants');
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
+//  0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                        Sequence Number                        |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                    Acknowledgment Number                      |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                                                       |A|R|S|F|
+// |                           Reserved                    |C|S|Y|I|
+// |                                                       |K|T|N|N|
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// |                             data                              |
+// +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-/**
- * Represents a packet.
- *
- * @class Packet
- * @constructor
- */
 module.exports = Packet;
-function Packet(sequenceNumber, payload, synchronize, reset) {
-  if (Buffer.isBuffer(sequenceNumber)) {
-    var segment = sequenceNumber;
 
-    var offset = 0;
+function Packet(sequenceNumber, acknowledgementNumber, packetType, payload) {
+    if (Buffer.isBuffer(sequenceNumber)) {
+        let buffer = sequenceNumber;
+        this._sequenceNumber = buffer.readUInt32BE(0);
+        this._acknowledgementNumber = buffer.readUInt32BE(4);
+        let options = buffer.readUInt32BE(8);
+        switch (options) {
+            case 1:
+            this._packetType = constants.PacketTypes.FIN;
+            break;
+            case 2:
+            this._packetType = constants.PacketTypes.SYN;
+            break;
+            case 4:
+            this._packetType = constants.PacketTypes.RST;
+            break;
+            case 8:
+            this._packetType = constants.PacketTypes.ACK;
+            break;
+            case 10:
+            this._packetType = constants.PacketTypes.SYN_ACK;
+            break;
+            default:
+            this._packetType = constants.PacketTypes.DATA;
+        }
+        this._payload = Buffer.alloc(buffer.length - 12);
+        buffer.copy(this._payload, 0, 12);
+    } else {
+        this._sequenceNumber = sequenceNumber;
+        this._acknowledgementNumber = acknowledgementNumber;
+        this._packetType = packetType;
+        this._payload = payload;
+    }
+};
+util.inherits(Packet, EventEmitter);
 
-    var bools = segment.readUInt8(offset); offset++;
-    this._acknowledgement = !!(bools & 0x80);
-    this._synchronize     = !!(bools & 0x40);
-    this._finish          = !!(bools & 0x20);
-    this._reset           = !!(bools & 0x10);
-
-    this._sequenceNumber = segment.readUInt8(offset); offset++;
-    this._payload = Buffer.alloc(segment.length - offset);
-    segment.copy(this._payload, 0, offset);
-  } else {
-    this._acknowledgement = false;
-    this._synchronize = !!synchronize;
-    this._finish = false;
-    this._reset = !!reset;
-    this._sequenceNumber = sequenceNumber;
-    this._payload = payload;
-  }
+Packet.prototype.getSequenceNumber = function() {
+    return this._sequenceNumber;
 };
 
-Packet.createAcknowledgementPacket = function (sequenceNumber) {
-  var packet = new Packet(sequenceNumber, Buffer.alloc(0), false);
-  packet._acknowledgement = true;
-  return packet;
-};
-
-Packet.createFinishPacket = function () {
-  var packet = new Packet(0, Buffer.alloc(0), false, false);
-  packet._finish = true;
-  return packet;
-};
-
-Packet.prototype.getIsAcknowledgement = function () {
-  return this._acknowledgement;
-};
-
-Packet.prototype.getIsSynchronize = function () {
-  return this._synchronize;
-};
-
-Packet.prototype.getIsFinish = function () {
-  return this._finish;
-};
-
-Packet.prototype.getSequenceNumber = function () {
-  return this._sequenceNumber;
-};
-
-Packet.prototype.getPayload = function () {
-  return this._payload;
-};
-
-Packet.prototype.getIsReset = function () {
-  return this._reset;
-};
-
-/**
- * Get a byte array based on the meta data.
- *
- * @method toBuffer
- */
-Packet.prototype.toBuffer = function () {
-  var offset = 0;
-  var retval = Buffer.alloc(2 + this._payload.length);
-
-  var bools = 0 + (
-    (this._acknowledgement && 0x80) |
-    (this._synchronize     && 0x40) |
-    (this._finish          && 0x20) |
-    (this._reset           && 0x10)
-  );
-
-  retval.writeUInt8(bools, offset); offset++;
-  retval.writeUInt8(this._sequenceNumber, offset); offset++;
-
-  this._payload.copy(retval, offset, 0);
-
-  return retval;
+Packet.prototype.getAcknowledgementNumber = function () {
+    return this._acknowledgementNumber;
 }
 
-Packet.prototype.clone = function () {
-  return new Packet(this.toBuffer());
+Packet.prototype.getPayload = function() {
+    return this._payload;
 };
+
+Packet.prototype.getPacketType = function() {
+    return this._packetType;
+}
+
+Packet.prototype.acknowledge = function () {
+    this.emit('acknowledge');
+};
+
+Packet.prototype.toBuffer = function() {
+    let retval = Buffer.alloc(12 + this._payload.length);
+    retval.writeUInt32BE(this._sequenceNumber, 0);
+    retval.writeUInt32BE(this._acknowledgementNumber, 4);
+    switch (this._packetType) {
+        case constants.PacketTypes.FIN:
+        retval.writeUInt32BE(1, 8)
+        break;            
+        case constants.PacketTypes.SYN:
+        retval.writeUInt32BE(2, 8)
+        break;
+        case constants.PacketTypes.RST:
+        retval.writeUInt32BE(4, 8)
+        break;
+        case constants.PacketTypes.ACK:
+        retval.writeUInt32BE(8, 8)
+        break;
+        case constants.PacketTypes.SYN_ACK:
+        retval.writeUInt32BE(10, 8)
+        break;
+        case constants.PacketTypes.DATA:
+        retval.writeUInt32BE(0, 8)
+        break;        
+        default:
+        break;
+    }
+    this._payload.copy(retval, 12, 0);
+    return retval;
+}
 
 Packet.prototype.toObject = function () {
-  return {
-    acknowledgement: this.getIsAcknowledgement(),
-    synchronize: this.getIsSynchronize(),
-    finish: this.getIsFinish(),
-    reset: this.getIsReset(),
-    sequenceNumber: this.getSequenceNumber(),
-    payload: this.getPayload().toString('base64')
-  }
-};
-
-Packet.prototype.equals = function (packet) {
-  return (
-    this.getIsAcknowledgement() === packet.getIsAcknowledgement() &&
-    this.getIsSynchronize() === packet.getIsSynchronize() &&
-    this.getIsFinish() === packet.getIsFinish() &&
-    this.getIsReset() === packet.getIsReset() &&
-    this.getSequenceNumber() === packet.getSequenceNumber() &&
-    bufferEqual(this.getPayload(), packet.getPayload())
-  )
-};
+    let object = {
+        sequenceNumber: this._sequenceNumber,
+        acknowledgementNumber: this._acknowledgementNumber,
+        packetType: this._packetType
+    }
+    return object;
+}
