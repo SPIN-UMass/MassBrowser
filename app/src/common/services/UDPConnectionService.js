@@ -3,7 +3,6 @@ import { store } from '@utils/store'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
 import { EventEmitter } from 'events'
-// import { UDPRelayConnectionError } from '@utils/errors'
 
 export class UDPConnectionService extends EventEmitter {
   constructor () {
@@ -161,16 +160,11 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.mainServer.on('message', (message, remoteInfo) => {
-          let addressKey = remoteInfo.address + remoteInfo.port + this.port
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           let packet = new rudp.Packet(message)
-          if (packet.getIsFinish()) {
-            delete this._connections[addressKey]
-          } else {
-            setImmediate(() => {
-              connection.receive(packet)
-            })
-          }
+          setImmediate(() => {
+            connection.receive(packet)
+          })
         })
 
         this.mainServer.on('listening', () => {
@@ -203,16 +197,11 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.secondServer.on('message', (message, remoteInfo) => {
-          let addressKey = remoteInfo.address + remoteInfo.port + (this.port + 1)
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, false, true)
           let packet = new rudp.Packet(message)
-          if (packet.getIsFinish()) {
-            delete this._connections[addressKey]
-          } else {
-            setImmediate(() => {
-              connection.receive(packet)
-            })
-          }
+          setImmediate(() => {
+            connection.receive(packet)
+          })
         })
 
         this.secondServer.on('listening', () => {

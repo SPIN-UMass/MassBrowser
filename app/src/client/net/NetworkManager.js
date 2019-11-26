@@ -87,22 +87,23 @@ class NetworkManager {
 
   async start () {
     await udpConnectionService.start()
-    let TCPEchoServer = await API.requestNewStunServer()
-    this.TCPNATConnection = new TCPNATConnection(TCPEchoServer.ip, TCPEchoServer.port)
+    let echoServer = await API.requestNewStunServer()
+    this.TCPNATConnection = new TCPNATConnection(echoServer.ip, echoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => { this._onTCPNetworkUpdate(data) })
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect().then(() => {
       this.startTCPNATRoutine()
     })
 
-    this.UDPNATConnection = new UDPNATConnection('54.145.75.108', 8823)
+    // this.UDPNATConnection = new UDPNATConnection(echoServer.ip, echoServer.port)
+    this.UDPNATConnection = new UDPNATConnection('80.240.22.240', 8823)
     this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
     await this.UDPNATConnection.connect().then(() => {
       this.startUDPNATRoutine()
     })
 
     setTimeout(() => this._sendKeepAlive(), 500)
-    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 5 * 1000) // what is the interval?
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 5 * 1000)
   }
 
   _onTCPNetworkUpdate (data) {

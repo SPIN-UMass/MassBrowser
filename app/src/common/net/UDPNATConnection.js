@@ -1,11 +1,12 @@
 import { EventEmitter } from 'events'
 import { debug } from '~/utils/log'
+import {getAddress} from '../utils'
 import udpConnectionService from '@common/services/UDPConnectionService'
 
 class UDPNATConnection extends EventEmitter {
   constructor (echoServerAddress, echoServerPort) {
     super()
-    this.echoServerAddress = echoServerAddress
+    this.echoServerAddress = getAddress(echoServerAddress)
     this.echoServerPort = echoServerPort
     this.socket = null
   }

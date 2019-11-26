@@ -26,3 +26,15 @@ export function showConfirmDialog(title, text, options) {
     })
   })
 }
+
+export function getAddress (domain) {
+  const dns = require('dns')
+  dns.lookup(domain, function (err, result) {
+    if (err) {
+      console.log(err)
+      return null
+    } else {
+      return result
+    }
+  })
+}

@@ -65,6 +65,15 @@ class ClientAPI extends CommonAPI {
       }).then(r => r.data)
   }
 
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': config.UDPechoServer.host,
+        'port': config.UDPechoServer.port
+      })
+    })
+  }
+
   requestNewStunServer () {
     return new Promise((resolve, reject) => {
       resolve({
