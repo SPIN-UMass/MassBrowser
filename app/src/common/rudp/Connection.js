@@ -184,6 +184,5 @@ Connection.prototype._read = function (n) {
 }
 
 Connection.prototype._final = function (callback) {
-	this.close()
-	// callback()
+	callback()
 }

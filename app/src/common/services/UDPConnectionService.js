@@ -28,6 +28,8 @@ export class UDPConnectionService extends EventEmitter {
 
   // this function should only be used by relays
   async setPort (port) {
+    // closing all connections that were using prev port
+    await this.closeAllConnections()
     this.port = port
     await this.restart()
   }
@@ -125,6 +127,9 @@ export class UDPConnectionService extends EventEmitter {
       }
       if (!this._connections[secondAddressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
+        connection.on('close', () => {
+          delete this._connections[secondAddressKey]
+        })
         this._connections[secondAddressKey] = connection
       } else {
         connection = this._connections[secondAddressKey]
@@ -132,6 +137,7 @@ export class UDPConnectionService extends EventEmitter {
     } else {
       if (!this._connections[addressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
+        connection.on('close', () => this.deleteConnectionListItem(addressKey))
         this._connections[addressKey] = connection
         if (this.relayMode && !toEchoServer) {
           this.emit('relay-new-connection', connection, addressKey)
@@ -233,35 +239,37 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   closeAllConnections () {
+    console.log('closing all connections')
     let promises = []
     for (let addressKey in this._connections) {
-        let connection = this._connections[addressKey]
-        connection.close()
-        promise = new Promise((resolve, reject) => {
-            connection.on('close', () => {
-            resolve()
-            })
+      let connection = this._connections[addressKey]
+      connection.removeListener('close', () => this.deleteConnectionListItem(addressKey))
+      let promise = new Promise((resolve, reject) => {
+        connection.on('close', () => {
+          resolve()
         })
-        promises.push(promise)
+      })
+      connection.close()
+      promises.push(promise)
     }
     console.log('waiting for connections to close')
-    Promise.all(promises)
+    return Promise.all(promises)
   }
 
   async stopMainServer () {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       if (this._isMainServerRunning) {
         await this.closeAllConnections()
-        .then(() => {
+          .then(() => {
             console.log('all connections are close')
             this._connections = {}
             this.mainServer.close(() => {
-                this.mainServer = null
-                this._natPunchingList = {}
-                this._isMainServerRunning = false
-                resolve()
+              this.mainServer = null
+              this._natPunchingList = {}
+              this._isMainServerRunning = false
+              resolve()
             })
-        })
+          })
       } else {
         resolve()
       }
