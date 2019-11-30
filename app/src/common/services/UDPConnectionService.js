@@ -232,15 +232,35 @@ export class UDPConnectionService extends EventEmitter {
     await this.stopSecondServer()
   }
 
+  closeAllConnections () {
+    let promises = []
+    for (let addressKey in this._connections) {
+        let connection = this._connections[addressKey]
+        connection.close()
+        promise = new Promise((resolve, reject) => {
+            connection.on('close', () => {
+            resolve()
+            })
+        })
+        promises.push(promise)
+    }
+    console.log('waiting for connections to close')
+    Promise.all(promises)
+  }
+
   async stopMainServer () {
     return new Promise((resolve, reject) => {
       if (this._isMainServerRunning) {
-        this._connections = {}
-        this.mainServer.close(() => {
-          this.mainServer = null
-          this._natPunchingList = {}
-          this._isMainServerRunning = false
-          resolve()
+        await this.closeAllConnections()
+        .then(() => {
+            console.log('all connections are close')
+            this._connections = {}
+            this.mainServer.close(() => {
+                this.mainServer = null
+                this._natPunchingList = {}
+                this._isMainServerRunning = false
+                resolve()
+            })
         })
       } else {
         resolve()
@@ -251,7 +271,6 @@ export class UDPConnectionService extends EventEmitter {
   async stopSecondServer () {
     return new Promise((resolve, reject) => {
       if (this._isSecondServerRunning) {
-        this._connections = {}
         this.secondServer.close(() => {
           this.secondServer = null
           this._secondNatPunchingList = {}

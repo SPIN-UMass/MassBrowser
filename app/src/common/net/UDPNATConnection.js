@@ -8,12 +8,12 @@ class UDPNATConnection extends EventEmitter {
     this.echoServerAddress = echoServerAddress
     this.echoServerPort = echoServerPort
     this.socket = null
+    this.secondSocket = null
   }
 
   stop () {
-    this.socket.close(() => {
-      this.socket = null
-    })
+    this.socket = null
+    this.secondSocket = null
   }
 
   async connect () {
@@ -80,14 +80,6 @@ class UDPNATConnection extends EventEmitter {
   }
 
   reconnect () {
-    if (this.socket) {
-      this.socket.end()
-      this.socket = null
-    }
-    if (this.secondSocket) {
-      this.secondSocket.end()
-      this.secondSocket = null
-    }
     return this.connect()
   }
 

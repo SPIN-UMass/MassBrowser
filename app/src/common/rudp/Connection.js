@@ -42,10 +42,11 @@ function Connection(packetSender) {
 		this._sender.sendAck();
 	})
 	this._receiver.on('data', function (data) {
-		self.emit('data', data)
+		this.emit('data', data)
 	});
 	this.on('close', () => {
 		console.log('im closed')
+		this.emit('close');
 		this._sender.close();
 		this._receiver.close();
 	});
