@@ -65,7 +65,7 @@ export default [
       },
       {
         path: '/client/stats',
-        component: require('@/views/stats/statsView'),
+        component: require('@/views/stats/StatsView'),
         name: 'debug',
         children: [
           { path: '/client/stats', redirect: '/client/stats/connections' },
