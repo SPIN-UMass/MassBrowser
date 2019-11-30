@@ -24,11 +24,9 @@ function Sender(connection, packetSender) {
 }
 util.inherits(Sender, EventEmitter);
 
-Sender.prototype.close = function () {
+Sender.prototype.clear = function () {
 	this._retransmissionQueue = [];
 	this._sendingQueue = [];
-	this._delayedAckTimer = null;
-	this._timeoutTimer = null;
 }
 
 Sender.prototype.send = function () {
@@ -81,7 +79,7 @@ Sender.prototype._timeout = function () {
 		this._stopTimeoutTimer();
 		this._sendingQueue = [];
 		this._retransmissionQueue = [];
-		this.emit('max_number_of_tries_reached');
+		this.emit('timeout');
 	}
 	if (this._retransmissionQueue.length !== 0) {
 		this._timeoutCount += 1;

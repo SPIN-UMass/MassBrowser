@@ -31,7 +31,7 @@ module.exports.Retransmission = {
 	'MAX_NUMBER_OF_RETRANSMISSION': 5,
 	'INITIAL_RETRANSMISSION_INTERVAL': 100
 };
-module.exports.CLOSE_WAIT_TIME = 30000;
+module.exports.CLOSE_WAIT_TIME = 1000;
 module.exports.INITIAL_MAX_WINDOW_SIZE = 16
 module.exports.MAX_SEQUENCE_NUMBER = 4294967295;
 module.exports.DELAYED_ACK_TIME = 5;

@@ -10,8 +10,6 @@ function Connection(packetSender) {
 	this._currentTCPState = constants.TCPStates.LISTEN;
 	this._sender = new Sender(this, packetSender);
 	this._receiver = new Receiver(this, packetSender);
-
-
 	this._initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
 	this._nextSequenceNumber = 0;
 	this._nextExpectedSequenceNumber = 0;
@@ -30,25 +28,21 @@ function Connection(packetSender) {
 	this._sender.on('fin_acked', () => {
 		if (this._currentTCPState === constants.TCPStates.LAST_ACK) {
 			this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+			this._sender._stopTimeoutTimer();
 			this.emit('close');
 		} else if (this._currentTCPState === constants.TCPStates.FIN_WAIT_1){
 			this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
 		}
 	});
-	this._sender.on('max_number_of_tries_reached', () => {
+	this._sender.on('timeout', () => {
 		console.log('maximum number of tries reached')
+		this.emit('timeout')
 	})
 	this._receiver.on('send_ack', () => {
 		this._sender.sendAck();
 	})
 	this._receiver.on('data', function (data) {
-		this.emit('data', data)
-	});
-	this.on('close', () => {
-		console.log('im closed')
-		this.emit('close');
-		this._sender.close();
-		this._receiver.close();
+		self.emit('data', data)
 	});
 };
 
@@ -125,6 +119,9 @@ Connection.prototype.receive = function (packet) {
 					this._sender.verifyAck(packet.getAcknowledgementNumber())
 					break;
 				case constants.PacketTypes.FIN:
+					this.incrementNextExpectedSequenceNumber();
+					this._sender.clear();
+					this._receiver.clear();
 					this._sender.sendAck();
 					this._changeCurrentTCPState(constants.TCPStates.CLOSE_WAIT);
 					this._sender.sendFin();
@@ -147,11 +144,13 @@ Connection.prototype.receive = function (packet) {
 			break;
 		case constants.TCPStates.FIN_WAIT_2:
 			if (packet.getPacketType() === constants.PacketTypes.FIN) {
+				this.incrementNextExpectedSequenceNumber();
 				this._sender.sendAck();
 				this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
 				setTimeout(() => {
-					this._changeCurrentTCPState(constants.TCPStates.CLOSED)
-					this.emit('close')
+					this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+					this._sender._stopTimeoutTimer();
+					this.emit('close');
 				}, constants.CLOSE_WAIT_TIME);
 			}
 			break;
@@ -169,7 +168,9 @@ Connection.prototype._changeCurrentTCPState = function (newState) {
 }
 
 Connection.prototype.close = function () {
-	this._sender.sendFin()
+	this._sender.clear();
+	this._receiver.clear();
+	this._sender.sendFin();
 	this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_1)
 }
 
@@ -183,5 +184,6 @@ Connection.prototype._read = function (n) {
 }
 
 Connection.prototype._final = function (callback) {
-	callback()
+	this.close()
+	// callback()
 }

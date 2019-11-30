@@ -14,7 +14,7 @@ function Receiver(connection) {
 util.inherits(Receiver, EventEmitter);
 
 
-Receiver.prototype.close = function () {
+Receiver.prototype.clear = function () {
 	this._packets.clear();
 };
 
