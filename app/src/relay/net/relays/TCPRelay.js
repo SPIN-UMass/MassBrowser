@@ -90,6 +90,7 @@ export class TCPRelay {
 
 export function connectToClientTCP (clientIP, clientPort, token) {
   console.log('Connecting to',clientIP,clientPort)
+  console.log('FUUUUUUUUUUUUUUUUUUU')
   const socket = net.connect({host: clientIP, port: clientPort}, (err) => {
     if (err) {
       console.log(err)
