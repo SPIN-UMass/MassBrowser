@@ -41,7 +41,6 @@ class ClientAPI extends CommonAPI {
   requestSession (categories) {
     return this.transport.post(
       CLIENT_URL + '/' + this.userID + SESSION_URL, {
-        'testing': true,
         'categories': categories
       }
     )
@@ -64,15 +63,6 @@ class ClientAPI extends CommonAPI {
         'udp_port': remoteUDPPort,
         'alt_udp_port': remoteSecondUDPPort
       }).then(r => r.data)
-  }
-
-  requestNewUDPStunServer () {
-    return new Promise((resolve, reject) => {
-      resolve({
-        'ip': config.UDPechoServer.host,
-        'port': config.UDPechoServer.port
-      })
-    })
   }
 
   requestNewStunServer () {
