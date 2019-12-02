@@ -152,7 +152,8 @@ class RelayManager {
     API.acceptSession(data.client, data.id)
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
+      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
+      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port + 1)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }
@@ -177,9 +178,7 @@ class RelayManager {
 
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
-    connection.on('finish', () => {
-      udpConnectionService.deleteNatPunchingListItem(addressKey)
-      udpConnectionService.deleteConnectionListItem(addressKey)
+    connection.on('close', () => {
       receiver.closeConnections()
       connection.unpipe(upPipe)
       downPipe.unpipe(connection)

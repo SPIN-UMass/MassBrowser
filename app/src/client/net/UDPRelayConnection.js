@@ -53,12 +53,8 @@ export class UDPRelayConnection extends EventEmitter {
       }
     })
 
-    socket.on('error', (err) => {
-      warn('socket(connection) error', err)
-      this.emit('close')
-    })
-
-    socket.on('finish', () => {
+    socket.on('close', () => {
+      warn('connection state has been changed to closed')
       this.emit('close')
     })
     return socket
@@ -88,9 +84,7 @@ export class UDPRelayConnection extends EventEmitter {
     const b = Buffer.concat([sendPacket, data])
     const enc = this.cipher.encrypt(b)
     this.emit('send', enc)
-    if (this.socket.writable) {
-      this.socket.write(enc)
-    }
+    this.socket.write(enc)
   }
 }
 

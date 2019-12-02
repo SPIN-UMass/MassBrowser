@@ -73,7 +73,8 @@ export class UDPConnectionService extends EventEmitter {
   performUDPHolePunchingClient (address, port) {
     return new Promise((resolve, reject) => {
       let addressKey = address + port + this.port
-      let secondAddressKey = address + port + this.secondPort
+      // let secondAddressKey = address + port + this.secondPort
+      let secondAddressKey = address + port + (this.port + 1)
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve(this._connections[addressKey])
@@ -120,7 +121,8 @@ export class UDPConnectionService extends EventEmitter {
   getConnection (address, port, toEchoServer, useSecondPort) {
     let connection
     let addressKey = address + port + this.port
-    let secondAddressKey = address + port + this.secondPort
+    // let secondAddressKey = address + port + this.secondPort
+    let secondAddressKey = address + port + (this.port + 1)
     if (useSecondPort) {
       if (this.secondServer === null) {
         return null
@@ -128,7 +130,7 @@ export class UDPConnectionService extends EventEmitter {
       if (!this._connections[secondAddressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
         connection.on('close', () => {
-          delete this._connections[secondAddressKey]
+          this.deleteConnectionListItem(addressKey)
         })
         this._connections[secondAddressKey] = connection
       } else {
@@ -137,7 +139,10 @@ export class UDPConnectionService extends EventEmitter {
     } else {
       if (!this._connections[addressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
-        connection.on('close', () => this.deleteConnectionListItem(addressKey))
+        connection.on('close', () => {
+          this.deleteNatPunchingListItem(addressKey)
+          this.deleteConnectionListItem(addressKey)
+        })
         this._connections[addressKey] = connection
         if (this.relayMode && !toEchoServer) {
           this.emit('relay-new-connection', connection, addressKey)
@@ -202,7 +207,8 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         this.secondServer = dgram.createSocket('udp4')
         this.secondServer.bind({
-          port: this.secondPort,
+          // port: this.secondPort,
+          port: this.port + 1,
           exclusive: false
         })
 
