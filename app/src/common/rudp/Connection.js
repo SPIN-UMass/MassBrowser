@@ -30,6 +30,7 @@ function Connection(packetSender) {
 		if (this._currentTCPState === constants.TCPStates.LAST_ACK) {
 			this._changeCurrentTCPState(constants.TCPStates.CLOSED);
 			this._sender._stopTimeoutTimer();
+			this._stopTimeoutTimer();
 			this.emit('close');
 		} else if (this._currentTCPState === constants.TCPStates.FIN_WAIT_1){
 			this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
@@ -173,6 +174,7 @@ Connection.prototype.receive = function (packet) {
 				setTimeout(() => {
 					this._changeCurrentTCPState(constants.TCPStates.CLOSED);
 					this._sender._stopTimeoutTimer();
+					this._stopTimeoutTimer();
 					this.emit('close');
 				}, constants.CLOSE_WAIT_TIME);
 			}
