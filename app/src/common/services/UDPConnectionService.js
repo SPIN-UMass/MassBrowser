@@ -35,7 +35,6 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   updateNatPunchingListItem (addressKey) {
-    console.log('updating nat punching for:', addressKey)
     if (this._natPunchingList[addressKey]) {
       this._natPunchingList[addressKey].isPunched = true
     } else {
@@ -53,21 +52,22 @@ export class UDPConnectionService extends EventEmitter {
     delete this._connections[addressKey]
   }
 
+  sendDummyPacket (address, port) {
+    this.mainServer.send(Buffer.alloc(0), port, address)
+  }
+
   performUDPHolePunchingRelay (address, port) {
     return new Promise((resolve, reject) => {
       let addressKey = address + port + this.port
-      console.log('punching for ', address, port)
-      console.log(addressKey)
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve(this._connections[addressKey])
       } else {
-        let connection = this.getConnection(address, port, false, false)
         this._natPunchingList[addressKey] = {
           isPunched: false
         }
         debug(`punching for ${address}:${port}`)
-        connection.send(Buffer.from('HELLO'))
+        this.sendDummyPacket(address, port)
         resolve()
       }
     })
@@ -87,24 +87,20 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         let connection = this.getConnection(address, port, false, false)
         let secondConnection = this.getConnection(address, port, false, true)
+        connection.on('connect', () => {
+          this._natPunchingList[addressKey].isPunched = true
+          clearTimeout(timer)
+          resolve(this._connections[addressKey])
+        })
+        secondConnection.on('connect', () => {
+          this._natPunchingList[secondAddressKey].isPunched = true
+          clearTimeout(timer)
+          resolve(this._connections[secondAddressKey])
+        })
         let timer = setTimeout(() => {
           debug('NAT Punching failed')
-          connection.removeListener('data', onData)
-          secondConnection.removeListener('data', onData)
           reject()
         }, 10000)
-        const onData = (data, addressKey) => {
-          console.log('got message')
-          if (data.toString() === 'HELLO') {
-            this._natPunchingList[addressKey].isPunched = true
-            connection.removeListener('data', onData)
-            secondConnection.removeListener('data', onData)
-            clearTimeout(timer)
-            resolve(this._connections[addressKey])
-          }
-        }
-        connection.on('data', (data) => onData(data, addressKey))
-        secondConnection.on('data', data => onData(data, secondAddressKey))
         this._natPunchingList[addressKey] = {
           isPunched: false
         }
@@ -112,8 +108,8 @@ export class UDPConnectionService extends EventEmitter {
           isPunched: false
         }
         debug(`punching for ${address}:${port}`)
-        connection.send(Buffer.from('HELLO'))
-        secondConnection.send(Buffer.from('HELLO'))
+        connection.send(Buffer.alloc(0))
+        secondConnection.send(Buffer.alloc(0))
       }
     })
   }
@@ -149,7 +145,6 @@ export class UDPConnectionService extends EventEmitter {
         })
         this._connections[addressKey] = connection
         if (this.relayMode && !toEchoServer) {
-          console.log('got new connection')
           this.emit('relay-new-connection', connection, addressKey)
         }
       } else {
@@ -180,6 +175,10 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.mainServer.on('message', (message, remoteInfo) => {
+          if (message.length < 12) {
+            // dummy message
+            return
+          }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           let packet = new rudp.Packet(message)
           setImmediate(() => {
@@ -218,6 +217,9 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.secondServer.on('message', (message, remoteInfo) => {
+          if (message.length < 12) {
+            return
+          }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, false, true)
           let packet = new rudp.Packet(message)
           setImmediate(() => {
