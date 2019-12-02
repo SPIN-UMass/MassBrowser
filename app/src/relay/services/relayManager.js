@@ -128,7 +128,6 @@ class RelayManager {
   }
 
   timeout (ms) {
-    console.log('waiting...')
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 

@@ -35,6 +35,7 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   updateNatPunchingListItem (addressKey) {
+    console.log('updating nat punching for:', addressKey)
     if (this._natPunchingList[addressKey]) {
       this._natPunchingList[addressKey].isPunched = true
     } else {
@@ -55,6 +56,8 @@ export class UDPConnectionService extends EventEmitter {
   performUDPHolePunchingRelay (address, port) {
     return new Promise((resolve, reject) => {
       let addressKey = address + port + this.port
+      console.log('punching for ', address, port)
+      console.log(addressKey)
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve(this._connections[addressKey])
@@ -91,6 +94,7 @@ export class UDPConnectionService extends EventEmitter {
           reject()
         }, 10000)
         const onData = (data, addressKey) => {
+          console.log('got message')
           if (data.toString() === 'HELLO') {
             this._natPunchingList[addressKey].isPunched = true
             connection.removeListener('data', onData)
@@ -145,6 +149,7 @@ export class UDPConnectionService extends EventEmitter {
         })
         this._connections[addressKey] = connection
         if (this.relayMode && !toEchoServer) {
+          console.log('got new connection')
           this.emit('relay-new-connection', connection, addressKey)
         }
       } else {
