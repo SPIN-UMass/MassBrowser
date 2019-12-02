@@ -74,13 +74,13 @@ Sender.prototype._timeout = function () {
 			this._changeCurrentCongestionControlState(constants.CongestionControl.States.SLOW_START);
 			break;
 	}
-	if (this._timeoutCount > constants.Retransmission.MAX_NUMBER_OF_RETRANSMISSION) {
-		this._timeoutCount = 0;
-		this._stopTimeoutTimer();
-		this._sendingQueue = [];
-		this._retransmissionQueue = [];
-		this.emit('timeout');
-	}
+	// if (this._timeoutCount > constants.Retransmission.MAX_NUMBER_OF_RETRANSMISSION) {
+	// 	this._timeoutCount = 0;
+	// 	this._stopTimeoutTimer();
+	// 	this._sendingQueue = [];
+	// 	this._retransmissionQueue = [];
+	// 	this.emit('timeout');
+	// }
 	if (this._retransmissionQueue.length !== 0) {
 		this._timeoutCount += 1;
 	}
