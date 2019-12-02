@@ -67,7 +67,9 @@ export class UDPConnectionService extends EventEmitter {
           isPunched: false
         }
         debug(`punching for ${address}:${port}`)
-        this.sendDummyPacket(address, port)
+        for (let i = 1; i < 5; i++) {
+          this.sendDummyPacket(address, port)
+        }
         resolve()
       }
     })
