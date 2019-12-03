@@ -19,64 +19,48 @@ module.exports = Packet;
 function Packet(sequenceNumber, acknowledgementNumber, packetType, payload) {
     if (Buffer.isBuffer(sequenceNumber)) {
         let buffer = sequenceNumber;
-        this._sequenceNumber = buffer.readUInt32BE(0);
-        this._acknowledgementNumber = buffer.readUInt32BE(4);
+        this.sequenceNumber = buffer.readUInt32BE(0);
+        this.acknowledgementNumber = buffer.readUInt32BE(4);
         let options = buffer.readUInt32BE(8);
         switch (options) {
             case 1:
-            this._packetType = constants.PacketTypes.FIN;
+            this.packetType = constants.PacketTypes.FIN;
             break;
             case 2:
-            this._packetType = constants.PacketTypes.SYN;
+            this.packetType = constants.PacketTypes.SYN;
             break;
             case 4:
-            this._packetType = constants.PacketTypes.RST;
+            this.packetType = constants.PacketTypes.RST;
             break;
             case 8:
-            this._packetType = constants.PacketTypes.ACK;
+            this.packetType = constants.PacketTypes.ACK;
             break;
             case 10:
-            this._packetType = constants.PacketTypes.SYN_ACK;
+            this.packetType = constants.PacketTypes.SYN_ACK;
             break;
             default:
-            this._packetType = constants.PacketTypes.DATA;
+            this.packetType = constants.PacketTypes.DATA;
         }
-        this._payload = Buffer.alloc(buffer.length - 12);
-        buffer.copy(this._payload, 0, 12);
+        this.payload = Buffer.alloc(buffer.length - 12);
+        buffer.copy(this.payload, 0, 12);
     } else {
-        this._sequenceNumber = sequenceNumber;
-        this._acknowledgementNumber = acknowledgementNumber;
-        this._packetType = packetType;
-        this._payload = payload;
+        this.sequenceNumber = sequenceNumber;
+        this.acknowledgementNumber = acknowledgementNumber;
+        this.packetType = packetType;
+        this.payload = payload;
     }
 };
 util.inherits(Packet, EventEmitter);
-
-Packet.prototype.getSequenceNumber = function() {
-    return this._sequenceNumber;
-};
-
-Packet.prototype.getAcknowledgementNumber = function () {
-    return this._acknowledgementNumber;
-}
-
-Packet.prototype.getPayload = function() {
-    return this._payload;
-};
-
-Packet.prototype.getPacketType = function() {
-    return this._packetType;
-}
 
 Packet.prototype.acknowledge = function () {
     this.emit('acknowledge');
 };
 
 Packet.prototype.toBuffer = function() {
-    let retval = Buffer.alloc(12 + this._payload.length);
-    retval.writeUInt32BE(this._sequenceNumber, 0);
-    retval.writeUInt32BE(this._acknowledgementNumber, 4);
-    switch (this._packetType) {
+    let retval = Buffer.alloc(12 + this.payload.length);
+    retval.writeUInt32BE(this.sequenceNumber, 0);
+    retval.writeUInt32BE(this.acknowledgementNumber, 4);
+    switch (this.packetType) {
         case constants.PacketTypes.FIN:
         retval.writeUInt32BE(1, 8)
         break;            
@@ -98,15 +82,15 @@ Packet.prototype.toBuffer = function() {
         default:
         break;
     }
-    this._payload.copy(retval, 12, 0);
+    this.payload.copy(retval, 12, 0);
     return retval;
 }
 
 Packet.prototype.toObject = function () {
     let object = {
-        sequenceNumber: this._sequenceNumber,
-        acknowledgementNumber: this._acknowledgementNumber,
-        packetType: this._packetType
+        sequenceNumber: this.sequenceNumber,
+        acknowledgementNumber: this.acknowledgementNumber,
+        packetType: this.packetType
     }
     return object;
 }

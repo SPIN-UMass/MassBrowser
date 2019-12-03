@@ -7,12 +7,12 @@ const util = require('util');
 
 module.exports = Connection;
 function Connection(packetSender) {
-	this._currentTCPState = constants.TCPStates.LISTEN;
+	this.currentTCPState = constants.TCPStates.LISTEN;
 	this._sender = new Sender(this, packetSender);
 	this._receiver = new Receiver(this, packetSender);
-	this._initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
-	this._nextSequenceNumber = 0;
-	this._nextExpectedSequenceNumber = 0;
+	this.initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
+	this.nextSequenceNumber = 0;
+	this.nextExpectedSequenceNumber = 0;
 	this._connectionTimeoutTimer = null;
 
 	Duplex.call(this);
@@ -27,12 +27,12 @@ function Connection(packetSender) {
 		this.emit('connect')
 	});
 	this._sender.on('fin_acked', () => {
-		if (this._currentTCPState === constants.TCPStates.LAST_ACK) {
+		if (this.currentTCPState === constants.TCPStates.LAST_ACK) {
 			this._changeCurrentTCPState(constants.TCPStates.CLOSED);
 			this._sender._stopTimeoutTimer();
 			this._stopTimeoutTimer();
 			this.emit('close');
-		} else if (this._currentTCPState === constants.TCPStates.FIN_WAIT_1){
+		} else if (this.currentTCPState === constants.TCPStates.FIN_WAIT_1){
 			this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
 		}
 	});
@@ -46,6 +46,9 @@ function Connection(packetSender) {
 	this._receiver.on('data', (data) => {
 		this.emit('data', data)
 	});
+	this._sender.once('done', () => {
+		this.emit('done');
+	})
 };
 
 util.inherits(Connection, Duplex);
@@ -72,36 +75,36 @@ Connection.prototype._restartTimeoutTimer = function () {
 }
 
 Connection.prototype.getInitialSequenceNumber = function () {
-	return this._initialSequenceNumber;
+	return this.initialSequenceNumber;
 };
 
 Connection.prototype.getNextExpectedSequenceNumber = function () {
-	return this._nextExpectedSequenceNumber;
+	return this.nextExpectedSequenceNumber;
 };
 
 Connection.prototype.getNextSequenceNumber = function () {
-	return this._nextSequenceNumber;
+	return this.nextSequenceNumber;
 };
 
 Connection.prototype._setNextSequenceNumber = function (sequenceNumber) {
-	this._nextSequenceNumber = sequenceNumber;
+	this.nextSequenceNumber = sequenceNumber;
 }
 
 Connection.prototype._setNextExpectedSequenceNumber = function (sequenceNumber) {
-	this._nextExpectedSequenceNumber = sequenceNumber;
+	this.nextExpectedSequenceNumber = sequenceNumber;
 }
 
 Connection.prototype.incrementNextSequenceNumber = function () {
-	this._nextSequenceNumber = (this._nextSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
+	this.nextSequenceNumber = (this.nextSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
 };
 
 Connection.prototype.incrementNextExpectedSequenceNumber = function () {
-	this._nextExpectedSequenceNumber = (this._nextExpectedSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
+	this.nextExpectedSequenceNumber = (this.nextExpectedSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
 }
 
 Connection.prototype.send = function (data) {
 	this._sender.addDataToQueue(data)
-	switch(this._currentTCPState) {
+	switch(this.currentTCPState) {
 		case constants.TCPStates.LISTEN:
 			this._sender.sendSyn();
 			this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
@@ -116,31 +119,31 @@ Connection.prototype.send = function (data) {
 Connection.prototype.receive = function (packet) {
 	// console.log('got:', packet)
 	this._restartTimeoutTimer();
-	switch(this._currentTCPState) {
+	switch(this.currentTCPState) {
 		case constants.TCPStates.LISTEN:
-			if (packet.getPacketType() === constants.PacketTypes.SYN) {
-				this._setNextExpectedSequenceNumber(packet.getSequenceNumber() + 1);
+			if (packet.packetType === constants.PacketTypes.SYN) {
+				this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
 				this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
 				this._sender.sendSynAck();
 				this._changeCurrentTCPState(constants.TCPStates.SYN_RCVD)
 			}
 			break;
 		case constants.TCPStates.SYN_SENT:
-			if (packet.getPacketType() === constants.PacketTypes.SYN_ACK) {
-				this._setNextExpectedSequenceNumber(packet.getSequenceNumber() + 1);
+			if (packet.packetType === constants.PacketTypes.SYN_ACK) {
+				this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
 				this._sender.sendAck();
-				this._sender.verifyAck(packet.getAcknowledgementNumber())
+				this._sender.verifyAck(packet.acknowledgementNumber)
 			}
 			break;
 		case constants.TCPStates.SYN_RCVD:
-			if (packet.getPacketType() === constants.PacketTypes.ACK) {
-				this._sender.verifyAck(packet.getAcknowledgementNumber())
+			if (packet.packetType === constants.PacketTypes.ACK) {
+				this._sender.verifyAck(packet.acknowledgementNumber)
 			}
 			break;
 		case constants.TCPStates.ESTABLISHED:
-			switch(packet.getPacketType()) {
+			switch(packet.packetType) {
 				case constants.PacketTypes.ACK:
-					this._sender.verifyAck(packet.getAcknowledgementNumber())
+					this._sender.verifyAck(packet.acknowledgementNumber)
 					break;
 				case constants.PacketTypes.FIN:
 					this.incrementNextExpectedSequenceNumber();
@@ -157,17 +160,17 @@ Connection.prototype.receive = function (packet) {
 			}
 			break;
 		case constants.TCPStates.LAST_ACK:
-			if (packet.getPacketType() === constants.PacketTypes.ACK) {
-				this._sender.verifyAck(packet.getAcknowledgementNumber());
+			if (packet.packetType === constants.PacketTypes.ACK) {
+				this._sender.verifyAck(packet.acknowledgementNumber);
 			}
 			break;
 		case constants.TCPStates.FIN_WAIT_1:
-			if (packet.getPacketType() === constants.PacketTypes.ACK) {
-				this._sender.verifyAck(packet.getAcknowledgementNumber());
+			if (packet.packetType === constants.PacketTypes.ACK) {
+				this._sender.verifyAck(packet.acknowledgementNumber);
 			}
 			break;
 		case constants.TCPStates.FIN_WAIT_2:
-			if (packet.getPacketType() === constants.PacketTypes.FIN) {
+			if (packet.packetType === constants.PacketTypes.FIN) {
 				this.incrementNextExpectedSequenceNumber();
 				this._sender.sendAck();
 				this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
@@ -180,7 +183,7 @@ Connection.prototype.receive = function (packet) {
 			}
 			break;
 		case constants.TCPStates.TIME_WAIT:
-			if (packet.getPacketType() === constants.PacketTypes.FIN) {
+			if (packet.packetType === constants.PacketTypes.FIN) {
 				this._sender.sendAck()
 			}
 			break;
@@ -188,15 +191,22 @@ Connection.prototype.receive = function (packet) {
 };
 
 Connection.prototype._changeCurrentTCPState = function (newState) {
-	console.log(helpers.getKeyByValue(constants.TCPStates, this._currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState))
-	this._currentTCPState = newState;
+	console.log(helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState))
+	this.currentTCPState = newState;
 }
 
 Connection.prototype.close = function () {
-	this._sender.clear();
-	this._receiver.clear();
-	this._sender.sendFin();
-	this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_1)
+	switch(this.currentTCPState) {
+		case constants.LISTEN:
+		case constants.SYN_SENT:
+		case constants.SYN_RCVD:
+		case constants.TCPStates.ESTABLISHED:
+			this._sender.clear();
+			this._receiver.clear();
+			this._sender.sendFin();
+			this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_1)
+			break;
+	}
 }
 
 Connection.prototype._write = function (chunk, encoding, callback) {
