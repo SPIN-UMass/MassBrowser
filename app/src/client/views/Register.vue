@@ -46,8 +46,17 @@
     components: {
       GridLoader
     },
-    created () {
+    async created () {
+      console.log("REGISTER CREATED")
+      await store.ready
       this.invitationCodeMask = 'N'.repeat(INVITATION_CODE_LENGTH/2) + DELIM + 'N'.repeat(INVITATION_CODE_LENGTH/2)
+      console.log("MMM")
+      let registered = await RegistrationService.isRegistered()
+      console.log(" MMM  REG", registered)
+
+      if (registered) {
+        this.$router.push('/')
+      } 
     },
     watch: {
       /**
