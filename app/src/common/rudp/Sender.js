@@ -241,7 +241,7 @@ Sender.prototype.verifyAck = function (sequenceNumber) {
 					break;
 			}
 			this.restartTimeoutTimer();
-			while (this._retransmissionQueue.currentValue() && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
+			while (!!this._retransmissionQueue.currentValue() && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
 				let packetObject = this._retransmissionQueue.dequeue();
 				packetObject = packetObject.value;
 				packetObject.packet.acknowledge();

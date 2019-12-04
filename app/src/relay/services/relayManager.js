@@ -152,9 +152,9 @@ class RelayManager {
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
-      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port + 1)
-      await this.timeout(3000)
-      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
+      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port + 1)
+      // await this.timeout(3000)
+      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }
   }
 
