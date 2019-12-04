@@ -24,7 +24,6 @@ Queue.prototype.enqueue = function (id, object) {
 	}
 	let newTail = new Node(id, object);
 	this._ids[id] = newTail;
-	this.size = this.size + 1;
 	if (this._head === null) {
 		this._head = newTail
 		
@@ -35,6 +34,7 @@ Queue.prototype.enqueue = function (id, object) {
 		this._tail.next = newTail;
 		this._tail = newTail;
 	}
+	this.size = this.size + 1;
 }
 
 Queue.prototype.pushFront = function (queue) {

@@ -106,6 +106,9 @@ Sender.prototype._timeout = function () {
 Sender.prototype._retransmit = function () {
 	let packetsCount = Math.min(this._retransmissionQueue.size, Math.floor(this._maxWindowSize))
 	let iterator = this._retransmissionQueue.getIterator();
+	if (iterator === null) {
+		return
+	}
 	for (let i = 0; i < packetsCount; i++) {
 		let packetObject = iterator.value;
 		this._packetSender.send(packetObject.packet);
@@ -238,7 +241,7 @@ Sender.prototype.verifyAck = function (sequenceNumber) {
 					break;
 			}
 			this.restartTimeoutTimer();
-			while (this._retransmissionQueue.size && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
+			while (this._retransmissionQueue.currentValue() && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
 				let packetObject = this._retransmissionQueue.dequeue();
 				packetObject = packetObject.value;
 				packetObject.packet.acknowledge();
