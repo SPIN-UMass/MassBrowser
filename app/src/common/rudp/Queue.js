@@ -27,7 +27,6 @@ Queue.prototype.enqueue = function (id, object) {
 	this.size = this.size + 1;
 	if (this._head === null) {
 		this._head = newTail
-		
 	} else if (this._tail === null) {
 		this._tail = newTail
 		this._head.next = this._tail

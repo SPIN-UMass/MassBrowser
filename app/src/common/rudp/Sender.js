@@ -1,4 +1,3 @@
-var helpers = require('./helpers');
 var constants = require('./constants');
 var Packet = require('./Packet');
 var Queue = require('./Queue');
