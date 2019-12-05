@@ -50,8 +50,8 @@ function initializeTray(additionalMenu) {
     }
   ]
   if (additionalMenu){
-    menu[menu.length] = additionalMenu  
-  } 
+    menu[menu.length] = additionalMenu
+  }
   menu[menu.length] = {
       label: 'Exit',
       click() {
@@ -95,7 +95,7 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     title: config.appName,
     height: 350,
-    width: 500,
+    width: 550,
     resizable: false,
     minimizable: false,
     maximizable: false,

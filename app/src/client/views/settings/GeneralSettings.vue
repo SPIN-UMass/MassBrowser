@@ -43,15 +43,15 @@
                         </v-select>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-xs-6">
-                        <label>Country Setting</label>
-                    </div>
-                    <div class="col-xs-6 align-right">
-                        <v-select v-model="country" v-on:input="countryChanged" :clearable="false" :options="['United States', 'Iran', 'China']" :searchable="true">
-                        </v-select>
-                    </div>
-                </div>
+                <!--<div class="row">-->
+                    <!--<div class="col-xs-6">-->
+                        <!--<label>Country Setting</label>-->
+                    <!--</div>-->
+                    <!--<div class="col-xs-6 align-right">-->
+                        <!--<v-select v-model="country" v-on:input="countryChanged" :clearable="false" :options="['United States', 'Iran', 'China']" :searchable="true">-->
+                        <!--</v-select>-->
+                    <!--</div>-->
+                <!--</div>-->
             </div>
         </settings-group>
     </div>

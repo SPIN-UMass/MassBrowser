@@ -12,7 +12,6 @@
                         router-link(to='/client/feedback') {{$t("MENU_FEEDBACK")}}
                     li(:class="{active: currentTab.startsWith('settings')}")
                         router-link(to='/client/settings') {{$t("MENU_SETTINGS")}}
-                        router-link(to='/client/feedback') feedback
                     li(:class="{active: currentTab.startsWith('stats')}")
                         router-link(to='/client/stats') stats
                         //- .span(v-on:click="$router.push('client-websites')") websites
