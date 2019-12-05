@@ -78,8 +78,7 @@ export class UDPConnectionService extends EventEmitter {
   performUDPHolePunchingClient (address, port) {
     return new Promise((resolve, reject) => {
       let addressKey = address + port + this.port
-      // let secondAddressKey = address + port + this.secondPort
-      let secondAddressKey = address + port + (this.port + 1)
+      let secondAddressKey = address + port + this.secondPort
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve(this._connections[addressKey])
@@ -123,8 +122,7 @@ export class UDPConnectionService extends EventEmitter {
   getConnection (address, port, toEchoServer, useSecondPort) {
     let connection
     let addressKey = address + port + this.port
-    // let secondAddressKey = address + port + this.secondPort
-    let secondAddressKey = address + port + (this.port + 1)
+    let secondAddressKey = address + port + this.secondPort
     if (useSecondPort) {
       if (this.secondServer === null) {
         return null
@@ -213,8 +211,7 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         this.secondServer = dgram.createSocket('udp4')
         this.secondServer.bind({
-          // port: this.secondPort,
-          port: this.port + 1,
+          port: this.secondPort,
           exclusive: false
         })
 

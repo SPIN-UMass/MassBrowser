@@ -1,35 +1,35 @@
 module.exports.PacketTypes = {
-	'ACK': 1,
-	'SYN': 2,
-	'FIN': 3,
-	'SYN_ACK': 4,
-	'DATA': 5
+  'ACK': 1,
+  'SYN': 2,
+  'FIN': 3,
+  'SYN_ACK': 4,
+  'DATA': 5
 };
 module.exports.TCPStates = {
-	'CLOSED': 0,
-	'LISTEN': 1,
-	'SYN_SENT': 2,
-	'SYN_RCVD': 3,
-	'ESTABLISHED': 4,
-	'CLOSE_WAIT': 5,
-	'FIN_WAIT_1': 6,
-	'FIN_WAIT_2': 7,
-	'TIME_WAIT': 8,
-	'LAST_ACK': 9,
+  'CLOSED': 0,
+  'LISTEN': 1,
+  'SYN_SENT': 2,
+  'SYN_RCVD': 3,
+  'ESTABLISHED': 4,
+  'CLOSE_WAIT': 5,
+  'FIN_WAIT_1': 6,
+  'FIN_WAIT_2': 7,
+  'TIME_WAIT': 8,
+  'LAST_ACK': 9,
 };
 module.exports.CongestionControl = {
-	'States': {
-		'SLOW_START': 0,
-		'CONGESTION_AVOIDANCE': 1,
-		'FAST_RECOVERY': 2
-	},
-	'INITIAL_SLOW_START_THRESHOLD': 100
+  'States': {
+    'SLOW_START': 0,
+    'CONGESTION_AVOIDANCE': 1,
+    'FAST_RECOVERY': 2
+  },
+  'INITIAL_SLOW_START_THRESHOLD': 100
 };
 module.exports.Retransmission = {
-	'ALPHA': 0.125,
-	'BETA': 0.25,
-	'MAX_NUMBER_OF_RETRANSMISSION': 5,
-	'INITIAL_RETRANSMISSION_INTERVAL': 100
+  'ALPHA': 0.125,
+  'BETA': 0.25,
+  'MAX_NUMBER_OF_RETRANSMISSION': 5,
+  'INITIAL_RETRANSMISSION_INTERVAL': 100
 };
 module.exports.CLOSE_WAIT_TIME = 1000;
 module.exports.INITIAL_MAX_WINDOW_SIZE = 64;

@@ -40,7 +40,10 @@ class RelayManager {
       }
     })
 
-    udpConnectionService.on('relay-new-connection', (connection, addressKey) => this.onNewUDPConnection(connection, addressKey))
+    udpConnectionService.on('relay-new-connection', (connection, addressKey) => {
+      udpConnectionService.updateNatPunchingListItem(addressKey)
+      this.onNewUDPConnection(connection)
+    })
   }
 
   setUploadLimit (limitBytes) {
@@ -149,26 +152,22 @@ class RelayManager {
     }
 
     API.acceptSession(data.client, data.id)
+    debug(data)
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
-      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port + 1)
-      // await this.timeout(3000)
-      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
+      await this.timeout(3000)
+      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }
   }
 
-  onNewUDPConnection (connection, addressKey) {
+  onNewUDPConnection (connection) {
     let upPipe = this.uploadLimiter.throttle()
     upPipe.on('error', (err) => { debug(err) })
     let downPipe = this.downloadLimiter.throttle()
     downPipe.on('error', (err) => { debug(err) })
     connection.on('data', data => {
-      if (data.toString() === 'HELLO') {
-        udpConnectionService.updateNatPunchingListItem(addressKey)
-      } else {
-        upPipe.write(data)
-      }
+      upPipe.write(data)
     })
 
     downPipe.on('data', data => {
