@@ -1,5 +1,5 @@
 export * from './connectionManager'
-export * from './RelayConnection'
+export * from './TCPRelayConnection'
 export * from './RelayAssigner'
 export * from './clientSocks'
 export * from './Session'

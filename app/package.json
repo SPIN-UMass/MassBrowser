@@ -4,6 +4,10 @@
   "description": "MassBrowser",
   "config": {
     "client": {
+      "echoServer": {
+        "host": "dev.yaler.co",
+        "port": 8823
+      },
       "configFoldername": "client",
       "appName": "MassBrowser",
       "socksPort": 7080,
@@ -34,6 +38,7 @@
       "appName": "MassBuddy",
       "natEnabled": false,
       "port": 8040,
+      "UDPPort": 8040,
       "domainfrontable": false,
       "domainfrontPort": 8083,
       "keepAliveInterval": 30,
@@ -60,8 +65,8 @@
       "enabled": false
     },
     "dev": {
-      "serverURL": "https://dev.yaler.co",
-      "websocketURL": "wss://dev.yaler.co:443",
+      "serverURL": "https://dev2.yaler.co",
+      "websocketURL": "wss://dev2.yaler.co:443",
       "sentry": {
         "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
       },

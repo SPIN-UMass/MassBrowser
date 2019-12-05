@@ -19,6 +19,7 @@ const defaultConfig = {
     },
     natEnabled: true,
     port: 8040   /* Only used if natEnabled is false */,
+    UDPPort: 8040,
     keepAliveInterval: 30,
     stunServer: {
       host: 'stun2.l.google.com',
@@ -57,7 +58,7 @@ function initializeConfig(options) {
         }
       })
   }
-  
+
   function configureWith(pConfig) {
     let devConfig = pConfig.dev || {}
     let prodConfig = pConfig.prod || {}
@@ -69,7 +70,7 @@ function initializeConfig(options) {
     let roleProdConfig = pConfig[role].prod || {}
     roleConfig.prod = undefined
     roleConfig.dev = undefined
-    
+
     pConfig['client'] = undefined
     pConfig['relay'] = undefined
 
@@ -82,14 +83,14 @@ function initializeConfig(options) {
     } else {
       updateConfig(config, prodConfig)
       updateConfig(config, roleProdConfig)
-    }    
+    }
   }
 
   configureWith(defaultConfig)
   configureWith(packageJSON.config)
-  
+
   updateConfig(config, options)
-  
+
   if (config.mode === 'development') {
     console.log("Running in development mode")
     config.isDevelopment = true
@@ -107,7 +108,7 @@ function initializeConfig(options) {
   config.isElectronRendererProcess = config.applicationInterface === 'electron' && config.electronProcess === 'renderer'
   config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'
   config.isElectronProcess = config.applicationInterface === 'electron'
-  
+
   config.version = packageJSON.version
 
 

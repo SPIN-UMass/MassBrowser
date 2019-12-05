@@ -64,9 +64,9 @@ export class HttpTransport extends Transport {
 
     options.validateStatus = status => true
     this._setHeaders(options)
-    
-    
-    
+
+
+
     return  axios.request(options)
     .catch((r) => {
       return this.handleNetworkError({url: path, data: data}, r)
@@ -149,7 +149,7 @@ export class WebSocketTransport extends Transport {
   eventReceived(resp) {
     this.eventHandler(resp.event, resp.data)
   }
-  
+
   handleReconnect() {
     this.eventHandler('reconnected','')
   }
@@ -180,7 +180,7 @@ export class WebSocketTransport extends Transport {
       this.connectionMap[proto['id']] = resolve
 
       var sproto = JSON.stringify(proto)
-      
+
       this.ws.send(sproto, (err) => {
         if (err) {
           if (this.ws.readyState === WebSocket.CLOSED){

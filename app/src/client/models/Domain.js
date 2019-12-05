@@ -33,7 +33,7 @@ class DomainSchema {
     // if this.subdomain is undefined, then it will return undefined as well
     var regex = globalRegexCache[this.subdomain]
     if (regex) {
-       return regex
+      return regex
     }
 
     // create a new regex since it's not in the cache
@@ -64,7 +64,7 @@ class DomainSchema {
           // its subdomain. For example, if cs.umass.edu can't be found,
           // try umass.edu instead.
           if (!domains.length) {
-          // Extract subdomain
+            // Extract subdomain
             var firstDot = maindomain.indexOf('.')
             if (firstDot == -1) {
               return null
@@ -99,7 +99,7 @@ class DomainSchema {
           return null
         })                      // end .then
     }                  // end const findDomainRec()
-    return findDomainRec('',domainName)
+    return findDomainRec('', domainName)
   }      // end static findDomain()
 
   toString () {
