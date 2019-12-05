@@ -1,149 +1,257 @@
 var helpers = require('./helpers');
 var constants = require('./constants');
-var PendingPacket = require('./PendingPacket');
 var Packet = require('./Packet');
+var Queue = require('./Queue');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-// TODO: the sender should never send acknowledgement or finish packets.
-// TODO: have the ability to cancel the transfer of any pending packet.
-
-function Window(packets) {
-  this._packets = packets;
+module.exports = Sender;
+function Sender(connection, packetSender) {
+  this._packetSender = packetSender;
+  this._connection = connection;
+  this._duplicateAckCount = 0;
+  this._currentCongestionControlState = constants.CongestionControl.States.SLOW_START;
+  this._timeoutTimer = null;
+  this._samplingTimer = null;
+  this._timeoutInterval = constants.Retransmission.INITIAL_RETRANSMISSION_INTERVAL;
+  this._estimatedRTT = 0;
+  this._devRTT = 0;
+  this._slowStartThreshold = constants.CongestionControl.INITIAL_SLOW_START_THRESHOLD;
+  this._retransmissionQueue = new Queue();
+  this._sendingQueue = Buffer.alloc(0);
+  this._maxWindowSize = constants.INITIAL_MAX_WINDOW_SIZE;
+  this._delayedAckTimer = null;
+  this._sample = true;
+  this._startSamplingTimer();
 }
-util.inherits(Window, EventEmitter);
+util.inherits(Sender, EventEmitter);
 
-Window.prototype.send = function () {
-  // Our packets to send.
-  // using .slice to duplicate the this._packets
-  var pkts = this._packets.slice();
+Sender.prototype.clear = function () {
+  clearInterval(this._samplingTimer);
+  this._retransmissionQueue.clear();
+  this._sendingQueue = Buffer.alloc(0);
+}
 
-  // The initial synchronization packet. Always send this first.
-  this._synchronizationPacket = pkts.shift();
-  // The final reset packet. It can equal to the synchronization packet.
-  this._resetPacket = pkts.length ? pkts.pop() : this._synchronizationPacket
+Sender.prototype.send = async function () {
+  await this._sendDataLoop()
+}
 
-  // This means that the reset packet's acknowledge event thrown will be
-  // different from that of the synchronization packet.
-  if (this._resetPacket !== this._synchronizationPacket) {
-    this._resetPacket.on('acknowledge', function () {
-      self.emit('done');
-    });
+Sender.prototype.addDataToQueue = function (data) {
+  this._sendingQueue = Buffer.concat([this._sendingQueue, data])
+}
+
+Sender.prototype._stopSamplingTimer = function () {
+  clearInterval(this._samplingTimer);
+  this._samplingTimer = null;
+}
+
+Sender.prototype._startSamplingTimer = function () {
+  this._samplingTimer = setInterval(() => {
+    this._sample = true
+  }, constants.SAMPLING_INTERVAL);
+}
+
+Sender.prototype._stopTimeoutTimer = function () {
+  clearTimeout(this._timeoutTimer);
+  this._timeoutTimer = null;
+}
+
+Sender.prototype._startTimeoutTimer = function () {
+  this._timeoutCount = 0;
+  this._timeoutTimer = setTimeout(() => {
+    this._timeout();
+  }, this._timeoutInterval)
+}
+
+Sender.prototype.restartTimeoutTimer = function () {
+  this._timeoutCount = 0;
+  this._stopTimeoutTimer();
+  this._startTimeoutTimer();
+}
+
+Sender.prototype._timeout = function () {
+  switch(this._currentCongestionControlState) {
+    case constants.CongestionControl.States.SLOW_START:
+      this._slowStartThreshold = Math.floor(this._maxWindowSize / 2);
+      this._maxWindowSize = constants.INITIAL_MAX_WINDOW_SIZE;
+      this._duplicateAckCount = 0;
+      this._retransmit();
+      break;
+    case constants.CongestionControl.States.CONGESTION_AVOIDANCE:
+    case constants.CongestionControl.States.FAST_RECOVERY:
+      this._slowStartThreshold = Math.floor(this._maxWindowSize / 2);
+      this._maxWindowSize = constants.INITIAL_MAX_WINDOW_SIZE;
+      this._duplicateAckCount = 0;
+      this._retransmit();
+      this._changeCurrentCongestionControlState(constants.CongestionControl.States.SLOW_START);
+      break;
   }
+  if (this._retransmissionQueue.size) {
+    this._timeoutCount += 1;
+  }
+  this._timeoutTimer = setTimeout(() => {
+    this._timeout();
+  }, this._timeoutInterval)
+}
 
-  var self = this;
+Sender.prototype._retransmit = function () {
+  let packetsCount = Math.min(this._retransmissionQueue.size, Math.floor(this._maxWindowSize));
+  let iterator = this._retransmissionQueue.getIterator();
+  for (let i = 0; i < packetsCount; i++) {
+    let packetObject = iterator.value;
+    this._packetSender.send(packetObject.packet);
+    packetObject.retransmitted = true;
+    iterator = iterator.next
+  }
+};
 
-  // Will be used to handle the case when all non sync or reset packets have
-  // been acknowledged.
-  var emitter = new EventEmitter();
+Sender.prototype._pushToRetransmissionQueue = async function (packet) {
+  let packetObject = {
+    packet: packet,
+    retransmitted: false,
+    sampling: this._sample
+  }
+  if (this._sample) {
+    packetObject.sentTime = process.hrtime();
+    this._sample = false;
+  }
+  await this._retransmissionQueue.enqueue(packet.sequenceNumber, packetObject)
+  if (this._timeoutTimer === null) {
+    this._startTimeoutTimer();
+  }
+};
 
-  this._synchronizationPacket.on('acknowledge', function () {
-    // We will either notify the owning class that this window has finished
-    // sending all of its packets (that is, if this window only had one packet
-    // in it), or keep looping through each each non sync-reset packets until
-    // they have been acknowledged.
+Sender.prototype.sendSyn = async function () {
+  let synPacket = new Packet(this._connection.initialSequenceNumber, this._connection.nextExpectedSequenceNumber, constants.PacketTypes.SYN, Buffer.alloc(0))
+  synPacket.on('acknowledge', () => {
+    this.emit('syn_acked');
+  });
+  this._packetSender.send(synPacket);
+  this._retransmissionQueue = new Queue();
+  await this._pushToRetransmissionQueue(synPacket)
+};
 
-    if (self._resetPacket === self._synchronizationPacket) {
-      self.emit('done');
-      return;
-    } else if (pkts.length === 0) {
-      // This means that this window only had two packets, and the second one
-      // was a reset packet.
-      self._resetPacket.send();
-      return;
-    }
+Sender.prototype.sendSynAck = async function () {
+  let synAckPacket = new Packet(this._connection.initialSequenceNumber, this._connection.nextExpectedSequenceNumber, constants.PacketTypes.SYN_ACK, Buffer.alloc(0))
+  synAckPacket.on('acknowledge', () => {
+    this.emit('syn_ack_acked');
+  });
+  this._packetSender.send(synAckPacket)
+  await this._pushToRetransmissionQueue(synAckPacket)
+};
 
-    emitter.on('acknowledge', function () {
-      // This means that it is now time to send the reset packet.
-      self._resetPacket.send();
-    });
+Sender.prototype.sendAck = function (immediate = true) {
+  if (immediate === true) {
+    this._packetSender.send(new Packet(this._connection.nextSequenceNumber, this._connection.nextExpectedSequenceNumber, constants.PacketTypes.ACK, Buffer.alloc(0)))
+  } else if (immediate === false && this._delayedAckTimer === null) {
+    this._delayedAckTimer = setTimeout(()=> {
+      this.sendAck();
+      this._delayedAckTimer = null;
+    }, constants.DELAYED_ACK_TIME)
+  }
+};
 
-    // And if there are more than two packets in this window, then send all
-    // other packets.
+Sender.prototype._updateRTT = function (sampleRTT) {
+  sampleRTT = sampleRTT[0] * 1000 + sampleRTT[1] / 1000000;
+  this._estimatedRTT = (1 - constants.Retransmission.ALPHA) * this._estimatedRTT + constants.Retransmission.ALPHA * sampleRTT
+  this._devRTT = (1 - constants.Retransmission.BETA) * this._devRTT + constants.Retransmission.BETA * Math.abs(sampleRTT - this._estimatedRTT);
+  this._timeoutInterval = Math.floor(this._estimatedRTT + 4 * this._devRTT);
+}
 
-    var acknowledged = 0;
+Sender.prototype.sendFin = async function () {
+  let finPacket = new Packet(this._connection.nextSequenceNumber, this._connection.nextExpectedSequenceNumber, constants.PacketTypes.FIN, Buffer.alloc(0))
+  finPacket.on('acknowledge', () => {
+    this.emit('fin_acked');
+  });
+  this._packetSender.send(finPacket)
+  await this._pushToRetransmissionQueue(finPacket)
+}
 
-    function onAcknowledge() {
-      acknowledged++;
-      if (acknowledged === pkts.length) {
-        emitter.emit('acknowledge');
+Sender.prototype._sendDataLoop = async function () {
+  while (this._sendingQueue.length && this._retransmissionQueue.size < Math.floor(this._maxWindowSize)) {
+    let payload = this._sendingQueue.slice(0, constants.UDP_SAFE_SEGMENT_SIZE)
+    this._sendingQueue = this._sendingQueue.slice(constants.UDP_SAFE_SEGMENT_SIZE);
+    let packet = new Packet(this._connection.nextSequenceNumber, this._connection.nextExpectedSequenceNumber, constants.PacketTypes.DATA, payload);
+    this._connection.incrementNextSequenceNumber();
+    this._packetSender.send(packet);
+    await this._pushToRetransmissionQueue(packet);
+  }
+};
+
+Sender.prototype._printCongestionControlInfo = function () {
+  // this function is for debug
+  console.log('current state:',helpers.getKeyByValue(constants.CongestionControl.States, this._currentCongestionControlState))
+  console.log('_maxWindowSize:', this._maxWindowSize)
+  console.log('_duplicateAckCount:', this._duplicateAckCount)
+  console.log('_slowStartThreshold:', this._slowStartThreshold)
+  console.log('_timeoutCount:', this._timeoutCount)
+  console.log('_retransmissionQueue.size:', this._retransmissionQueue.size)
+}
+
+Sender.prototype._changeCurrentCongestionControlState = function (newState) {
+  // console.log(helpers.getKeyByValue(constants.CongestionControl.States, this._currentCongestionControlState), '->', helpers.getKeyByValue(constants.CongestionControl.States, newState))
+  this._currentCongestionControlState = newState;
+}
+
+Sender.prototype.verifyAck = async function (sequenceNumber) {
+  if (this._retransmissionQueue.size) {
+    let retransmissionQueueHeadSequenceNumber = this._retransmissionQueue.currentValue().packet.sequenceNumber;
+    if (retransmissionQueueHeadSequenceNumber < sequenceNumber) {
+      let diff = sequenceNumber - retransmissionQueueHeadSequenceNumber
+      switch(this._currentCongestionControlState) {
+        case constants.CongestionControl.States.SLOW_START:
+          this._maxWindowSize = this._maxWindowSize + diff;
+          this._duplicateAckCount = 0;
+          if (this._maxWindowSize >= this._slowStartThreshold) {
+            this._changeCurrentCongestionControlState(constants.CongestionControl.States.CONGESTION_AVOIDANCE);
+          }
+          break;
+        case constants.CongestionControl.States.CONGESTION_AVOIDANCE:
+          this._duplicateAckCount = 0;
+          this._maxWindowSize = this._maxWindowSize + diff/ Math.floor(this._maxWindowSize);
+          break;
+        case constants.CongestionControl.States.FAST_RECOVERY:
+          this._maxWindowSize = this._slowStartThreshold;
+          this._duplicateAckCount = 0;
+          this._changeCurrentCongestionControlState(constants.CongestionControl.States.CONGESTION_AVOIDANCE);
+          break;
+      }
+      this.restartTimeoutTimer();
+      while (!!this._retransmissionQueue.currentValue() && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
+        let packetObject = await this._retransmissionQueue.dequeue();
+        packetObject = packetObject.value;
+        packetObject.packet.acknowledge();
+        if (packetObject.sampling && packetObject.retransmitted === false) {
+          let sampleRTT = process.hrtime(packetObject.sentTime)
+          this._updateRTT(sampleRTT);
+        }
+        if (this._retransmissionQueue.size === 0) {
+          this._stopTimeoutTimer();
+        }
+      }
+      this._sendDataLoop()
+    } else if (retransmissionQueueHeadSequenceNumber === sequenceNumber) {
+      switch(this._currentCongestionControlState) {
+        case constants.CongestionControl.States.SLOW_START:
+        case constants.CongestionControl.States.CONGESTION_AVOIDANCE:
+          this._duplicateAckCount += 1;
+          break;
+        case constants.CongestionControl.States.FAST_RECOVERY:
+          this._maxWindowSize = this._maxWindowSize + 1;
+          this._sendDataLoop();
+          break;
+      }
+      if (this._duplicateAckCount === 3) {
+        switch(this._currentCongestionControlState) {
+          case constants.CongestionControl.States.SLOW_START:
+          case constants.CongestionControl.States.CONGESTION_AVOIDANCE:
+            this._slowStartThreshold = Math.floor(this._maxWindowSize / 2)
+            this._maxWindowSize = this._slowStartThreshold + 3;
+            this._retransmit();
+            this._changeCurrentCongestionControlState(constants.CongestionControl.States.FAST_RECOVERY);
+            break;
+        }
       }
     }
-
-
-    pkts.forEach(function (packet) {
-      packet.on('acknowledge', onAcknowledge);
-      packet.send();
-    });
-  });
-
-  this._synchronizationPacket.send();
-};
-
-Window.prototype.verifyAcknowledgement = function (sequenceNumber) {
-  for (var i = 0; i < this._packets.length; i++) {
-    if (this._packets[i].getSequenceNumber() === sequenceNumber) {
-      this._packets[i].acknowledge();
-    }
-  }
-};
-
-/**
- * An abstraction of sending raw UDP packets using the Go-Back-N protocol.
- *
- * @class Sender
- * @constructor
- */
-module.exports = Sender;
-function Sender(packetSender) {
-  this._packetSender = packetSender;
-  this._windows = [];
-  this._sending = null;
-}
-
-/**
- * Sends data to the remote host.
- *
- * @class Sender
- * @method
- */
-Sender.prototype.send = function (data) {
-  var chunks = helpers.splitArrayLike(data, constants.UDP_SAFE_SEGMENT_SIZE);
-  var windows = helpers.splitArrayLike(chunks, constants.WINDOW_SIZE);
-  this._windows = this._windows.concat(windows);
-  this._push();
-}
-
-/*
- * Pushes out the data to the remote host.
- */
-Sender.prototype._push = function () {
-  var self = this;
-  if (!this._sending && this._windows.length) {
-    this._baseSequenceNumber = Math.floor(Math.random() * (constants.MAX_SIZE - constants.WINDOW_SIZE));
-    var window = this._windows.shift()
-    var toSend = new Window(window.map(function (data, i) {
-      var packet = new Packet(i + self._baseSequenceNumber, data, !i, i === window.length - 1);
-      return new PendingPacket(packet, self._packetSender);
-    }));
-    this._sending = toSend;
-    var self = this;
-    this._sending.on('done', function () {
-      self._sending = null;
-      self._push();
-    });
-    toSend.send();
-  }
-}
-
-/**
- * Verifies whether or not the acknowledgement number is within the Window.
- *
- * @class Sender
- * @method
- */
-Sender.prototype.verifyAcknowledgement = function (sequenceNumber) {
-  if (this._sending) {
-    this._sending.verifyAcknowledgement(sequenceNumber);
   }
 }

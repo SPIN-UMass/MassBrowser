@@ -74,7 +74,7 @@ class SessionService extends EventEmitter {
   }
 
   async findHostModels (host) {
-    if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
+    if (net.isIP(host)) {
       let torCategory = (await Category.find({name: 'Tor'}))[0]
       let telegramCategory = (await Category.find({name: 'Messaging'}))[0]
       if (torService.isTorIP(host)) {

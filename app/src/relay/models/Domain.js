@@ -36,10 +36,7 @@ class DomainSchema {
        return regex
     }
 
-    // create a new regex since it's not in the cache
     regex = new RegExp('^' + (this.subdomain || '') + '$')
-
-    // save cache
     globalRegexCache[this.subdomain] = regex
     this._regex_cache = regex
 
@@ -54,12 +51,6 @@ class DomainSchema {
     const findDomainRec = (subdomain, maindomain) => {
       return Domain.find({name: maindomain})
         .then(domains => {
-          // domains is an array of domains objects returned by the
-          // Domain.find()
-
-          // very useful debugging info
-          // console.log("Function call Domain.find(", maindomain, ") returns: ", domains)
-
           // if it couldn't be found in the database, try to query with
           // its subdomain. For example, if cs.umass.edu can't be found,
           // try umass.edu instead.
@@ -84,23 +75,19 @@ class DomainSchema {
             // umass.edu. Assuming we have gotten a list of domain
             // objects by querying umass.edu, we need to figure out if
             // any of them contains a subdomain that matches cs.
-
-            // TODO: "accurate matching first" feature need to be
             // implemented. That is to say there are two rules in the DB:
             // {domain: umass.edu subdomain: *}
             // {domain: umass.edu subdomain: cs}
             // we shoud prefer matching cs rule first in this case.
             if (domains[i].subdomainRegex.test(subdomain)) {
-              // very useful debugging info
-              // console.log("Returns the final matching domain object: ", domains[i])
               return domains[i]
             }
           }
           return null
-        })                      // end .then
-    }                  // end const findDomainRec()
-    return findDomainRec('',domainName)
-  }      // end static findDomain()
+        })
+    }
+    return findDomainRec('', domainName)
+  }
 
   toString () {
     if (this.subdomain) {
