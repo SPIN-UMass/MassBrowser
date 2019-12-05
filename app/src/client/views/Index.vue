@@ -10,8 +10,14 @@
                         router-link(to='/client/websites') {{$t("MENU_WEBSITES")}}
                     li(:class="{active: currentTab==='feedback'}")
                         router-link(to='/client/feedback') {{$t("MENU_FEEDBACK")}}
-                    li(:class="{active: currentTab==='settings-general'}")
+                    li(:class="{active: currentTab.startsWith('settings')}")
                         router-link(to='/client/settings') {{$t("MENU_SETTINGS")}}
+                        router-link(to='/client/feedback') feedback
+                    li(:class="{active: currentTab.startsWith('stats')}")
+                        router-link(to='/client/stats') stats
+                        //- .span(v-on:click="$router.push('client-websites')") websites
+                    //- li(:class="{active: currentTab==='client-settings'}")
+                    //-   a() settings
         #m-content
             router-view.
         #m-footer

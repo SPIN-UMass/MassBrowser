@@ -12,6 +12,7 @@ import { torService, telegramService } from '@common/services'
 
 let TEST_URL="backend.yaler.co"
 import { Domain, Category } from '@/models'
+import {throttleCall} from '@utils'
 
 let TCP_CLIENT = 0
 let TCP_RELAY = 1
@@ -69,31 +70,38 @@ class SessionService extends EventEmitter {
 
   async assignRelay (host, port) {
     // figure out the corresponding category of the host(domain/IP)
-    if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
-      let torCategory = (await Category.find({name: 'Tor'}))[0]
+    const { category } = await this.findHostModels(host)
 
-      let telegramCategory =  (await Category.find({name: 'Messaging'}))[0]
-
-      if (torService.isTorIP(host)) {
-        var category = torCategory
-      }
-      else if (telegramService.isTelegramIP(host)) {
-        var category = telegramCategory
-      }
-      else {
-        debug(`Assigning session for ${host} of failed`)
-        return
-      }
-    }
-    else {
-      let domain = await Domain.findDomain(host)
-      var category = (await (await domain.getWebsite()).getCategory())
+    if (!category) {
+      debug(`Assigning session for ${host} of failed`)
+      return
     }
 
     debug(`Assigning session for ${host} of category ${category.name}`)
     // assign a session based on the category of the requested host
     let session = await this.assignSessionForCategory(category)
     return session.connection
+  }
+
+  async findHostModels (host) {
+    if (net.isIP(host)) {  // net.isIP() will return 0 or 4 or 6
+      let torCategory = (await Category.find({name: 'Tor'}))[0]
+
+      let telegramCategory = (await Category.find({name: 'Messaging'}))[0]
+
+      if (torService.isTorIP(host)) {
+        return { category: torCategory }
+      } else if (telegramService.isTelegramIP(host)) {
+        return { category: telegramCategory }
+      } else {
+        return {}
+      }
+    } else {
+      const domain = await Domain.findDomain(host)
+      const website = await domain.getWebsite()
+      const category = await website.getCategory()
+      return { domain, website, category }
+    }
   }
 
   async assignSessionForCategory(category) {
@@ -162,10 +170,12 @@ class SessionService extends EventEmitter {
           warn(`Session [${sessionInfo.id}] rejected by relay`)
           storeRemoveSession(sessionInfo)
           reject(new SessionRejectedError('session was rejected by relay'))
-        }
+        },
+        sessionInfo
       }
 
       storeUpdateSession(sessionInfo, 'pending')
+      this.emitPendingSessionUpdate(sessionInfo)
       this._startSessionPoll()
     })
   }
@@ -184,11 +194,11 @@ class SessionService extends EventEmitter {
 
       this.sessions.push(session)
       storeUpdateSession(sessionInfo, 'active')
+      this.emitSessionUpdate(session)
 
       debug(`Session [${sessionInfo.id}] connected`)
       resolve(session)
       return session
-
     } catch (err) {
       debug(`Session [${sessionInfo.id}] connection to relay failed`)
       reject(err)
@@ -204,7 +214,7 @@ class SessionService extends EventEmitter {
    * Resolves pending sessions with the newly created sessions
    */
 
-  _handleClosedSessions(session) {
+  _handleClosedSessions (session) {
     console.log(this.sessions)
     let index = this.sessions.indexOf(session)
     this.sessions.splice(index,1)
@@ -240,10 +250,14 @@ class SessionService extends EventEmitter {
       let resolve = this.pendingSessions[sessionInfo.id].accept
       delete this.pendingSessions[sessionInfo.id]
 
+      session.on('send', () => this.emitSessionUpdate(session))
+      session.on('receive', () => this.emitSessionUpdate(session))
+      session.on('state-changed', () => this.emitSessionUpdate(session))
+
       try {
         await resolve(session)
         await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
-      } catch(e) {
+      } catch (e) {
         /* Refer to Bug #1 */
         (sessionInfo.relay['allowed_categories'] || []).forEach(category => {
           if (this.categoryWaitLists[category.id]) {
@@ -312,19 +326,55 @@ class SessionService extends EventEmitter {
     },()=>{
       debug(`Session ${session.id} is dead`)
     })
-
-
   }
+
   sessionHeartBeat() {
     for (var i = 0; i < this.sessions.length; i++) {
       this.testSession(this.sessions[i])
     }
+  }
 
+  async getSessionDetails () {
+    const pending = Object.values(this.pendingSessions).map(s => pendingSessionToSessionDetails(s.sessionInfo))
+    return pending.concat(this.sessions.map(sessionToSessionDetails))
+  }
 
+  emitSessionUpdate (session) {
+    throttleCall(`session-update-${session.id}`, 500, () => {
+      this.emit('session-update', session.id, sessionToSessionDetails(session))
+    })
+  }
+
+  emitPendingSessionUpdate (sessionInfo) {
+    throttleCall(`session-update-${sessionInfo.id}`, 500, () => {
+      this.emit('session-update', sessionInfo.id, pendingSessionToSessionDetails(sessionInfo))
+    })
   }
 }
 
+function sessionToSessionDetails (session) {
+  return {
+    id: session.id,
+    state: session.state,
+    ip: session.ip,
+    port: session.port,
+    domainName: session.domainName,
+    sent: session.bytesSent,
+    received: session.bytesReceived
+  }
+}
 
+function pendingSessionToSessionDetails (sessionInfo) {
+  const session = sessionInfo.relay || {}
+  return {
+    id: sessionInfo.id,
+    state: session.state,
+    ip: session.ip,
+    port: session.port,
+    sent: 0,
+    received: 0
+  }
+}
 
 function storeUpdateSession(session, state) {
   store.commit('updateSession', {
