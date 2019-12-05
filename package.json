@@ -92,6 +92,7 @@
     "babel-cli": "^6.26.0",
     "electron-builder-http": "^19.27.5",
     "electron-publish": "^20.42.0",
-    "node-abi": "2.5.0"
+    "node-abi": "2.5.0",
+    "semaphore": "^1.1.0"
   }
 }

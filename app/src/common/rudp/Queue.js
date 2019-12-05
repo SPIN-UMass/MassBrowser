@@ -12,7 +12,7 @@ function Queue() {
   this.size = 0;
   this._head = null;
   this._tail = null;
-  this._lock = new Lock();
+  this._lock = require('semaphore')(1);
 }
 
 Queue.prototype.getIterator = function () {
@@ -20,36 +20,40 @@ Queue.prototype.getIterator = function () {
 }
 
 Queue.prototype.enqueue = async function (id, object) {
-  await this._lock.acquire();
-  if (!!this._ids[id]) {
-    return
-  }
-  let node = new Node(id, object);
-  this._ids[id] = node;
-  if (this._head === null) {
-    this._head = node
+  this._lock.take(() => {
+    if (!!this._ids[id]) {
+      return
+    }
+    let node = new Node(id, object);
+    this._ids[id] = node;
+    if (this._head === null) {
+      this._head = node
 
-    this._tail = node
+      this._tail = node
 
-  } else {
-    this._tail.next = node;
-    this._tail = node;
-  }
-  this.size = this.size + 1;
-  this._lock.release();
+    } else {
+      this._tail.next = node;
+      this._tail = node;
+    }
+    this.size = this.size + 1;
+    this._lock.leave();
+  })
 }
 
-Queue.prototype.dequeue = async function () {
-  await this._lock.acquire();
-  if (this._head === null) {
-    return null;
-  }
-  this.size = this.size - 1;
-  let node = new Node(this._head.id, this._head.value);
-  delete this._ids[node.id]
-  this._head = this._head.next;
-  this._lock.release();
-  return node;
+Queue.prototype.dequeue = function () {
+  var selected_node = null
+  this._lock.take(() => {
+    if (this._head === null) {
+      return null;
+    }
+    this.size = this.size - 1;
+    let node = new Node(this._head.id, this._head.value);
+    delete this._ids[node.id]
+    this._head = this._head.next;
+    selected_node = node
+    this._lock.leave();
+  })
+  return selected_node
 }
 
 Queue.prototype.clear = function () {

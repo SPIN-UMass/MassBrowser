@@ -62,7 +62,7 @@ class ClientAPI extends CommonAPI {
         'ip': remoteAddress,
         'port': remoteTCPPort,
         'udp_port': remoteUDPPort,
-        'alt_udp_port': remoteSecondUDPPort
+        'udp_alt_port': remoteSecondUDPPort
       }).then(r => r.data)
   }
 

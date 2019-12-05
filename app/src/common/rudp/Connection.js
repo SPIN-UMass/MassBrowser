@@ -10,8 +10,8 @@ module.exports = Connection;
 function Connection(packetSender) {
   this.currentTCPState = constants.TCPStates.LISTEN;
   this._sender = new Sender(this, packetSender);
-  this._sendLock = new Lock();
-  this._receiveLock = new Lock();
+  this._sendLock = require('semaphore')(1);
+  this._receiveLock = require('semaphore')(1);
   this._receiver = new Receiver(this, packetSender);
   this.initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
   this.nextSequenceNumber = 0;
@@ -105,99 +105,100 @@ Connection.prototype.incrementNextExpectedSequenceNumber = function () {
   this.nextExpectedSequenceNumber = (this.nextExpectedSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
 }
 
-Connection.prototype.send = function (data) {
-  this._sender.addDataToQueue(data)
+Connection.prototype.send = async function (data) {
+  await this._sender.addDataToQueue(data)
   switch(this.currentTCPState) {
     case constants.TCPStates.LISTEN:
-      this._sender.sendSyn();
+      await this._sender.sendSyn();
       this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
       this._changeCurrentTCPState(constants.TCPStates.SYN_SENT)
       break;
     case constants.TCPStates.ESTABLISHED:
-      this._sender.send();
+      await this._sender.send();
       break;
   }
 };
 
 Connection.prototype.receive = async function (packet) {
-  await this._receiveLock.acquire();
-  this._restartTimeoutTimer();
-  switch(this.currentTCPState) {
-    case constants.TCPStates.LISTEN:
-      if (packet.packetType === constants.PacketTypes.SYN) {
-        this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
-        this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
-        await this._sender.sendSynAck();
-        this._changeCurrentTCPState(constants.TCPStates.SYN_RCVD)
-      }
-      break;
-    case constants.TCPStates.SYN_SENT:
-      if (packet.packetType === constants.PacketTypes.SYN_ACK) {
-        this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
-        await this._sender.sendAck();
-        await this._sender.verifyAck(packet.acknowledgementNumber)
-      }
-      break;
-    case constants.TCPStates.SYN_RCVD:
-      switch(packet.packetType) {
-        case constants.PacketTypes.ACK:
+  this._receiveLock.take(async () => {
+    this._restartTimeoutTimer();
+    switch(this.currentTCPState) {
+      case constants.TCPStates.LISTEN:
+        if (packet.packetType === constants.PacketTypes.SYN) {
+          this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
+          this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
+          await this._sender.sendSynAck();
+          this._changeCurrentTCPState(constants.TCPStates.SYN_RCVD)
+        }
+        break;
+      case constants.TCPStates.SYN_SENT:
+        if (packet.packetType === constants.PacketTypes.SYN_ACK) {
+          this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
+          await this._sender.sendAck();
           await this._sender.verifyAck(packet.acknowledgementNumber)
-          break;
-        case constants.PacketTypes.DATA:
-          await this._sender.verifyAck(packet.acknowledgementNumber)
-          await this._receiver.receive(packet)
-          break;
-      }
-      break;
-    case constants.TCPStates.ESTABLISHED:
-      switch(packet.packetType) {
-        case constants.PacketTypes.ACK:
-          await this._sender.verifyAck(packet.acknowledgementNumber)
-          break;
-        case constants.PacketTypes.FIN:
+        }
+        break;
+      case constants.TCPStates.SYN_RCVD:
+        switch(packet.packetType) {
+          case constants.PacketTypes.ACK:
+            await this._sender.verifyAck(packet.acknowledgementNumber)
+            break;
+          case constants.PacketTypes.DATA:
+            await this._sender.verifyAck(packet.acknowledgementNumber)
+            await this._receiver.receive(packet)
+            break;
+        }
+        break;
+      case constants.TCPStates.ESTABLISHED:
+        switch(packet.packetType) {
+          case constants.PacketTypes.ACK:
+            await this._sender.verifyAck(packet.acknowledgementNumber)
+            break;
+          case constants.PacketTypes.FIN:
+            this.incrementNextExpectedSequenceNumber();
+            this._sender.clear();
+            this._receiver.clear();
+            this._sender.sendAck();
+            this._changeCurrentTCPState(constants.TCPStates.CLOSE_WAIT);
+            this._sender.sendFin();
+            this._changeCurrentTCPState(constants.TCPStates.LAST_ACK);
+            break;
+          case constants.PacketTypes.DATA:
+            await this._receiver.receive(packet);
+            break;
+        }
+        break;
+      case constants.TCPStates.LAST_ACK:
+        if (packet.packetType === constants.PacketTypes.ACK) {
+          await this._sender.verifyAck(packet.acknowledgementNumber);
+        }
+        break;
+      case constants.TCPStates.FIN_WAIT_1:
+        if (packet.packetType === constants.PacketTypes.ACK) {
+          await this._sender.verifyAck(packet.acknowledgementNumber);
+        }
+        break;
+      case constants.TCPStates.FIN_WAIT_2:
+        if (packet.packetType === constants.PacketTypes.FIN) {
           this.incrementNextExpectedSequenceNumber();
-          this._sender.clear();
-          this._receiver.clear();
           this._sender.sendAck();
-          this._changeCurrentTCPState(constants.TCPStates.CLOSE_WAIT);
-          this._sender.sendFin();
-          this._changeCurrentTCPState(constants.TCPStates.LAST_ACK);
-          break;
-        case constants.PacketTypes.DATA:
-          await this._receiver.receive(packet);
-          break;
-      }
-      break;
-    case constants.TCPStates.LAST_ACK:
-      if (packet.packetType === constants.PacketTypes.ACK) {
-        await this._sender.verifyAck(packet.acknowledgementNumber);
-      }
-      break;
-    case constants.TCPStates.FIN_WAIT_1:
-      if (packet.packetType === constants.PacketTypes.ACK) {
-        await this._sender.verifyAck(packet.acknowledgementNumber);
-      }
-      break;
-    case constants.TCPStates.FIN_WAIT_2:
-      if (packet.packetType === constants.PacketTypes.FIN) {
-        this.incrementNextExpectedSequenceNumber();
-        this._sender.sendAck();
-        this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
-        setTimeout(() => {
-          this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-          this._sender._stopTimeoutTimer();
-          this._stopTimeoutTimer();
-          this.emit('close');
-        }, constants.CLOSE_WAIT_TIME);
-      }
-      break;
-    case constants.TCPStates.TIME_WAIT:
-      if (packet.packetType === constants.PacketTypes.FIN) {
-        this._sender.sendAck()
-      }
-      break;
-  }
-  this._receiveLock.release();
+          this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
+          setTimeout(() => {
+            this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+            this._sender._stopTimeoutTimer();
+            this._stopTimeoutTimer();
+            this.emit('close');
+          }, constants.CLOSE_WAIT_TIME);
+        }
+        break;
+      case constants.TCPStates.TIME_WAIT:
+        if (packet.packetType === constants.PacketTypes.FIN) {
+          this._sender.sendAck()
+        }
+        break;
+    }
+    this._receiveLock.leave();
+  })
 };
 
 Connection.prototype._changeCurrentTCPState = function (newState) {
@@ -220,10 +221,11 @@ Connection.prototype.close = async function () {
 }
 
 Connection.prototype._write = async function (chunk, encoding, callback) {
-  await this._sendLock.acquire();
-  this.send(chunk)
-  callback()
-  this._sendLock.release();
+  this._sendLock.take(async () => {
+    await this.send(chunk);
+    callback();
+    this._sendLock.leave();
+  })
 }
 
 Connection.prototype._read = function (n) {

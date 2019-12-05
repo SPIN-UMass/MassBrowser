@@ -32,9 +32,8 @@ Sender.prototype.clear = function () {
   this._sendingQueue = Buffer.alloc(0);
 }
 
-Sender.prototype.send = function () {
-  this._sending = true;
-  this._sendDataLoop()
+Sender.prototype.send = async function () {
+  await this._sendDataLoop()
 }
 
 Sender.prototype.addDataToQueue = function (data) {
