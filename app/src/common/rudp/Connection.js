@@ -1,23 +1,26 @@
 const Sender = require('./Sender');
 const Receiver = require('./Receiver');
-const Lock = require('./Lock');
 const constants = require('./constants');
 const helpers = require('./helpers');
 const Duplex = require('stream').Duplex;
 const util = require('util');
+import {Semaphore} from 'await-semaphore'
+import { throwStatement } from 'babel-types';
 
 module.exports = Connection;
 function Connection(packetSender) {
   this.currentTCPState = constants.TCPStates.LISTEN;
   this._sender = new Sender(this, packetSender);
-  this._sendLock = require('semaphore')(1);
-  this._receiveLock = require('semaphore')(1);
+
   this._receiver = new Receiver(this, packetSender);
   this.initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
   this.nextSequenceNumber = 0;
   this.nextExpectedSequenceNumber = 0;
   this._connectionTimeoutTimer = null;
-
+  this._sequenceNumberLock = new Semaphore(1);
+  this._expectedSequenceNumberLock = new Semaphore(1);
+  this._receiverLock = new Semaphore(1);
+  this._sendLock = new Semaphore(1);
   Duplex.call(this);
 
   this._sender.on('syn_ack_acked', () => {
@@ -46,9 +49,6 @@ function Connection(packetSender) {
   this._receiver.on('send_ack', () => {
     this._sender.sendAck();
   })
-  this._receiver.on('data', (data) => {
-    this.emit('data', data)
-  });
   this._sender.once('done', () => {
     this.emit('done');
   })
@@ -89,51 +89,67 @@ Connection.prototype.getNextSequenceNumber = function () {
   return this.nextSequenceNumber;
 };
 
-Connection.prototype._setNextSequenceNumber = function (sequenceNumber) {
+Connection.prototype._setNextSequenceNumber = async  function (sequenceNumber) {
+  let release = await this._sequenceNumberLock.acquire()
+
   this.nextSequenceNumber = sequenceNumber;
+  release()
 }
 
-Connection.prototype._setNextExpectedSequenceNumber = function (sequenceNumber) {
+Connection.prototype._setNextExpectedSequenceNumber =  async function (sequenceNumber) {
+  let release = await this._expectedSequenceNumberLock.acquire()
+
   this.nextExpectedSequenceNumber = sequenceNumber;
+  release()
 }
 
-Connection.prototype.incrementNextSequenceNumber = function () {
+Connection.prototype.incrementNextSequenceNumber = async function () {
+  let release = await this._sequenceNumberLock.acquire()
   this.nextSequenceNumber = (this.nextSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
+  release()
 };
 
-Connection.prototype.incrementNextExpectedSequenceNumber = function () {
+Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
+  let release = await this._expectedSequenceNumberLock.acquire()
+
   this.nextExpectedSequenceNumber = (this.nextExpectedSequenceNumber + 1) % constants.MAX_SEQUENCE_NUMBER;
+  release()
 }
 
 Connection.prototype.send = async function (data) {
+
+  let release = await this._sendLock.acquire();
   await this._sender.addDataToQueue(data)
+  
   switch(this.currentTCPState) {
     case constants.TCPStates.LISTEN:
       await this._sender.sendSyn();
-      this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
+      await this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
       this._changeCurrentTCPState(constants.TCPStates.SYN_SENT)
       break;
     case constants.TCPStates.ESTABLISHED:
-      await this._sender.send();
+      this._sender.send();
       break;
   }
+  release()
+
 };
 
 Connection.prototype.receive = async function (packet) {
-  this._receiveLock.take(async () => {
+    let release = await this._receiverLock.acquire()
     this._restartTimeoutTimer();
     switch(this.currentTCPState) {
       case constants.TCPStates.LISTEN:
         if (packet.packetType === constants.PacketTypes.SYN) {
-          this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
-          this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
+          await this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
+          await this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
           await this._sender.sendSynAck();
           this._changeCurrentTCPState(constants.TCPStates.SYN_RCVD)
         }
         break;
       case constants.TCPStates.SYN_SENT:
         if (packet.packetType === constants.PacketTypes.SYN_ACK) {
-          this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
+          await this._setNextExpectedSequenceNumber(packet.sequenceNumber + 1);
           await this._sender.sendAck();
           await this._sender.verifyAck(packet.acknowledgementNumber)
         }
@@ -155,7 +171,7 @@ Connection.prototype.receive = async function (packet) {
             await this._sender.verifyAck(packet.acknowledgementNumber)
             break;
           case constants.PacketTypes.FIN:
-            this.incrementNextExpectedSequenceNumber();
+            await this.incrementNextExpectedSequenceNumber();
             this._sender.clear();
             this._receiver.clear();
             this._sender.sendAck();
@@ -180,7 +196,7 @@ Connection.prototype.receive = async function (packet) {
         break;
       case constants.TCPStates.FIN_WAIT_2:
         if (packet.packetType === constants.PacketTypes.FIN) {
-          this.incrementNextExpectedSequenceNumber();
+          await this.incrementNextExpectedSequenceNumber();
           this._sender.sendAck();
           this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
           setTimeout(() => {
@@ -197,8 +213,9 @@ Connection.prototype.receive = async function (packet) {
         }
         break;
     }
-    this._receiveLock.leave();
-  })
+
+    release();
+  
 };
 
 Connection.prototype._changeCurrentTCPState = function (newState) {
@@ -221,11 +238,9 @@ Connection.prototype.close = async function () {
 }
 
 Connection.prototype._write = async function (chunk, encoding, callback) {
-  this._sendLock.take(async () => {
-    await this.send(chunk);
-    callback();
-    this._sendLock.leave();
-  })
+    this.send(chunk).then(()=>{callback();});
+    
+
 }
 
 Connection.prototype._read = function (n) {

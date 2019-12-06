@@ -4,6 +4,7 @@ import { Crypto } from '@utils/crypto'
 import API from '@/api'
 import { Buffer } from 'buffer'
 const net = require('net')
+import {Semaphore} from 'await-semaphore'
 
 export class ConnectionReceiver {
   constructor (socketUp, socketDown, socket, authenticator) {
@@ -19,6 +20,7 @@ export class ConnectionReceiver {
       }
     })
 
+
     this.crypt = false
     this.isAuthenticated = false
     this.carrylen = 0
@@ -31,6 +33,8 @@ export class ConnectionReceiver {
     this.desciber = {}
     this.initcarry = ''
     this.connections = {}
+    
+   this.dumblock = new Semaphore(1) 
   }
 
   authenticate (data) {
@@ -53,7 +57,7 @@ export class ConnectionReceiver {
     }
   }
 
-  write (connectionID, command, data) {
+  async write (connectionID, command, data) {
     let sendPacket = Buffer(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)
@@ -62,7 +66,7 @@ export class ConnectionReceiver {
       debug(`Sending Down [${command}] , [${data}] , [${data.length}]`)
     }
     const b = Buffer.concat([sendPacket, data])
-    this.socketDown.write(this.crypt.encrypt(b))
+    await this.socketDown.write(this.crypt.encrypt(b))
   }
 
   newConnection (ip, port, connectionID) {

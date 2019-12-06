@@ -1,4 +1,5 @@
 var Lock = require('./Lock');
+import {Semaphore} from 'await-semaphore'
 
 function Node(id, value) {
   this.id = id;
@@ -12,16 +13,20 @@ function Queue() {
   this.size = 0;
   this._head = null;
   this._tail = null;
-  this._lock = require('semaphore')(1);
+  this._lock = new Semaphore(1);
 }
 
-Queue.prototype.getIterator = function () {
-  return Object.assign({}, this._head);
+Queue.prototype.getIterator =  async function () {
+  let release = await this._lock.acquire()
+  var res = Object.assign({}, this._head);
+  release()
+  return res
 }
 
 Queue.prototype.enqueue = async function (id, object) {
-  this._lock.take(() => {
+    let release = await this._lock.acquire()
     if (!!this._ids[id]) {
+      throw new Error("WTF")
       return
     }
     let node = new Node(id, object);
@@ -36,13 +41,13 @@ Queue.prototype.enqueue = async function (id, object) {
       this._tail = node;
     }
     this.size = this.size + 1;
-    this._lock.leave();
-  })
+    release()
 }
 
-Queue.prototype.dequeue = function () {
+Queue.prototype.dequeue =  async function () {
   var selected_node = null
-  this._lock.take(() => {
+  let release = await this._lock.acquire()
+
     if (this._head === null) {
       return null;
     }
@@ -51,15 +56,17 @@ Queue.prototype.dequeue = function () {
     delete this._ids[node.id]
     this._head = this._head.next;
     selected_node = node
-    this._lock.leave();
-  })
+  release()
   return selected_node
 }
 
-Queue.prototype.clear = function () {
+Queue.prototype.clear = async function () {
+  let release = await this._lock.acquire()
+
   this._head = null;
   this._tail = null;
   this.size = 0;
+  release()
 };
 
 Queue.prototype.currentNode = function () {
@@ -70,6 +77,7 @@ Queue.prototype.currentNode = function () {
 }
 
 Queue.prototype.currentValue = function () {
+
   if (this._head === null) {
     return null;
   }

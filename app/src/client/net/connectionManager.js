@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import * as errors from '@utils/errors'
 import { debug } from '@utils/log'
 import { connectionStats } from '@/services'
+import {Semaphore} from 'await-semaphore'
 
 class ConnectionManager {
   constructor () {
@@ -48,7 +49,7 @@ class ConnectionManager {
       }
     }
     if (CMD === 'D') {
-      // console.log(this.ClientConnections);
+      //console.log(this.ClientConnections);
       if (lastconid in this.clientConnections) {
         this.clientConnections[lastconid].write(data)
       }
@@ -119,9 +120,9 @@ class ConnectionManager {
     })
   }
 
-  writer (data, conid) {
+  async writer (data, conid) {
     // console.log('DATA SEND', data, conid);
-    this.connectionMaps[conid].write(conid, 'D', data)
+    await this.connectionMaps[conid].write(conid, 'D', data)
   }
 
   newClientConnection (connection, dstip, dstport, onConnect) {

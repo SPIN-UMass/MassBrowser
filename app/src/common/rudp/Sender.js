@@ -4,6 +4,7 @@ var Packet = require('./Packet');
 var Queue = require('./Queue');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+import {Semaphore} from 'await-semaphore'
 
 module.exports = Sender;
 function Sender(connection, packetSender) {
@@ -23,6 +24,12 @@ function Sender(connection, packetSender) {
   this._delayedAckTimer = null;
   this._sample = true;
   this._startSamplingTimer();
+  this._senderLock = new Semaphore(1);
+  this._restrasmitlock = new Semaphore(1);
+  this._amISending = false;
+  this._amIResending = false;
+  this._retransmitqueueLock = new Semaphore(1);
+
 }
 util.inherits(Sender, EventEmitter);
 
@@ -33,7 +40,7 @@ Sender.prototype.clear = function () {
 }
 
 Sender.prototype.send = async function () {
-  await this._sendDataLoop()
+  this._sendDataLoop()
 }
 
 Sender.prototype.addDataToQueue = function (data) {
@@ -94,18 +101,38 @@ Sender.prototype._timeout = function () {
   }, this._timeoutInterval)
 }
 
-Sender.prototype._retransmit = function () {
+Sender.prototype._retransmit = async function () {
+  let release = await this._restrasmitlock.acquire()
+
+  if (this._amIResending){
+    release()
+    return 
+  }  
+
+    this._amIResending = true
+    release()
+
   let packetsCount = Math.min(this._retransmissionQueue.size, Math.floor(this._maxWindowSize));
-  let iterator = this._retransmissionQueue.getIterator();
+
+  let iterator = await this._retransmissionQueue.getIterator();
   for (let i = 0; i < packetsCount; i++) {
     let packetObject = iterator.value;
-    this._packetSender.send(packetObject.packet);
+    
+    let pkt =  packetObject.packet
+
+    this._packetSender.send(pkt);
     packetObject.retransmitted = true;
     iterator = iterator.next
   }
+  release = await this._restrasmitlock.acquire()
+
+  this._amIResending = false
+  release()
+  
 };
 
 Sender.prototype._pushToRetransmissionQueue = async function (packet) {
+  let release  = await this._retransmitqueueLock.acquire()
   let packetObject = {
     packet: packet,
     retransmitted: false,
@@ -119,6 +146,7 @@ Sender.prototype._pushToRetransmissionQueue = async function (packet) {
   if (this._timeoutTimer === null) {
     this._startTimeoutTimer();
   }
+  release()
 };
 
 Sender.prototype.sendSyn = async function () {
@@ -152,7 +180,7 @@ Sender.prototype.sendAck = function (immediate = true) {
 };
 
 Sender.prototype._updateRTT = function (sampleRTT) {
-  sampleRTT = sampleRTT[0] * 1000 + sampleRTT[1] / 1000000;
+  sampleRTT = sampleRTT[0] * 5000 + sampleRTT[1] / 1000000;
   this._estimatedRTT = (1 - constants.Retransmission.ALPHA) * this._estimatedRTT + constants.Retransmission.ALPHA * sampleRTT
   this._devRTT = (1 - constants.Retransmission.BETA) * this._devRTT + constants.Retransmission.BETA * Math.abs(sampleRTT - this._estimatedRTT);
   this._timeoutInterval = Math.floor(this._estimatedRTT + 4 * this._devRTT);
@@ -168,14 +196,32 @@ Sender.prototype.sendFin = async function () {
 }
 
 Sender.prototype._sendDataLoop = async function () {
+  let release = await this._senderLock.acquire()
+
+  if (this._amISending){
+    release()
+    return 
+  } 
+
+    this._amISending = true
+    release()
+
+
   while (this._sendingQueue.length && this._retransmissionQueue.size < Math.floor(this._maxWindowSize)) {
     let payload = this._sendingQueue.slice(0, constants.UDP_SAFE_SEGMENT_SIZE)
     this._sendingQueue = this._sendingQueue.slice(constants.UDP_SAFE_SEGMENT_SIZE);
     let packet = new Packet(this._connection.nextSequenceNumber, this._connection.nextExpectedSequenceNumber, constants.PacketTypes.DATA, payload);
-    this._connection.incrementNextSequenceNumber();
+    await this._connection.incrementNextSequenceNumber();
     this._packetSender.send(packet);
     await this._pushToRetransmissionQueue(packet);
   }
+  release = await this._senderLock.acquire()
+
+  this._amISending = false
+  
+  release()
+
+
 };
 
 Sender.prototype._printCongestionControlInfo = function () {

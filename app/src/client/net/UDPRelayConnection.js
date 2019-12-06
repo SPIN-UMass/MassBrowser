@@ -46,6 +46,7 @@ export class UDPRelayConnection extends EventEmitter {
     this.cipher = cipher
 
     socket.on('data', (data) => {
+
       this.cipher.decrypt(data)
     })
 

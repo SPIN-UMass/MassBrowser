@@ -3,6 +3,7 @@ import { store } from '@utils/store'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
 import { EventEmitter } from 'events'
+import {Semaphore} from 'await-semaphore'
 
 export class UDPConnectionService extends EventEmitter {
   constructor () {
@@ -110,7 +111,7 @@ export class UDPConnectionService extends EventEmitter {
         }
         debug(`punching for ${address}:${port}`)
         connection.send(Buffer.alloc(0))
-        secondConnection.send(Buffer.alloc(0))
+        // secondConnection.send(Buffer.alloc(0))
       }
     })
   }
@@ -174,9 +175,11 @@ export class UDPConnectionService extends EventEmitter {
           exclusive: false
         })
 
-        this.mainServer.on('message', (message, remoteInfo) => {
+        this.mainServer.on('message', async (message, remoteInfo) => {
           if (message.length < 12) {
-            // dummy message
+            // dummy message 
+            console.log("I AM GETTING DUMMYYYY")
+            // throw  new Error ("MMM")
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
@@ -204,6 +207,7 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   async startSecondServer () {
+    
     return new Promise((resolve, reject) => {
       if (this.secondServer) {
         debug('UDP Connection Service is already running')
@@ -247,7 +251,7 @@ export class UDPConnectionService extends EventEmitter {
 
   async stop () {
     await this.stopMainServer()
-    await this.stopSecondServer()
+    //await this.stopSecondServer()
   }
 
   closeAllConnections () {
