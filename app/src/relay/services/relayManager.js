@@ -135,7 +135,7 @@ class RelayManager {
   }
 
   async onNewSessionEvent (data) {
-    console.log("NEW SESSION")
+    //console.log("NEW SESSION")
     let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
       'writeiv': (Buffer.from(data.read_iv, 'base64')),
