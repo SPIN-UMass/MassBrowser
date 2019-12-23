@@ -143,15 +143,15 @@
       },
       behindNAT: {
         get () {
-          return this.privateAddress.ip != this.publicAddress.ip
+          return this.privateAddress.ip !== this.publicAddress.ip
         }
       },
       portNumber: {
         get () {
-          return Number(this.$store.state.relayPort)
+          return Number(this.$store.state.TCPRelayPort)
         },
         set (portNumber) {
-          if (portNumber == this.$store.state.relayPort) {
+          if (portNumber == this.$store.state.TCPRelayPort) {
             return
           }
 
@@ -161,7 +161,7 @@
 
           let action = () => {
             info(`setting port to ${portNumber}`)
-            relayManager.setRelayPort(Number(portNumber), this.completeVersion)
+            relayManager.setTCPRelayPort(Number(portNumber), this.completeVersion)
           }
 
           if (portNumberTimeout != null) {
