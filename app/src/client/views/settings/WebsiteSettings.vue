@@ -4,7 +4,7 @@
       button.close(data-dismiss="alert" v-on:click="helpStage = 0")
         i.pci-cross.pci-circle
       strong Need Help?
-      p Choose which websites you want to use MassBrowser for. 
+      p Choose which websites you want to use MassBrowser for.
       p Enable proxying for a website if that website is censored for you.
 
     .toolbar
@@ -28,14 +28,14 @@
 
   const WebsiteToggle = {
     render: function(h) {
-      return h('toggle-button', { 
+      return h('toggle-button', {
         props: {
           width: 100,
           value: this.website.enabled,
           labels: this.label
         },
         on: {
-          change: this.onChange 
+          change: this.onChange
         }
       })
     },
@@ -67,7 +67,7 @@
     async created () {
       allWebsites = await Website.find({thirdParty: false})
       this.websites = allWebsites
-      
+
       let helpDone = await KVStore.get('websites-page-help-finished')
       if (!helpDone) {
         this.helpStage = 1
@@ -85,7 +85,7 @@
           this.websites = allWebsites
           return
         }
-        
+
         query = query.toLowerCase()
         this.websites = allWebsites.filter(w => w.name.toLowerCase().indexOf(query) !== -1)
       }
@@ -113,27 +113,27 @@
 
     .toolbar {
       height: $toolbar_height;
-      margin: 0px;
+      margin: 0;
 
-    
+
       .form-group {
-        margin: 0px;
+        margin: 0;
       }
 
       #search {
         height: $toolbar_height;
         width: 100%;
-        margin: 0px;
-        
+        margin: 0;
+
         outline: none;
         border: none !important;
         -webkit-box-shadow: none !important;
         -moz-box-shadow: none !important;
         box-shadow: none !important;
-      
+
       }
     }
-    
+
     .website-list {
       height: $list_height;
       overflow: auto;
@@ -152,5 +152,5 @@
       }
     }
   }
-  
+
 </style>

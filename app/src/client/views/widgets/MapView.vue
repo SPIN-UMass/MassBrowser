@@ -21,17 +21,17 @@
       }
     },
     computed: {
-      sessions() { 
-        return this.$store.state.sessions 
+      sessions() {
+        return this.$store.state.sessions
       }
     },
     created() {
-     
+
     },
     async mounted () {
       map = createMap(this.$refs.mapdiv)
       map.bubbles(this.pins)
-      
+
       await this.addSelfPin()
 
       let self = this
@@ -80,9 +80,9 @@
           if (this.pinMap[session.id] === undefined) {
             let loc = await getLocationForIP('178.62.241.153')//session.ip)
             let pin = new Pin(session.id, loc.longitude, loc.latitude)
-            
+
             // setTimeout(() => {
-              this.addPin(pin) 
+              this.addPin(pin)
             // }, 100)
             // console.log(this.pins)
             // setTimeout(() => {
@@ -91,7 +91,7 @@
               console.log(pin)
               this.addArc(new Arc(this.selfPin, pin))
             // }, 500)
-            
+
           }
         }
       }
@@ -114,7 +114,7 @@
             // .center([-70, 40])
             // .translate([element.offsetWidth / 2, element.offsetHeight / 2])
             // .scale(1000)
-          
+
         path = d3.geo.path()
             .projection( projection );
         return {path: path, projection: projection};
@@ -210,6 +210,6 @@
     height: 100%;
     margin: auto;
     position: relative;
-    top: 0px;
-  }  
+    top: 0;
+  }
 </style>

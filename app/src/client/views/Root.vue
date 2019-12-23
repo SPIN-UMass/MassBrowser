@@ -13,6 +13,9 @@
       if (!store.state.browserIntegrationComplete) {
         return '/browser-integration'
       } else {
+        if (!store.state.languageAndCountrySet) {
+          return '/client/settings'
+        }
         return '/client'
       }
     } else {

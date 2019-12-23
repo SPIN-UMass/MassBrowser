@@ -6,7 +6,7 @@
         .modal-content
           .modal-header
             button.close(v-on:click='onClose()') #[span x]
-            .modal-title {{ website }} Instructions
+            .modal-title {{ website }} {{$t("WEBSITES_INSTRUCTIONS")}}
           .modal-body
             component(:is='websiteComponent' :close="onClose")
 </template>

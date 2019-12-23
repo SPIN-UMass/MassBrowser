@@ -1,7 +1,7 @@
 import { initializeMainProcess } from '@common/main/electron/main'
 import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
-
+import * as path from 'path'
 import { statusManager } from '@common/services/statusManager'
 import { autoUpdater, autoLauncher, dockHider, feedbackService, privacyPolicyService } from '@common/services'
 import { syncService, registrationService, websiteSupportService, connectionStats, sessionService } from '@/services'
@@ -28,7 +28,6 @@ remote.registerService('session', sessionService)
 
 // let requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 // requireControllerFilter.keys().forEach(requireControllerFilter)
-
 
 let currentWindow = null
 

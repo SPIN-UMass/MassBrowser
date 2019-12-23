@@ -1,8 +1,9 @@
+<!-- This file is not being used -->
 <template lang="pug">
   #container.p-index
     .content
       h1 UOIS Proxy
-      h3 Best cencorship circumvention tool ever
+      h3 Best censorship circumvention tool ever
       a(href='#/roleselect').btn.btn-default.btn-hover-warning.btn-lg.get-started Get Started
 </template>
 
@@ -10,17 +11,17 @@
   export default {
     data () {
       return {
-  
+
       }
     },
     components: {
-  
+
     },
     created () {
-  
+
     },
     methods: {
-  
+
     }
   }
 </script>
