@@ -47,7 +47,6 @@ export async function initializeRendererProcess (routes) {
 
   const remoteStore = getService('store')
   await remoteStore.getState().then((remoteState) => {
-    console.log('got the states')
     lang = remoteState.language || lang
   })
 
