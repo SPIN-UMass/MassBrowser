@@ -74,7 +74,6 @@ class SessionService extends EventEmitter {
   }
 
   async findHostModels (host) {
-    console.log("THIS IS IP",host)
     if (net.isIP(host)) {
       
       let torCategory = (await Category.find({name: 'Tor'}))[0]
@@ -88,6 +87,7 @@ class SessionService extends EventEmitter {
       }
     } else {
       const domain = await Domain.findDomain(host)
+      console.log("DM",domain,host)
       const website = await domain.getWebsite()
       const category = await website.getCategory()
       return { domain, website, category }
