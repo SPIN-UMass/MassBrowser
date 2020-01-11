@@ -1,11 +1,12 @@
 import { addCertificateToFirefox, setClientVersion } from './firefox'
 import { debug, error } from '@utils/log'
 import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
-import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
+import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService,torManager } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks } from '@/net'
 import config from '@utils/config'
 import Raven from '@utils/raven'
+
 import API from '@/api'
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
@@ -13,11 +14,17 @@ import {
 } from '@utils/errors'
 import { store } from '@utils/store'
 import networkManager from './net/NetworkManager'
+import { swap } from 'change-case';
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
 
 export default async function bootClient () {
+
+  
+  console.log("MMM", config.torPath)
+  
+  
   statusManager.clearAll()
 
   let status
@@ -68,7 +75,7 @@ export default async function bootClient () {
     status.clear()
 
     status = statusManager.info('Starting SOCKS servers')
-    await startClientSocks('127.0.0.1', config.socksPort)
+    await startClientSocks('127.0.0.1', config.socksPort,config.socksSecondPort)
     status.clear()
 
     status = statusManager.info('Starting Network Manager')
@@ -93,6 +100,11 @@ export default async function bootClient () {
     status = statusManager.info('Checking browser availability')
     await setClientVersion()
     status.clear()
+
+    status = statusManager.info('Starting Tor')
+    await torManager.start()
+    status.clear()
+
 
     if (config.isFirefoxVersion) {
       status = statusManager.info('Installing the Cert')

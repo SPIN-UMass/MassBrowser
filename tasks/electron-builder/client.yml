@@ -22,7 +22,21 @@ dmg:
       type: file
 mac: 
   icon: "app/assets/icons/client/icon.icns"
+  extraFiles: [
+  {
+    "from":  "app/assets/tor/tor-MB-osx-x86_64/Contents",
+    "to": "./",
+    "filter": ["**/*"]
+  }]
+
 win:
   icon: "app/assets/icons/client/icon.ico"
+  extraFiles: [
+  {
+    "from":  "app/assets/tor/tor-MB-windows-x86_64/",
+    "to": ".",
+    "filter": ["**/*"]
+  }]
 linux:
   icon: "app/assets/icons/client"
+  extraFiles: "app/assets/tor/tor-MB-linux-x86_64"

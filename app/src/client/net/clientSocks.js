@@ -223,7 +223,7 @@ function regularProxy (socket, address, port, proxyReady) {
 
 function torProxy (socket, address, port, proxyReady) {
   console.log("HERERe",socksClient)
-  var proxy = socksClient.createConnection({socksHost:'localhost',socksPort: 9055, port: port, host: address})
+  var proxy = socksClient.createConnection({socksHost:'localhost',socksPort: config.torPort, port: port, host: address})
   
   
 
