@@ -67,7 +67,7 @@ export default async function bootClient () {
     await cacheProxy.startCacheProxy()
     status.clear()
 
-    status = statusManager.info('Starting SOCKS server')
+    status = statusManager.info('Starting SOCKS servers')
     await startClientSocks('127.0.0.1', config.socksPort)
     status.clear()
 

@@ -22,6 +22,9 @@
       "cachebrowser": {
         "mitmPort": 6425
       },
+      "tor":{
+        "port":9055
+      },
       "web": {
         "port": 6423,
         "domain": "start.yaler.co"
@@ -132,7 +135,8 @@
     "vue-spinner": "^1.0.2",
     "vuex": "^2.4.0",
     "winston": "^2.3.1",
-    "ws": "^3.0.0"
+    "ws": "^3.0.0",
+    "socks5-client":"^1.2.8"
   },
   "author": "Massbrowser Team <massbrowser@cs.umass.edu>"
 }
