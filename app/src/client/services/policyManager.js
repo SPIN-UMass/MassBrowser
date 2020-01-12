@@ -20,14 +20,19 @@ class PolicyManager extends EventEmitter {
 
   getDomainPolicy (host, port) {
     return new Promise((resolve, reject) => {
+      
       const net = require('net')
       if (net.isIP(host)) {
         return reject(new errors.InvalidHostError('IP based filtering not supported'))
       }
       // return resolve(this.POLICY_YALER_PROXY)
       Domain.findDomain(host)
+
         .then(domain => {
+          
+          
           if (!domain) {
+            
             return resolve(this.POLICY_VANILLA_PROXY)
           }
 

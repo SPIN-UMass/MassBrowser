@@ -87,7 +87,10 @@ class SessionService extends EventEmitter {
       }
     } else {
       const domain = await Domain.findDomain(host)
-      console.log("DM",domain,host)
+      if (!domain){
+        let cat = {"name": "DIRECT"}
+        return {host,host, cat}
+      }
       const website = await domain.getWebsite()
       const category = await website.getCategory()
       return { domain, website, category }
