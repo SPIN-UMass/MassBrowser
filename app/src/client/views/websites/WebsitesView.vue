@@ -3,17 +3,17 @@
         .alert.alert-primary.help(v-if="helpStage > 0" v-on:click="helpStage = 0")
             button.close(data-dismiss="alert" v-on:click="helpStage = 0")
                 i.pci-cross.pci-circle
-            strong Need Help?
-            p Choose which websites you want to use MassBrowser for.
-            p Enable proxying for a website if that website is censored for you.
+            strong {{$t("WEBSITES_HELP")}}
+            p {{$t("WEBSITES_CHOOSE_MSG")}}
+            p {{$t("WEBSITES_ENABLE_PROXY_FOR_WEBSITE")}}
         .tab-base
             .nav.nav-tabs
-                .nav-item(v-for="category in categories" v-bind:class="{ active: selectedCategory.id === category.id }" v-on:click="selectedCategory=category") {{category.name}}
+                .nav-item(v-for="category in categories" v-bind:class="{ active: selectedCategory.id === category.id }" v-on:click="selectedCategory=category") {{$t(category.name)}}
             .tab-container
                 .tab-content(v-if="selectedCategory.name !== 'Tor'")
                     .toolbar.form-inline
                         .form-group
-                            input#search.form-control(type="text", autocomplete="off", placeholder="Search Website...", v-model='searchQuery')
+                            input#search.form-control(type="text", autocomplete="off", v-bind:placeholder="$t('WEBSITES_SEARCH_WEBSITES')", v-model='searchQuery')
                         .website-list
                             table.table
                                 tbody
@@ -21,13 +21,13 @@
                                         td.name {{item.name}}
                                         td.toggle(v-if='!specialWebsites[item.name]') #[website-toggle.toggle(:website="item")]
                                         td.special-website-link-container(v-if='specialWebsites[item.name]')
-                                            .special-website-link(v-on:click='selectedWebsiteInstructions = item.name') Click here for instructions
+                                            .special-website-link(v-on:click='selectedWebsiteInstructions = item.name') {{$t("WEBSITES_CLICK_FOR_INSTRUCTIONS")}}
                         .request-website-hint-container(v-if="websites.length <= 2")
-                            p Can't find the website you're looking for?
-                            a(v-on:click="websiteRequest.showModal=true") Request support for a website
+                            p {{$t("WEBSITES_CANT_FIND_MSG")}}
+                            a(v-on:click="websiteRequest.showModal=true") {{$t("WEBSITES_REQUEST_NEW_WEBSITE")}}
                 tor-view.special-category(v-if="selectedCategory.name === 'Tor'")
                 .website-footer(v-if="selectedCategory.name !== 'Tor'")
-                    a(v-on:click="websiteRequest.showModal=true") Request support for a website
+                    a(v-on:click="websiteRequest.showModal=true") {{$t("WEBSITES_REQUEST_NEW_WEBSITE")}}
         .modal-container(v-if='websiteRequest.showModal')
             .modal-backdrop.fade(:class="{in: websiteRequest.showModal}")
             .modal.fade(style='display: block' role='dialog' :class="{in: websiteRequest.showModal}")
@@ -35,13 +35,13 @@
                     .modal-content
                         .modal-header
                             button.close(v-on:click='websiteRequest.showModal=false') #[span x]
-                            .modal-title Request Website Support
+                            .modal-title {{$t("WEBSITES_REQUEST_NEW_WEBSITE")}}
                         .modal-body(class="{'has-error': websiteRequest.hasError}")
                             p Enter website address below
                             input.form-control(type="text" placeholder="e.g. https://facebook.com" v-model="websiteRequest.value")
                         .modal-footer
-                            button.btn.btn-danger(v-on:click='websiteRequest.showModal=false') Cancel
-                            button.btn.btn-primary(v-on:click='submitWebsiteRequest') Submit Request
+                            button.btn.btn-danger(v-on:click='websiteRequest.showModal=false') {{$t("WEBSITES_CANCEL_REQUEST")}}
+                            button.btn.btn-primary(v-on:click='submitWebsiteRequest') {{$t("WEBSITES_SUBMIT_REQUEST")}}
         website-instructions-modal(
         v-if="selectedWebsiteInstructions != null"
         :website='selectedWebsiteInstructions'
@@ -97,7 +97,7 @@
 
       let categories = await Category.find({parent: null})
       categories = categories.filter(c => c.name !== 'Third Parties')
-      this.categories = [{name: 'All categories', id: null}].concat(categories)
+      this.categories = [{name: this.$t('WEBSITES_ALL_CATS'), id: null}].concat(categories)
 
       let helpDone = await KVStore.get('websites-page-help-finished')
       if (!helpDone) {
@@ -211,13 +211,13 @@
 
 
             .form-group {
-                margin: 0px;
+                margin: 0;
             }
 
             #search {
                 height: $toolbar_height;
                 width: 100%;
-                margin: 0px;
+                margin: 0;
 
                 outline: none;
                 border: none !important;
@@ -257,7 +257,7 @@
         .special-category {
             height: $content-height;
             background-color: white;
-            padding: 20px 0px;
+            padding: 20px 0;
         }
 
         td.special-website-link-container {

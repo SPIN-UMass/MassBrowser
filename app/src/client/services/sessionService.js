@@ -75,6 +75,7 @@ class SessionService extends EventEmitter {
 
   async findHostModels (host) {
     if (net.isIP(host)) {
+      
       let torCategory = (await Category.find({name: 'Tor'}))[0]
       let telegramCategory = (await Category.find({name: 'Messaging'}))[0]
       if (torService.isTorIP(host)) {
@@ -86,6 +87,10 @@ class SessionService extends EventEmitter {
       }
     } else {
       const domain = await Domain.findDomain(host)
+      if (!domain){
+        let cat = {"name": "DIRECT"}
+        return {host,host, cat}
+      }
       const website = await domain.getWebsite()
       const category = await website.getCategory()
       return { domain, website, category }

@@ -2,12 +2,12 @@
   .y-browser-integration
     .dragger
     .text-center
-      h1.title Browser Configuration
-      p.message Please visit the link below in Firefox to configure you're browser      
+      h1.title {{$t("BROWSER_CONFIGURATION_TITLE")}}
+      p.message {{$t("BROWSER_CONFIGURATION_LINK_MSG")}}
     .text-center.link-container
       code.link(v-on:click="openLink") http://{{webDomain}}:{{webPanelPort}}
     .text-center.alert.alert-danger.error-container(v-if="error") {{error}}
-      
+
 </template>
 
 <script>
@@ -19,7 +19,6 @@
   // import child_process from 'child_process'
   import opn from 'opn'
   const context = getService('context')
-
 
   export default {
     store,
@@ -37,14 +36,14 @@
       })
     },
     methods: {
-      finish() {
+      finish () {
         this.$router.push('/client')
       },
-      async openLink() {
+      async openLink () {
         try {
           await opn(`http://${this.webDomain}:${this.webPanelPort}`, {app: 'firefox'})
-        } catch(e) {
-          this.error = "Currently only the Firefox browser is supported. Please install Firefox to continue"
+        } catch (e) {
+          this.error = this.$t('ERROR_NOT_FIREFOX')
         }
         // child_process.execSync(`open -a Firefox http://${this.webDomain}`)
         // shell.openExternal(`http://${this.webDomain}`)
@@ -69,7 +68,7 @@
     }
 
     .title {
-      margin-top: 0px;
+      margin-top: 0;
       padding-top: 50px;
     }
 
@@ -79,13 +78,13 @@
 
     .link-container {
       margin-top: 40px;
-      code.link {    
+      code.link {
         padding: 20px;
         font-size: 20px;
         color: rgb(150, 100, 100);
         cursor: pointer;
         .link-text {
-          
+
         }
       }
     }
@@ -94,10 +93,10 @@
       margin-top: 40px;
       color:white;
       font-size: 16px;
-      padding: 0px 60px;
+      padding: 0 60px;
       border: none;
     }
-    
+
   }
-  
+
 </style>

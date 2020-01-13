@@ -1,21 +1,23 @@
 <template>
     <div id="m-home">
         <div class="m-title">
-            <strong>MassClient</strong> is currently running.
+            <i18n path="HOME_RUNNING_MSG">
+                <strong>MassClient</strong>
+            </i18n>
         </div>
         <div id="m-client-help-box">
-            <p>
-                You can close this window and it will continue running in the background.
-                If you like MassBrowser please take a moment and give us a <router-link class="action-link" to="/client/feedback">feedback</router-link>. Also you can select the websites that you want to browse in the
-                <router-link to="/client/websites">websites</router-link> tab.
-            </p>
+            <i18n path="HOME_WELCOME_MSG">
+                <router-link slot="feedback" class="action-link" to="/client/feedback">{{$t('MENU_FEEDBACK')}}</router-link>
+                <router-link slot="websites" to="/client/websites">{{$t('MENU_WEBSITES')}}</router-link>
+            </i18n>
         </div>
         <div class="m-client-open-browser" v-on:click="openFirefox">
             <div v-if="this.$store.state.isFirefoxIncluded">
-                Open MassBrowser
+                {{$t('HOME_OPEN_BROWSER')}}
             </div>
             <div v-else >
-                Open <icon name="firefox"></icon> Firefox
+                <icon name="firefox"></icon>
+                {{$t('HOME_OPEN_FIREFOX')}}
             </div>
         </div>
 

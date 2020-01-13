@@ -24,7 +24,7 @@
     mounted () {
       map = createMap(this.$refs.mapdiv)
       // map.bubbles(this.pins)
-      
+
       // this.startPollingSessions()
       // this.addSelfPin()
     },
@@ -88,7 +88,7 @@
             .center([3, 40])
             .translate([element.offsetWidth / 2, element.offsetHeight / 2])
             .scale(80)
-          
+
         path = d3.geo.path()
             .projection( projection );
         return {path: path, projection: projection};
@@ -183,6 +183,6 @@
     height: 100%;
     margin: auto;
     position: relative;
-    top: 0px;
-  }  
+    top: 0;
+  }
 </style>

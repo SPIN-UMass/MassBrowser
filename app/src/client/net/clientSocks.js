@@ -1,5 +1,6 @@
 const net = require('net')
 const socks = require('./socks.js')
+var socksClient = require('socks5-client')
 
 import { connectionManager } from './connectionManager'
 import { cacheManager } from '@/cachebrowser'
@@ -9,9 +10,10 @@ import * as errors from '@utils/errors'
 import config from '@utils/config'
 import { torService, telegramService } from '@common/services'
 
-export function startClientSocks (mhost, mport) {
+export function startClientSocks (mhost, mport,msport) {
   var HOST = mhost
   var PORT = mport
+  var SECOND_PORT = msport
 
   if (typeof mhost === 'undefined') {
     HOST = '127.0.0.1'
@@ -21,7 +23,11 @@ export function startClientSocks (mhost, mport) {
     PORT = '7080'
   }
 
-  function onConnection (socket, port, address, proxyReady) {
+  if (typeof msport === 'undefined') {
+    SECOND_PORT = '7081'
+  }
+
+  function onConnection (socket, port, address, proxyReady,defaultProxy = regularProxy) {
     connectionStats.localSocketConnected(socket, address, port)
 
     // Handle torService and telegramService via yalerProxy
@@ -71,9 +77,9 @@ export function startClientSocks (mhost, mport) {
       } else if (proxyType === policyManager.POLICY_CACHEBROWSE) {
         return cachebrowse(socket, address, port, proxyReady)
       } else if (proxyType === policyManager.POLICY_VANILLA_PROXY) {
-        return regularProxy(socket, address, port, proxyReady)
+        return defaultProxy(socket, address, port, proxyReady)
       } else {
-        return regularProxy(socket, address, port, proxyReady)
+        return defaultProxy(socket, address, port, proxyReady)
       }
     })
     .catch(err => {
@@ -91,11 +97,23 @@ export function startClientSocks (mhost, mport) {
     })
   }
 
+
+  function onSecondConnection (socket, port, address, proxyReady) {
+    return onConnection(socket,port,address,proxyReady,torProxy)
+  }
+
   return new Promise((resolve, reject) => {
     var userPass// process.argv[3] && process.argv[4] && {username: process.argv[3], password: process.argv[4]}
     var server = socks.createServer(onConnection, userPass, server => {
       resolve(server)
     })
+    
+    var second_server = socks.createServer(onSecondConnection, userPass, second_server => {
+      resolve(second_server)
+    })
+    
+
+    
 
     server.on('error', function (e) {
       console.error('SERVER ERROR: %j', e)
@@ -109,7 +127,23 @@ export function startClientSocks (mhost, mport) {
       }
     })
 
+
+
+    second_server.on('error', function (e) {
+      console.error('SERVER ERROR: %j', e)
+      if (e.code === 'EADDRINUSE') {
+        console.log('Address in use, retrying in 10 seconds...')
+        setTimeout(function () {
+          console.log('Reconnecting to %s:%s', HOST, SECOND_PORT)
+          second_server.close()
+          second_server.listen(SECOND_PORT, HOST)
+        }, 10000)
+      }
+    })
+
     server.listen(PORT, HOST)
+    second_server.listen(SECOND_PORT, HOST)
+    
   })
 }
 
@@ -185,6 +219,70 @@ function regularProxy (socket, address, port, proxyReady) {
     }
   })
 }
+
+
+function torProxy (socket, address, port, proxyReady) {
+  
+  var proxy = socksClient.createConnection({socksHost:'localhost',socksPort: config.torPort, port: port, host: address})
+  
+  
+
+
+  connectionStats.remoteSocketConnected(socket, proxy)
+
+  proxy.on('connect', () => {
+    console.log("connected")
+    proxyReady()
+  })
+
+  proxy.on('data', (d) => {
+    try {
+      if (!socket.write(d)) {
+        proxy.pause()
+
+        socket.on('drain', function () {
+          proxy.resume()
+        })
+        setTimeout(function () {
+          proxy.resume()
+        }, 100)
+      }
+    } catch (err) {
+    }
+  })
+
+  socket.on('data', function (d) {
+    try {
+      if (!proxy.write(d)) {
+        socket.pause()
+        proxy.on('drain', function () { socket.resume() })
+        setTimeout(function () { socket.resume() }, 100)
+      }
+    } catch (err) {
+      // TODO handle err
+    }
+  })
+
+  proxy.on('error', function (err) {
+    error(`ignore: ${err}`)
+  })
+
+  socket.on('error', (err) => {
+    error(`ignore: ${err}`)
+  })
+
+  proxy.on('close', function (hadError) {
+    try {
+      if (hadError) {
+        error(`socks connection close unexpectedly ${address} ${port}`)
+      }
+      socket.close()
+    } catch (err) {
+    }
+  })
+}
+
+
 
 function sendToWebPanel (socket, address, port, proxyReady) {
   if (port === 443) {

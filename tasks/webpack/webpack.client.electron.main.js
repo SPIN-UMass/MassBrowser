@@ -5,10 +5,7 @@ process.env.BABEL_ENV = 'electron-main'
 const path = require('path')
 const pkg = require('../../app/package.json')
 const webpack = require('webpack')
-
 const common = require('./common')
-
-
 
 let config = {
   devtool: '#source-map',
@@ -32,6 +29,5 @@ let config = {
   resolve: common.resolve('client'),
   target: 'electron-main'
 }
-
 
 module.exports = config

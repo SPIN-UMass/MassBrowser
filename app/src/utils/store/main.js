@@ -14,7 +14,7 @@ class Store {
     let parsedConfig = parseStoreConfig(storeConfig, config)
     this.state = parsedConfig.state
     this.stateConfig = parsedConfig.stateConfig
-    
+
     this.proxyState = new Proxy(this.state, {
       set: (target, property, value) => {
         target[property] = value
@@ -45,6 +45,14 @@ class Store {
         let resolve = this.pendingRequests[requestID]
         delete this.pendingRequests[requestID]
         resolve()
+      })
+
+      remote.on('store.commit', (sender, details) => {
+        let mutation = this.mutations[details.name]
+        if (mutation === undefined) {
+          throw new NoSuchMutationError(details.name)
+        }
+        mutation(this.proxyState, details.arg)
       })
     }
   }
@@ -79,7 +87,7 @@ class Store {
       if (!this.stateConfig[key].persist) {
         continue
       }
-  
+
       let val = await KVStore.get(key, null)
       if (val !== null) {
         this.state[key] = val

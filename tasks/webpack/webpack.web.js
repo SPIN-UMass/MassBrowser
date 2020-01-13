@@ -5,6 +5,7 @@ process.env.BABEL_ENV = 'web'
 const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const common = require('./common')
@@ -89,7 +90,14 @@ let webConfig = {
         ? path.resolve(rootPath, 'node_modules')
         : false,
     }),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    new CopyPlugin([
+      {
+        from: path.join(common.rootDir, 'app/src/utils/locales/'),
+        to: path.join(common.rootDir, `app/dist/web/locales`),
+        toType: 'dir'
+      }
+    ])
   ],
   output: {
     filename: '[name].js',

@@ -7,17 +7,17 @@
   export default {
     data() {
       return {
-    
+
       }
     },
     mounted () {
-    
+
     },
     beforeDestroy() {
-      
+
     },
     methods: {
-      
+
     }
   }
 
@@ -35,6 +35,6 @@
     height: 100%;
     margin: auto;
     /* position: relative;
-    top: 0px; */
-  }  
+    top: 0; */
+  }
 </style>

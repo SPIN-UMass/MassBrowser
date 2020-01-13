@@ -7,11 +7,11 @@
             <p>{{ alert.message }}</p>
         </div>
         <div class="feedback-msg">
-            <span>Help us improve our system by giving us feedback</span>
+            <span>{{$t('FEEDBACK_MSG')}}</span>
         </div>
         <div class="feedback-exp">
             <div class="feedback-exp-msg">
-                How was your experience
+                {{$t('FEEDBACK_QUESTION')}}
             </div>
             <div class="feedback-emojis">
                 <img src="../../../assets/images/angry.png" v-on:click="selectRate(-1)" :class="{active: rate === -1}"/>
@@ -26,16 +26,16 @@
                     rows="4"
                     v-model="content"
                     :class="{ invalid: !contentValid }"
-                    :placeholder="rate === -1 ? 'Can you tell us more what went wrong?': rate === 0 ? 'Pocker face! seriously?' : rate === 1 ? 'We are happy that you like it, anything to improve?': 'Tell us more'"
+                    :placeholder="rate === -1 ? $t('FEEDBACK_TELL_US_MORE') : rate === 0 ? $t('FEEDBACK_POKER') : rate === 1 ? $t('FEEDBACK_HAPPY'): $t('FEEDBACK_TELL_US_MORE')"
             >
             </textarea>
         </div>
         <div class="feedback-log">
             <input id="includeLogs" type="checkbox" v-model="includeLogs" />
-            <label for="includeLogs">Send logs with feedback</label>
+            <label for="includeLogs">{{$t('FEEDBACK_SEND_LOGS')}}</label>
         </div>
         <div class="feedback-submit-button" v-on:click="submit()">
-            Submit
+            {{$t('SUBMIT')}}
         </div>
     </div>
 
@@ -44,7 +44,7 @@
 <script>
   import SettingsGroup from '@common/widgets/SettingsGroup'
   import { getService } from '@utils/remote'
-  import { sleep } from "@utils"
+  import { sleep } from '@utils'
   import { setTimeout } from 'timers'
 
   const feedbackService = getService('feedback')
@@ -78,11 +78,11 @@
         this.contentValid = true
         const success = await feedbackService.sendFeedback(this.content, this.rate, this.includeLogs)
         if (success) {
-          this.showAlert('success', 'Feedback Sent', 'Thank you for providing the feedback')
+          this.showAlert('success', this.$t('FEEDBACK_ALERT_SUCCESS_TITLE'), this.$t('FEEDBACK_ALERT_SUCCESS_MSG'))
           this.content = ''
           this.rate = null
         } else {
-          this.showAlert('danger', 'Unsuccessful', "Unfortunately we were not able to submit the feedback, please try again later")
+          this.showAlert('danger', this.$t('FEEDBACK_ALERT_FAILURE_TITLE'), this.$t('FEEDBACK_ALERT_FAILURE_MSG'))
         }
       },
       async showAlert (type, title, message) {

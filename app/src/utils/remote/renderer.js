@@ -58,7 +58,7 @@ function createServiceProxy(serviceName) {
     on: function() {
       eventEmitter.on.apply(eventEmitter, arguments)
     },
-    addListerer: function() {
+    addListener: function() {
       eventEmitter.addListener.apply(eventEmitter, arguments)
     },
     removeListener: function() {

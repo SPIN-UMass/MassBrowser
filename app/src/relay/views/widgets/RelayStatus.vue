@@ -6,15 +6,15 @@
           icon.status-led.on(name="check-circle"  scale="1.2" v-if="connected")
           icon.status-led.off(name="times-circle" scale="1.2" v-if="!connected")
         .col-xs-8.col-text
-          span.status-label(v-if='connected') Connection with server working
-          span.status-label(v-if='!connected') Cannot establish connection with server
+          span.status-label(v-if='connected') {{$t('RELAY_WORKING')}}
+          span.status-label(v-if='!connected') {{$t('RELAY_NOT_WORKING')}}
       .row.row-stat
         .col-xs-1.col-led
           icon.status-led.on(name="check-circle"  scale="1.2" v-if="reachable")
           icon.status-led.off(name="times-circle" scale="1.2" v-if="!reachable")
         .col-xs-8.col-text
-          span.status-label(v-if='reachable') MassBuddy reachable by clients
-          span.status-label(v-if='!reachable') MassBuddy is not reachable by clients
+          span.status-label(v-if='reachable') {{$t('RELAY_REACHABLE')}}
+          span.status-label(v-if='!reachable') {{$t('RELAY_NOT_REACHABLE')}}
 </template>
 
 <script>
@@ -37,10 +37,10 @@
   #m-relay-status {
     background: #fcfcfc;
 
-    padding: 5px 0px;
+    padding: 5px 0;
 
     .status-container {
-      padding: 0px 20px;
+      padding: 0 20px;
       .row-stat {
         margin-top: 15px;
 

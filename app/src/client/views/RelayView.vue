@@ -27,7 +27,7 @@
     components: {
     },
     created () {
-      
+
     },
     methods: {
     }
@@ -42,25 +42,25 @@
 
   .table-container {
     background: $color_back;
-  
+
     table {
       width: 100%;
-      margin-bottom: 0px;  
+      margin-bottom: 0;
     }
-    
+
     thead {
       font-family: $font-menu;
     }
 
     thead>tr {
-      background-color: $color_main; 
+      background-color: $color_main;
       color: #777;
     }
 
     tbody>tr:nth-child(2n+1) {
-      background-color: rgba(0, 0, 0, 0.02);  
+      background-color: rgba(0, 0, 0, 0.02);
     }
-    
+
     td,th {
       text-align: center;
     }
@@ -69,13 +69,13 @@
     tbody {
       height: $tbody_height;
       overflow-y: auto;
-      box-shadow: 0px -2px 0 0 rgba(0, 0, 0, 0.1);
+      box-shadow: 0 -2px 0 0 rgba(0, 0, 0, 0.1);
     }
-    
+
     thead, tbody, tr, td, th {
       display: block;
     }
-    
+
     tr:after {
       content: ' ';
       display: block;

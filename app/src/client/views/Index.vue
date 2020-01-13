@@ -5,13 +5,13 @@
             #m-nav
                 ul
                     li(:class="{active: currentTab==='home'}")
-                        router-link(to='/client') home
+                        router-link(to='/client') {{$t("MENU_HOME")}}
                     li(:class="{active: currentTab==='websites'}")
-                        router-link(to='/client/websites') websites
+                        router-link(to='/client/websites') {{$t("MENU_WEBSITES")}}
                     li(:class="{active: currentTab==='feedback'}")
-                        router-link(to='/client/feedback') feedback
+                        router-link(to='/client/feedback') {{$t("MENU_FEEDBACK")}}
                     li(:class="{active: currentTab.startsWith('settings')}")
-                        router-link(to='/client/settings') settings
+                        router-link(to='/client/settings') {{$t("MENU_SETTINGS")}}
                     li(:class="{active: currentTab.startsWith('stats')}")
                         router-link(to='/client/stats') stats
                         //- .span(v-on:click="$router.push('client-websites')") websites
@@ -139,7 +139,7 @@
 
         border-radius: 0 0 $application_border_radius $application_border_radius;
         background: $color-main;
-        box-shadow: 0px -1px 0 0 rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.1);
 
         .status-bar {
             float: left;

@@ -90,9 +90,13 @@
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
+    "copy-webpack-plugin": "^4.0.0",
     "electron-builder-http": "^19.27.5",
     "electron-publish": "^20.42.0",
     "node-abi": "2.5.0",
-    "semaphore": "^1.1.0"
+    "semaphore": "^1.1.0",
+    "socks5-client": "^1.2.8",
+    "vue-i18n": "^8.14.1",
+    "vue-select": "^3.2.0"
   }
 }

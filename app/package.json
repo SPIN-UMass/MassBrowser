@@ -22,6 +22,9 @@
       "cachebrowser": {
         "mitmPort": 6425
       },
+      "tor":{
+        "port":9055
+      },
       "web": {
         "port": 6423,
         "domain": "start.yaler.co"
@@ -65,8 +68,8 @@
       "enabled": false
     },
     "dev": {
-      "serverURL": "https://dev2.yaler.co",
-      "websocketURL": "wss://dev2.yaler.co:443",
+      "serverURL": "https://dev.yaler.co",
+      "websocketURL": "wss://dev.yaler.co:443",
       "sentry": {
         "dsn": "https://70f65517a1af4506b31f8e4e8ce9ddc7@sentry.yaler.co/3"
       },
@@ -123,14 +126,17 @@
     "vue": "^2.3.4",
     "vue-awesome": "^2.3.4",
     "vue-electron": "^1.0.6",
+    "vue-i18n": "^8.14.0",
     "vue-js-toggle-button": "^1.1.0",
     "vue-resource": "^1.0.3",
     "vue-router": "^2.1.2",
+    "vue-select": "^3.2.0",
     "vue-slider-component": "^2.4.1",
     "vue-spinner": "^1.0.2",
     "vuex": "^2.4.0",
     "winston": "^2.3.1",
-    "ws": "^3.0.0"
+    "ws": "^3.0.0",
+    "socks5-client":"^1.2.8"
   },
   "author": "Massbrowser Team <massbrowser@cs.umass.edu>"
 }

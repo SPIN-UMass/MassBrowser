@@ -1,8 +1,11 @@
 import packageJSON from 'package.json'
+import path from 'path'
 
 const defaultConfig = {
   client: {
     socksPort: 7080,
+    socksSecondPort: 7081,
+    torPort: 9055,
     cachebrowser: {
       mitmPort: 6425
     },
@@ -42,12 +45,22 @@ function initializeConfig(options) {
   let mode = (options || {}).mode
   let isDebug = (options || {}).debug
   let isFirefox = (options || {}).firefox
+  
 
+  const config = {}
+
+  let opsys = process.platform
+  if (opsys == "darwin") {
+      opsys = "osx"
+  } else if (opsys == "win32" || opsys == "win64") {
+      opsys = "windows"
+  } else if (opsys == "linux") {
+      opsys = "linux"
+  }
   if (role !== 'client' && role !== 'relay') {
     throw new Error("Invalid configuration role")
   }
-
-  const config = {}
+  config.OS = opsys;
 
   function updateConfig (baseConfig, newConfig) {
       Object.keys(newConfig).forEach(key => {
@@ -95,6 +108,16 @@ function initializeConfig(options) {
     console.log("Running in development mode")
     config.isDevelopment = true
     config.isProduction = false
+    if (config.OS == "osx"){
+      config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-osx-x86_64/Contents/MacOS/Tor/tor')
+    }
+
+    if (config.OS == "windows"){
+      config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-windows-x86_64/Tor/tor.exe')
+    }
+    if (config.OS == "linux"){
+      config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-linux-x86_64/Tor/tor')
+    }
   } else {
     config.environment == 'production'
     config.isDevelopment = false

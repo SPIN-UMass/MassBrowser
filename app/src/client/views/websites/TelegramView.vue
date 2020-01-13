@@ -1,21 +1,21 @@
 <template lang='pug'>
   .telegram-container
     .step-1(v-if='step === 1')
-      p Open the Telegram application and click on the Menu icon.
+      p {{$t("WEBSITES_TELEGRAM_STEP_1")}}
       img(:src="imgStep1" width="270")
     .step-2(v-if='step === 2')
-      p Click on Settings.
+      p {{$t("WEBSITES_TELEGRAM_STEP_2")}}
       img(:src="imgStep2" width="270")
     .step-3(v-if='step === 3')
-      p Click on Connection Type.
+      p {{$t("WEBSITES_TELEGRAM_STEP_3")}}
       img(:src="imgStep3" width="270")
     .step-4(v-if='step === 4')
-      p Enter the following settings.
+      p {{$t("WEBSITES_TELEGRAM_STEP_4")}}
       img(:src="imgStep4" width="210")
     .telegram-footer
-      button.btn.btn-warn(v-if="step > 1" v-on:click="step -= 1") Back
-      button.btn.btn-primary(v-if="step < 4" v-on:click="step += 1") Next
-      button.btn.btn-success(v-if="step === 4" v-on:click="close") Done
+      button.btn.btn-warn(v-if="step > 1" v-on:click="step -= 1") {{$t("BACK")}}
+      button.btn.btn-primary(v-if="step < 4" v-on:click="step += 1") {{$t("NEXT")}}
+      button.btn.btn-success(v-if="step === 4" v-on:click="close") {{$t("DONE")}}
 </template>
 
 <script>
@@ -48,7 +48,7 @@
     img {
       margin-top: 0;
     }
-    
+
     .telegram-footer {
       text-align: right;
       button {
