@@ -33,15 +33,26 @@ class WebPanelService {
       res.end('active')
     })
 
-    app.use('/cert', function (req, res, next) {
+    app.use('/plugin', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
-      res.setHeader('Content-Type', 'application/x-x509-ca-cert')
-      fs.readFile(path.join(getDataDir(), 'certs/ca.pem'))
+      res.setHeader('Content-Type', 'application/x-xpinstall')
+      fs.readFile(path.join(getDataDir(), 'massbrowser_manager-0.1.0-fx.xpi'))
       .then(f => {
         console.log(f)
         res.end(f)
         next()
       })
+    })
+
+    app.use('/cert', function (req, res, next) {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Content-Type', 'application/x-x509-ca-cert')
+      fs.readFile(path.join(getDataDir(), 'certs/ca.pem'))
+        .then(f => {
+          console.log(f)
+          res.end(f)
+          next()
+        })
     })
 
     app.use('/settings-complete', function (req, res, next) {
