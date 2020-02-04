@@ -47,14 +47,14 @@ class _ZMQListener {
             }
           }, () => {
             if (this.validSessions.has(session)) {
-              console.log('session failed happend')
+              console.log('session failed happened')
               this.validSessions.delete(session)
               _session.connection.end()
               this.onDisconnect(session)
             }
           })
         }).catch((err) => {
-          console.log('session error happend', err)
+          console.log('session error happened', err)
           if (this.validSessions.has(session)) {
             this.validSessions.delete(session)
             this.onDisconnect(session)

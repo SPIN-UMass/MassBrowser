@@ -6,7 +6,7 @@ import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks } from '@/net'
 import config from '@utils/config'
 import Raven from '@utils/raven'
-
+import { eventHandler } from '@/events'
 import API from '@/api'
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
@@ -15,20 +15,14 @@ import {
 import { store } from '@utils/store'
 import networkManager from './net/NetworkManager'
 import { swap } from 'change-case';
+import {WebSocketTransport} from '../utils/transport'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
 
 export default async function bootClient () {
-
-  
-  console.log("MMM", config.torPath)
-  
-  
   statusManager.clearAll()
-
   let status
-
   try {
     await store.ready
 
@@ -43,19 +37,29 @@ export default async function bootClient () {
     let auth = await API.authenticate(client.id, client.password)
     API.transport.setAuthToken(auth.token)
     status.clear()
+    //
+    // status = statusManager.info('Connecting to WebSocket server')
+    // let transport = new WebSocketTransport(
+    //   `${config.websocketURL}/api/?session_key=${auth.session_key}`,
+    //   '/api'
+    // )
+    // transport.setEventHandler(eventHandler)
+    // await transport.connect()
+    // API.setTransport(transport)
+    // status.clear()
 
     status = statusManager.info('Server connection established')
     await API.clientUp()
     status.clear()
 
-    if (await torService.requiresDownload()) {
-      status = statusManager.info('Downloading Tor list')
-      await torService.downloadTorList()
-      status.clear()
-    }
-    status = statusManager.info('Loading Tor list')
-    await torService.loadTorList()
-    status.clear()
+    // if (await torService.requiresDownload()) {
+    //   status = statusManager.info('Downloading Tor list')
+    //   await torService.downloadTorList()
+    //   status.clear()
+    // }
+    // status = statusManager.info('Loading Tor list')
+    // await torService.loadTorList()
+    // status.clear()
 
     if (await telegramService.requiresDownload()) {
       status = statusManager.info('Downloading Telegram list')
@@ -104,7 +108,6 @@ export default async function bootClient () {
     status = statusManager.info('Starting Tor')
     await torManager.start()
     status.clear()
-
 
     if (config.isFirefoxVersion) {
       status = statusManager.info('Installing the Cert')

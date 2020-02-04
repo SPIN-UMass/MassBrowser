@@ -7,8 +7,6 @@ import { torService, telegramService } from '@common/services'
 import { ConnectionTypes } from '@common/constants'
 import { Domain, Category } from '@/models'
 import API from '@/api'
-import networkManager from '../net/NetworkManager'
-import udpConnectionService from '@common/services/UDPConnectionService'
 let TEST_URL = 'backend.yaler.co'
 import {throttleCall} from '@utils'
 
@@ -75,7 +73,6 @@ class SessionService extends EventEmitter {
 
   async findHostModels (host) {
     if (net.isIP(host)) {
-      
       let torCategory = (await Category.find({name: 'Tor'}))[0]
       let telegramCategory = (await Category.find({name: 'Messaging'}))[0]
       if (torService.isTorIP(host)) {
@@ -87,8 +84,8 @@ class SessionService extends EventEmitter {
       }
     } else {
       const domain = await Domain.findDomain(host)
-      if (!domain){
-        let cat = {"name": "DIRECT"}
+      if (!domain) {
+        let cat = {'name': 'DIRECT'}
         return {host,host, cat}
       }
       const website = await domain.getWebsite()
@@ -141,6 +138,7 @@ class SessionService extends EventEmitter {
 
       debug(`Requesting for new session`)
       let sessionInfo = await API.requestSession(catIDs)
+
 
       if (!sessionInfo) {
         catIDs.forEach(category => {

@@ -172,10 +172,7 @@ class RelayManager {
     })
 
     downPipe.on('data', data => {
-
       connection.write(data)
-      
-
     })
 
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
