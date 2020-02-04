@@ -139,7 +139,6 @@ class SessionService extends EventEmitter {
       debug(`Requesting for new session`)
       let sessionInfo = await API.requestSession(catIDs)
 
-
       if (!sessionInfo) {
         catIDs.forEach(category => {
           if (this.categoryWaitLists[category]) {

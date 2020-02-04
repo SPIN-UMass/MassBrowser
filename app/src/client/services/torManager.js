@@ -11,7 +11,7 @@ class TorManager  {
     this.isRunning = false
     this.process = {}
     this.torConfigPath = path.join(getDataDir(),"tor")
-    
+
     this.generateConfig()
 
   }
@@ -38,7 +38,7 @@ class TorManager  {
       this.restart()
     })
     this.process.on("exit",(code,signal )=>{
-      debug(`TOR stopped with code ${code} signal ${signal}`)
+      // debug(`TOR stopped with code ${code} signal ${signal}`)
       this.restart()
     })
 
@@ -51,13 +51,13 @@ class TorManager  {
     }
     this.process.kill(9)
     this.isRunning = false
-    
+
   }
   async restart (){
     await this.stop()
     await this.start()
   }
-  
+
 
 }
 
