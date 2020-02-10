@@ -122,7 +122,7 @@ function initSocksConnection (on_accept) {
       return
     }
 
-    errorLog('my error %j', e)
+    // errorLog('my error %j', e)
   })
 
   // do a handshake

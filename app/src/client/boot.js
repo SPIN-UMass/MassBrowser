@@ -52,14 +52,14 @@ export default async function bootClient () {
     await API.clientUp()
     status.clear()
 
-    // if (await torService.requiresDownload()) {
-    //   status = statusManager.info('Downloading Tor list')
-    //   await torService.downloadTorList()
-    //   status.clear()
-    // }
-    // status = statusManager.info('Loading Tor list')
-    // await torService.loadTorList()
-    // status.clear()
+    if (await torService.requiresDownload()) {
+      status = statusManager.info('Downloading Tor list')
+      await torService.downloadTorList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Tor list')
+    await torService.loadTorList()
+    status.clear()
 
     if (await telegramService.requiresDownload()) {
       status = statusManager.info('Downloading Telegram list')
