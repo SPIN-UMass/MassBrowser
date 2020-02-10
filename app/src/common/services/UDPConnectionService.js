@@ -7,6 +7,7 @@ import {Semaphore} from 'await-semaphore'
 
 export class UDPConnectionService extends EventEmitter {
   constructor () {
+    
     super()
     this.mainServer = null
     this.secondServer = null
@@ -313,5 +314,5 @@ export class UDPConnectionService extends EventEmitter {
   }
 }
 
-const udpConnectionService = new UDPConnectionService()
-export default udpConnectionService
+//const udpConnectionService = new UDPConnectionService()
+//export default udpConnectionService

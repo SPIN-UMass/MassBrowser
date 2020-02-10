@@ -73,6 +73,7 @@ function initializeConfig(options) {
   }
 
   function configureWith(pConfig) {
+    
     let devConfig = pConfig.dev || {}
     let prodConfig = pConfig.prod || {}
     pConfig.dev = undefined
