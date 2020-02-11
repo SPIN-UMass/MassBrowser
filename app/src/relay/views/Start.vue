@@ -22,7 +22,6 @@
             <div class="s-sync" v-if="page === 'sync'">
                 <div class="well">
                     {{$t('START_RELAY_SYNC')}}
-                    <p>
                 </div>
                 <button class="btn btn-info" v-on:click="startSync" v-if="sync.state==''">{{$t('START_RELAY_DOWNLOAD_BTN')}}</button>
                 <div class="progress" v-if="sync.state=='downloading'">
