@@ -30,7 +30,7 @@
               .text-primary.text-bold(v-if="plugin.success===null") Checking plugin working ...
               .text-success.text-bold(v-if="plugin.success===true") Plugin is working
               .text-danger.text-bold(v-if="plugin.success===false && plugin.errorMessage") {{plugin.errorMessage}}
-              button.plugin-btn.btn.btn-primary(v-if="plugin.success !== null" v-on:click="checkProxySettings") Verify Installations
+              button.plugin-btn.btn.btn-primary(v-if="plugin.success !== null" v-on:click="checkPlugin") Verify Installations
               button.cert-btn.btn.btn-success(v-on:click="addPlugin") Add plugin
 
 
@@ -101,7 +101,7 @@
     require('../assets/images/plugin-step-3.png')
   ]
 
-  var certImage =  require('../assets/images/cert.png')
+  var certImage = require('../assets/images/cert.png')
 
   var steps = ['plugin', 'cert', 'dnsCache', 'finish']
 
@@ -127,19 +127,17 @@
         socksPort: SOCKS_PORT
       }
     },
-    created() {
-      this.checkProxySettings(false)
+    created () {
+      this.checkPlugin()
       .then(() => {
         if (this.plugin.success) {
           this.nextStep()
-
           this.checkCert()
           .then(() => {
             if (this.cert.success && this.tab === 'cert') {
               this.nextStep()
             }
           })
-
           this.checkDNSCache()
           .then(() => {
             if (this.dnsCache.success && this.tab === 'dnsCache') {
@@ -150,10 +148,10 @@
       })
     },
     methods: {
-      onFinishTab() {
+      onFinishTab () {
 
       },
-      onTabChange() {
+      onTabChange () {
         if (this.tab === 'finish') {
           return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
         } else if (this.tab === 'cert') {
@@ -162,7 +160,21 @@
           this.checkDNSCache()
         }
       },
-      checkProxySettings(showError=true) {
+      checkPlugin () {
+        return axios.get(`http://${ONBOARDING_DOMAIN}/check-plugin`)
+          .then(response => {
+            if (response.data === 'active') {
+              this.plugin.success = true
+              this.pollCertValidation = true
+            }
+          })
+          .catch(e => {
+            console.error(e)
+            this.plugin.success = false
+            this.plugin.errorMessage = 'Plugin settings not valid. Make sure to install the plugin.'
+          })
+      },
+      checkProxySettings (showError=true) {
         return axios.get(`http://${ONBOARDING_DOMAIN}/check-proxy`)
         .then(response => {
           if (response.data === 'active') {
@@ -187,8 +199,8 @@
       addPlugin () {
         window.open(`http://${ONBOARDING_ADDRESS}/plugin`, '_self')
       },
-      installCert() {
-        console.log("Requesting certificate dialog")
+      installCert () {
+        console.log('Requesting certificate dialog')
         window.open(`http://${ONBOARDING_ADDRESS}/cert`,'_self')
         if (!this.cert.checkIntervalStarted) {
           this.pollCertValidation = true
@@ -196,8 +208,8 @@
           setTimeout(this.checkCert, 2000)
         }
       },
-      checkCert() {
-        console.log("Checking Certificate")
+      checkCert () {
+        console.log('Checking Certificate')
         if (!this.plugin.success) {
           return new Promise((resolve, reject) => {
             this.cert.success = false
@@ -221,8 +233,8 @@
         })
 
       },
-      checkDNSCache() {
-        console.log("Checking DNS")
+      checkDNSCache () {
+        console.log('Checking DNS')
         if (!this.plugin.success) {
           return new Promise((resolve, reject) => {
             this.dnsCache.success = false
@@ -237,7 +249,7 @@
          * will respond to the /ping request with a 'pong'. So if a pong reply is received
          * it means the DNS cache is not disabled.
          */
-        function testDNSCache() {
+        function testDNSCache () {
           return new Promise((resolve, reject) => {
             axios.get(`https://www.thecocktaildb.com/ping`, { validateStatus: () => true })
             .then(response => {

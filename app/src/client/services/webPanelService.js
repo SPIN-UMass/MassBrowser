@@ -15,16 +15,16 @@ import {websiteSupportService} from './websiteSupportService'
 class WebPanelService {
   constructor () {
     this.app = connect()
-    
+
     this.server = null
     this.initializeApp(this.app)
-    
-    
-    
+
+
+
   }
 
   start() {
-    
+
     let port = config.web.port
     this.server = http.createServer(this.app)
     this.server.listen(port, () => debug(`Web panel server started on port ${port}`))
@@ -49,8 +49,22 @@ class WebPanelService {
       })
     })
 
+    app.use('/check-plugin', function (req, res, next) {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Content-Type', 'text/plain')
+      if (store.state.pluginInstallationComplete) {
+        res.end('active')
+      }
+    })
+
+    app.use('/plugin-complete', function (req, res, next) {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.end('ok')
+      store.commit('completePluginInstallation')
+    })
+
     app.use('/report', function (req, res, next) {
-      
+
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'text/plain')
       websiteSupportService.requestWebsiteSupport(req.body.domain)
