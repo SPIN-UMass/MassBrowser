@@ -13,6 +13,7 @@ export default {
     client: new PersistedState({}),
     registrationComplete: new RendererCachedPersistedState(false),
     browserIntegrationComplete: new RendererCachedPersistedState(false),
+    pluginInstallationComplete: new RendererCachedPersistedState(false),
     isFirefoxIncluded: new RendererCachedPersistedState(false),
     autoLaunchEnabled: new RendererCachedPersistedState(true),
     dockIconVisible: new RendererCachedPersistedState(false),
@@ -40,6 +41,9 @@ export default {
     },
     completeBrowserIntegration(state) {
       state.browserIntegrationComplete = true
+    },
+    completePluginInstallation(state) {
+      state.pluginInstallationComplete = true
     },
     updateSession(state, session) {
       if (session.id in state.sessionMap) {

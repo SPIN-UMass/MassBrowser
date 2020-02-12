@@ -18,7 +18,6 @@
 <script>
   import { store } from '@utils/store'
   import { getService } from '@utils/remote'
-  import { policyManager} from '@/services'
   import { prettyBytes } from '@utils'
 
   const sessionService = getService('session')

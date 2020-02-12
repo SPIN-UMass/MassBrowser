@@ -1,6 +1,6 @@
 {
   "name": "MassBrowser",
-  "version": "0.1.0",
+  "version": "0.11.0",
   "description": "MassBrowser",
   "config": {
     "client": {
@@ -13,7 +13,8 @@
       "socksPort": 7080,
       "tor": {
         "listURL": "https://media.yaler.co/torlist",
-        "listUpdateInterval": 432000000
+        "listUpdateInterval": 432000000,
+        "port":9055
       },
       "telegram": {
         "listURL": "https://media.yaler.co/telegramlist",
@@ -21,9 +22,6 @@
       },
       "cachebrowser": {
         "mitmPort": 6425
-      },
-      "tor":{
-        "port":9055
       },
       "web": {
         "port": 6423,
