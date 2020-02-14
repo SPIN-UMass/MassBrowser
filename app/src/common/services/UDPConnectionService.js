@@ -7,7 +7,7 @@ import {Semaphore} from 'await-semaphore'
 
 export class UDPConnectionService extends EventEmitter {
   constructor () {
-    
+
     super()
     this.mainServer = null
     this.secondServer = null
@@ -178,7 +178,7 @@ export class UDPConnectionService extends EventEmitter {
 
         this.mainServer.on('message', async (message, remoteInfo) => {
           if (message.length < 12) {
-            // dummy message 
+            // dummy message
             console.log("I AM GETTING DUMMYYYY")
             // throw  new Error ("MMM")
             return
@@ -208,7 +208,7 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   async startSecondServer () {
-    
+
     return new Promise((resolve, reject) => {
       if (this.secondServer) {
         debug('UDP Connection Service is already running')
@@ -314,5 +314,5 @@ export class UDPConnectionService extends EventEmitter {
   }
 }
 
-//const udpConnectionService = new UDPConnectionService()
-//export default udpConnectionService
+const udpConnectionService = new UDPConnectionService()
+export default udpConnectionService

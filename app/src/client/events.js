@@ -4,6 +4,7 @@ import { sessionService } from './services/sessionService'
 // import { connectToClientTCP } from '@/net/relays/TCPRelay'
 
 const handlers = {
+  'new-relay-session': data => { console.log('######', data) }
   // 'new-relay-session': data => handleNewRelaySessions(data),
   // 'new-client-session': data => sessionService.handleRetrievedSessions(data)
   // 'new-session': data => relayManager.onNewSessionEvent(data),
