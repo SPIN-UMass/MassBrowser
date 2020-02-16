@@ -23,7 +23,7 @@ export class CommonAPI {
       {
         'username': username,
         'password': password
-      }  
+      }
     )
     .then(response => response.data)
     .then(body => {
@@ -31,7 +31,7 @@ export class CommonAPI {
       return body
     })
   }
-  
+
   getLastModificationTime (entity) {
     return this.transport.get('/meta/last_modification_date')
       .then(response => response.data)

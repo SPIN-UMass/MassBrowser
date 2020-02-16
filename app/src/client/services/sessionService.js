@@ -256,6 +256,57 @@ class SessionService extends EventEmitter {
     }
   }
 
+  async handleNewRelaySessions (session) {
+    debug(`Got new relay session [${session.id}]`)
+    let desc = {
+      'readkey': Buffer.from(session.read_key, 'base64'),
+      'readiv': Buffer.from(session.read_iv, 'base64'),
+      'writekey': Buffer.from(session.write_key, 'base64'),
+      'writeiv': Buffer.from(session.write_iv, 'base64'),
+      'token': Buffer.from(session.token, 'base64')
+    }
+    if (session.id in this.sessions) {
+      console.log('already using this session')
+      return
+    }
+
+    for (let i = 0; i < this.sessions.length; i++) {
+      if (this.sessions[i].ip === session.relay.ip) {
+        console.log('we already have a session with this client')
+        return
+      }
+    }
+
+    this.processedSessions[session.id] = desc
+    // if (session.relay.ip === null) {
+    //   session.relay.ip = '0.0.0.0'
+    // }
+    // if this is the reach test the ip is null check here for error
+    let sessionObject = new Session(session.id, session.relay.ip, session.relay.port, session.relay.udp_port,
+      desc, session.relay['allowed_categories'], session.connection_type, session.relay.domain_name)
+
+    sessionObject.on('send', () => this.emitSessionUpdate(sessionObject))
+    sessionObject.on('receive', () => this.emitSessionUpdate(sessionObject))
+    sessionObject.on('state-changed', () => this.emitSessionUpdate(sessionObject))
+
+    try {
+      this.sessions.push(sessionObject)
+      storeUpdateSession(session, 'active')
+      this.emitSessionUpdate(sessionObject)
+      API.updateSessionStatus(session.id, 'client_accepted')
+      debug(`Session [${session.id}] accepted`)
+      await sessionObject.listen()
+    } catch (e) {
+      debug(`Session [${session.id}] connection to relay failed`)
+      API.updateSessionStatus(session.id, 'failed')
+      throw e
+    }
+  }
+
+  handleNewClientSessions (session) {
+
+  }
+
   _filterValidSessions (sessionInfos) {
     var [staleCount, duplicateCount] = [0, 0]
     var validSessionInfos = sessionInfos.filter(session => {
