@@ -1,6 +1,6 @@
 import { Session } from '@/net/Session'
 import { connectionManager } from '@/net/connectionManager'
-
+import udpConnectionService from '@common/services/UDPConnectionService'
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5560'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
 const zeromq = require('zeromq')
@@ -13,13 +13,14 @@ class _ZMQListener {
     this.validSessions = new Set()
   }
 
-  connect () {
+  async connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
     this.requests.on('message', (msg) => {
       this.onRequest(msg)
     })
     this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
+    await udpConnectionService.start()
   }
 
   testConnection (session) {
