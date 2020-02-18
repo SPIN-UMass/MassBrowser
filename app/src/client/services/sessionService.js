@@ -364,6 +364,10 @@ class SessionService extends EventEmitter {
     this.sessionHeartInterval = setInterval(() => this.sessionHeartBeat(), 30 * 1000)
   }
 
+  timeout (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
   async testSession (session) {
     debug(`testing session ${session.id}`)
     connectionManager.testConnect(TEST_URL, 80, session.connection, () => {
