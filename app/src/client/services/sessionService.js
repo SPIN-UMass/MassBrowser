@@ -291,9 +291,9 @@ class SessionService extends EventEmitter {
     sessionObject.on('state-changed', () => this.emitSessionUpdate(sessionObject))
 
     try {
-      this.sessions.push(sessionObject)
-      storeUpdateSession(session, 'active')
-      this.emitSessionUpdate(sessionObject)
+      // this.sessions.push(sessionObject)
+      // storeUpdateSession(session, 'active')
+      // this.emitSessionUpdate(sessionObject)
       API.updateSessionStatus(session.id, 'client_accepted')
       debug(`Session [${session.id}] accepted`)
 
