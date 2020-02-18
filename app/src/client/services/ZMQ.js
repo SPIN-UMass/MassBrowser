@@ -13,18 +13,18 @@ class _ZMQListener {
     this.validSessions = new Set()
   }
 
-  async connect () {
+  connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
     this.requests.on('message', (msg) => {
       this.onRequest(msg)
     })
     this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
-    await udpConnectionService.start()
   }
 
-  testConnection (session) {
+  async testConnection (session) {
     console.log('Session received')
+    await udpConnectionService.start(false, session.main_port, session.alt_port)
     return new Promise((resolve, reject) => {
       // setTimeout(()=>{reject('timeout')},10000)
       try {

@@ -156,7 +156,11 @@ export class UDPConnectionService extends EventEmitter {
     return connection
   }
 
-  async start (relayMode) {
+  async start (relayMode, mainPort, altPort) {
+    if (mainPort && altPort) {
+      this.port = mainPort
+      this.secondPort = altPort
+    }
     this.relayMode = relayMode || false
     await this.startMainServer()
     if (!relayMode) {
