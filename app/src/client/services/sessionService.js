@@ -5,6 +5,7 @@ import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
 import { ConnectionTypes } from '@common/constants'
+import udpConnectionService from '@common/services/UDPConnectionService'
 import { Domain, Category } from '@/models'
 import API from '@/api'
 let TEST_URL = 'backend.yaler.co'
@@ -295,6 +296,12 @@ class SessionService extends EventEmitter {
       this.emitSessionUpdate(sessionObject)
       API.updateSessionStatus(session.id, 'client_accepted')
       debug(`Session [${session.id}] accepted`)
+
+      if (session.main_port && session.alt_port) {
+        await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', session.main_port)
+        await this.timeout(3000)
+        await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', session.alt_port)        
+      }
       await sessionObject.listen()
     } catch (e) {
       debug(`Session [${session.id}] connection to relay failed`)
