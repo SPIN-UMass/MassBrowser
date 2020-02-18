@@ -36,7 +36,12 @@ class _ZMQListener {
           'token': Buffer.from(session.token, 'base64')
         }
         this.validSessions.add(session)
-        var _session = new Session(session.id, session.relay.ip, session.relay.port, session.relay.udp_port, desc, session.relay['allowed_categories'], session.connection_type)
+        var _session
+        if (session.test_type === 'client') {
+          _session = new Session(session.id, session.client.ip, session.client.port, session.client.udp_port, desc, session.relay['allowed_categories'], session.connection_type)
+        } else if (session.test_type === 'relay') {
+          _session = new Session(session.id, session.relay.ip, session.relay.port, session.relay.udp_port, desc, session.relay['allowed_categories'], session.connection_type)
+        }
         _session.connect().then(() => {
           console.log('Session Connected')
           connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
