@@ -60,7 +60,7 @@ export class UDPRelayConnection extends EventEmitter {
   _initRelay (socket) {
     let desc = this.desc
     let i = Math.random() * (100 - 1) + 1
-    let padarr = [Buffer(desc['token'])]
+    let padarr = [Buffer.from(desc['token'])]
     while (i > 0) {
       padarr.push(this.cipher.encryptzero())
       i -= 1
@@ -74,7 +74,8 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   write (connectionID, command, data) {
-    let sendPacket = Buffer(7)
+    console.log('write:', connectionID, command, data)
+    let sendPacket = Buffer.alloc(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)
     sendPacket.writeUInt32BE(data.length, 3)
