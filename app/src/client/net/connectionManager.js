@@ -169,6 +169,7 @@ class ConnectionManager {
 
   testConnect (dstip, dstport, relay, onConnect, onDisconnect) {
     var conid = crypto.randomBytes(2).readUInt16BE()
+    console.log("relay: %j", relay);
     debug(`new remote connection (${conid}, ${dstip}, ${dstport})`)
     this.clientConnections[conid] = {}
     this.clientConnections[conid].relayConnected = () => { onConnect() }

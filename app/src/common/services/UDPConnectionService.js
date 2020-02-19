@@ -146,7 +146,7 @@ export class UDPConnectionService extends EventEmitter {
           this.deleteConnectionListItem(addressKey)
         })
         this._connections[addressKey] = connection
-        if (this.relayMode && !toEchoServer) {
+        if (!toEchoServer) {
           this.emit('relay-new-connection', connection, addressKey)
         }
       } else {
@@ -183,8 +183,7 @@ export class UDPConnectionService extends EventEmitter {
         this.mainServer.on('message', async (message, remoteInfo) => {
           if (message.length < 12) {
             // dummy message
-            console.log("I AM GETTING DUMMYYYY")
-            // throw  new Error ("MMM")
+            console.log('DUMMY')
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)

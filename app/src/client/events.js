@@ -1,11 +1,11 @@
 import { debug, warn } from '~/utils/log'
-import { sessionService } from './services/sessionService'
+import { relayManager } from './services'
 
 // import { connectToClientTCP } from '@/net/relays/TCPRelay'
 
 const handlers = {
-  'new-relay-session': data => sessionService.handleNewRelaySessions(data),
-  'new-client-session': data => sessionService.handleNewClientSessions(data)
+  'new-relay-session': data => relayManager.handleNewRelaySessions(data)
+  // 'new-client-session': data => sessionService.handleNewClientSessions(data)
   // 'new-session': data => relayManager.onNewSessionEvent(data),
   // 'reconnected': reconnected,
   // 'client-session': connectClientSession

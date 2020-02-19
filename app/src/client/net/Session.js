@@ -66,6 +66,8 @@ export class Session extends EventEmitter {
     this.connected = true
     return relay.connect()
       .then(() => {
+        console.log('connected !!!')
+        console.log("relay: %j", relay);
         this.connection = relay
         this.changeState(Session.CONNECTED)
       })
