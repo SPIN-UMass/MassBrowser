@@ -23,7 +23,7 @@ export class ConnectionReceiver {
     this.crypt = false
     this.isAuthenticated = false
     this.carrylen = 0
-    this.carry = Buffer(0)
+    this.carry = Buffer.alloc(0)
     this.lastcommand = ''
     this.newconcarry = ''
     this.lastConnectionID = ''

@@ -174,7 +174,7 @@ class ConnectionManager {
     this.clientConnections[conid].relayConnected = () => { onConnect() }
     this.clientConnections[conid].end = () => { onDisconnect() }
     return new Promise((resolve, reject) => {
-      debug(`Relay ${relay} assigned for connection`)
+      debug(`Relay ${relay.id} assigned for connection`)
       this.connectionMaps[conid] = relay
       var cr = String(dstip) + ':' + String(dstport)
       // console.log('sendsize:', cr.length, cr)
