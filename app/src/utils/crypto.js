@@ -7,12 +7,12 @@ export class Crypto {
     this.decipher = crypto.createDecipheriv(alg, writekey, writeiv)
     this.onData = onData
     this.onError = onError
-    this.datacarry = Buffer(0)
+    this.datacarry = Buffer.alloc(0)
     this.decipher.on('readable', () => {
       let data = this.decipher.read()
       if (this.datacarry) {
         data = Buffer.concat([this.datacarry, data])
-        this.datacarry = Buffer(0)
+        this.datacarry = Buffer.alloc(0)
       }
       while (data.length > 31) {
         let padsize = data.readUInt8(31)
