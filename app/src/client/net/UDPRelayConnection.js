@@ -65,6 +65,7 @@ export class UDPRelayConnection extends EventEmitter {
       padarr.push(this.cipher.encryptzero())
       i -= 1
     }
+    console.log('init relay')
     socket.write(Buffer.concat(padarr))
     return socket
   }
