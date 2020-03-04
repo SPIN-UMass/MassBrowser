@@ -132,7 +132,7 @@ class NetworkMonitor {
     }
     if (changed) {
       warn('TCP changed')
-      console.log(data)
+      // console.log(data)
       relayManager.handleReconnect()
     }
   }
@@ -148,7 +148,7 @@ class NetworkMonitor {
     }
     if (changed) {
       warn('UDP changed')
-      console.log(data)
+      // console.log(data)
       relayManager.handleReconnect()
     }
   }

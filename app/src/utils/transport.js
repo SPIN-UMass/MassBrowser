@@ -128,6 +128,7 @@ export class WebSocketTransport extends Transport {
 
       this.ws.on('message', (message) => {
         var resp = JSON.parse(message)
+        console.log(resp)
         var handler = messageHandlers[resp.type]
         if (handler === undefined) {
           error("Invalid message type received from server")

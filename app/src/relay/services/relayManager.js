@@ -135,7 +135,6 @@ class RelayManager {
   }
 
   async onNewSessionEvent (data) {
-    //console.log("NEW SESSION")
     let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
       'writeiv': (Buffer.from(data.read_iv, 'base64')),
@@ -153,10 +152,16 @@ class RelayManager {
     }
 
     API.acceptSession(data.client, data.id)
-    debug(data)
+
+    if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
+      debug('New reach test')
+      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', data.alt_port)
+      await this.timeout(3000)
+      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', data.main_port)      
+    }
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
+      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }

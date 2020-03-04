@@ -48,11 +48,11 @@ class RelayManager {
   async handleNewRelaySessions (session) {
     debug(`Got new relay session [${session.id}]`)
     let desc = {
-      'readkey': Buffer.from(session.read_key, 'base64'),
-      'readiv': Buffer.from(session.read_iv, 'base64'),
-      'writekey': Buffer.from(session.write_key, 'base64'),
-      'writeiv': Buffer.from(session.write_iv, 'base64'),
-      'token': Buffer.from(session.token, 'base64'),
+      'writekey': (Buffer.from(session.read_key, 'base64')),
+      'writeiv': (Buffer.from(session.read_iv, 'base64')),
+      'readkey': (Buffer.from(session.write_key, 'base64')),
+      'readiv': (Buffer.from(session.write_iv, 'base64')),
+      'token': (Buffer.from(session.token, 'base64')),
       'client': session.client,
       'sessionId': session.id
     }
@@ -64,10 +64,12 @@ class RelayManager {
     API.updateSessionStatus(session.id, 'client_accepted')
     debug(`Session [${session.id}] accepted`)
 
+
     if (session.main_port && session.alt_port && session.connection_type === ConnectionTypes.UDP) {
-      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', session.main_port)
+      debug('New reach test')
+      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', session.alt_port)
       await this.timeout(3000)
-      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', session.alt_port)        
+      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', session.main_port)      
     }
   }
 
