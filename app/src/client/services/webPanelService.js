@@ -41,7 +41,7 @@ class WebPanelService {
     app.use('/plugin', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'application/x-xpinstall')
-      fs.readFile(path.join(getDataDir(), 'massbrowser_manager-0.1.0-fx.xpi'))
+      fs.readFile(path.join(config.extPath, 'massbrowser_manager-current.xpi'))
       .then(f => {
         console.log(f)
         res.end(f)

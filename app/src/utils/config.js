@@ -109,8 +109,10 @@ function initializeConfig(options) {
     console.log("Running in development mode")
     config.isDevelopment = true
     config.isProduction = false
+    config.extPath = path.join(process.cwd(),'app/assets/ext/')
     if (config.OS == "osx"){
       config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-osx-x86_64/Contents/MacOS/Tor/tor')
+
     }
 
     if (config.OS == "windows"){
@@ -123,6 +125,20 @@ function initializeConfig(options) {
     config.environment == 'production'
     config.isDevelopment = false
     config.isProduction = true
+
+    if (config.OS == "osx"){
+      config.torPath =  path.join(__dirname,'../../../../Tor/MacOS/Tor/tor')
+      config.extPath = path.join(__dirname,'../../../../Resources/')
+    }
+    if (config.OS == "windows"){
+      config.torPath =  path.join(process.cwd(),'Tor/tor.exe')
+      config.extPath = process.cwd() //path.join(process.cwd(),'')
+    }
+    if (config.OS == "linux"){
+      config.torPath =  path.join(process.cwd(),'Tor/tor')
+      config.extPath = process.cwd() //path.join(process.cwd(),'')
+    }
+
   }
 
   config.isClient = role === 'client'

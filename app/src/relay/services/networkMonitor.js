@@ -31,16 +31,16 @@ class NetworkMonitor {
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
 
-    this.UDPNATConnection = new UDPNATConnection('80.240.22.240', 8823)
-    this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
-    this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
-    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
-    udpConnectionService.on('start', () => {
-      this.UDPNATConnection.reconnect()
-    })
-    await this.UDPNATConnection.connect().then(() => {
-      this.isUDPNATRoutineRunning = true
-    })
+    // this.UDPNATConnection = new UDPNATConnection('80.240.22.240', 8823)
+    // this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
+    // this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
+    // // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
+    // udpConnectionService.on('start', () => {
+    //   this.UDPNATConnection.reconnect()
+    // })
+    // await this.UDPNATConnection.connect().then(() => {
+    //   this.isUDPNATRoutineRunning = true
+    // })
 
     setTimeout(() => this._sendKeepAlive(), 500)
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
@@ -65,12 +65,12 @@ class NetworkMonitor {
         resolve()
       })
     })
-    const UDPNATPromise = new Promise((resolve, reject) => {
-      this.UDPNATConnection.once('udp-net-update', data => {
-        resolve()
-      })
-    })
-    return Promise.all([TCPNATPromise, UDPNATPromise])
+    // const UDPNATPromise = new Promise((resolve, reject) => {
+    //   this.UDPNATConnection.once('udp-net-update', data => {
+    //     resolve()
+    //   })
+    // })
+    return Promise.all([TCPNATPromise,])
   }
 
   getPublicAddress () {

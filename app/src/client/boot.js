@@ -22,7 +22,7 @@ require('events').EventEmitter.prototype._maxListeners = 10000
 export default async function bootClient () {
 
   
-  console.log("MMM", config.torPath)
+  
   
   
   statusManager.clearAll()

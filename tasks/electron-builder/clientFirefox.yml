@@ -24,6 +24,14 @@ mac:
   icon: "app/assets/icons/client/icon.icns"
 win:
   icon: "app/assets/icons/client/icon.ico"
-  extraFiles: "browser"
+  extraFiles: ["browser",{
+    "from":  "app/assets/tor/tor-MB-windows-x86_64/",
+    "to": ".",
+    "filter": ["**/*"]
+  },{
+    "from":  "app/assets/ext/massbrowser_manager-current.xpi",
+    "to": ".",
+    "filter": ["**/*"]
+  }]
 linux:
   icon: "app/assets/icons/client"

@@ -14,23 +14,41 @@ const runID = Math.random().toString(36).substring(7)
 export function initializeMainProcess(onWindowCreated, onWindowClosed,additionalMenu = null) {
   windowCreatedCallback = onWindowCreated
   windowClosedCallback = onWindowClosed
+  const gotTheLock = app.requestSingleInstanceLock()
+  if (!gotTheLock) {
+    app.quit()
+  } else {
 
-  app.on('ready', () => {
-    initializeTray(additionalMenu)
-    createWindow()
-  })
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+      // Someone tried to run a second instance, we should focus our window.
+      
 
-  app.on('window-all-closed', () => {
-    // if (process.platform !== 'darwin') {
-    //   app.quit()
-    // }
-  })
+      if (mainWindow) {
+        if (mainWindow === null) {
+          createWindow()
+        } else {
+          mainWindow.focus()
+        }
+      }
+    })
 
-  app.on('activate', () => {
-    if (mainWindow === null) {
+    app.on('ready', () => {
+      initializeTray(additionalMenu)
       createWindow()
-    }
-  })
+    })
+
+    app.on('window-all-closed', () => {
+      // if (process.platform !== 'darwin') {
+      //   app.quit()
+      // }
+    })
+
+    app.on('activate', () => {
+      if (mainWindow === null) {
+        createWindow()
+      }
+    })
+  }
 }
 
 function initializeTray(additionalMenu) {
