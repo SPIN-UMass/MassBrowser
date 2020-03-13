@@ -5,8 +5,8 @@
   "config": {
     "client": {
       "echoServer": {
-        "host": "dev.yaler.co",
-        "port": 8823
+        "host": "echo.aler.co",
+        "port": 8080
       },
       "configFoldername": "client",
       "appName": "MassBrowser",
