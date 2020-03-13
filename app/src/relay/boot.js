@@ -15,6 +15,7 @@ import {
   ServerError, ApplicationBootError
 } from '@utils/errors'
 
+console.log("MMMx")
 export default async function bootRelay () {
   let status
 
@@ -132,12 +133,12 @@ export default async function bootRelay () {
         err.logAndReport()
       } else {
         error(err)
-        Raven.captureException(err)
+        //Raven.captureException(err)
       }
       throw new ApplicationBootError('Failed to start Application')
     } else {
       throw err
-    }
+     }
   }
 }
 
@@ -146,14 +147,14 @@ async function waitForInternet (attempt = 0) {
 
   try {
     let response = await http.get('http://httpbin.org/ip')
-    if (response.status == 200) {
+    if (response.status === 200) {
       return
     }
   } catch (e) {}
 
   try {
     let response = await http.get('https://api.ipify.org/?format=json')
-    if (response.status == 200) {
+    if (response.status === 200) {
       return
     }
   } catch (e) {}

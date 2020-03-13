@@ -25,7 +25,7 @@ class RelayManager {
     store.ready.then(() => {
       this.natEnabled = store.state.natEnabled
       this.TCPRelayPort = store.state.TCPRelayPort
-      this.UDPRelayPort = store.state.UDPRelayPort
+  //     // this.UDPRelayPort = store.state.UDPRelayPort
       this.uploadLimit = store.state.uploadLimit
       this.downloadLimit = store.state.downloadLimit
       this.bandwidthLimited = this.uploadLimit !== 0 || this.downloadLimit !== 0
@@ -38,11 +38,11 @@ class RelayManager {
       } else {
         debug(`NAT mode is not enabled, running relay on port: ${this.TCPRelayPort}`)
       }
-    })
+    // })
 
-    udpConnectionService.on('relay-new-connection', (connection, addressKey) => {
-      udpConnectionService.updateNatPunchingListItem(addressKey)
-      this.onNewUDPConnection(connection)
+  //   udpConnectionService.on('relay-new-connection', (connection, addressKey) => {
+  //     udpConnectionService.updateNatPunchingListItem(addressKey)
+  //     this.onNewUDPConnection(connection)
     })
   }
 
@@ -74,13 +74,13 @@ class RelayManager {
     }
   }
 
-  setUDPRelayPort (port, restartRelay = true) {
-    this.UDPRelayPort = port
-    store.commit('changeUDPRelayPort', port)
-    if (restartRelay) {
-      this.restartRelay()
-    }
-  }
+  // setUDPRelayPort (port, restartRelay = true) {
+  //   // this.UDPRelayPort = port
+  //   // store.commit('changeUDPRelayPort', port)
+  //   // if (restartRelay) {
+  //   //   this.restartRelay()
+  //   // }
+  // }
 
   async changeAccess (access) {
     if (access === this.openAccess) {
@@ -96,13 +96,13 @@ class RelayManager {
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
       warn('restarting the relays!')
       await this._restartTCPRelayServer()
-      await this._restartUDPRelayServer()
+      // await this._restartUDPRelayServer()
       statusManager.info(`TCP Relay server started on port ${publicAddress.port}`, { timeout: true })
-      statusManager.info(`UDP Relay server started on port ${publicAddress.UDPPort}`, { timeout: true })
+      // statusManager.info(`UDP Relay server started on port ${publicAddress.UDPPort}`, { timeout: true })
     } else {
       API.relayDown()
       await this._stopTCPRelayServer()
-      await this._stopUDPRelayServer()
+      // await this._stopUDPRelayServer()
     }
   }
 
@@ -126,7 +126,7 @@ class RelayManager {
       let publicAddress = this._getReachableAddress()
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
       this._restartTCPRelayServer()
-      this._restartUDPRelayServer()
+      // this._restartUDPRelayServer()
     }
   }
 
@@ -157,44 +157,44 @@ class RelayManager {
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
-      await this.timeout(3000)
-      await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
+      // await this.timeout(3000)
+      // await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
     }
   }
 
-  onNewUDPConnection (connection) {
-    let upPipe = this.uploadLimiter.throttle()
-    upPipe.on('error', (err) => { debug(err) })
-    let downPipe = this.downloadLimiter.throttle()
-    downPipe.on('error', (err) => { debug(err) })
-    connection.on('data', data => {
-      upPipe.write(data)
-    })
+  // // onNewUDPConnection (connection) {
+  // //   let upPipe = this.uploadLimiter.throttle()
+  // //   upPipe.on('error', (err) => { debug(err) })
+  // //   let downPipe = this.downloadLimiter.throttle()
+  // //   downPipe.on('error', (err) => { debug(err) })
+  // //   connection.on('data', data => {
+  // //     upPipe.write(data)
+  // //   })
 
-    downPipe.on('data', data => {
+  // //   downPipe.on('data', data => {
 
-      connection.write(data)
+  // //     connection.write(data)
       
 
-    })
+  // //   })
 
-    let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
+  // //   let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
-    connection.on('close', () => {
-      receiver.closeConnections()
-      connection.unpipe(upPipe)
-      downPipe.unpipe(connection)
-      downPipe.end()
-      upPipe.end()
-    })
-  }
+  // //   connection.on('close', () => {
+  // //     receiver.closeConnections()
+  // //     connection.unpipe(upPipe)
+  // //     downPipe.unpipe(connection)
+  // //     downPipe.end()
+  // //     upPipe.end()
+  // //   })
+  // // }
 
-  async _stopUDPRelayServer () {
-    if (this.isUDPRelayServerRunning) {
-      await udpConnectionService.stop()
-      this.isUDPRelayServerRunning = false
-    }
-  }
+  // // async _stopUDPRelayServer () {
+  // //   if (this.isUDPRelayServerRunning) {
+  // //     await udpConnectionService.stop()
+  // //     this.isUDPRelayServerRunning = false
+  // //   }
+  // // }
 
   async _stopTCPRelayServer () {
     if (this.isTCPRelayServerRunning) {
@@ -204,11 +204,11 @@ class RelayManager {
     }
   }
 
-  async _startUDPRelayServer () {
-    let localAddress = this._getLocalAddress()
-    await udpConnectionService.setPort(localAddress.UDPPort)
-    this.isUDPRelayServerRunning = true
-  }
+  // // async _startUDPRelayServer () {
+  // //   let localAddress = this._getLocalAddress()
+  // //   await udpConnectionService.setPort(localAddress.UDPPort)
+  // //   this.isUDPRelayServerRunning = true
+  // // }
 
   async _startTCPRelayServer () {
     let localAddress = this._getLocalAddress()
@@ -223,18 +223,18 @@ class RelayManager {
     this.isTCPRelayServerRunning = true
   }
 
-  async _restartUDPRelayServer () {
-    try {
-      if (this.isUDPRelayServerRunning) {
-        await this._stopUDPRelayServer()
-        debug(`UDP Relay stopped`)
-      }
-      await this._startUDPRelayServer()
-      debug(`UDP Relay started`)
-    } catch (err) {
-      warn(err)
-    }
-  }
+  // // async _restartUDPRelayServer () {
+  // //   try {
+  // //     if (this.isUDPRelayServerRunning) {
+  // //       await this._stopUDPRelayServer()
+  // //       debug(`UDP Relay stopped`)
+  // //     }
+  // //     await this._startUDPRelayServer()
+  // //     debug(`UDP Relay started`)
+  // //   } catch (err) {
+  // //     warn(err)
+  // //   }
+  // // }
 
   async _restartTCPRelayServer () {
     try {

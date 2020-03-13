@@ -25,7 +25,7 @@ class NetworkMonitor {
   }
 
   async start () {
-    await udpConnectionService.start(true)
+    // await udpConnectionService.start(true)
     this.TCPNATConnection = new TCPNATConnection(config.echoServer.host, config.echoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
@@ -46,18 +46,18 @@ class NetworkMonitor {
     this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), config.keepAliveInterval * 1000)
   }
 
-  stopUDPNATRoutine () {
-    if (this.isUDPNATRoutineRunning) {
-      this.isUDPNATRoutineRunning = false
-      this.UDPNATConnection.stop()
-    }
-  }
+  // stopUDPNATRoutine () {
+  //   if (this.isUDPNATRoutineRunning) {
+  //     this.isUDPNATRoutineRunning = false
+  //     // this.UDPNATConnection.stop()
+  //   }
+  // }
 
-  async startUDPNATRoutine () {
-    await this.UDPNATConnection.connect().then(() => {
-      this.isUDPNATRoutineRunning = true
-    })
-  }
+  // async startUDPNATRoutine () {
+  //   await this.UDPNATConnection.connect().then(() => {
+  //     this.isUDPNATRoutineRunning = true
+  //   })
+  // }
 
   waitForNetworkStatus () {
     const TCPNATPromise = new Promise((resolve, reject) => {
@@ -70,7 +70,7 @@ class NetworkMonitor {
     //     resolve()
     //   })
     // })
-    return Promise.all([TCPNATPromise,])
+    return Promise.all([TCPNATPromise])
   }
 
   getPublicAddress () {
@@ -106,19 +106,19 @@ class NetworkMonitor {
       store.commit('changeTCPRelayReachable', isTCPRelayReachable)
     }
 
-    if (isUDPRelayReachable !== this.isUDPRelayReachable) {
-      this.isUDPRelayReachable = isUDPRelayReachable
-      store.commit('changeUDPRelayReachable', isUDPRelayReachable)
-    }
+    // if (isUDPRelayReachable !== this.isUDPRelayReachable) {
+    //   this.isUDPRelayReachable = isUDPRelayReachable
+    //   store.commit('changeUDPRelayReachable', isUDPRelayReachable)
+    // }
 
     info(`TCP Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
     if (this.TCPNATConnection.isConnected) {
-      this.TCPNATConnection.keepAlive()
+       this.TCPNATConnection.keepAlive()
     }
     info(`UDP Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
-    if (this.isUDPNATRoutineRunning) {
-      this.UDPNATConnection.keepAlive()
-    }
+    // if (this.isUDPNATRoutineRunning) {
+    //   this.UDPNATConnection.keepAlive()
+    // }
   }
 
   _onTCPNetworkUpdate (data) {
@@ -137,21 +137,21 @@ class NetworkMonitor {
     }
   }
 
-  _onUDPNetworkUpdate (data) {
-    let changed = false
-    if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
-      changed = true
-      this.localAddress = data.localAddress
-      this.remoteAddress = data.remoteAddress
-      this.localUDPPort = data.localUDPPort
-      this.remoteUDPPort = data.remoteUDPPort
-    }
-    if (changed) {
-      warn('UDP changed')
-      console.log(data)
-      relayManager.handleReconnect()
-    }
-  }
+  // _onUDPNetworkUpdate (data) {
+  //   let changed = false
+  //   if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
+  //     changed = true
+  //     this.localAddress = data.localAddress
+  //     this.remoteAddress = data.remoteAddress
+  //     this.localUDPPort = data.localUDPPort
+  //     this.remoteUDPPort = data.remoteUDPPort
+  //   }
+  //   if (changed) {
+  //     warn('UDP changed')
+  //     console.log(data)
+  //     relayManager.handleReconnect()
+  //   }
+  // }
 }
 export const networkMonitor = new NetworkMonitor()
 export default networkMonitor

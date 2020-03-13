@@ -25,9 +25,9 @@ import path from 'path'
 import fs from 'fs-extra'
 
 
-log.debug(`MMMMM ${config.configFoldername}`)
+//log.debug(`MMMxMM ${config.configFoldername}`)
 const torFilePath = path.join(getDataDir(), config.configFoldername, 'torlist')
-log.debug(`MMMMM ${config.configFoldername} , ${torFilePath}`)
+//log.debug(`MMMxMM ${config.configFoldername} , ${torFilePath}`)
 class TorService {
   constructor() {
     this.ipSet = new Set()
@@ -40,11 +40,11 @@ class TorService {
   // requiresDownload() returns true if the Tor list expires or does
   // not exist
   async requiresDownload() {
-    const lastUpdate = KVStore.get('torlist-lastupdate');
+    const lastUpdate = KVStore.get('torlist-lastupdate')
     if (!lastUpdate || new Date() - lastUpdate > config.tor.listUpdateInterval) {
       return true;
     }
-    return !(await fs.pathExists(torFilePath));
+    return !(await fs.pathExists(torFilePath))
   }
 
   // loadTorList() loads all the IPs from the Tor lists to the ipSet
