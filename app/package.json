@@ -5,7 +5,7 @@
   "config": {
     "client": {
       "echoServer": {
-        "host": "echo.aler.co",
+        "host": "echo.yaler.co",
         "port": 8080
       },
       "configFoldername": "client",
