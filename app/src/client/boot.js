@@ -78,13 +78,13 @@ export default async function bootClient () {
     await startClientSocks('127.0.0.1', config.socksPort,config.socksSecondPort)
     status.clear()
 
-    status = statusManager.info('Starting Network Manager')
-    await networkManager.start()
-    status.clear()
+    // status = statusManager.info('Starting Network Manager')
+    // await networkManager.start()
+    // status.clear()
 
-    status = statusManager.info('Obtaining NAT information')
-    await networkManager.waitForNetworkStatus()
-    status.clear()
+    // status = statusManager.info('Obtaining NAT information')
+    // await networkManager.waitForNetworkStatus()
+    // status.clear()
 
     status = statusManager.info('Starting remaining services')
     await Promise.all([webPanelService.start(), noHostHandlerService.start()])
