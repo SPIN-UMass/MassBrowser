@@ -167,7 +167,7 @@ class NetworkManager {
       debug('TCP Relay started on ', publicPort)
       server.on('error', (e) => {
         if (e.code === 'EADDRINUSE') {
-          warn('TCP Relay address in use, retrying...')
+          warn('TCP Relay address in use, retrying..., ', publicPort)
           setTimeout(() => {
             server.close()
             server.listen({port: publicPort, host: '0.0.0.0', exclusive: false}, () => {
