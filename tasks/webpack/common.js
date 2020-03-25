@@ -76,6 +76,7 @@ const resolve = (target) => {
     alias: {
       '@': path.join(rootDir, `app/src/${target}`),
       '@common': path.join(rootDir, 'app/src/common'),
+      '@client': path.join(rootDir, 'app/src/client'),
       'styles': path.join(rootDir, 'app/src/app/styles'),
       '@assets': path.join(rootDir, 'app/assets'),
       '@utils': path.join(rootDir, 'app/src/utils'),

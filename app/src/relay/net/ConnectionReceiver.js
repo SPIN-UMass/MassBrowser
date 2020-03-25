@@ -33,8 +33,7 @@ export class ConnectionReceiver {
     this.desciber = {}
     this.initcarry = ''
     this.connections = {}
-    
-   this.dumblock = new Semaphore(1) 
+    this._lock = new Semaphore(1)
   }
 
   authenticate (data) {
@@ -58,6 +57,7 @@ export class ConnectionReceiver {
   }
 
   async write (connectionID, command, data) {
+    let release = await this._lock.acquire()
     let sendPacket = Buffer(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)
@@ -66,7 +66,8 @@ export class ConnectionReceiver {
       debug(`Sending Down [${command}] , [${data}] , [${data.length}]`)
     }
     const b = Buffer.concat([sendPacket, data])
-    await this.socketDown.write(this.crypt.encrypt(b))
+    await this.socketDown.write(this.crypt.encrypt(b))   
+    release()
   }
 
   newConnection (ip, port, connectionID) {

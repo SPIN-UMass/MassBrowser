@@ -43,6 +43,7 @@ export async function addCertificateToFirefox () {
 }
 
 export async function openInternalBrowser (website) {
+  website = website || 'massbrowser.cs.umass.edu'
   let firefoxPath = path.join(process.cwd(), 'browser', 'firefox')
   let profilePath = path.join(process.cwd(), 'browser', 'profile')
   await run(`${firefoxPath} -profile "${profilePath}" ${website}`)

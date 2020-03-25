@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
-
+import {openInternalBrowser,isFirefoxVersion} from '@client/firefox'
 import config from '@utils/config'
 
 let mainWindow
@@ -22,13 +22,17 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed,additional
     app.on('second-instance', (event, commandLine, workingDirectory) => {
       // Someone tried to run a second instance, we should focus our window.
       
-
-      if (mainWindow) {
+      if (isFirefoxVersion()) {
+        openInternalBrowser()
+      } else {
+      if (mainWindow) {   
         if (mainWindow === null) {
+
           createWindow()
         } else {
           mainWindow.focus()
         }
+      }
       }
     })
 

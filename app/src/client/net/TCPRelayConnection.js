@@ -4,6 +4,7 @@ import { EventEmitter } from 'events'
 import { debug, warn } from '@utils/log'
 import { RelayConnectionError } from '@utils/errors'
 import { pendMgr } from './PendingConnections'
+import {Semaphore} from 'await-semaphore'
 
 export class TCPRelayConnection extends EventEmitter {
   constructor (relayAddress, relayPort, desc) {
@@ -18,6 +19,7 @@ export class TCPRelayConnection extends EventEmitter {
     this.initialBuffer = null
     this.cipher = null
     this.socket = null
+    this._lock = new Semaphore(1)
   }
 
   connect () {
@@ -121,7 +123,9 @@ export class TCPRelayConnection extends EventEmitter {
     this.socket.end()
   }
 
-  write (conid, command, data) {
+  async write (conid, command, data) {
+
+    let release = await this._lock.acquire()
     let sendpacket = Buffer(7)
     sendpacket.writeUInt16BE(conid)
     sendpacket.write(command, 2)
@@ -130,6 +134,7 @@ export class TCPRelayConnection extends EventEmitter {
     const enc = this.cipher.encrypt(b)
     this.emit('send', enc)
     this.socket.write(enc)
+    release()
   }
 }
 

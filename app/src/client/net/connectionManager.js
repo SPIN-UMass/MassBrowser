@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import * as errors from '@utils/errors'
-import { debug } from '@utils/log'
+import { debug, error } from '@utils/log'
 import { connectionStats } from '@/services'
 import {Semaphore} from 'await-semaphore'
 
@@ -48,14 +48,17 @@ class ConnectionManager {
         }
       }
     }
-    if (CMD === 'D') {
+    else if (CMD === 'D') {
       //console.log(this.ClientConnections);
       if (lastconid in this.clientConnections) {
         this.clientConnections[lastconid].write(data)
       }
     }
-    if (CMD === 'C') {
+    else if (CMD === 'C') {
       this.cleanClose(lastconid)
+    } else {
+      error( "Unknown command, faulty relay, restarting all sessions")
+      this.closeAllRelays()
     }
   }
 
@@ -65,7 +68,7 @@ class ConnectionManager {
   }
 
   listener (data) {
-    // console.log('DATA RECEIVED', data);
+    //console.log('DATA RECEIVED', data);
     while (data) {
       if (this.carrylen > 0) {
         if (data.length <= this.carrylen) {
@@ -110,7 +113,13 @@ class ConnectionManager {
   connectionClose (socket) {
 //    console.log('closed')
   }
+  closeAllRelays () {
+    Object.keys(this.connectionMaps).forEach((key) => {      
+        // console.log('closing connection')
+        this.clientConnections[key].end()
 
+    })
+  }
   onRelayClose (relay) {
     Object.keys(this.connectionMaps).forEach((key) => {
       if (this.connectionMaps[key] === relay) {
@@ -187,3 +196,4 @@ class ConnectionManager {
 
 export const connectionManager = new ConnectionManager()
 export default connectionManager
+  
