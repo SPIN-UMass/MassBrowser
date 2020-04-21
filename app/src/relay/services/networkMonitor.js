@@ -111,11 +111,11 @@ class NetworkMonitor {
       store.commit('changeUDPRelayReachable', isUDPRelayReachable)
     }
 
-    info(`TCP Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
+    // info(`TCP Keepalive sent, connected: ${isServerConnected}  reachable: ${isTCPRelayReachable}`)
     if (this.TCPNATConnection.isConnected) {
       this.TCPNATConnection.keepAlive()
     }
-    info(`UDP Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
+    // info(`UDP Keepalive sent, connected: ${isServerConnected}  reachable: ${isUDPRelayReachable}`)
     if (this.isUDPNATRoutineRunning) {
       this.UDPNATConnection.keepAlive()
     }
