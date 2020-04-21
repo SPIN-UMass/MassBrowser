@@ -151,14 +151,15 @@ class RelayManager {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 
-    API.acceptSession(data.client, data.id)
 
     if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
-      debug('New reach test')
-      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', data.alt_port)
-      await this.timeout(3000)
-      await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', data.main_port)      
+      debug(' Got a new reach test doing nothing for now')
+      return;
+      // await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', data.alt_port)
+      // await this.timeout(3000)
+      // await udpConnectionService.performUDPHolePunchingRelay('54.145.75.108', data.main_port)      
     }
+    API.acceptSession(data.client, data.id)
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.alt_udp_port)
