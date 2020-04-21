@@ -113,7 +113,7 @@ export class UDPConnectionService extends EventEmitter {
         }
         debug(`punching for ${address}:${port}`)
         connection.send(Buffer.alloc(0))
-        // secondConnection.send(Buffer.alloc(0))
+        secondConnection.send(Buffer.alloc(0))
       }
     })
   }
