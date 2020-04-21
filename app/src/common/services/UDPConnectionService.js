@@ -88,6 +88,7 @@ export class UDPConnectionService extends EventEmitter {
         debug('NAT is already punched using second port')
         resolve(this._connections[secondAddressKey])
       } else {
+        // tell getconnection to set session key 
         let connection = this.getConnection(address, port, false, false)
         let secondConnection = this.getConnection(address, port, false, true)
         connection.on('connect', () => {

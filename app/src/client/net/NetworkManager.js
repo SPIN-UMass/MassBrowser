@@ -98,7 +98,7 @@ class NetworkManager {
 
     // let address = await getAddress(echoServer.ip)
     // this.UDPNATConnection = new UDPNATConnection(address, echoServer.port)
-    this.UDPNATConnection = new UDPNATConnection('80.240.22.240', 8823)
+    this.UDPNATConnection = new UDPNATConnection('104.156.251.168', 8823)
     this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
     await this.UDPNATConnection.connect().then(() => {
       this.startUDPNATRoutine()
