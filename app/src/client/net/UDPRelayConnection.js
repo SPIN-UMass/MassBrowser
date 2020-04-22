@@ -65,7 +65,6 @@ export class UDPRelayConnection extends EventEmitter {
       padarr.push(this.cipher.encryptzero())
       i -= 1
     }
-    console.log('init relay')
     socket.write(Buffer.concat(padarr))
     return socket
   }
@@ -75,7 +74,6 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   write (connectionID, command, data) {
-    console.log('write:', connectionID, command, data)
     let sendPacket = Buffer.alloc(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)
