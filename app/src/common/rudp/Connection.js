@@ -239,8 +239,6 @@ Connection.prototype.close = async function () {
 
 Connection.prototype._write = async function (chunk, encoding, callback) {
     this.send(chunk).then(()=>{callback();});
-    
-
 }
 
 Connection.prototype._read = function (n) {

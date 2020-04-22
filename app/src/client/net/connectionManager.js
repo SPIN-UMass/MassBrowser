@@ -141,7 +141,6 @@ class ConnectionManager {
           this.connectionMaps[conid] = relay
           let cr = String(dstip) + ':' + String(dstport)
           this.connectionMaps[conid].write(conid, 'N', Buffer.from(cr))
-
           connection.on('data', (data) => {
             this.writer(data, conid)
           })
@@ -153,7 +152,6 @@ class ConnectionManager {
           connection.on('error', (err) => {
             this.connectionMaps[conid].write(conid, 'C', Buffer.alloc(0))
           })
-
           connectionStats.connectionRelayAssigned(connection, relay)
           resolve('Assigned')
         })
