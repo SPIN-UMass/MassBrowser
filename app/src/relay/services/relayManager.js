@@ -153,6 +153,7 @@ class RelayManager {
 
     if (desc.connectiontype === ConnectionTypes.UDP) {
       debug('created connection object for udp session')
+      console.log(desc.token)
       udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_port, desc.token, false)
       // udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_port, desc.token)
     }
