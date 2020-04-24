@@ -12,6 +12,7 @@ function PacketSender(socket, address, port, sessionKey) {
   this._closed = false;
   this._socket.on('close', () => {
     this._closed = true;
+    
   })
 };
 
