@@ -121,6 +121,7 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
 Connection.prototype._decrypt = function(encryptedPacketWithIV) {
   let iv = encryptedPacketWithIV.slice(0,16);
   let key = this._packetSender._sessionKey.slice(0,32);
+  console.log('key', key)
   console.log('iv:', iv);
   let encryptedPacket = encryptedPacketWithIV.slice(16);
   let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
