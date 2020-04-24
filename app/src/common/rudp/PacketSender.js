@@ -28,7 +28,6 @@ PacketSender.prototype.send = function (packet) {
 
 PacketSender.prototype._encrypt = function (buffer) {
   const iv = crypto.randomBytes(16);
-  console.log('iv:', iv)
   let key = Buffer.from(this._sessionKey.slice(0,32))
   let cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
   let encrypted = cipher.update(buffer);
