@@ -84,6 +84,7 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         console.log('There is already a connection')
     }
+    this.emit('relay-new-connection', connection)
   }
 
   performUDPHolePunchingRelay (address, port) {
