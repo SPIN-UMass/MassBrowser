@@ -152,7 +152,7 @@ Connection.prototype.receive = async function (buffer) {
     let release = await this._receiverLock.acquire()
     let packet = new Packet(buffer)
     if (this._packetSender._sessionKey) {
-      packet = this._decrypt(buffer)
+      packet = new Packet(this._decrypt(buffer))
     }
     this._restartTimeoutTimer();
     switch(this.currentTCPState) {
