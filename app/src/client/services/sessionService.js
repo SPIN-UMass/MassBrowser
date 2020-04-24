@@ -148,6 +148,12 @@ class SessionService extends EventEmitter {
         })
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
       }
+
+      if (sessionInfo.connection_type === ConnectionTypes.UDP) {
+        debug('creating connection object for udp pending session')
+        udpConnectionService.createEncryptedConnection(sessionInfo.relay.ip, sessionInfo.relay.udp_port, sessionInfo.token, true)
+      }
+
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),

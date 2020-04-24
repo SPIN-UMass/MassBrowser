@@ -10,8 +10,8 @@ import { throwStatement } from 'babel-types';
 module.exports = Connection;
 function Connection(packetSender) {
   this.currentTCPState = constants.TCPStates.LISTEN;
+  this._packetSender = packetSender;
   this._sender = new Sender(this, packetSender);
-
   this._receiver = new Receiver(this, packetSender);
   this.initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
   this.nextSequenceNumber = 0;
@@ -116,6 +116,15 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
   release()
 }
 
+Connection.prototype._decrypt = function(encryptedPacketWithIV) {
+  let iv = encryptedPacketWithIV.slice(0,16);
+  let encryptedPacket = encryptedPacketWithIV.slice(16)
+  let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(this._packetSender._sessionKey), iv);
+  let decrypted = decipher.update(encryptedPacket);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  return decrypted;
+};
+
 Connection.prototype.send = async function (data) {
 
   let release = await this._sendLock.acquire();
@@ -137,6 +146,9 @@ Connection.prototype.send = async function (data) {
 
 Connection.prototype.receive = async function (packet) {
     let release = await this._receiverLock.acquire()
+    if (this._packetSender._sessionKey !== null) {
+      packet = this._decrypt(packet)
+    }
     this._restartTimeoutTimer();
     switch(this.currentTCPState) {
       case constants.TCPStates.LISTEN:
