@@ -16,18 +16,15 @@ function PacketSender(socket, address, port, sessionKey) {
 };
 
 PacketSender.prototype.send = function (packet) {
-  let buffer;
-  if (this._sessionKey !== null) {
+  let buffer = packet.toBuffer();
+  if (this._sessionKey) {
     buffer = this._encrypt(packet.toBuffer())
-  } else {
-    buffer = packet.toBuffer();
   }
 
   if (!this._closed) {
     this._socket.send(buffer, 0, buffer.length, this._port, this._address);
   }
 };
-
 
 PacketSender.prototype._encrypt = function (buffer) {
   const iv = crypto.randomBytes(16);

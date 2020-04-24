@@ -217,9 +217,8 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
-          let packet = new rudp.Packet(message)
           setImmediate(() => {
-            connection.receive(packet)
+            connection.receive(message)
           })
         })
 
@@ -258,9 +257,8 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, false, true)
-          let packet = new rudp.Packet(message)
           setImmediate(() => {
-            connection.receive(packet)
+            connection.receive(message)
           })
         })
 

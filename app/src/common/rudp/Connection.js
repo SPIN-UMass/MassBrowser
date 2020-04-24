@@ -1,5 +1,6 @@
 const Sender = require('./Sender');
 const Receiver = require('./Receiver');
+const Packet = require('./Packet');
 const constants = require('./constants');
 const helpers = require('./helpers');
 const Duplex = require('stream').Duplex;
@@ -144,9 +145,10 @@ Connection.prototype.send = async function (data) {
 
 };
 
-Connection.prototype.receive = async function (packet) {
+Connection.prototype.receive = async function (buffer) {
     let release = await this._receiverLock.acquire()
-    if (this._packetSender._sessionKey !== null) {
+    let packet = new Packet(buffer)
+    if (this._packetSender._sessionKey) {
       packet = this._decrypt(packet)
     }
     this._restartTimeoutTimer();
