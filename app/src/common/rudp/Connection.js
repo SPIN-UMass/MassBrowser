@@ -5,6 +5,7 @@ const constants = require('./constants');
 const helpers = require('./helpers');
 const Duplex = require('stream').Duplex;
 const util = require('util');
+const crypto = require('crypto');
 import {Semaphore} from 'await-semaphore'
 import { throwStatement } from 'babel-types';
 
@@ -119,7 +120,7 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
 
 Connection.prototype._decrypt = function(encryptedPacketWithIV) {
   let iv = encryptedPacketWithIV.slice(0,16);
-  let encryptedPacket = encryptedPacketWithIV.slice(16)
+  let encryptedPacket = encryptedPacketWithIV.slice(16);
   let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(this._packetSender._sessionKey), iv);
   let decrypted = decipher.update(encryptedPacket);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
