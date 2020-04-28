@@ -89,13 +89,13 @@ class _ZMQListener {
 
   onDisconnect (session) {
     session['is_reachable'] = false
-    console.log(session, 'is not reachable')
+    console.log(session.id, 'is not reachable')
     this.results.send(JSON.stringify(session))
   }
 
   onConnect (session) {
     session['is_reachable'] = true
-    console.log(session, 'is reachable')
+    console.log(session.id, 'is reachable')
     this.results.send(JSON.stringify(session))
   }
 }

@@ -63,6 +63,7 @@ export class UDPConnectionService extends EventEmitter {
     return new Promise((resolve, reject) => {
       console.log(address, 'added into the incomming connections')
       this._expectedConnections[address] = true
+      resolve()
     })
   }
 

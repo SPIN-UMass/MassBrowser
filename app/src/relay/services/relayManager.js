@@ -136,6 +136,7 @@ class RelayManager {
   }
 
   async onNewSessionEvent (data) {
+    let reachClientAddress = '54.145.75.108'
     let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
       'writeiv': (Buffer.from(data.read_iv, 'base64')),
@@ -160,15 +161,18 @@ class RelayManager {
 
     if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
       debug(' Got a new reach test')
-      let reachClientAddress = '54.145.75.108'
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.main_port, data.token, false)
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.alt_port, desc.token, false)
+    }
+
+    API.acceptSession(data.client, data.id)
+
+    if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
       await udpConnectionService.addExpectedIncomingConnection(reachClientAddress)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.alt_port)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.main_port)      
     }
-    API.acceptSession(data.client, data.id)
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       await udpConnectionService.addExpectedIncomingConnection(data.client.ip)

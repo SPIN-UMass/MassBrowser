@@ -119,13 +119,17 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
 }
 
 Connection.prototype._decrypt = function(encryptedPacketWithIV) {
-  let iv = encryptedPacketWithIV.slice(0,16);
-  let key = this._packetSender._sessionKey.slice(0,32);
-  let encryptedPacket = encryptedPacketWithIV.slice(16);
-  let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
-  let decrypted = decipher.update(encryptedPacket);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted;
+  try {
+    let iv = encryptedPacketWithIV.slice(0,16);
+    let key = this._packetSender._sessionKey.slice(0,32);
+    let encryptedPacket = encryptedPacketWithIV.slice(16);
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+    let decrypted = decipher.update(encryptedPacket);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted;
+  } catch (err) {
+    // console.log(err)
+  }
 };
 
 Connection.prototype.send = async function (data) {
