@@ -151,7 +151,6 @@ class SessionService extends EventEmitter {
 
       if (sessionInfo.connection_type === ConnectionTypes.UDP) {
         debug('creating connection object for udp pending session')
-        console.log(sessionInfo.token)
         udpConnectionService.createEncryptedConnection(sessionInfo.relay.ip, sessionInfo.relay.udp_port, sessionInfo.token, true)
       }
 
