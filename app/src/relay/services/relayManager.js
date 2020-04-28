@@ -168,6 +168,7 @@ class RelayManager {
     API.acceptSession(data.client, data.id)
 
     if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
+      await this.timeout(3000)
       await udpConnectionService.addExpectedIncomingConnection(reachClientAddress)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.alt_port)
       await this.timeout(3000)
