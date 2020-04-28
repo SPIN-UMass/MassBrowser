@@ -25,6 +25,7 @@ class _ZMQListener {
   async testConnection (session) {
     if (session.main_port) {
       await udpConnectionService.start(false, session.main_port, session.alt_port)
+      udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, false)
       udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, true)
     }
     return new Promise((resolve, reject) => {
