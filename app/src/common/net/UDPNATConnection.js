@@ -18,8 +18,8 @@ class UDPNATConnection extends EventEmitter {
 
   async connect () {
     return new Promise((resolve, reject) => {
-      this.socket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, true, false)
-      this.secondSocket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, true, true)
+      this.socket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, false)
+      this.secondSocket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, true)
       let secondUDPPort = -1
       let firstUDPPort = -1
       let remoteAddress = null

@@ -15,6 +15,7 @@ export class UDPConnectionService extends EventEmitter {
     this.port = 10000 + Math.floor(Math.random() * (65535 - 10000))
     this.secondPort = 10000 + Math.floor(Math.random() * (65535 - 10000))
     this._connections = {}
+    this._expectedConnections = {}
     this._isMainServerRunning = false
     this._isSecondServerRunning = false
     this._natPunchingList = {}
@@ -58,6 +59,13 @@ export class UDPConnectionService extends EventEmitter {
     this.mainServer.send(Buffer.alloc(0), port, address)
   }
 
+  addExpectedIncomingConnection (address) {
+    return new Promise((resolve, reject) => {
+      console.log(address, 'added into the incomming connections')
+      this._expectedConnections[address] = true
+    })
+  }
+
   createEncryptedConnection (address, port, sessionKey, useAltPort) {
     let connection
     let addressKey = address + port + this.port
@@ -84,7 +92,6 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         console.log('There is already a connection')
     }
-    this.emit('relay-new-connection', connection)
   }
 
   performUDPHolePunchingRelay (address, port) {
@@ -117,9 +124,8 @@ export class UDPConnectionService extends EventEmitter {
         debug('NAT is already punched using second port')
         resolve(this._connections[secondAddressKey])
       } else {
-        // tell getconnection to set session key 
-        let connection = this.getConnection(address, port, false, false)
-        let secondConnection = this.getConnection(address, port, false, true)
+        let connection = this.getConnection(address, port, false)
+        let secondConnection = this.getConnection(address, port, true)
         connection.on('connect', () => {
           this._natPunchingList[addressKey].isPunched = true
           clearTimeout(timer)
@@ -151,7 +157,7 @@ export class UDPConnectionService extends EventEmitter {
     return this.mainServer.address()
   }
 
-  getConnection (address, port, toEchoServer, useSecondPort) {
+  getConnection (address, port, useSecondPort) {
     let connection
     let addressKey = address + port + this.port
     let secondAddressKey = address + port + this.secondPort
@@ -177,11 +183,12 @@ export class UDPConnectionService extends EventEmitter {
           this.deleteConnectionListItem(addressKey)
         })
         this._connections[addressKey] = connection
-        if (!toEchoServer) {
-          this.emit('relay-new-connection', connection, addressKey)
-        }
       } else {
         connection = this._connections[addressKey]
+        if (this._expectedConnections[address]) {
+          this.emit('relay-new-connection', connection, addressKey)
+          delete this._expectedConnections[address]
+        }
       }
     }
     return connection
@@ -257,7 +264,7 @@ export class UDPConnectionService extends EventEmitter {
           if (message.length < 12) {
             return
           }
-          let connection = this.getConnection(remoteInfo.address, remoteInfo.port, false, true)
+          let connection = this.getConnection(remoteInfo.address, remoteInfo.port, true)
           setImmediate(() => {
             connection.receive(message)
           })
