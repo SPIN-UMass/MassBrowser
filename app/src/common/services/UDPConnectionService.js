@@ -148,7 +148,7 @@ export class UDPConnectionService extends EventEmitter {
         }
         debug(`punching for ${address}:${port}`)
         connection.send(Buffer.alloc(0))
-        // secondConnection.send(Buffer.alloc(0))
+        secondConnection.send(Buffer.alloc(0))
       }
     })
   }
@@ -291,7 +291,7 @@ export class UDPConnectionService extends EventEmitter {
 
   async stop () {
     await this.stopMainServer()
-    //await this.stopSecondServer()
+    await this.stopSecondServer()
   }
 
   closeAllConnections () {
