@@ -80,7 +80,7 @@ export class UDPConnectionService extends EventEmitter {
         })
         this._connections[secondAddressKey] = connection
       } else {
-        console.log('There is already a connection')
+        console.log(secondAddressKey, 'There is already a connection')
       }
     }
     if (!this._connections[addressKey]) {
