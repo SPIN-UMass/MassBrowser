@@ -94,10 +94,10 @@ class RelayManager {
 
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
-      API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
       warn('restarting the relays!')
       await this._restartTCPRelayServer()
       await this._restartUDPRelayServer()
+      API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
       statusManager.info(`TCP Relay server started on port ${publicAddress.port}`, { timeout: true })
       statusManager.info(`UDP Relay server started on port ${publicAddress.UDPPort}`, { timeout: true })
     } else {
@@ -160,10 +160,10 @@ class RelayManager {
 
     if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
       debug(' Got a new reach test')
-      reachClientAddress = '54.145.75.108'
+      let reachClientAddress = '54.145.75.108'
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.main_port, data.token, false)
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.alt_port, desc.token, false)
-      await udpConnectionService.addExpectedIncomingConnection(data.client.ip)
+      await udpConnectionService.addExpectedIncomingConnection(reachClientAddress)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.alt_port)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.main_port)      

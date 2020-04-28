@@ -94,7 +94,7 @@ export default async function bootRelay () {
     status.clear()
 
     status = statusManager.info('Starting Relay')
-    relayManager.startRelay()
+    await relayManager.startRelay()
     status.clear()
 
     if (config.domainfrontable) {
