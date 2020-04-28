@@ -158,7 +158,6 @@ class RelayManager {
       // udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_port, desc.token)
     }
 
-
     if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
       debug(' Got a new reach test doing nothing for now')
       return;

@@ -23,7 +23,6 @@ class _ZMQListener {
   }
 
   async testConnection (session) {
-    console.log('Session received')
     if (session.main_port) {
       await udpConnectionService.start(false, session.main_port, session.alt_port)
     }
