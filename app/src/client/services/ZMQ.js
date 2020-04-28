@@ -24,11 +24,13 @@ class _ZMQListener {
 
   async testConnection (session) {
     console.log('Session received')
-    await udpConnectionService.start(false, session.main_port, session.alt_port)
+    if (session.main_port) {
+      await udpConnectionService.start(false, session.main_port, session.alt_port)
+    }
     return new Promise((resolve, reject) => {
       // setTimeout(()=>{reject('timeout')},10000)
       try {
-        // console.log(session)
+        console.log(session)
         var desc = {
           'readkey': Buffer.from(session.read_key, 'base64'),
           'readiv': Buffer.from(session.read_iv, 'base64'),
