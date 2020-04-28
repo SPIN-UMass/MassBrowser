@@ -66,7 +66,9 @@ export class ConnectionReceiver {
       debug(`Sending Down [${command}] , [${data}] , [${data.length}]`)
     }
     const b = Buffer.concat([sendPacket, data])
-    await this.socketDown.write(this.crypt.encrypt(b))
+    if (this.socketDown.writable) {
+      await this.socketDown.write(this.crypt.encrypt(b))
+    }
   }
 
   newConnection (ip, port, connectionID) {
