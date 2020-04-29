@@ -26,10 +26,8 @@ class _ZMQListener {
     if (session.main_port) {
       await udpConnectionService.start(false, session.main_port, session.alt_port)
       if (session.test_type === 'client') {
-        udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, false)
         udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
       } else {
-        udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, false)
         udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, true)
       }
     }
@@ -47,7 +45,7 @@ class _ZMQListener {
         this.validSessions.add(session)
         var _session
         if (session.test_type === 'client') {
-          _session = new Session(session.id, session.client.ip, session.client.port, session.client.udp_port, desc, session.relay['allowed_categories'], session.connection_type)
+          _session = new Session(session.id, session.client.ip, session.client.port, session.client.udp_port, desc, session.client['allowed_categories'], session.connection_type)
         } else if (session.test_type === 'relay') {
           _session = new Session(session.id, session.relay.ip, session.relay.port, session.relay.udp_port, desc, session.relay['allowed_categories'], session.connection_type)
         }

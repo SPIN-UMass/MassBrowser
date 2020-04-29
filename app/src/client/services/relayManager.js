@@ -19,7 +19,6 @@ class RelayManager {
     this.authenticator = new ConnectionAuthenticator()
 
     udpConnectionService.on('relay-new-connection', (connection, addressKey) => {
-      console.log('HEY')
       udpConnectionService.updateNatPunchingListItem(addressKey)
       this.onNewUDPConnection(connection)
     })

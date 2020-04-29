@@ -107,9 +107,10 @@ class PolicyManager extends EventEmitter {
     }
 
     let category = await website.getCategory()
-    if (category === null || !category.enabled) {
-      throw new errors.InvalidHostError('Category is not allowed')
-    }
+    // ignore for now 
+    // if (category === null || !category.enabled) {
+    //   throw new errors.InvalidHostError('Category is not allowed')
+    // }
   }
 }
 
