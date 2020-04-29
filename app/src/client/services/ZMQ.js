@@ -25,8 +25,13 @@ class _ZMQListener {
   async testConnection (session) {
     if (session.main_port) {
       await udpConnectionService.start(false, session.main_port, session.alt_port)
-      udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, false)
-      udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, true)
+      if (session.test_type === 'client') {
+        udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, false)
+        udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
+      } else {
+        udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, false)
+        udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, true)
+      }
     }
     return new Promise((resolve, reject) => {
       // setTimeout(()=>{reject('timeout')},10000)
