@@ -13,18 +13,18 @@ class _ZMQListener {
     this.validSessions = new Set()
   }
 
-  connect () {
+  async connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
     this.requests.on('message', (msg) => {
       this.onRequest(msg)
     })
     this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
+    await udpConnectionService.start(false, 21312, 21313)
   }
 
   async testConnection (session) {
-    if (session.main_port) {
-      await udpConnectionService.start(false, session.main_port, session.alt_port)
+    if (session.reach_client_main_port) {
       if (session.test_type === 'client') {
         udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
       } else {

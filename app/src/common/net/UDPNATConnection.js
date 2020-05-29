@@ -8,6 +8,8 @@ class UDPNATConnection extends EventEmitter {
     this.echoServerAddress = echoServerAddress
     this.echoServerPort = echoServerPort
     this.socket = null
+    this.firsttid = null
+    this.secondtid = null
     this.secondSocket = null
   }
 
@@ -20,49 +22,45 @@ class UDPNATConnection extends EventEmitter {
     return new Promise((resolve, reject) => {
       this.socket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, false)
       this.secondSocket = udpConnectionService.getConnection(this.echoServerAddress, this.echoServerPort, true)
+      this.socket.setStunMode()
+      this.secondSocket.setStunMode()
       let secondUDPPort = -1
       let firstUDPPort = -1
       let remoteAddress = null
+      let firstPromiseResolve = null
+      let secondPromiseResolve = null
       const secondSocketPromise = new Promise((resolve, reject) => {
         if (this.secondSocket) {
-          this.secondSocket.on('data', (data) => {
-            data = data.toString()
-            secondUDPPort = Number(data.split(':')[1])
-            remoteAddress = data.split(':')[0]
-            this.emit('udp-net-update', {
-              remoteSecondUDPPort: secondUDPPort,
-              remoteUDPPort: firstUDPPort,
-              remoteAddress: remoteAddress,
-              localAddress: udpConnectionService.getLocalAddress().address,
-              localUDPPort: udpConnectionService.getLocalAddress().port
-            })
-            resolve()
-          })
+          secondPromiseResolve = resolve
         } else {
           resolve()
         }
       })
 
       const firstSocketPromise = new Promise((resolve, reject) => {
-        this.socket.on('data', (data) => {
-          data = data.toString()
-          firstUDPPort = Number(data.split(':')[1])
-          remoteAddress = data.split(':')[0]
-          this.emit('udp-net-update', {
+        firstPromiseResolve = resolve
+      })
+
+      udpConnectionService.on('stun-data', (tid, data) => {
+        if (tid === this.firsttid) {
+          firstUDPPort = Number(data.port)
+          remoteAddress = data.address
+          firstPromiseResolve()
+        } else {
+          secondUDPPort = Number(data.port)
+          remoteAddress = data.address
+          secondPromiseResolve()
+        }
+        this.emit('udp-net-update', {
             remoteSecondUDPPort: secondUDPPort,
             remoteUDPPort: firstUDPPort,
             remoteAddress: remoteAddress,
             localAddress: udpConnectionService.getLocalAddress().address,
             localUDPPort: udpConnectionService.getLocalAddress().port
-          })
-          resolve()
         })
       })
 
-      this.socket.send(Buffer.from('TEST'))
-      if (this.secondSocket) {
-        this.secondSocket.send(Buffer.from('TEST'))
-      }
+      this.keepAlive()
 
       this.socket.on('close', () => {
         debug('UDP Connectivity Server Ended')
@@ -84,9 +82,9 @@ class UDPNATConnection extends EventEmitter {
   }
 
   keepAlive () {
-    this.socket.send(Buffer.from('OK'))
+    this.firsttid = this.socket.sendStunRequest()
     if (this.secondSocket) {
-      this.secondSocket.send(Buffer.from('OK'))
+      this.secondtid = this.secondSocket.sendStunRequest()
     }
   }
 }

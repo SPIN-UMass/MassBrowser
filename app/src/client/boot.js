@@ -35,17 +35,18 @@ export default async function bootClient () {
 
     status = statusManager.info('Authenticating Client')
     let auth = await API.authenticate(client.id, client.password)
-    // API.transport.setAuthToken(auth.token)
+    API.transport.setAuthToken(auth.token)
     status.clear()
-    //
-    status = statusManager.info('Connecting to WebSocket server')
-    let transport = new WebSocketTransport(
-      `${config.websocketURL}/api/?session_key=${auth.session_key}`,
-      '/api'
-    )
-    transport.setEventHandler(eventHandler)
-    await transport.connect()
-    API.setTransport(transport)
+
+    status = statusManager.info('Server connection established')
+    // status = statusManager.info('Connecting to WebSocket server')
+    // let transport = new WebSocketTransport(
+    //   `${config.websocketURL}/api/?session_key=${auth.session_key}`,
+    //   '/api'
+    // )
+    // transport.setEventHandler(eventHandler)
+    // await transport.connect()
+    // API.setTransport(transport)
     status.clear()
 
     status = statusManager.info('Server connection established')
@@ -105,9 +106,9 @@ export default async function bootClient () {
     await setClientVersion()
     status.clear()
 
-    status = statusManager.info('Starting Tor')
-    await torManager.start()
-    status.clear()
+    // status = statusManager.info('Starting Tor')
+    // await torManager.start()
+    // status.clear()
 
     if (config.isFirefoxVersion) {
       status = statusManager.info('Installing the Cert')

@@ -226,9 +226,18 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
-          setImmediate(() => {
-            connection.receive(message)
-          })
+          if (rudp.StunPacket.isStunPacket(message)) {
+            connection.on('data', (tid, data) => {
+              this.emit('stun-data', tid, data)
+            })
+            setImmediate(() => {
+              connection.receiveStunPacket(message)
+            })
+          } else {
+              setImmediate(() => {
+              connection.receive(message)
+            })
+          }
         })
 
         this.mainServer.on('listening', () => {
@@ -266,9 +275,18 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, true)
-          setImmediate(() => {
-            connection.receive(message)
-          })
+          if (rudp.StunPacket.isStunPacket(message)) {
+            connection.on('data', (tid, data) => {
+              this.emit('stun-data', tid, data)
+            })
+            setImmediate(() => {
+              connection.receiveStunPacket(message)
+            })
+          } else {
+              setImmediate(() => {
+              connection.receive(message)
+            })
+          }
         })
 
         this.secondServer.on('listening', () => {

@@ -16,6 +16,12 @@ function PacketSender(socket, address, port, sessionKey) {
   })
 };
 
+PacketSender.prototype.sendBuffer = function (buffer) {
+  if (!this._closed) {
+    this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+  }
+}
+
 PacketSender.prototype.send = function (packet) {
   let buffer = packet.toBuffer();
   if (this._sessionKey) {

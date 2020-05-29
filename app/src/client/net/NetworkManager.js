@@ -98,14 +98,15 @@ class NetworkManager {
 
     // let address = await getAddress(echoServer.ip)
     // this.UDPNATConnection = new UDPNATConnection(address, echoServer.port)
-    this.UDPNATConnection = new UDPNATConnection('104.156.251.168', 8823)
+    let udpStunServer = await API.requestNewUDPStunServer()
+    this.UDPNATConnection = new UDPNATConnection(udpStunServer.ip, udpStunServer.port)
     this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
     await this.UDPNATConnection.connect().then(() => {
       this.startUDPNATRoutine()
     })
 
     setTimeout(() => this._sendKeepAlive(), 500)
-    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 5 * 1000)
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 10 * 1000)
   }
 
   _onTCPNetworkUpdate (data) {

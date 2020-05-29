@@ -1,6 +1,7 @@
 const Sender = require('./Sender');
 const Receiver = require('./Receiver');
 const Packet = require('./Packet');
+const StunPacket = require('./StunPacket');
 const constants = require('./constants');
 const helpers = require('./helpers');
 const Duplex = require('stream').Duplex;
@@ -11,6 +12,7 @@ import { throwStatement } from 'babel-types';
 
 module.exports = Connection;
 function Connection(packetSender) {
+  this.stunMode = false;
   this.currentTCPState = constants.TCPStates.LISTEN;
   this._packetSender = packetSender;
   this._sender = new Sender(this, packetSender);
@@ -57,6 +59,23 @@ function Connection(packetSender) {
 };
 
 util.inherits(Connection, Duplex);
+
+Connection.prototype.receiveStunPacket = function (buffer) {
+  let sp = StunPacket.decode(buffer)
+  let res = sp.attrs[StunPacket.ATTR.XOR_MAPPED_ADDRESS]
+  this.emit('data', sp.tid, res);
+}
+
+Connection.prototype.sendStunRequest = function () {
+  let sp = new StunPacket(StunPacket.BINDING_CLASS, StunPacket.METHOD.REQUEST, {});
+  let message = sp.encode();
+  this._packetSender.sendBuffer(message);
+  return sp.tid;
+}
+
+Connection.prototype.setStunMode = function () {
+  this.stunMode = true;
+}
 
 Connection.prototype._stopTimeoutTimer = function () {
   clearTimeout(this._connectionTimeoutTimer);

@@ -45,10 +45,27 @@ export class CommonAPI {
     .then(response => response.data)
   }
 
-  getSessions () {
+  getReachSession () {
     return this.transport.get(
-      CLIENT_URL + '/' + this.userID + '/sessions?limit=50&status=1'
-    ).then(r => r.data.results)
+      CLIENT_URL + '/' + this.userID + '/reach'
+    ).then((r) =>  {
+      return r.data
+    })
+  }
+
+  getSessions (status, limit) {
+    if (status === undefined) {
+      status = 1
+    }
+    if (limit === undefined) {
+      limit = 50
+    }
+    return this.transport.get(
+      CLIENT_URL + '/' + this.userID + '/sessions?limit='+ limit + '&status=' + status
+    ).then((r) =>  {
+      console.log(r.data)
+      return r.data.results
+    })
   }
 
   updateSessionStatus(sessionID, status) {

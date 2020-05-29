@@ -72,6 +72,15 @@ class ClientAPI extends CommonAPI {
       }).then(r => r.data)
   }
 
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': 'stun.l.google.com',
+        'port': 19302
+      })
+    })
+  }
+
   requestNewStunServer () {
     return new Promise((resolve, reject) => {
       resolve({

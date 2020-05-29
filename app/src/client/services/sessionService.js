@@ -1,6 +1,7 @@
 import { connectionManager, Session } from '@/net'
 import { EventEmitter } from 'events'
 import { warn, debug } from '@utils/log'
+import { relayManager } from '../services'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
@@ -8,9 +9,10 @@ import { ConnectionTypes } from '@common/constants'
 import udpConnectionService from '@common/services/UDPConnectionService'
 import { Domain, Category } from '@/models'
 import API from '@/api'
-let TEST_URL = 'backend.yaler.co'
 import {throttleCall} from '@utils'
 
+let TEST_URL = 'backend.yaler.co'
+let REACH_TEST_DUMMY_RELAY_ID = '111111'
 /**
  * Note: Implements RelayAssigner
  *
@@ -45,12 +47,14 @@ class SessionService extends EventEmitter {
      */
     this.categoryWaitLists = {}
     this.sessionPollInterval = null
+    this.reachTestPollInterval = null
     this.sessionHeartInterval = null
   }
 
   async start () {
     connectionManager.setRelayAssigner(this)
-    // this._startSessionPoll()
+    this._startSessionPoll()
+    this._startReachTestPoll()
     this._startSessionHeart()
   }
 
@@ -138,7 +142,8 @@ class SessionService extends EventEmitter {
       })
 
       debug(`Requesting for new session`)
-      let sessionInfo = await API.requestSession(catIDs)
+      
+      sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
         catIDs.forEach(category => {
@@ -265,6 +270,7 @@ class SessionService extends EventEmitter {
     let validSessionInfos = this._filterValidSessions(sessionInfos)
 
     for (let sessionInfo of validSessionInfos) {
+
       var desc = {
         'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
         'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
@@ -272,6 +278,7 @@ class SessionService extends EventEmitter {
         'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
         'token': Buffer.from(sessionInfo.token, 'base64')
       }
+
       if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
         // TODO: give warning here
         continue
@@ -335,6 +342,16 @@ class SessionService extends EventEmitter {
         waitList.forEach(callback => callback(session))
       }
     })
+  }
+
+  _startReachTestPoll () {
+    if (this.reachTestPollInterval != null) {
+      return
+    }
+    this.reachTestPollInterval = setInterval(() => {
+        API.getReachSession()
+        .then(ses => relayManager.handleNewRelaySessions(ses))
+    }, 4 * 1000)
   }
 
   _startSessionPoll () {
