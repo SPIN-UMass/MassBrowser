@@ -45,7 +45,6 @@ class RelayManager {
   }
 
   async handleNewRelaySessions (session) {
-    let reachClientAddress = session.reach_client_ip
     debug(`Got new relay session [${session.id}]`)
     let desc = {
       'writekey': (Buffer.from(session.read_key, 'base64')),
@@ -59,8 +58,8 @@ class RelayManager {
 
     if (session.connection_type === ConnectionTypes.UDP) {
       this.authenticator.addPendingConnection((desc.token), desc)
-      udpConnectionService.createEncryptedConnection(reachClientAddress, session.reach_client_main_port, session.token, false)
-      udpConnectionService.createEncryptedConnection(reachClientAddress, session.reach_client_alt_port, session.token, false)
+      udpConnectionService.createEncryptedConnection(session.reach_client_ip, session.reach_client_main_port, session.token, false)
+      udpConnectionService.createEncryptedConnection(session.reach_client_ip, session.reach_client_alt_port, session.token, false)
     }
     
     API.updateSessionStatus(session.id, 'client_accepted')
@@ -68,10 +67,10 @@ class RelayManager {
 
     if (session.reach_client_main_port && session.reach_client_alt_port && session.connection_type === ConnectionTypes.UDP) {
       await this.timeout(3000)
-      await udpConnectionService.addExpectedIncomingConnection(reachClientAddress)
-      await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, session.reach_client_alt_port)
+      await udpConnectionService.addExpectedIncomingConnection(session.reach_client_ip)
+      await udpConnectionService.performUDPHolePunchingRelay(session.reach_client_ip, session.reach_client_alt_port)
       await this.timeout(3000)
-      await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, session.reach_client_main_port)      
+      await udpConnectionService.performUDPHolePunchingRelay(session.reach_client_ip, session.reach_client_main_port)      
     }
   }
 
