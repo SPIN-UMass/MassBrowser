@@ -24,7 +24,7 @@ class _ZMQListener {
   }
 
   async testConnection (session) {
-    if (session.reach_client_main_port) {
+    if (session.connection_type === 2) {
       if (session.test_type === 'client') {
         udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
       } else {

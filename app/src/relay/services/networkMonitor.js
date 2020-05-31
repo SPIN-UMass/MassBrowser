@@ -142,6 +142,7 @@ class NetworkMonitor {
     let changed = false
     if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
       changed = true
+      console.log(data)
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localUDPPort = data.localUDPPort

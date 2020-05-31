@@ -12,6 +12,7 @@ import { throwStatement } from 'babel-types';
 
 module.exports = Connection;
 function Connection(packetSender) {
+  this.stunMode = false;
   this.currentTCPState = constants.TCPStates.LISTEN;
   this._packetSender = packetSender;
   this._sender = new Sender(this, packetSender);
@@ -58,6 +59,10 @@ function Connection(packetSender) {
 };
 
 util.inherits(Connection, Duplex);
+
+Connection.prototype.setStunMode = function () {
+  this.stunMode = true;
+}
 
 Connection.prototype.receiveStunPacket = function (buffer) {
   let sp = StunPacket.decode(buffer)
@@ -254,6 +259,9 @@ Connection.prototype._changeCurrentTCPState = function (newState) {
 }
 
 Connection.prototype.close = async function () {
+  if (this.stunMode) {
+    this.emit('close');
+  }
   switch(this.currentTCPState) {
     case constants.LISTEN:
     case constants.SYN_SENT:

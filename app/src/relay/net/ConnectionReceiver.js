@@ -24,7 +24,7 @@ export class ConnectionReceiver {
     this.crypt = false
     this.isAuthenticated = false
     this.carrylen = 0
-    this.carry = Buffer(0)
+    this.carry = Buffer.alloc(0)
     this.lastcommand = ''
     this.newconcarry = ''
     this.lastConnectionID = ''
@@ -58,7 +58,7 @@ export class ConnectionReceiver {
   }
 
   async write (connectionID, command, data) {
-    let sendPacket = Buffer(7)
+    let sendPacket = Buffer.alloc(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)
     sendPacket.writeUInt32BE(data.length, 3)
@@ -77,25 +77,25 @@ export class ConnectionReceiver {
         debug(`New connection to [${ip}]:[${port}]`)
         this.connections[connectionID] = net.connect({host: ip, port: port}, () => {
           debug(`connected to [${ip}]`)
-          this.write(connectionID, 'N', Buffer(ip + ':' + String(port)))
+          this.write(connectionID, 'N', Buffer.from(ip + ':' + String(port)))
         })
         this.connections[connectionID].on('data', (data) => {
           this.write(connectionID, 'D', data)
         })
         this.connections[connectionID].on('end', () => {
-          this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
+          this.write(connectionID, 'C', Buffer.from(ip + ':' + String(port)))
           delete this.connections[connectionID]
         })
         this.connections[connectionID].on('error', () => {
           debug(`error on [${ip}]`)
-          this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
+          this.write(connectionID, 'C', Buffer.from(ip + ':' + String(port)))
           delete this.connections[connectionID]
         })
       } catch (err) {
-        this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
+        this.write(connectionID, 'C', Buffer.from(ip + ':' + String(port)))
       }
     }).catch((err) => {
-      this.write(connectionID, 'C', Buffer(ip + ':' + String(port)))
+      this.write(connectionID, 'C', Buffer.from(ip + ':' + String(port)))
       debug(err)
     })
   }
@@ -159,7 +159,7 @@ export class ConnectionReceiver {
       } else {
         if (this.carry.length > 0) {
           data = Buffer.concat([this.carry, data])
-          this.carry = Buffer(0)
+          this.carry = Buffer.alloc(0)
         }
         if (data.length < 7) {
           this.carry = data

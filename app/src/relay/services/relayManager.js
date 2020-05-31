@@ -95,8 +95,8 @@ class RelayManager {
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
       warn('restarting the relays!')
-      await this._restartTCPRelayServer()
-      await this._restartUDPRelayServer()
+      // await this._restartTCPRelayServer()
+      // await this._restartUDPRelayServer()
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
       statusManager.info(`TCP Relay server started on port ${publicAddress.port}`, { timeout: true })
       statusManager.info(`UDP Relay server started on port ${publicAddress.UDPPort}`, { timeout: true })
@@ -126,8 +126,8 @@ class RelayManager {
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
-      this._restartTCPRelayServer()
-      this._restartUDPRelayServer()
+      // this._restartTCPRelayServer()
+      // this._restartUDPRelayServer()
     }
   }
 
@@ -160,20 +160,20 @@ class RelayManager {
       udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_alt_port, data.token, false)
     }
 
-    if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
-      debug(' Got a new reach test')
-      udpConnectionService.createEncryptedConnection(reachClientAddress, data.main_port, data.token, false)
-      udpConnectionService.createEncryptedConnection(reachClientAddress, data.alt_port, data.token, false)
+    if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
+      debug(' Got a new reach test', data.reach_client_main_port, data.reach_client_alt_port, data.reach_client_ip)
+      udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_main_port, data.token, false)
+      udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_alt_port, data.token, false)
     }
 
     API.acceptSession(data.client, data.id)
 
-    if (data.main_port && data.alt_port && data.connection_type === ConnectionTypes.UDP) {
+    if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
       await this.timeout(3000)
       await udpConnectionService.addExpectedIncomingConnection(reachClientAddress)
-      await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.alt_port)
+      await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_alt_port)
       await this.timeout(3000)
-      await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.main_port)      
+      await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_main_port)      
     }
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
