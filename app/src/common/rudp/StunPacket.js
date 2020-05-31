@@ -63,7 +63,6 @@ StunPacket.prototype._getTransactionId = function _getTransactionId() {
 StunPacket.prototype.encode = function encode() {
     var encoded_attrs = this._encodeAttributes();
     var encoded_header = this._encodeHeader(encoded_attrs.length);
-
     return Buffer.concat([encoded_header, encoded_attrs]);
 };
 
@@ -92,11 +91,13 @@ StunPacket.prototype._encodeAttributes = function _encodeAttributes() {
 
 // Determines whether STUN StunPacket
 StunPacket.isStunPacket = function _isStunStunPacket(buffer) {
-    var block = buffer.readUInt8(0);
-    var bit1 = block & 0x80;
-    var bit2 = block & 0x40;
+    let block = buffer.readUInt16BE(0)
+    return (block === 0x0101) ? true : false;
+    // var block = buffer.readUInt8(0);
+    // var bit1 = block & 0x80;
+    // var bit2 = block & 0x40;
 
-    return (bit1 === 0 && bit2 === 0) ? true : false;
+    // return (bit1 === 0 && bit2 === 0) ? true : false;
 };
 
 // Decode StunPacket

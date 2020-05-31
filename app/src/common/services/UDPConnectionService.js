@@ -227,6 +227,7 @@ export class UDPConnectionService extends EventEmitter {
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           if (rudp.StunPacket.isStunPacket(message)) {
+            console.log(remoteInfo, 'is stun', message)
             connection.on('data', (tid, data) => {
               this.emit('stun-data', tid, data)
             })

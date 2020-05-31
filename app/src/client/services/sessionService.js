@@ -348,6 +348,10 @@ class SessionService extends EventEmitter {
     if (this.reachTestPollInterval != null) {
       return
     }
+    setTimeout(() => {
+      API.getReachSession()
+        .then(ses => relayManager.handleNewRelaySessions(ses))
+      }, 5000)
     this.reachTestPollInterval = setInterval(() => {
         console.log('sending reach request')
         API.getReachSession()
