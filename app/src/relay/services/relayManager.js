@@ -136,7 +136,8 @@ class RelayManager {
   }
 
   async onNewSessionEvent (data) {
-    let reachClientAddress = '54.145.75.108'
+    let reachClientAddress = data.reach_client_ip
+
     let desc = {
       'writekey': (Buffer.from(data.read_key, 'base64')),
       'writeiv': (Buffer.from(data.read_iv, 'base64')),

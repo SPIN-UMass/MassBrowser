@@ -12,7 +12,6 @@ import { throwStatement } from 'babel-types';
 
 module.exports = Connection;
 function Connection(packetSender) {
-  this.stunMode = false;
   this.currentTCPState = constants.TCPStates.LISTEN;
   this._packetSender = packetSender;
   this._sender = new Sender(this, packetSender);
@@ -71,10 +70,6 @@ Connection.prototype.sendStunRequest = function () {
   let message = sp.encode();
   this._packetSender.sendBuffer(message);
   return sp.tid;
-}
-
-Connection.prototype.setStunMode = function () {
-  this.stunMode = true;
 }
 
 Connection.prototype._stopTimeoutTimer = function () {

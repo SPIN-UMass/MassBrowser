@@ -13,6 +13,15 @@ class RelayAPI extends CommonAPI {
     return response.data
   }
 
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': 'stun.l.google.com',
+        'port': 19302
+      })
+    })
+  }
+
   acceptSession (client, sessionid) {
     return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'relay_accepted'})
   }

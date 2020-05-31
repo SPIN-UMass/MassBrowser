@@ -31,7 +31,8 @@ class NetworkMonitor {
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
 
-    this.UDPNATConnection = new UDPNATConnection('104.156.251.168', 8823)
+    let udpStunServer = await API.requestNewUDPStunServer()
+    this.UDPNATConnection = new UDPNATConnection(udpStunServer.ip, udpStunServer.port)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
     // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
