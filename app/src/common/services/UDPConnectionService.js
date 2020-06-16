@@ -81,6 +81,7 @@ export class UDPConnectionService extends EventEmitter {
     if (useAltPort) {
       if (this._connections[secondAddressKey]) {
         this.deleteConnectionListItem(secondAddressKey)
+        this.deleteNatPunchingListItem(secondAddressKey)
       }
       connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port, sessionKey))
       connection.on('close', () => {
@@ -91,9 +92,10 @@ export class UDPConnectionService extends EventEmitter {
     }
     if (this._connections[addressKey]) {
       this.deleteConnectionListItem(addressKey)
+      this.deleteNatPunchingListItem(addressKey)
     }
-      connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port, sessionKey))
-      connection.on('close', () => {
+    connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port, sessionKey))
+    connection.on('close', () => {
       this.deleteNatPunchingListItem(addressKey)
       this.deleteConnectionListItem(addressKey)
     })
@@ -135,19 +137,11 @@ export class UDPConnectionService extends EventEmitter {
         connection.on('connect', () => {
           this._natPunchingList[addressKey].isPunched = true
           clearTimeout(timer)
-          secondConnection.close().then(() => {
-            console.log('using main the other connection has been closed')
-            this.deleteConnectionListItem(secondAddressKey)
-          })
           resolve(this._connections[addressKey])
         })
         secondConnection.on('connect', () => {
           this._natPunchingList[secondAddressKey].isPunched = true
           clearTimeout(timer)
-          connection.close().then(() => {
-            console.log('using alt the other connection has been closed')
-            this.deleteConnectionListItem(addressKey)
-          })
           resolve(this._connections[secondAddressKey])
         })
         let timer = setTimeout(() => {

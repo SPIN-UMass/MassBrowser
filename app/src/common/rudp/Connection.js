@@ -199,15 +199,6 @@ Connection.prototype.receive = async function (buffer) {
             await this._sender.verifyAck(packet.acknowledgementNumber)
             await this._receiver.receive(packet)
             break;
-          case constants.PacketTypes.FIN:
-            await this.incrementNextExpectedSequenceNumber();
-            this._sender.clear();
-            this._receiver.clear();
-            this._sender.sendAck();
-            this._changeCurrentTCPState(constants.TCPStates.CLOSE_WAIT);
-            this._sender.sendFin();
-            this._changeCurrentTCPState(constants.TCPStates.LAST_ACK);
-            break;
         }
         break;
       case constants.TCPStates.ESTABLISHED:
