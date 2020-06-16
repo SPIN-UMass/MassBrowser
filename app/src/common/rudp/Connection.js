@@ -266,9 +266,9 @@ Connection.prototype.close = async function () {
     return;
   }
   switch(this.currentTCPState) {
-    case constants.LISTEN:
-    case constants.SYN_SENT:
-    case constants.SYN_RCVD:
+    case constants.TCPStates.LISTEN:
+    case constants.TCPStates.SYN_SENT:
+    case constants.TCPStates.SYN_RCVD:
     case constants.TCPStates.ESTABLISHED:
       this._sender.clear();
       this._receiver.clear();
