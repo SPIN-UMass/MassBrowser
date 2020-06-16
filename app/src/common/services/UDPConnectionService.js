@@ -76,8 +76,8 @@ export class UDPConnectionService extends EventEmitter {
 
   createEncryptedConnection (address, port, sessionKey, useAltPort) {
     let connection
-    let addressKey = address + port + ':' + this.port
-    let secondAddressKey = address + port + ':' + this.secondPort
+    let addressKey = address + ':' + port  + this.port
+    let secondAddressKey = address + ':' + port  + this.secondPort
     if (useAltPort) {
       if (this._connections[secondAddressKey]) {
         this.deleteConnectionListItem(secondAddressKey)
@@ -102,7 +102,7 @@ export class UDPConnectionService extends EventEmitter {
 
   performUDPHolePunchingRelay (address, port) {
     return new Promise((resolve, reject) => {
-      let addressKey = address + port + ':' + this.port
+      let addressKey = address + ':' + port  + this.port
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve(this._connections[addressKey])
@@ -121,8 +121,8 @@ export class UDPConnectionService extends EventEmitter {
 
   performUDPHolePunchingClient (address, port) {
     return new Promise((resolve, reject) => {
-      let addressKey = address + port + ':' + this.port
-      let secondAddressKey = address + port + ':' + this.secondPort
+      let addressKey = address + ':' + port  + this.port
+      let secondAddressKey = address + ':' + port  + this.secondPort
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
         resolve(this._connections[addressKey])
@@ -173,8 +173,8 @@ export class UDPConnectionService extends EventEmitter {
 
   getConnection (address, port, useSecondPort) {
     let connection
-    let addressKey = address + port + ':' + this.port
-    let secondAddressKey = address + port + ':' + this.secondPort
+    let addressKey = address + ':' + port  + this.port
+    let secondAddressKey = address + ':' + port  + this.secondPort
     if (useSecondPort) {
       if (this.secondServer === null) {
         return null
