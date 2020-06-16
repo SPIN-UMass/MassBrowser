@@ -47,13 +47,6 @@ export default async function bootRelay () {
     API.setTransport(transport)
     status.clear()
 
-    status = statusManager.info('Connecting to Connectivity server')
-    await networkMonitor.start()
-    status.clear()
-    status = statusManager.info('Obtaining NAT information')
-    await networkMonitor.waitForNetworkStatus()
-    status.clear()
-
     /** Only sync database in boot if it is the first time booting
     * otherwise sync will after the client has started to avoid
     * having delay on each run */
@@ -95,6 +88,13 @@ export default async function bootRelay () {
 
     status = statusManager.info('Starting Relay')
     await relayManager.startRelay()
+    status.clear()
+
+    status = statusManager.info('Connecting to Connectivity server')
+    await networkMonitor.start()
+    status.clear()
+    status = statusManager.info('Obtaining NAT information')
+    await networkMonitor.waitForNetworkStatus()
     status.clear()
 
     if (config.domainfrontable) {

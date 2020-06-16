@@ -88,6 +88,7 @@ class UDPNATConnection extends EventEmitter {
     if (this.secondSocket) {
       this.secondtid = this.secondSocket.sendStunRequest()
     }
+    return
   }
 }
 

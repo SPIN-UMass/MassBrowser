@@ -1,8 +1,9 @@
-import { policyManager } from '@/services'
+import { policyManager } from '@/services/'
 import { debug } from '@utils/log'
 import { Crypto } from '@utils/crypto'
-import API from '@/api'
+import API from '@common/api'
 import { Buffer } from 'buffer'
+
 const net = require('net')
 
 export class ConnectionReceiver {
@@ -32,6 +33,7 @@ export class ConnectionReceiver {
     this.desciber = {}
     this.initcarry = ''
     this.connections = {}
+    this.dumblock = new Semaphore(1) 
   }
 
   authenticate (data) {

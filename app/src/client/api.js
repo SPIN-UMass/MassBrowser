@@ -4,7 +4,6 @@ import config from '@utils/config'
 import { debug } from '@utils/log'
 
 const SESSIONS_PATH = '/sessions'
-const SESSION_PATH = '/session/'
 const CLIENT_URL = '/client'
 const globalDNSCache = {}
 
@@ -47,18 +46,6 @@ class ClientAPI extends CommonAPI {
       }, (err) => {
         return null
       })
-  }
-
-  clientSessionDisconnected (client, sessionid) {
-    debug('closing session')
-    // TODO
-    return new Promise((resolve, reject) => {
-      resolve()
-    })
-  }
-
-  clientSessionConnected (client, sessionid) {
-    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'used'})
   }
 
   updateClientAddress (remoteAddress, remoteTCPPort, remoteUDPPort, remoteSecondUDPPort) {

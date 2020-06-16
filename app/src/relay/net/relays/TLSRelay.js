@@ -1,6 +1,6 @@
 import tls from 'tls'
 import fs from 'fs'
-import { ConnectionReceiver } from '@/net/ConnectionReceiver'
+import { ConnectionReceiver } from '@/net'
 
 export default class TLSRelay {
   constructor(keyPath, certPath, port) {

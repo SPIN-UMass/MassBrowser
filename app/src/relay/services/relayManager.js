@@ -1,4 +1,4 @@
-import { TCPRelay, ConnectionAuthenticator, ThrottleGroup } from '@/net'
+import { TCPRelay, ConnectionReceiver } from '@/net'
 import { warn, debug } from '@utils/log'
 import API from '@/api'
 import { store } from '@utils/store'
@@ -6,7 +6,7 @@ import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
 import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
 import udpConnectionService from '@common/services/UDPConnectionService'
-import {ConnectionReceiver} from '../net/ConnectionReceiver'
+import { ConnectionAuthenticator, ThrottleGroup } from '@common/net'
 
 /**
  * Manages the relay servers.
@@ -88,7 +88,7 @@ class RelayManager {
       return
     }
     warn('change access has been changed')
-
+    await udpConnectionService.start(true)
     this.openAccess = access
     store.commit('changeOpenAccess', this.openAccess)
 

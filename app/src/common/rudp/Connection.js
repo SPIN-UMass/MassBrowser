@@ -67,7 +67,7 @@ Connection.prototype.setStunMode = function () {
 Connection.prototype.receiveStunPacket = function (buffer) {
   let sp = StunPacket.decode(buffer)
   let res = sp.attrs[StunPacket.ATTR.XOR_MAPPED_ADDRESS]
-  this.emit('data', sp.tid, res);
+  this.emit('stun-data', sp.tid, res);
 }
 
 Connection.prototype.sendStunRequest = function () {
@@ -261,6 +261,7 @@ Connection.prototype._changeCurrentTCPState = function (newState) {
 Connection.prototype.close = async function () {
   if (this.stunMode) {
     this.emit('close');
+    return;
   }
   switch(this.currentTCPState) {
     case constants.LISTEN:

@@ -1,8 +1,12 @@
 import { Session } from '@/net/Session'
 import { connectionManager } from '@/net/connectionManager'
+import { ConnectionTypes } from '@common/constants'
 import udpConnectionService from '@common/services/UDPConnectionService'
 let REQUEST_ZMQ_SERVER = 'tcp://127.0.0.1:5560'
 let RESULTS_ZMQ_SERVER = 'tcp://127.0.0.1:5558'
+const SESSION_TIMEOUT = 10000
+const REACH_CLIENT_MAIN_UDP_PORT = 21312
+const REACH_CLIENT_ALT_UDP_PORT = 21313
 const zeromq = require('zeromq')
 
 class _ZMQListener {
@@ -20,11 +24,11 @@ class _ZMQListener {
     })
     this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
-    await udpConnectionService.start(false, 21312, 21313)
+    await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
   }
 
   async testConnection (session) {
-    if (session.connection_type === 2) {
+    if (session.connection_type === ConnectionTypes.UDP) {
       if (session.test_type === 'client') {
         udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
       } else {
@@ -32,7 +36,7 @@ class _ZMQListener {
       }
     }
     return new Promise((resolve, reject) => {
-      // setTimeout(()=>{reject('timeout')},10000)
+      setTimeout(()=>{reject('timeout')}, SESSION_TIMEOUT)
       try {
         console.log(session)
         var desc = {

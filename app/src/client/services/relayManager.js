@@ -1,12 +1,12 @@
-import { ConnectionAuthenticator, ThrottleGroup } from '../net'
-import { ConnectionReceiver } from '../net/ConnectionReceiver'
+import { ConnectionAuthenticator, ThrottleGroup } from '@common/net'
+import { ConnectionReceiver } from '@/net'
 import { warn, debug } from '@utils/log'
-import API from '@/api'
 import { store } from '@utils/store'
 import { networkMonitor } from '@/services'
 import { statusManager } from '@common/services'
-import udpConnectionService from '@common/services/UDPConnectionService'
 import { ConnectionTypes, UNLIMITED_BANDWIDTH } from '@common/constants'
+import API from '@/api'
+import udpConnectionService from '@common/services/UDPConnectionService'
 
 class RelayManager {
   constructor () {
@@ -97,84 +97,6 @@ class RelayManager {
       upPipe.end()
     })
   }
-
-  // async _stopUDPRelayServer () {
-  //   if (this.isUDPRelayServerRunning) {
-  //     await udpConnectionService.stop()
-  //     this.isUDPRelayServerRunning = false
-  //   }
-  // }
-
-  // async _stopTCPRelayServer () {
-  //   if (this.isTCPRelayServerRunning) {
-  //     await this.TCPRelayServer.stop()
-  //     this.isTCPRelayServerRunning = false
-  //     this.TCPRelayServer = null
-  //   }
-  // }
-
-  // async _startUDPRelayServer () {
-  //   let localAddress = this._getLocalAddress()
-  //   await udpConnectionService.setPort(localAddress.UDPPort)
-  //   this.isUDPRelayServerRunning = true
-  // }
-
-  // async _startTCPRelayServer () {
-  //   let localAddress = this._getLocalAddress()
-  //   this.TCPRelayServer = new TCPRelay(
-  //     this.authenticator,
-  //     localAddress.ip,
-  //     localAddress.port,
-  //     this.uploadLimiter,
-  //     this.downloadLimiter
-  //   )
-  //   await this.TCPRelayServer.start()
-  //   this.isTCPRelayServerRunning = true
-  // }
-
-  // async _restartUDPRelayServer () {
-  //   try {
-  //     if (this.isUDPRelayServerRunning) {
-  //       await this._stopUDPRelayServer()
-  //       debug(`UDP Relay stopped`)
-  //     }
-  //     await this._startUDPRelayServer()
-  //     debug(`UDP Relay started`)
-  //   } catch (err) {
-  //     warn(err)
-  //   }
-  // }
-
-  // async _restartTCPRelayServer () {
-  //   try {
-  //     if (this.isTCPRelayServerRunning) {
-  //       await this._stopTCPRelayServer()
-  //       debug(`TCP Relay stopped`)
-  //     }
-  //     await this._startTCPRelayServer()
-  //     debug(`Relay started`)
-  //   } catch (err) {
-  //     warn(err)
-  //   }
-  // }
-
-  // _getReachableAddress () {
-  //   let publicAddress = networkMonitor.getPublicAddress()
-  //   store.commit('changePublicAddress', publicAddress)
-  //   if (this.natEnabled) {
-  //     return {ip: publicAddress.ip, port: publicAddress.port, UDPPort: publicAddress.UDPPort}
-  //   }
-  //   return {ip: publicAddress.ip, port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
-  // }
-
-  // _getLocalAddress () {
-  //   let privateAddress = networkMonitor.getPrivateAddress()
-  //   store.commit('changePrivateAddress', privateAddress)
-  //   if (this.natEnabled) {
-  //     return {ip: privateAddress.ip, port: privateAddress.port, UDPPort: privateAddress.UDPPort}
-  //   }
-  //   return {ip: '0.0.0.0', port: this.TCPRelayPort, UDPPort: this.UDPRelayPort}
-  // }
 }
 
 export const relayManager = new RelayManager()

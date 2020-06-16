@@ -25,7 +25,6 @@ class NetworkMonitor {
   }
 
   async start () {
-    await udpConnectionService.start(true)
     this.TCPNATConnection = new TCPNATConnection(config.echoServer.host, config.echoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
@@ -35,7 +34,6 @@ class NetworkMonitor {
     this.UDPNATConnection = new UDPNATConnection(udpStunServer.ip, udpStunServer.port)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
-    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
     udpConnectionService.on('start', () => {
       this.UDPNATConnection.reconnect()
     })

@@ -96,8 +96,6 @@ class NetworkManager {
       this.startTCPNATRoutine()
     })
 
-    // let address = await getAddress(echoServer.ip)
-    // this.UDPNATConnection = new UDPNATConnection(address, echoServer.port)
     let udpStunServer = await API.requestNewUDPStunServer()
     this.UDPNATConnection = new UDPNATConnection(udpStunServer.ip, udpStunServer.port)
     this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
@@ -120,7 +118,7 @@ class NetworkManager {
     }
     if (changed) {
       this.restartListenerServer()
-      API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort)
+      API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
     }
   }
 
@@ -134,7 +132,8 @@ class NetworkManager {
       this.remoteUDPPort = data.remoteUDPPort
       this.remoteSecondUDPPort = data.remoteSecondUDPPort
     }
-    if (changed) {
+    if (changed && this.remoteSecondUDPPort !== -1 && this.remoteUDPPort !== -1) {
+      debug(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
       API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
     }
   }

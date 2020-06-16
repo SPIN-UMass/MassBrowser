@@ -3,7 +3,7 @@ import { store } from '@utils/store'
 import * as dgram from 'dgram'
 import * as rudp from '../rudp'
 import { EventEmitter } from 'events'
-import {Semaphore} from 'await-semaphore'
+import { Semaphore } from 'await-semaphore'
 
 export class UDPConnectionService extends EventEmitter {
   constructor () {
@@ -63,6 +63,11 @@ export class UDPConnectionService extends EventEmitter {
     return new Promise((resolve, reject) => {
       console.log(address, 'added into the incomming connections')
       this._expectedConnections[address] = true
+      setTimeout(() => {
+        if (this._expectedConnections[address]) {
+          delete this._expectedConnections[address]
+        }
+      }, 20000)
       resolve()
     })
   }
@@ -168,6 +173,9 @@ export class UDPConnectionService extends EventEmitter {
       }
       if (!this._connections[secondAddressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
+        connection.on('stun-data', (tid, data) => {
+          this.emit('stun-data', tid, data)
+        })
         connection.on('close', () => {
           this.deleteNatPunchingListItem(secondAddressKey)
           this.deleteConnectionListItem(secondAddressKey)
@@ -179,6 +187,9 @@ export class UDPConnectionService extends EventEmitter {
     } else {
       if (!this._connections[addressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
+        connection.on('stun-data', (tid, data) => {
+          this.emit('stun-data', tid, data)
+        })
         connection.on('close', () => {
           this.deleteNatPunchingListItem(addressKey)
           this.deleteConnectionListItem(addressKey)
@@ -227,9 +238,6 @@ export class UDPConnectionService extends EventEmitter {
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
           if (rudp.StunPacket.isStunPacket(message)) {
-            connection.on('data', (tid, data) => {
-              this.emit('stun-data', tid, data)
-            })
             setImmediate(() => {
               connection.receiveStunPacket(message)
             })
@@ -276,9 +284,6 @@ export class UDPConnectionService extends EventEmitter {
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, true)
           if (rudp.StunPacket.isStunPacket(message)) {
-            connection.on('data', (tid, data) => {
-              this.emit('stun-data', tid, data)
-            })
             setImmediate(() => {
               connection.receiveStunPacket(message)
             })

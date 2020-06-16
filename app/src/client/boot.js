@@ -39,6 +39,11 @@ export default async function bootClient () {
     status.clear()
 
     status = statusManager.info('Server connection established')
+    status.clear()
+    /*
+    websocket instead of http connection to the backend
+    need changes in backend as well
+    */
     // status = statusManager.info('Connecting to WebSocket server')
     // let transport = new WebSocketTransport(
     //   `${config.websocketURL}/api/?session_key=${auth.session_key}`,
@@ -47,7 +52,6 @@ export default async function bootClient () {
     // transport.setEventHandler(eventHandler)
     // await transport.connect()
     // API.setTransport(transport)
-    status.clear()
 
     status = statusManager.info('Server connection established')
     await API.clientUp()

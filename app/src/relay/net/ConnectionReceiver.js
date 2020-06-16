@@ -4,7 +4,6 @@ import { Crypto } from '@utils/crypto'
 import API from '@/api'
 import { Buffer } from 'buffer'
 const net = require('net')
-import {Semaphore} from 'await-semaphore'
 
 export class ConnectionReceiver {
   constructor (socketUp, socketDown, socket, authenticator) {
@@ -33,8 +32,6 @@ export class ConnectionReceiver {
     this.desciber = {}
     this.initcarry = ''
     this.connections = {}
-    
-   this.dumblock = new Semaphore(1) 
   }
 
   authenticate (data) {

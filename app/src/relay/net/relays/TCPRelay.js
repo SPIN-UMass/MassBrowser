@@ -1,7 +1,7 @@
 const net = require('net')
 import fs from 'fs'
-import { ConnectionReceiver } from '@/net/ConnectionReceiver'
-import { ThrottleGroup } from '@/net/throttle'
+import { ConnectionReceiver } from '@/net'
+import { ThrottleGroup } from '@common/net'
 import { debug, info } from '@utils/log'
 
 export class TCPRelay {
