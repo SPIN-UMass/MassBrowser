@@ -34,8 +34,6 @@ export class CommonAPI {
   }
 
   clientSessionDisconnected (client, sessionid) {
-    debug('closing session')
-    // TODO
     return new Promise((resolve, reject) => {
       resolve()
     })

@@ -65,6 +65,7 @@ Connection.prototype.setStunMode = function () {
 }
 
 Connection.prototype.receiveStunPacket = function (buffer) {
+  this.stunMode = true;
   let sp = StunPacket.decode(buffer)
   let res = sp.attrs[StunPacket.ATTR.XOR_MAPPED_ADDRESS]
   this.emit('stun-data', sp.tid, res);

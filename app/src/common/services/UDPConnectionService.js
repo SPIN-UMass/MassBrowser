@@ -135,11 +135,19 @@ export class UDPConnectionService extends EventEmitter {
         connection.on('connect', () => {
           this._natPunchingList[addressKey].isPunched = true
           clearTimeout(timer)
+          secondConnection.close().then(() => {
+            console.log('using main the other connection has been closed')
+            this.deleteConnectionListItem(secondAddressKey)
+          })
           resolve(this._connections[addressKey])
         })
         secondConnection.on('connect', () => {
           this._natPunchingList[secondAddressKey].isPunched = true
           clearTimeout(timer)
+          connection.close().then(() => {
+            console.log('using alt the other connection has been closed')
+            this.deleteConnectionListItem(addressKey)
+          })
           resolve(this._connections[secondAddressKey])
         })
         let timer = setTimeout(() => {
@@ -341,7 +349,7 @@ export class UDPConnectionService extends EventEmitter {
       if (this._isMainServerRunning) {
         await this.closeAllConnections()
           .then(() => {
-            console.log('all connections are close')
+            console.log('all connections are closed')
             this._connections = {}
             this.mainServer.close(() => {
               this.mainServer = null

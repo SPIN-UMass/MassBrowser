@@ -86,15 +86,15 @@ export default async function bootRelay () {
     await telegramService.loadTelegramList()
     status.clear()
 
-    status = statusManager.info('Starting Relay')
-    await relayManager.startRelay()
-    status.clear()
-
     status = statusManager.info('Connecting to Connectivity server')
     await networkMonitor.start()
     status.clear()
     status = statusManager.info('Obtaining NAT information')
     await networkMonitor.waitForNetworkStatus()
+    status.clear()
+
+    status = statusManager.info('Starting Relay')
+    await relayManager.startRelay()
     status.clear()
 
     if (config.domainfrontable) {

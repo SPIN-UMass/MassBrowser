@@ -25,6 +25,7 @@ class NetworkMonitor {
   }
 
   async start () {
+    await udpConnectionService.start(true)
     this.TCPNATConnection = new TCPNATConnection(config.echoServer.host, config.echoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
@@ -131,7 +132,6 @@ class NetworkMonitor {
     }
     if (changed) {
       warn('TCP changed')
-      // console.log(data)
       relayManager.handleReconnect()
     }
   }
@@ -140,7 +140,6 @@ class NetworkMonitor {
     let changed = false
     if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
       changed = true
-      console.log(data)
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localUDPPort = data.localUDPPort
@@ -148,7 +147,6 @@ class NetworkMonitor {
     }
     if (changed) {
       warn('UDP changed')
-      // console.log(data)
       relayManager.handleReconnect()
     }
   }
