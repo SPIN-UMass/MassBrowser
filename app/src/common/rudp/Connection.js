@@ -260,6 +260,7 @@ Connection.prototype._changeCurrentTCPState = function (newState) {
 }
 
 Connection.prototype.close = async function () {
+  console.log('CLOSED CALLED', this.stunMode, this.currentTCPState)
   if (this.stunMode) {
     this.emit('close');
     return;

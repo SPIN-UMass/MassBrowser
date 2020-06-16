@@ -52,7 +52,10 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   deleteConnectionListItem (addressKey) {
+    console.log(addressKey, 'removed')
+    console.log(Object.keys(this._connections))
     delete this._connections[addressKey]
+    console.log(Object.keys(this._connections))
   }
 
   sendDummyPacket (address, port) {
@@ -96,7 +99,7 @@ export class UDPConnectionService extends EventEmitter {
         })
         this._connections[addressKey] = connection
       } else {
-        console.log('There is already a connection')
+        console.log(addressKey, 'There is already a connection')
     }
   }
 
