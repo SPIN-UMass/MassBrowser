@@ -157,28 +157,28 @@ class RelayManager {
       debug('created connection object for udp session')
       udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_port, data.token, false)
       udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_alt_port, data.token, false)
+      await udpConnectionService.addExpectedIncomingConnection(data.client.ip, data.client.udp_alt_port)
+      await udpConnectionService.addExpectedIncomingConnection(data.client.ip, data.client.udp_port)
     }
 
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
       debug(' Got a new reach test', data.reach_client_main_port, data.reach_client_alt_port, data.reach_client_ip)
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_main_port, data.token, false)
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_alt_port, data.token, false)
+      await udpConnectionService.addExpectedIncomingConnection(reachClientAddress, data.reach_client_alt_port)
+      await udpConnectionService.addExpectedIncomingConnection(reachClientAddress, data.reach_client_main_port)
     }
 
     API.acceptSession(data.client, data.id)
 
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
-      await this.timeout(3000)
-      await udpConnectionService.addExpectedIncomingConnection(reachClientAddress, data.reach_client_alt_port)
-      await udpConnectionService.addExpectedIncomingConnection(reachClientAddress, data.reach_client_main_port)
+      await this.timeout(3000) // this one is for delay in zmq client
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_alt_port)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_main_port)      
     }
 
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
-      await udpConnectionService.addExpectedIncomingConnection(data.client.ip, data.client.udp_alt_port)
-      await udpConnectionService.addExpectedIncomingConnection(data.client.ip, data.client.udp_port)
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_alt_port)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(data.client.ip, data.client.udp_port)
