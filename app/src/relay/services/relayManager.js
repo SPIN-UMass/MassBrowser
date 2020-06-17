@@ -164,7 +164,7 @@ class RelayManager {
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_main_port, data.token, false)
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_alt_port, data.token, false)
     }
-    
+
     API.acceptSession(data.client, data.id)
 
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {

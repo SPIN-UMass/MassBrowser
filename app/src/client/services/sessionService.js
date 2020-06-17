@@ -143,7 +143,7 @@ class SessionService extends EventEmitter {
 
       debug(`Requesting for new session`)
       
-      sessionInfo = await API.requestSession(catIDs)
+      let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
         catIDs.forEach(category => {
@@ -355,7 +355,8 @@ class SessionService extends EventEmitter {
     this.reachTestPollInterval = setInterval(() => {
         API.getReachSession()
         .then(ses => relayManager.handleNewRelaySessions(ses))
-    }, 5 * 60 * 1000)
+        console.log('ddd')
+    }, 60000)
   }
 
   _startSessionPoll () {
