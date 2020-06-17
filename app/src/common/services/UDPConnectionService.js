@@ -63,7 +63,7 @@ export class UDPConnectionService extends EventEmitter {
 
   addExpectedIncomingConnection (address, port) {
     return new Promise((resolve, reject) => {
-      key = address + ':' + port
+      let key = address + ':' + port
       console.log(key, 'added into the incomming connections')
       this._expectedConnections[key] = true
       setTimeout(() => {
