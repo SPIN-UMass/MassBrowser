@@ -265,6 +265,9 @@ Sender.prototype.verifyAck = async function (sequenceNumber) {
       this.restartTimeoutTimer();
       while (!!this._retransmissionQueue.currentValue() && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
         let packetObject = await this._retransmissionQueue.dequeue();
+        if (packetObject === null) {
+          break;
+        }
         packetObject = packetObject.value;
         packetObject.packet.acknowledge();
         if (packetObject.sampling && packetObject.retransmitted === false) {

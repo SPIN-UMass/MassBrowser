@@ -110,9 +110,9 @@ export default async function bootClient () {
     await setClientVersion()
     status.clear()
 
-    // status = statusManager.info('Starting Tor')
-    // await torManager.start()
-    // status.clear()
+    status = statusManager.info('Starting Tor')
+    await torManager.start()
+    status.clear()
 
     if (config.isFirefoxVersion) {
       status = statusManager.info('Installing the Cert')

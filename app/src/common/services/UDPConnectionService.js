@@ -52,9 +52,7 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   deleteConnectionListItem (addressKey) {
-    console.log(addressKey, 'removed')
     delete this._connections[addressKey]
-    console.log(Object.keys(this._connections))
   }
 
   sendDummyPacket (address, port) {
@@ -64,7 +62,6 @@ export class UDPConnectionService extends EventEmitter {
   addExpectedIncomingConnection (address, port) {
     return new Promise((resolve, reject) => {
       let key = address + ':' + port
-      console.log(key, 'added into the incomming connections')
       this._expectedConnections[key] = true
       setTimeout(() => {
         if (this._expectedConnections[key]) {
@@ -198,16 +195,16 @@ export class UDPConnectionService extends EventEmitter {
           this.deleteConnectionListItem(addressKey)
         })
         this._connections[addressKey] = connection
-        console.log('got new connection wasnt expecting')
+        // console.log('got new connection wasnt expecting')
       } else {
         let key = address + ':' + port
         connection = this._connections[addressKey]
         if (this._expectedConnections[key]) {
-          console.log('got connection i was expecting', addressKey)
+          // console.log('got connection i was expecting', addressKey)
           this.emit('relay-new-connection', connection, addressKey)
           delete this._expectedConnections[key]
         } else {
-          console.log('got connection wasnt expecting', addressKey)
+          // console.log('got connection wasnt expecting', addressKey)
         }
       }
     }

@@ -81,7 +81,6 @@ export class UDPRelayConnection extends EventEmitter {
     const b = Buffer.concat([sendPacket, data])
     const enc = this.cipher.encrypt(b)
     this.emit('send', enc)
-    console.log('sending data')
     if (this.socket.writable) {      
       this.socket.write(enc)
     } else {
