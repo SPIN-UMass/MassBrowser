@@ -3,8 +3,8 @@ import config from '@utils/config'
 import { sleep } from '@utils'
 import { debug, error, warn } from '@utils/log'
 import { Raven } from '@utils/raven'
-import { statusManager, autoLauncher } from '@common/services'
-import { syncService, relayManager, networkMonitor, registrationService, torService } from '@/services'
+import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
+import { syncService, relayManager, networkMonitor, registrationService } from '@/services'
 import { DomainFrontedRelay } from '@/net'
 import { HttpTransport, WebSocketTransport } from '@utils/transport'
 import { eventHandler } from '@/events'
@@ -15,8 +15,7 @@ import {
   ServerError, ApplicationBootError
 } from '@utils/errors'
 
-
-export default async function bootRelay() {
+export default async function bootRelay () {
   let status
 
   try {
@@ -48,16 +47,10 @@ export default async function bootRelay() {
     API.setTransport(transport)
     status.clear()
 
-    status = statusManager.info('Connecting to Connectivity server')
-    await networkMonitor.start()
-    status.clear()
-    status = statusManager.info('Obtaining NAT information')
-    await networkMonitor.waitForNetworkStatus()
-    status.clear()
+    /** Only sync database in boot if it is the first time booting
+    * otherwise sync will after the client has started to avoid
+    * having delay on each run */
 
-    // Only sync database in boot if it is the first time booting
-    // otherwise sync will after the client has started to avoid
-    // having delay on each run
     let isFirstSync = await syncService.isFirstSync()
 
     debug('It is first boot, syncing database')
@@ -84,8 +77,24 @@ export default async function bootRelay() {
     await torService.loadTorList()
     status.clear()
 
+    if (await telegramService.requiresDownload()) {
+      status = statusManager.info('Downloading Telegram list')
+      await telegramService.downloadTelegramList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Telegram list')
+    await telegramService.loadTelegramList()
+    status.clear()
+
+    status = statusManager.info('Connecting to Connectivity server')
+    await networkMonitor.start()
+    status.clear()
+    status = statusManager.info('Obtaining NAT information')
+    await networkMonitor.waitForNetworkStatus()
+    status.clear()
+
     status = statusManager.info('Starting Relay')
-    relayManager.startRelay()
+    await relayManager.startRelay()
     status.clear()
 
     if (config.domainfrontable) {
@@ -105,7 +114,7 @@ export default async function bootRelay() {
     status.clear()
 
     store.commit('completeBoot')
-  } catch(err) {
+  } catch (err) {
     if (err instanceof NetworkError) {
       err.log()
       throw new ApplicationBootError('Could not connect to the server, make sure you have a working Internet connection', true, err)
@@ -114,12 +123,11 @@ export default async function bootRelay() {
       throw new ApplicationBootError('Server authentication failed, please contact support for help', false)
     } else if (err instanceof RequestError) {
       err.logAndReport()
-      throw new ApplicationBootError('Error occured while booting application', true)
+      throw new ApplicationBootError('Error occurred while booting application', true)
     } else if (err instanceof ServerError) {
       err.log()
       throw new ApplicationBootError('There is a problem with the server, please try again later', true)
-    } else if (!(err instanceof ApplicationBootError)){
-      // console.warn(handledErrors.reduce((o, a) => o || err instanceof a, false))
+    } else if (!(err instanceof ApplicationBootError)) {
       if (err.smart) {
         err.logAndReport()
       } else {
@@ -133,22 +141,22 @@ export default async function bootRelay() {
   }
 }
 
-async function waitForInternet(attempt=0) {
-  const http = new HttpTransport();
+async function waitForInternet (attempt = 0) {
+  const http = new HttpTransport()
 
   try {
-    let response = await http.get('http://httpbin.org/ip');
+    let response = await http.get('http://httpbin.org/ip')
     if (response.status == 200) {
-      return;
+      return
     }
-  } catch(e) {}
+  } catch (e) {}
 
   try {
-    let response = await http.get('https://api.ipify.org/?format=json');
+    let response = await http.get('https://api.ipify.org/?format=json')
     if (response.status == 200) {
-      return;
+      return
     }
-  } catch(e) {}
+  } catch (e) {}
 
   /* Sleep from 2 to 7 seconds */
   await sleep(2000 + Math.min(5000, attempt * 1000))

@@ -11,12 +11,12 @@ let windowClosedCallback
 
 const runID = Math.random().toString(36).substring(7)
 
-export function initializeMainProcess(onWindowCreated, onWindowClosed) {
+export function initializeMainProcess(onWindowCreated, onWindowClosed,additionalMenu = null) {
   windowCreatedCallback = onWindowCreated
   windowClosedCallback = onWindowClosed
 
   app.on('ready', () => {
-    initializeTray()
+    initializeTray(additionalMenu)
     createWindow()
   })
 
@@ -30,15 +30,16 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed) {
     if (mainWindow === null) {
       createWindow()
     }
-  })  
+  })
 }
 
-function initializeTray() {
+function initializeTray(additionalMenu) {
   var image = nativeImage.createFromDataURL(require(`@assets/icons/${config.role}/tray.png`))
   tray = new Tray(image)
-  const contextMenu = Menu.buildFromTemplate([
+
+  var menu = [
     {
-      label: `Open ${config.appName}`,
+      label: `Open Settings`,
       click() {
         if (mainWindow === null) {
           createWindow()
@@ -46,14 +47,18 @@ function initializeTray() {
           mainWindow.focus()
         }
       }
-    },
-    {
+    }
+  ]
+  if (additionalMenu){
+    menu[menu.length] = additionalMenu
+  }
+  menu[menu.length] = {
       label: 'Exit',
       click() {
         app.quit()
       }
     }
-  ])
+  const contextMenu = Menu.buildFromTemplate(menu)
 
   tray.setContextMenu(contextMenu)
 
@@ -76,7 +81,7 @@ function initializeTray() {
           { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
       ]}
     ]));
-  }  
+  }
 }
 
 function createWindow () {
@@ -90,20 +95,20 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     title: config.appName,
     height: 350,
-    width: 500,
+    width: 550,
     resizable: false,
     minimizable: false,
     maximizable: false,
     fullscreenable: false,
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'hidden',
+    useContentSize: true
   })
   mainWindow.runID = runID
-  
   mainWindow.setTitle(config.appName);
   mainWindow.loadURL(winURL)
 
   if (config.isDevelopment) {
-    mainWindow.webContents.openDevTools()  
+    mainWindow.webContents.openDevTools()
   }
 
   mainWindow.on('closed', () => {

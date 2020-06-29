@@ -68,7 +68,7 @@ const rules = [
         name: 'fonts/[name].[ext]'
       }
     }
-  }   
+  }
 ]
 
 const resolve = (target) => {
@@ -90,17 +90,22 @@ const resolve = (target) => {
   }
 }
 
-const plugins = (role, interface, electronProcess, otherPlugins) => [
-  new webpack.NoEmitOnErrorsPlugin(),
-  new webpack.DefinePlugin({
-    'process.env.NODE_ENV': process.env.NODE_ENV === 'production' 
-    ? '"production"' 
-    : '"development"',
-    'process.env.ROLE': `"${role}"`,
-    'process.env.APP_INTERFACE': `"${interface}"`,
-    'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
-  })
-].concat(otherPlugins || [])
+const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false) => {
+  return [
+
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': process.env.NODE_ENV === 'production'
+        ? '"production"'
+        : '"development"',
+      'process.env.IS_FIREFOX': isFirefox ? '"YES"' : '"NO"',
+      'process.env.ROLE': `"${role}"`,
+      'process.env.APP_INTERFACE': `"${interface}"`,
+      'process.env.ELECTRON_PROCESS': `"${electronProcess}"`
+    })
+  ].concat(otherPlugins || [])}
+
+
 
 module.exports = {
   rootDir,

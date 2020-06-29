@@ -1,40 +1,28 @@
-/**
- * Created by milad on 4/11/17.
- */
-
-import crypto from 'crypto'
-
-import Raven from '@utils/raven'
-import KVStore from '@utils/kvstore'
-
-import config from '@utils/config'
+import { addCertificateToFirefox, setClientVersion } from './firefox'
 import { debug, error } from '@utils/log'
-import { HttpTransport } from '@utils/transport'
-
-import ConnectivityConnection from '@/net/CloudBasedConnectivityAPI'
-
-import API from '@/api'
-
-import { statusManager, autoLauncher } from '@common/services'
-import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService } from '@/services'
+import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
+import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService,torManager } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
-import { startClientSocks, RelayConnection, RandomRelayAssigner } from '@/net'
-
+import { startClientSocks } from '@/net'
+import config from '@utils/config'
+import Raven from '@utils/raven'
+import { eventHandler } from '@/events'
+import API from '@/api'
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
   ServerError, CacheBrowserError, ApplicationBootError
 } from '@utils/errors'
-
 import { store } from '@utils/store'
+import networkManager from './net/NetworkManager'
+import { swap } from 'change-case';
+import {WebSocketTransport} from '../utils/transport'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000
 
 export default async function bootClient () {
   statusManager.clearAll()
-
   let status
-
   try {
     await store.ready
 
@@ -51,7 +39,40 @@ export default async function bootClient () {
     status.clear()
 
     status = statusManager.info('Server connection established')
+    status.clear()
+    /*
+    websocket instead of http connection to the backend
+    need changes in backend as well
+    */
+    // status = statusManager.info('Connecting to WebSocket server')
+    // let transport = new WebSocketTransport(
+    //   `${config.websocketURL}/api/?session_key=${auth.session_key}`,
+    //   '/api'
+    // )
+    // transport.setEventHandler(eventHandler)
+    // await transport.connect()
+    // API.setTransport(transport)
+
+    status = statusManager.info('Server connection established')
     await API.clientUp()
+    status.clear()
+
+    if (await torService.requiresDownload()) {
+      status = statusManager.info('Downloading Tor list')
+      await torService.downloadTorList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Tor list')
+    await torService.loadTorList()
+    status.clear()
+
+    if (await telegramService.requiresDownload()) {
+      status = statusManager.info('Downloading Telegram list')
+      await telegramService.downloadTelegramList()
+      status.clear()
+    }
+    status = statusManager.info('Loading Telegram list')
+    await telegramService.loadTelegramList()
     status.clear()
 
     status = statusManager.info('Connecting to relay')
@@ -62,12 +83,16 @@ export default async function bootClient () {
     await cacheProxy.startCacheProxy()
     status.clear()
 
-    status = statusManager.info('Starting SOCKS server')
-    await startClientSocks('127.0.0.1', config.socksPort)
+    status = statusManager.info('Starting SOCKS servers')
+    await startClientSocks('127.0.0.1', config.socksPort,config.socksSecondPort)
     status.clear()
 
-    status = statusManager.info('Starting Connectivity Monitor')
-    await ConnectivityConnection.startRoutine()
+    status = statusManager.info('Starting Network Manager')
+    await networkManager.start()
+    status.clear()
+
+    status = statusManager.info('Obtaining NAT information')
+    await networkManager.waitForNetworkStatus()
     status.clear()
 
     status = statusManager.info('Starting remaining services')
@@ -81,8 +106,25 @@ export default async function bootClient () {
       status.clear()
     }
 
+    status = statusManager.info('Checking browser availability')
+    await setClientVersion()
+    status.clear()
+
+    status = statusManager.info('Starting Tor')
+    await torManager.start()
+    status.clear()
+
+    if (config.isFirefoxVersion) {
+      status = statusManager.info('Installing the Cert')
+      await addCertificateToFirefox()
+      status.clear()
+    }
+
     status = statusManager.info('Finalizing')
-    autoLauncher.initialize()
+    if (config.isElectronProcess) {
+      autoLauncher.initialize()
+    }
+
     status.clear()
 
     await store.commit('completeBoot')
@@ -108,11 +150,13 @@ function handleBootError (err) {
     err.log()
     throw new ApplicationBootError('There is a problem with the server, please try again later', true)
   } else if (!(err instanceof ApplicationBootError || err instanceof InvalidInvitationCodeError)) {
-    if (err.smart) {
-      err.logAndReport()
-    } else {
-      error(err)
-      Raven.captureException(err)
+    if (err) {
+      if (err.smart) {
+        err.logAndReport()
+      } else {
+        error(err)
+        Raven.captureException(err)
+      }
     }
     throw new ApplicationBootError('Failed to start Application')
   } else {

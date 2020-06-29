@@ -1,8 +1,5 @@
 import { CommonAPI } from '@common/api'
-import config from '@utils/config'
-import KVStore from '@utils/kvstore'
-
-import { error, debug } from '@utils/log'
+import { debug } from '@utils/log'
 
 const SESSION_PATH = '/session/'
 const RELAY_PATH = '/relays/'
@@ -16,12 +13,21 @@ class RelayAPI extends CommonAPI {
     return response.data
   }
 
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': 'stun.l.google.com',
+        'port': 19302
+      })
+    })
+  }
+
   acceptSession (client, sessionid) {
     return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'relay_accepted'})
   }
 
   clientSessionConnected (client, sessionid) {
-    return this.transport.put(SESSION_PATH + sessionid + '/status',  {status: 'used'})
+    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'used'})
   }
 
   clientSessionDisconnected (client, sessionid) {
@@ -36,20 +42,21 @@ class RelayAPI extends CommonAPI {
     return this.transport.post(RELAY_PATH + this.userID, {status: 'down'})
   }
 
-  relayUp (ip, port) {
+  relayUp (ip, TCPPort, UDPPort) {
     var data = {
       'ip': ip,
       'status': 'up',
-      'port': port,
+      'port': TCPPort,
+      'udp_port': UDPPort,
       'fingerprint': this.fingerprint
     }
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
 
-  relayDomainFrontUp (domain, domain_port) {
+  relayDomainFrontUp (domain, domainPort) {
     var data = {
       'domainfrontable': true,
-      'domainfront_port': domain_port,
+      'domainfront_port': domainPort,
       'domain_name': domain
     }
     return this.transport.post(RELAY_PATH + this.userID, data)
@@ -74,15 +81,15 @@ class RelayAPI extends CommonAPI {
     return this.transport.post('/relay/categories', data).then(r => r.data.allowed_categories)
   }
 
-  allowCategory(categoryID) {
+  allowCategory (categoryID) {
     return this.transport.put('/relay/category/' + categoryID)
   }
 
-  disallowCategory(categoryID) {
+  disallowCategory (categoryID) {
     return this.transport.delete('/relay/category/' + categoryID)
   }
 
-  async sendFeedback(content, rating, logs) {
+  async sendFeedback (content, rating, logs) {
     return await this.transport.post('/relay/feedback', {
       content,
       rating,

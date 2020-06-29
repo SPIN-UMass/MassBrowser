@@ -1,47 +1,65 @@
-<template lang="pug">
-  .start-page-container
-    .dragger
-    .start-header
-      span.i-nav.i-prev(v-if="prevEnabled" v-on:click="prevPage")
-        i.fa.fa-arrow-left
-      h1 {{ appName }}
-      span.i-nav.i-next(v-if="nextEnabled" v-on:click="nextPage")
-        i.fa.fa-arrow-right
-    .start-content
-      .s-start(v-if="page == 'start'")
-        .well
-          p #[strong Hey there!] Thanks for using #[strong {{ appName }}].
-          p Since it's your first time, lets walk through a few things.
-        button.btn.btn-info(v-on:click="nextPage") Start
-      .s-sync(v-if="page == 'sync'")
-        .well 
-          p First, we need to sync your local database with our servers.
-          p Click the button below to start syncing.
-        button.btn.btn-info(v-on:click="startSync" v-if="sync.state==''") Start Download
-        .progress(v-if="sync.state=='downloading'")
-          .progress-bar.progress-bar-info(ref="syncProgress")
-        p(v-if="sync.state=='done'") Cick on the #[span #[i.fa.fa-arrow-right]] icon in the top right corner to continue
-        //- button.btn.btn-success(v-on:click="nextPage" v-if="sync.state=='done'") Continue
-      .s-network-settings(v-if="page == 'network-settings'")
-        .well.well-sm Customize your #[strong Network Settings] here. Click on #[span #[i.fa.fa-question-circle]] for help.
-          br
-          | All settings can also be changed again later on.
-        .network-settings-container
-          network-settings(:completeVersion="false")
-      .s-category-settings(v-if="page == 'category-settings'")
-        .well.well-sm 
-          | Select which types of websites you want to allow users to browser through you. Scroll down to see all options.
-        category-settings(title='' :syncUpdates="false")
-      .s-final(v-if="page == 'final'")
-        .well You're all set. Click the button below to continue to {{ appName }}
-        button.btn.btn-success(v-on:click="finish") Continue
-
-      
+<template>
+    <div class="start-page-container">
+        <div class="dragger"></div>
+        <div class="start-header">
+            <span class="i-nav i-prev" v-if="prevEnabled" v-on:click="prevPage">
+                <i class="fa fa-arrow-left"></i>
+            </span>
+            <h1>{{ appName }}</h1>
+            <span class="i-nav i-next" v-if="nextEnabled" v-on:click="nextPage">
+                <i class="fa fa-arrow-right"></i>
+            </span>
+        </div>
+        <div class="start-content">
+            <div class="s-start" v-if="page === 'start'">
+                <div class="well">
+                    <i18n path="START_RELAY_WELCOME_MSG">
+                        <strong slot="appName">{{appName}}</strong>
+                    </i18n>
+                </div>
+                <button class="btn btn-info" v-on:click="nextPage">Start</button>
+            </div>
+            <div class="s-sync" v-if="page === 'sync'">
+                <div class="well">
+                    {{$t('START_RELAY_SYNC')}}
+                </div>
+                <button class="btn btn-info" v-on:click="startSync" v-if="sync.state==''">{{$t('START_RELAY_DOWNLOAD_BTN')}}</button>
+                <div class="progress" v-if="sync.state=='downloading'">
+                    <div class="progress-bar progress-bar-info" ref="syncProgress"></div>
+                </div>
+                <p v-if="sync.state=='done'">
+                    {{$t('START_RELAY_DONE')}}
+                </p>
+            </div>
+            <div class="s-network-settings" v-if="page === 'network-settings'">
+                <div class="well well-sm">
+                    {{$t('START_RELAY_NETWORK_SETTINGS_HELP_MSG')}}
+                </div>
+                <div class="network-settings-container">
+                    <network-settings :completeVersion="false"></network-settings>
+                </div>
+            </div>
+            <div class="s-category-settings" v-if="page === 'category-settings'">
+                <div class="well well-sm">
+                    {{$t('START_RELAY_WEBSITES_HELP_MSG')}}
+                </div>
+                <category-settings title="" :syncUpdates="false"></category-settings>
+            </div>
+            <div class="s-final" v-if="page === 'final'">
+                <div class="well">
+                    <i18n path="START_RELAY_ALL_SET_MSG">
+                        {{appName}}
+                    </i18n>
+                </div>
+                <button class="btn btn-success" v-on:click="finish">{{$t('CONTINUE')}}</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
   import { store } from '@utils/store'
-  import { mapState } from 'vuex' 
+  import { mapState } from 'vuex'
   import config from '@utils/config'
   import NetworkSettings from '@/views/settings/NetworkSettings'
   import CategorySettings from '@/views/settings/CategorySettings'
@@ -49,7 +67,7 @@
 
   const syncService = getService('sync')
   const registrationService = getService('registration')
-  
+
   const pages = [
     'start',
     'sync',
@@ -59,11 +77,11 @@
   ]
 
   const pageConfig = {
-    'start': { next: false, prev: false},
-    'sync': { next: false, prev: false},
+    'start': { next: false, prev: false },
+    'sync': { next: false, prev: false },
     'network-settings': { next: true, prev: false },
     'category-settings': { next: true, prev: true },
-    'final': { next: false, prev: true},
+    'final': { next: false, prev: true }
   }
 
   export default {
@@ -83,7 +101,7 @@
       syncProgress: 'syncProgress'
     }),
     watch: {
-      syncProgress(val) {
+      syncProgress (val) {
         if (this.$refs.syncProgress) {
           this.$refs.syncProgress.style.width = `${val}%`
         }
@@ -96,9 +114,9 @@
     created () {
     },
     methods: {
-      changePage(pageNumber) {
+      changePage (pageNumber) {
         let bConfig = pageConfig[this.page]
-        
+
         if (bConfig.onLeave) {
           bConfig.onLeave(this)
         }
@@ -108,17 +126,17 @@
         this.nextEnabled = pConfig.next
         this.prevEnabled = pConfig.prev
       },
-      nextPage() {
+      nextPage () {
         this.changePage(pages.indexOf(this.page) + 1)
       },
-      prevPage() {
+      prevPage () {
         this.changePage(pages.indexOf(this.page) - 1)
       },
-      async finish() {
+      async finish () {
         await registrationService.registerRelay()
         this.$router.push('/')
       },
-      async startSync() {
+      async startSync () {
         this.sync.state = 'downloading'
         await syncService.syncAll()
         setTimeout(() => {
@@ -132,123 +150,123 @@
 
 
 <style scoped lang='scss'>
-  @import '~@/views/styles/settings.scss';
+    @import '~@/views/styles/settings.scss';
 
-  $title_font_size: 20px;
-  $nav_font_size: 16px;
+    $title_font_size: 20px;
+    $nav_font_size: 16px;
 
-  .start-page-container {
-    height: $application_height;
-    padding: 30px;
-    background-color: #fafafa;
+    .start-page-container {
+        height: $application_height;
+        padding: 30px;
+        background-color: #fafafa;
 
-    .dragger {
-      -webkit-app-region: drag;
-      position: fixed;
-      height: 50px;
-      width: 100%;
-      top: 0;
-    }
-
-    .start-header {
-      text-align: center;
-
-      h1 {
-        font-family: $font_title;
-        font-size: 28px;
-        margin-top: 0px;
-      }
-
-      .i-nav {
-        font-size: 34px;
-        position: fixed;
-        top: 25px;
-        color: #ccc;
-        cursor: pointer;
-        &.i-next {  
-          right: 40px;
+        .dragger {
+            -webkit-app-region: drag;
+            position: fixed;
+            height: 50px;
+            width: 100%;
+            top: 0;
         }
-        &.i-prev {
-          left: 40px;
+
+        .start-header {
+            text-align: center;
+
+            h1 {
+                font-family: $font_title;
+                font-size: 28px;
+                margin-top: 0;
+            }
+
+            .i-nav {
+                font-size: 34px;
+                position: fixed;
+                top: 25px;
+                color: #ccc;
+                cursor: pointer;
+                &.i-next {
+                    right: 40px;
+                }
+                &.i-prev {
+                    left: 40px;
+                }
+                &:hover {
+                    color: #999;
+                }
+                &:active {
+                    color: #555;
+                }
+            }
         }
-        &:hover {
-          color: #999;
+
+        .start-content {
+
         }
-        &:active {
-          color: #555;
+
+        .s-start {
+            padding: 30px;
+            text-align: center;
+
+            button {
+                width: 150px;
+                height: 40px;
+                font-size: 16px;
+                margin-top: 15px;
+            }
         }
-      }
+
+        .s-sync {
+            padding: 10px;
+            text-align: center;
+
+            button {
+                font-size: 14px;
+                margin-top: 30px;
+                width: 150px;
+                height: 40px;
+            }
+
+            .progress {
+                width: 80%;
+                margin: auto;
+                margin-top: 60px;
+            }
+        }
+
+        .s-network-settings {
+            .well {
+                text-align: center;
+            }
+            .network-settings-container {
+                height: 200px;
+                overflow: auto;
+            }
+        }
+
+        .s-category-settings {
+            .well {
+                text-align: center;
+                margin-bottom: 5px;
+            }
+        }
+
+        .s-final {
+            text-align: center;
+            .well {
+                margin-top: 20px;
+            }
+            .btn {
+                margin-top: 20px;
+                width: 170px;
+                height: 40px;
+            }
+        }
     }
 
-    .start-content {
-      
+    .ml50 {
+        margin-left: 50px;
     }
 
-    .s-start {
-      padding: 30px;
-      text-align: center;
-
-      button {
-        width: 150px;
-        height: 40px;
-        font-size: 16px;
-        margin-top: 15px;
-      }
-    }
-
-    .s-sync {
-      padding: 10px;
-      text-align: center;
-
-      button {
-        font-size: 14px;
-        margin-top: 30px;
-        width: 150px;
-        height: 40px;
-      }
-
-      .progress {
-        width: 80%;
-        margin: auto;
-        margin-top: 60px;
-      }
-    }
-
-    .s-network-settings {
-      .well {
-        text-align: center;
-      }
-      .network-settings-container {
-        height: 200px;
-        overflow: auto;
-      }
-    }
-
-    .s-category-settings {
-      .well {
-        text-align: center;
-        margin-bottom: 5px;
-      }      
-    }
-
-    .s-final {
-      text-align: center;
-      .well {
+    .mu20 {
         margin-top: 20px;
-      }
-      .btn {
-        margin-top: 20px;
-        width: 170px;
-        height: 40px;
-      }
     }
-  }
-
-  .ml50 {
-    margin-left: 50px;
-  }
-      
-  .mu20 {
-    margin-top: 20px;
-  }
 </style>

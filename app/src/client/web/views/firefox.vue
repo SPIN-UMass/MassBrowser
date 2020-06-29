@@ -3,41 +3,43 @@
     //- h1 SwarmProxy Settings
     .tab-base.tab-stacked-left
       ul.nav.nav-tabs
-        li(:class="{active: tab==='proxy'}")
-          a(v-on:click="tab='proxy'") Proxy Settings
-            i.step-status.text-danger.fa.fa-times-circle(v-if="!proxy.success")
-            i.step-status.text-success.fa.fa-check-circle(v-if="proxy.success")
-        li(:class="{active: tab==='cert', disabled: !proxy.success}")
+        li(:class="{active: tab==='plugin'}")
+          a(v-on:click="tab='plugin'") MassBrowser Plugin
+            i.step-status.text-danger.fa.fa-times-circle(v-if="!plugin.success")
+            i.step-status.text-success.fa.fa-check-circle(v-if="plugin.success")
+        li(:class="{active: tab==='cert', disabled: !plugin.success}")
           a(v-on:click="tab='cert'") Trust CA Certificate
             i.step-status.text-danger.fa.fa-times-circle(v-if="!cert.success")
             i.step-status.text-success.fa.fa-check-circle(v-if="cert.success")
-        li( :class="{active: tab==='dnsCache', disabled: !proxy.success}")
+        li( :class="{active: tab==='dnsCache', disabled: !plugin.success}")
           a(v-on:click="tab='dnsCache'") Disable DNS Cache
             i.step-status.text-danger.fa.fa-times-circle(v-if="!dnsCache.success")
             i.step-status.text-success.fa.fa-check-circle(v-if="dnsCache.success")
       .tab-content
-        .tab-pane.step-proxy(:class="{active: tab==='proxy', in: tab==='proxy'}")
-          .step-title.text-thin Proxy Settings
-          div(v-if="!proxy.success")
+        .tab-pane.step-plugin(:class="{active: tab==='plugin', in: tab==='plugin'}")
+          .step-title.text-thin Add MassBrowser Plugin
+          div(v-if="!plugin.success")
             ol
-              li 
-                | Set your browser proxy to use #[code SOCKS v5] proxy with host #[code localhost] and port #[code {{socksPort}}]
-              li Make sure the #[code Proxy DNS when using SOCKS v5] option is enabled
-              li Click on the button below the verify your settings
-            
+              li
+                | Click on the button bellow to add MassBrowser plugin into your Firefox.
+              li Click on 'Continue to Installation'
+              li Click on 'Add'
+              li To verify your installation click the verify button bellow.
+
             .control-containers
-              .text-primary.text-bold(v-if="proxy.success===null") Checking Proxy Settings...
-              .text-success.text-bold(v-if="proxy.success===true") Proxy settings are valid
-              .text-danger.text-bold(v-if="proxy.success===false && proxy.errorMessage") {{proxy.errorMessage}}
-              button.proxy-btn.btn.btn-primary(v-if="proxy.success!==null" v-on:click="checkProxySettings") Check Proxy Settings
-              
+              .text-primary.text-bold(v-if="plugin.success===null") Checking plugin working ...
+              .text-success.text-bold(v-if="plugin.success===true") Plugin is working
+              .text-danger.text-bold(v-if="plugin.success===false && plugin.errorMessage") {{plugin.errorMessage}}
+              button.plugin-btn.btn.btn-primary(v-if="plugin.success !== null" v-on:click="checkPlugin") Verify Installations
+              button.cert-btn.btn.btn-success(v-on:click="addPlugin") Add plugin
+
 
             .help-container
-              span.help(v-if="!proxy.helpEnabled" v-on:click="proxy.helpEnabled = true") Need Help? Click here to show step by step instructions.
-              .help-steps-container(v-if="proxy.helpEnabled")
-                .help-image(v-for="image in proxy.stepImages")
-                  img(width='400' :src="image")
-          div(v-if="proxy.success").text-center.pad-all
+              span.help(v-if="!plugin.helpEnabled" v-on:click="plugin.helpEnabled = true") Need Help? Click here to show step by step instructions.
+              .help-steps-container(v-if="plugin.helpEnabled")
+                .help-image(v-for="image in plugin.stepImages")
+                  img(:src="image")
+          div(v-if="plugin.success").text-center.pad-all
             i.fa.fa-check-circle.fa-4x.text-success.mar-all
             div
               button.continue-btn.btn.btn-success.btn-rounded.mar-all(v-on:click="nextStep") Continue
@@ -59,7 +61,7 @@
                 img(width='300' :src="cert.image")
             div.text-center.mar-all
               button.cert-btn.btn.btn-success(v-on:click="installCert") Install Certificate
-          
+
           div(v-if="cert.success").text-center.pad-all
             i.fa.fa-check-circle.fa-4x.text-success.mar-all
             div
@@ -75,7 +77,7 @@
                 li If a warning message appears click on #[code I accept the risk!] button
                 li Search for the key #[code network.dnsCacheExpiration] and change the value to #[code 0]
                 li Click on the button below test whether the change was successful
-            div.text-center.mar-all            
+            div.text-center.mar-all
               button.cert-btn.btn.btn-primary(v-on:click="checkDNSCache") Check DNS Cache
           div(v-if="dnsCache.success").text-center.pad-all
             i.fa.fa-check-circle.fa-4x.text-success.mar-all
@@ -86,34 +88,31 @@
           .text-center.mar-all.pad-all
             i.fa.fa-check-circle.fa-5x.text-success.mar-all
             h4 You're good to go
-        
+
 </template>
 
 <script>
   import axios from 'axios/dist/axios'
   import { ONBOARDING_DOMAIN, ONBOARDING_ADDRESS, NO_HOST_HANDLER_PORT, SOCKS_PORT } from '../config'
 
-  var proxyStepImages = [
-    require('../assets/images/proxy-step-1.png'),
-    require('../assets/images/proxy-step-2.png'),
-    require('../assets/images/proxy-step-3.png'),
-    require('../assets/images/proxy-step-4.png'),
-    require('../assets/images/proxy-step-5.png'),
-    require('../assets/images/proxy-step-6.png')
+  var pluginStepImages = [
+    require('../assets/images/plugin-step-1.png'),
+    require('../assets/images/plugin-step-2.png'),
+    require('../assets/images/plugin-step-3.png')
   ]
 
-  var certImage =  require('../assets/images/cert.png')
+  var certImage = require('../assets/images/cert.png')
 
-  var steps = ['proxy', 'cert', 'dnsCache', 'finish']
+  var steps = ['plugin', 'cert', 'dnsCache', 'finish']
 
   export default {
     data() {
       return {
-        proxy: {
+        plugin: {
           success: null,
           errorMessage: null,
           helpEnabled: false,
-          stepImages: proxyStepImages
+          stepImages: pluginStepImages
         },
         cert: {
           success: null,
@@ -124,23 +123,21 @@
         dnsCache: {
           success: null
         },
-        tab: 'proxy',
+        tab: 'plugin',
         socksPort: SOCKS_PORT
       }
     },
-    created() {
-      this.checkProxySettings(false)
+    created () {
+      this.checkPlugin()
       .then(() => {
-        if (this.proxy.success) {
+        if (this.plugin.success) {
           this.nextStep()
-
           this.checkCert()
           .then(() => {
             if (this.cert.success && this.tab === 'cert') {
               this.nextStep()
             }
           })
-
           this.checkDNSCache()
           .then(() => {
             if (this.dnsCache.success && this.tab === 'dnsCache') {
@@ -151,10 +148,10 @@
       })
     },
     methods: {
-      onFinishTab() {
-        
+      onFinishTab () {
+
       },
-      onTabChange() {
+      onTabChange () {
         if (this.tab === 'finish') {
           return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
         } else if (this.tab === 'cert') {
@@ -163,41 +160,58 @@
           this.checkDNSCache()
         }
       },
-      checkProxySettings(showError=true) {
+      checkPlugin () {
+        return axios.get(`http://${ONBOARDING_DOMAIN}/check-plugin`)
+          .then(response => {
+            if (response.data === 'active') {
+              this.plugin.success = true
+              this.pollCertValidation = true
+            }
+          })
+          .catch(e => {
+            console.error(e)
+            this.plugin.success = false
+            this.plugin.errorMessage = 'Plugin settings not valid. Make sure to install the plugin.'
+          })
+      },
+      checkProxySettings (showError=true) {
         return axios.get(`http://${ONBOARDING_DOMAIN}/check-proxy`)
         .then(response => {
           if (response.data === 'active') {
-            this.proxy.success = true
+            this.plugin.success = true
 
             // this.checkCert()
             this.pollCertValidation = true
           } else {
             if (showError) {
-              this.proxy.errorMessage = 'Proxy settings not valid.'
+              this.plugin.errorMessage = 'Proxy settings not valid.'
             }
           }
         })
         .catch(e => {
           console.error(e)
-          this.proxy.success = false
+          this.plugin.success = false
           if (showError) {
-            this.proxy.errorMessage = 'Proxy settings not valid. Make sure the application is running.'
+            this.plugin.errorMessage = 'Proxy settings not valid. Make sure the application is running.'
           }
         })
       },
-      installCert() {
-        console.log("Requesting certificate dialog")
+      addPlugin () {
+        window.open(`http://${ONBOARDING_ADDRESS}/plugin`, '_self')
+      },
+      installCert () {
+        console.log('Requesting certificate dialog')
         window.open(`http://${ONBOARDING_ADDRESS}/cert`,'_self')
         if (!this.cert.checkIntervalStarted) {
           this.pollCertValidation = true
           this.cert.checkIntervalStarted = true;
-          setTimeout(this.checkCert, 2000) 
+          setTimeout(this.checkCert, 2000)
         }
       },
-      checkCert() {
-        console.log("Checking Certificate")
-        if (!this.proxy.success) {
-          return new Promise((resolve, reject) => { 
+      checkCert () {
+        console.log('Checking Certificate')
+        if (!this.plugin.success) {
+          return new Promise((resolve, reject) => {
             this.cert.success = false
             resolve()
           })
@@ -217,12 +231,12 @@
             setTimeout(this.checkCert, 2000)
           }
         })
-        
+
       },
-      checkDNSCache() {
-        console.log("Checking DNS")
-        if (!this.proxy.success) {
-          return new Promise((resolve, reject) => { 
+      checkDNSCache () {
+        console.log('Checking DNS')
+        if (!this.plugin.success) {
+          return new Promise((resolve, reject) => {
             this.dnsCache.success = false
             resolve()
           })
@@ -235,7 +249,7 @@
          * will respond to the /ping request with a 'pong'. So if a pong reply is received
          * it means the DNS cache is not disabled.
          */
-        function testDNSCache() {
+        function testDNSCache () {
           return new Promise((resolve, reject) => {
             axios.get(`https://www.thecocktaildb.com/ping`, { validateStatus: () => true })
             .then(response => {
@@ -253,7 +267,7 @@
             })
           })
         }
-      
+
         /**
          * The DNS cache disabling test will be successful first time
          * should check multiple times to make sure cache isn't working
@@ -262,7 +276,7 @@
           return testDNSCache()
           .then(success => success ? (count >= 1 ? runMultipleTests(count-1) : true) : false)
         }
-        
+
         return runMultipleTests(3)
         .then(success => {
           this.dnsCache.success = success
@@ -295,17 +309,17 @@
     }
 
     .tab-pane {
-      padding-left: 20px;
+      padding: 0 20px;
       .step-title {
         margin-bottom: 20px;
       }
 
       li {
         margin-top: 10px;
-      } 
+      }
     }
 
-    .step-proxy {
+    .step-plugin {
       .help-container {
         margin-top: 50px;
         margin-bottom: 20px;
@@ -321,23 +335,28 @@
         }
 
         .help-steps-container {
-          padding: 20px;
-          padding-left: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .help-image {
           border: 1px solid black;
           margin-bottom: 30px;
-          width: 400px;
         }
       }
 
       .control-containers {
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: center;
+          justify-content: center;
         margin-top: 30px;
         text-align: center;
 
-        .proxy-btn {
-          margin-top: 20px;
+        .plugin-btn {
+          margin: 5px;
         }
       }
     }
@@ -361,7 +380,7 @@
           cursor: pointer;
         }
       }
-      
+
       li.disabled {
         pointer-events:none;
       }

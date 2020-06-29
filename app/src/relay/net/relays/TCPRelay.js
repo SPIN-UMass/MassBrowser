@@ -1,7 +1,7 @@
 const net = require('net')
 import fs from 'fs'
-import { ConnectionReceiver } from '@/net/ConnectionReceiver'
-import { ThrottleGroup } from '@/net/throttle'
+import { ConnectionReceiver } from '@/net'
+import { ThrottleGroup } from '@common/net'
 import { debug, info } from '@utils/log'
 
 export class TCPRelay {
@@ -27,7 +27,7 @@ export class TCPRelay {
       this.connection_list.push(socket)
       socket.pipe(upPipe)
       downPipe.pipe(socket)
-  
+
       var recver = new ConnectionReceiver(upPipe, downPipe, socket, this.authenticator)
       socket.on('error', (err) => {
         console.log('socket error', err.message)
@@ -42,17 +42,17 @@ export class TCPRelay {
         console.log('socket ending')
         this.connection_list.splice(this.connection_list.indexOf(socket), 1)
         recver.closeConnections()
-  
+
         socket.unpipe(upPipe)
         downPipe.unpipe(socket)
         downPipe.end()
         upPipe.end()
       })
     })
-    
+
     return new Promise((resolve, reject) => {
       let serverStarted
-      
+
       server.listen({port: this.port, host: this.ip, exclusive: false}, () => {
         info('TCP relay running on port', this.port)
         serverStarted = true
@@ -62,7 +62,7 @@ export class TCPRelay {
       server.on('error', (e) => {
         if (!serverStarted) {
           reject(e)
-        }        
+        }
       })
     })
   }
@@ -78,7 +78,7 @@ export class TCPRelay {
           resolve()
         })
         this._server = null
-      })      
+      })
     }
   }
 
@@ -88,7 +88,7 @@ export class TCPRelay {
   }
 }
 
-export function connectToClient (clientIP, clientPort, token) {
+export function connectToClientTCP (clientIP, clientPort, token) {
   console.log('Connecting to',clientIP,clientPort)
   const socket = net.connect({host: clientIP, port: clientPort}, (err) => {
     if (err) {

@@ -47,6 +47,12 @@ function _createModel (name, schemaModel, datastore, options) {
       this.model = Model
       this._new_instance = true
       this._cached_transformer = null
+
+      this._schema.forEach(k => {
+        if (this[k] instanceof RelationField) {
+          this[k] = this[k].default || null;
+        }
+      })
     }
 
     static get name () {
@@ -109,7 +115,7 @@ function _createModel (name, schemaModel, datastore, options) {
      * Assigns the values in a JSON object to the model while applying field name transformations
      * You can define JSON field name transformations in your model by implementing a getter named
      * 'transform' which returns an object
-     * 
+     *
      * ```
      * get transform() {
      *  return {
@@ -132,7 +138,7 @@ function _createModel (name, schemaModel, datastore, options) {
           } else if (typeof transform[key] === 'object') {
             this[transform[key].name] = transform[key].value(json[key])
           } else {
-            error(`Invalid transformation defined in model ${name} for field ${key}`) 
+            error(`Invalid transformation defined in model ${name} for field ${key}`)
             this[key] = json[key]
           }
         }
@@ -228,7 +234,8 @@ export function createModel (name, schemaModel, options) {
 }
 
 export class RelationField {
-  constructor (relatedModel) {
+  constructor (relatedModel, dflt) {
     this.relatedModel = relatedModel
+    this.default = dflt || null
   }
 }

@@ -2,7 +2,7 @@ import { initializeMainProcess } from '@common/main/electron/main'
 import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
 import { syncService, relayManager, networkMonitor, registrationService } from '@/services'
-import { statusManager, autoUpdater, autoLauncher, dockHider, feedbackService } from '@common/services'
+import { statusManager, autoUpdater, autoLauncher, dockHider, feedbackService, privacyPolicyService } from '@common/services'
 import bootRelay from '@/boot'
 import { store } from '@utils/store'
 import { Category } from '@/models'
@@ -18,6 +18,7 @@ remote.registerService('registration', registrationService)
 remote.registerService('autoLaunch', autoLauncher)
 remote.registerService('dockHider', dockHider)
 remote.registerService('feedback', feedbackService)
+remote.registerService('privacy-policy', privacyPolicyService)
 
 
 // var requireControllerFilter = require.context('@/controllers', true, /\.js$/)

@@ -8,7 +8,11 @@
 
 import ZMQListener from '@/services/ZMQ'
 console.log("Control")
-ZMQListener.connect()
+try {
+	ZMQListener.connect()
+} catch(e) {
+	console.log(e)
+}
 
 
 

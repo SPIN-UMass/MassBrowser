@@ -1,14 +1,14 @@
 import { initializeMainProcess } from '@common/main/electron/main'
 import { remote } from '@utils/remote'
 import { debug } from '@utils/log'
-
+import * as path from 'path'
 import { statusManager } from '@common/services/statusManager'
-import { autoUpdater, autoLauncher, dockHider, feedbackService } from '@common/services'
-import { syncService, registrationService, websiteSupportService } from '@/services'
+import { autoUpdater, autoLauncher, dockHider, feedbackService, privacyPolicyService } from '@common/services'
+import { syncService, registrationService, websiteSupportService, connectionStats, sessionService } from '@/services'
 import KVStore from '@utils/kvstore'
 import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
-
+import {isFirefoxVersion,openInternalBrowser,setClientVersion } from '@/firefox'
 import models from '@/models' // required for bootstrapping remote models
 
 remote.registerService('sync', syncService)
@@ -21,11 +21,13 @@ remote.registerService('dockHider', dockHider)
 remote.registerService('kvstore', KVStore)
 remote.registerService('feedback', feedbackService)
 remote.registerService('website-support', websiteSupportService)
+remote.registerService('privacy-policy', privacyPolicyService)
+remote.registerService('connection-stats', connectionStats)
+remote.registerService('session', sessionService)
 
 
 // let requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 // requireControllerFilter.keys().forEach(requireControllerFilter)
-
 
 let currentWindow = null
 
@@ -45,4 +47,24 @@ function onWindowClosed() {
 process.on('uncaughtException', (err) => {
   console.error(err)
 })
-initializeMainProcess(onWindowCreated, onWindowClosed)
+
+setClientVersion ()
+  isFirefoxVersion().then((isBundle)=>{
+  if (isBundle){
+    initializeMainProcess(onWindowCreated, onWindowClosed,{
+      label: 'Open Browser',
+      click() {
+        openInternalBrowser('http://massbrowser.cs.umass.edu/')
+      }
+    })
+
+  }
+  else {
+    initializeMainProcess(onWindowCreated, onWindowClosed)
+  }
+  }).catch((err)=>{
+    debug(err)
+    initializeMainProcess(onWindowCreated, onWindowClosed)
+  })
+
+

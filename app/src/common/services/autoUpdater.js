@@ -7,8 +7,8 @@ import { RequestOptions } from "http"
 import { safeLoad } from "js-yaml"
 import * as path from "path"
 import { parse as parseUrl } from "url"
-import { FileInfo, formatUrl, getChannelFilename, getDefaultChannelName, isUseOldMacProvider, Provider } from "electron-updater/out/main"
-
+import { FileInfo, newUrlFromBase, getChannelFilename, getDefaultChannelName, Provider } from "electron-updater/out/main"
+import {URL} from 'url'
 import { AutoUpdateError } from '~/utils/errors'
 import { statusManager } from '@common/services/statusManager'
 import { warn, info } from '@utils/log'
@@ -23,6 +23,17 @@ if (config.isProduction) {
     eAutoUpdater.clientPromise = new Promise((r, _) => r(new GitHubProvider(options, eAutoUpdater, eAutoUpdater.httpExecutor)))
   })
 }
+
+function _Provider() {
+  const data = Provider
+
+  _Provider = function () {
+    return data
+  }
+
+  return data
+}
+
 
 class AutoUpdater extends EventEmitter {
   checkForUpdates() {
@@ -45,7 +56,7 @@ class AutoUpdater extends EventEmitter {
       
       const onError = (err) => {
         clearListeners()
-        reject(new AutoUpdaterError(err))
+        reject(new AutoUpdateError(err))
       }
 
       const clearListeners = () => {
@@ -112,20 +123,27 @@ class AutoUpdater extends EventEmitter {
 }
 
 function getChannelName() {
+  console.log('My rule is', config.role,config.is)
+  if (config.isFirefoxVersion){
+
+  
   if (isPlatform(OSX)) {
-    return `${config.role}-mac`
+    return `${config.role}Firefox-mac`
   } else {
-    return `${config.role}`
+    return `${config.role}Firefox`
+  }
+  }
+  else{
+    if (isPlatform(OSX)) {
+      return `${config.role}-mac`
+    } else {
+      return `${config.role}`
+    }
   }
 }
 
 function validateUpdateInfo(info) {
-  if (isUseOldMacProvider()) {
-    if ((info).url == null) {
-      throw new Error("Update info doesn't contain url")
-    }
-    return
-  }
+
 
   if (info.sha2 == null && info.sha512 == null) {
     throw new Error(`Update info doesn't contain sha2 or sha512 checksum: ${JSON.stringify(info, null, 2)}`)
@@ -199,6 +217,9 @@ export class GitHubProvider extends BaseGitHubProvider {
       headers: this.requestHeaders || undefined
     }, this.baseUrl)
 
+    console.log(this.baseUrl,this.getBaseDownloadPath(release.tag_name, channelFile))
+    const url = newUrlFromBase( this.getBaseDownloadPath(release.tag_name, channelFile), 'https://github.com')
+
     let rawData = null
     try {
       rawData = (await this.executor.request(requestOptions, cancellationToken))
@@ -206,7 +227,7 @@ export class GitHubProvider extends BaseGitHubProvider {
     catch (e) {
       if (!this.updater.allowPrerelease) {
         if (e instanceof HttpError && e.response.statusCode === 404) {
-          throw new Error(`Cannot find ${channelFile} in the latest release artifacts (${formatUrl(requestOptions)}): ${e.stack || e.message}`)
+          throw new Error(`Cannot find ${channelFile} in the latest release artifacts (${url}): ${e.stack || e.message}`)
         }
       }
       throw e
@@ -217,14 +238,11 @@ export class GitHubProvider extends BaseGitHubProvider {
       result = safeLoad(rawData)
     }
     catch (e) {
-      throw new Error(`Cannot parse update info from ${channelFile} in the latest release artifacts (${formatUrl(requestOptions)}): ${e.stack || e.message}, rawData: ${rawData}`)
+      throw new Error(`Cannot parse update info from ${channelFile} in the latest release artifacts (${url}): ${e.stack || e.message}, rawData: ${rawData}`)
     }
 
     validateUpdateInfo(result)
 
-    if (isUseOldMacProvider()) {
-      result.releaseJsonUrl = `${githubUrl(this.options)}/${requestOptions.path}`
-    }
 
     if (result.releaseName == null) {
       result.releaseName = release.name
@@ -235,26 +253,64 @@ export class GitHubProvider extends BaseGitHubProvider {
 
     return result
   }
-
+  mybasePath() {
+    return `/${this.options.owner}/${this.options.repo}/releases`
+  }
   get basePath() {
     return `/${this.options.owner}/${this.options.repo}/releases`
   }
 
-  async getUpdateFile(versionInfo) {
-    if (isUseOldMacProvider()) {
-      return versionInfo
-    }
+  getFileList(versionInfo) {
+
 
     // space is not supported on GitHub
     // const name = versionInfo.githubArtifactName || path.posix.basename(versionInfo.path).replace(/ /g, "-")
-    const name = versionInfo.path || path.posix.basename(versionInfo.path).replace(/ /g, "-")
-    return {
+    let name = versionInfo.path || path.posix.basename(versionInfo.path).replace(/ /g, "-")
+    console.log(versionInfo)
+    let _url = new URL( this.getBaseDownloadPath(`v${versionInfo.version}`, name), 'https://github.com')
+    
+    console.log(_url.toString().replace(/ /g, "-"))
+    return [{
       name,
-      url: formatUrl(Object.assign({path: this.getBaseDownloadPath(`v${versionInfo.version}`, name)}, this.baseUrl)),
+      url: _url.toString().replace(/ /g, "-"),
       sha2: versionInfo.sha2,
       sha512: versionInfo.sha512,
-    }
+    }]
   }
+  
+  
+  resolveFiles(updateInfo) {
+    // still replace space to - due to backward compatibility
+    let baseUrl = 'https://github.com'
+    var files = this.getFileList(updateInfo)
+    console.log(files)
+    
+    const result = files.map(fileInfo => {
+      if (fileInfo.sha2 == null && fileInfo.sha512 == null) {
+        throw (0, _builderUtilRuntime().newError)(`Update info doesn't contain nor sha256 neither sha512 checksum: ${(0, _builderUtilRuntime().safeStringifyJson)(fileInfo)}`, "ERR_UPDATER_NO_CHECKSUM");
+      }
+  
+      return {
+        url: newUrlFromBase(fileInfo.url, baseUrl),
+        info: fileInfo
+      };
+    });
+    console.log(result)
+    const packages = updateInfo.packages;
+    const packageInfo = packages == null ? null : packages[process.arch] || packages.ia32;
+  
+    if (packageInfo != null) {
+      result[0].packageInfo = Object.assign({}, packageInfo, {
+        path: newUrlFromBase(pathTransformer(packageInfo.path), baseUrl).href
+      });
+    }
+  
+    return result;
+
+
+  }
+
+
 
   getBaseDownloadPath(version, fileName) {
     return `${this.basePath}/download/${version}/${fileName}`

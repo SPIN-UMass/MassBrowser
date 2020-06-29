@@ -89,7 +89,7 @@ let webConfig = {
         ? path.resolve(rootPath, 'node_modules')
         : false,
     }),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
   ],
   output: {
     filename: '[name].js',

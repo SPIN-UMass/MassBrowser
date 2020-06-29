@@ -1,20 +1,45 @@
-<template lang="pug">
-  #m-home
-    #m-relay-toggle-box
-      .alert.alert-primary.status-box.running(v-if='openAccess')
-        h4 You can close this window now! 
-        p.de-emph #[strong MassBuddy] will continue running in the background.
-        p.de-emph You can also change your #[router-link(to='/relay/settings').action-link Settings] give us 
-          | #[router-link(to='/relay/feedback').action-link Feedback] or 
-          | #[span.action-link(v-on:click="onChange(false)") Stop MassBuddy].
-      .alert.alert-danger.status-box.not-running(v-if='!openAccess')
-        h4 #[strong MassBuddy] is not running! 
-        p.de-emph You are disconnected from the MassBrowser network
-        p.de-emph To start allowing client connections, #[span.action-link(v-on:click="onChange(true)") Start MassBuddy].
-    RelayStatus.relay-status
-    div.access-toggle-btn-container
-      button.btn.btn-danger(v-if="openAccess" v-on:click='onChange(false)') Stop MassBuddy
-      button.btn.btn-success(v-if="!openAccess" v-on:click='onChange(true)') Start MassBuddy
+<template>
+    <div id="m-home">
+        <div id="m-relay-toggle-box">
+            <div class="alert alert-primary status-box running" v-if="openAccess">
+                <h4>{{$t('HOME_RELAY_YOU_CAN_CLOSE_WINDOW')}}</h4>
+                <p class="de-emph">
+                    <i18n path="HOME_RELAY_IS_RUNNING">
+                        <strong slot="massBuddy">MassBuddy</strong>
+                    </i18n>
+                </p>
+                <p class="de-emph">
+                    <i18n path="HOME_RELAY_MSG">
+                        <router-link slot="settings" class="action-link" to="/relay/settings">{{$t('MENU_SETTINGS')}}</router-link><router-link slot="feedback" class="action-link" to="/relay/feedback">{{$t('MENU_FEEDBACK')}}</router-link><span slot="stop" class="action-link" v-on:click="onChange(false)">{{$t('HOME_RELAY_STOP_MASSBUDDY')}}</span>.
+                    </i18n>
+                </p>
+            </div>
+            <div class="alert alert-danger status-box not-running" v-if="!openAccess">
+                <h4>
+                    <i18n path="HOME_RELAY_IS_NOT_RUNNING">
+                        <strong slot="massBuddy">MassBuddy</strong>
+                    </i18n>
+                </h4>
+                <p class="de-emph">
+                    {{$t('HOME_RELAY_DISCONNECTED')}}
+                </p>
+                <p class="de-emph">
+                    <i18n path="HOME_RELAY_ALLOW_CLIENT">
+                        <span slot="start" class="action-link" v-on:click="onChange(true)">{{$t('HOME_RELAY_START_MASSBUDDY')}}</span>.
+                    </i18n>
+                </p>
+            </div>
+        </div>
+        <RelayStatus class="relay-status"></RelayStatus>
+        <div class="access-toggle-btn-container">
+            <button class="btn btn-danger" v-if="openAccess" v-on:click="onChange(false)">
+                {{$t('HOME_RELAY_STOP_MASSBUDDY')}}
+            </button>
+            <button class="btn btn-success" v-if="!openAccess" v-on:click="onChange(true)">
+                {{$t('HOME_RELAY_START_MASSBUDDY')}}
+            </button>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -25,7 +50,7 @@
   import { mapState } from 'vuex'
 
   const relayManager = getService('relay')
-  
+
   export default {
     store,
     computed: mapState({
@@ -48,89 +73,89 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@/views/styles/settings.scss';
-  
-  #m-home{
-    height: $content_height;
-    position: relative;
-    border-bottom: 1px solid #dadada;
-    background: white;
+    @import '~@/views/styles/settings.scss';
 
-    #m-relay-toggle-box {
-      background: #fcfcfc;
-      .action-link {
-        cursor: pointer;
-        color: white;
-        font-weight: bold;
-        &:hover {
-          color: orange;
+    #m-home{
+        height: $content_height;
+        position: relative;
+        border-bottom: 1px solid #dadada;
+        background: white;
+
+        #m-relay-toggle-box {
+            background: #fcfcfc;
+            .action-link {
+                cursor: pointer;
+                color: white;
+                font-weight: bold;
+                &:hover {
+                    color: orange;
+                }
+            }
+
+            .de-emph {
+                color: rgb(220, 220, 220);
+            }
+
+            .status-box {
+                margin: 0;
+
+                border-left: none;
+                .title {
+                    font-size: 16px;
+                }
+
+                &.running {
+                    .btn-container {
+                        margin-top: -5px;
+                    }
+                }
+
+                &.not-running {
+                    .btn-container {
+                        margin-top: 10px;
+                    }
+                }
+            }
+
+            .status-container {
+                padding: 0 10px;
+
+                .col-led {
+                    text-align: right;
+                }
+
+                .col-text {
+                    // padding: 0;
+                }
+
+                .row-stat {
+                    margin-top: 5px;
+                }
+            }
+
+            .toggle-container {
+                display: inline-block;
+                position: absolute;
+                right: 10px;
+            }
+
         }
-      }
 
-      .de-emph {
-        color: rgb(220, 220, 220);
-      }
-
-      .status-box {
-        margin: 0px;
-
-        border-left: none;
-        .title {
-          font-size: 16px;
-        }
-        
-        &.running {
-          .btn-container {
-            margin-top: -5px;
-          }  
+        .map {
+            height: 25%;
+            box-shadow: 0 -1px 0 0 rgba(0,0,0,.1);
         }
 
-        &.not-running {
-          .btn-container {
-            margin-top: 10px;
-          }  
-        }
-      }
-      
-      .status-container {
-        padding: 0px 10px;
 
-        .col-led {
-          text-align: right;
+        .relay-status {
+            //  height: 50%;
         }
 
-        .col-text {
-          // padding: 0px;
+        .access-toggle-btn-container {
+            // margin-top: 10px;
+            padding: 20px;
+            text-align: right;
         }
-
-        .row-stat {
-          margin-top: 5px;
-        }
-      }
-
-      .toggle-container {
-        display: inline-block;
-        position: absolute;
-        right: 10px;
-      }
-      
     }
 
-    .map {
-      height: 25%;
-      box-shadow: 0 -1px 0 0 rgba(0,0,0,.1);
-    }
-
-    
-    .relay-status {
-      //  height: 50%;
-    }
-
-    .access-toggle-btn-container {
-      // margin-top: 10px;
-      padding: 20px;
-      text-align: right;
-    }
-  }
-  
 </style>

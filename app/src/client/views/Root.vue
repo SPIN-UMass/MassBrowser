@@ -13,6 +13,9 @@
       if (!store.state.browserIntegrationComplete) {
         return '/browser-integration'
       } else {
+        if (!store.state.languageAndCountrySet) {
+          return '/client/settings'
+        }
         return '/client'
       }
     } else {
@@ -26,6 +29,7 @@
 
   export default {
     async created () {
+      await store.ready
       let route = await getRoute()
       this.$router.push(route) 
     }

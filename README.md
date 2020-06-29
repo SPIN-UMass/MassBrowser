@@ -4,22 +4,16 @@ Volunteer-based censorship circumvention tool
 
 ## Build Setup
 
-``` bash
-# install dependencies
-npm install
+Information on buiding it on a Linux machine can be found [here](/doc/install.md).
 
-# serve with hot reload at localhost:9080
-npm run dev
+## Testing instruction
 
-# build electron app for production
-npm run build
+Want to be a tester?  [here](/doc/test_instruction.md) is the doc you may find helpful.
 
-# lint all JS/Vue component files in `app/src`
-npm run lint
+## Ready to dev
 
-# run webpack in production
-npm run pack
-```
+Are you ready to dev?  [here](/doc/ready_to_dev.md) is the doc to get you started.
+
+## More about MassBrowser
+
 More information can be found [here](https://massbrowser.cs.umass.edu).
-
-

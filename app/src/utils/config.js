@@ -1,8 +1,11 @@
 import packageJSON from 'package.json'
+import path from 'path'
 
 const defaultConfig = {
   client: {
     socksPort: 7080,
+    socksSecondPort: 7081,
+    torPort: 9055,
     cachebrowser: {
       mitmPort: 6425
     },
@@ -19,6 +22,7 @@ const defaultConfig = {
     },
     natEnabled: true,
     port: 8040   /* Only used if natEnabled is false */,
+    UDPPort: 8040,
     keepAliveInterval: 30,
     stunServer: {
       host: 'stun2.l.google.com',
@@ -40,12 +44,23 @@ function initializeConfig(options) {
   let role = (options || {}).role
   let mode = (options || {}).mode
   let isDebug = (options || {}).debug
+  let isFirefox = (options || {}).firefox
+  
 
+  const config = {}
+
+  let opsys = process.platform
+  if (opsys == "darwin") {
+      opsys = "osx"
+  } else if (opsys == "win32" || opsys == "win64") {
+      opsys = "windows"
+  } else if (opsys == "linux") {
+      opsys = "linux"
+  }
   if (role !== 'client' && role !== 'relay') {
     throw new Error("Invalid configuration role")
   }
-
-  const config = {}
+  config.OS = opsys;
 
   function updateConfig (baseConfig, newConfig) {
       Object.keys(newConfig).forEach(key => {
@@ -56,8 +71,9 @@ function initializeConfig(options) {
         }
       })
   }
-  
+
   function configureWith(pConfig) {
+    
     let devConfig = pConfig.dev || {}
     let prodConfig = pConfig.prod || {}
     pConfig.dev = undefined
@@ -68,7 +84,7 @@ function initializeConfig(options) {
     let roleProdConfig = pConfig[role].prod || {}
     roleConfig.prod = undefined
     roleConfig.dev = undefined
-    
+
     pConfig['client'] = undefined
     pConfig['relay'] = undefined
 
@@ -81,18 +97,28 @@ function initializeConfig(options) {
     } else {
       updateConfig(config, prodConfig)
       updateConfig(config, roleProdConfig)
-    }    
+    }
   }
 
   configureWith(defaultConfig)
   configureWith(packageJSON.config)
-  
+
   updateConfig(config, options)
-  
+
   if (config.mode === 'development') {
     console.log("Running in development mode")
     config.isDevelopment = true
     config.isProduction = false
+    if (config.OS == "osx"){
+      config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-osx-x86_64/Contents/MacOS/Tor/tor')
+    }
+
+    if (config.OS == "windows"){
+      config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-windows-x86_64/Tor/tor.exe')
+    }
+    if (config.OS == "linux"){
+      config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-linux-x86_64/Tor/tor')
+    }
   } else {
     config.environment == 'production'
     config.isDevelopment = false
@@ -106,8 +132,12 @@ function initializeConfig(options) {
   config.isElectronRendererProcess = config.applicationInterface === 'electron' && config.electronProcess === 'renderer'
   config.isElectronMainProcess = config.applicationInterface === 'electron' && config.electronProcess === 'main'
   config.isElectronProcess = config.applicationInterface === 'electron'
-  
+
   config.version = packageJSON.version
+
+
+  config.isFirefoxVersion = config.isClient && isFirefox ==='YES'
+
   // config.appName = packageJSON.name // Now included directly in config
 
   config.isDebug = isDebug
@@ -129,7 +159,8 @@ const config = initializeConfig({
   role: process.env.ROLE,
   applicationInterface: process.env.APP_INTERFACE,
   electronProcess: process.env.ELECTRON_PROCESS,
-  debug: process.env.DEBUG
+  debug: process.env.DEBUG,
+  firefox : process.env.IS_FIREFOX
 })
 
 export default config

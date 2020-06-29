@@ -26,3 +26,17 @@ export function showConfirmDialog(title, text, options) {
     })
   })
 }
+
+export function getAddress (domain) {
+  const dns = require('dns')
+  return new Promise((resolve, reject) => {
+    dns.lookup(domain, function (err, result) {
+      if (err) {
+        console.log(err)
+        reject(err)
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}

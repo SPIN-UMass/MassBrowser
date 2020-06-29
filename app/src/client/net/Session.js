@@ -1,36 +1,28 @@
-/**
- * Created by milad on 6/29/17.
- */
 import { EventEmitter } from 'events'
-import { connectionManager } from '@/net/connectionManager'
-import { RelayConnection } from '@/net/RelayConnection'
+import { connectionManager } from './connectionManager'
 import { DomainConnection } from './DomainConnection'
 import { pendMgr } from './PendingConnections'
-import {sessionService} from '@/services/sessionService'
+import { sessionService } from '../services/sessionService'
+import { ConnectionTypes } from '../../common/constants'
+import { TCPRelayConnection } from './TCPRelayConnection'
+import { UDPRelayConnection } from './UDPRelayConnection'
 
 export class Session extends EventEmitter {
-  constructor (id, ip, port, desc, allowedCategories, connectionType, domainName) {
+  constructor (id, ip, port, UDPPort, desc, allowedCategories, connectionType, domainName) {
     super()
 
     this.id = id
     this.ip = ip
     this.port = port
+    this.UDPPort = UDPPort
     this.desc = desc
-    var allowedcats = []
-
-    if (allowedCategories) {
-      allowedCategories.forEach(cat => {
-        allowedcats.push(cat.id)
-      })
-    }
-
-    this.allowedCategories = new Set(allowedcats)
+    this.allowedCategories = this._initAllowedCategories(allowedCategories)
     this.connection = null
     this.connectionType = connectionType
     this.state = Session.CREATED
     this.domainName = domainName
-    this.listener_resolve = {}
-    this.listener_reject = {}
+    this.listenerResolve = {}
+    this.listenerReject = {}
     this.bytesSent = 0
     this.bytesReceived = 0
   }
@@ -38,10 +30,19 @@ export class Session extends EventEmitter {
   connect () {
     this.changeState(Session.CONNECTING)
 
-    if (this.isCDN) {
-      var relay = new DomainConnection(this.domainName, this.desc)
-    } else {
-      var relay = new RelayConnection(this.ip, this.port, this.desc)
+    let relay
+    switch (this.connectionType) {
+      case ConnectionTypes.TCP_CLIENT:
+        relay = new TCPRelayConnection(this.ip, this.port, this.desc)
+        break
+      case ConnectionTypes.UDP:
+        relay = new UDPRelayConnection(this.ip, this.UDPPort, this.desc)
+        break
+      case ConnectionTypes.CDN:
+        relay = new DomainConnection(this.domainName, this.desc)
+        break
+      default:
+        relay = new TCPRelayConnection(this.ip, this.port, this.desc)
     }
 
     relay.id = this.id
@@ -59,7 +60,6 @@ export class Session extends EventEmitter {
     relay.on('close', () => {
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
-      console.log('Calling to remove session')
       sessionService._handleClosedSessions(this)
     })
 
@@ -73,17 +73,15 @@ export class Session extends EventEmitter {
   }
 
   listen () {
-
-    this.changeState(Session.LISTENING)
-    pendMgr.addPendingConnection(this)
     return new Promise((resolve, reject) => {
-      this.listener_resolve = resolve
-      this.listener_reject = reject
+      this.changeState(Session.LISTENING)
+      pendMgr.addPendingConnection(this)
+      this.listenerResolve = resolve
+      this.listenerReject = reject
     })
   }
 
-  relay_connected (relay) {
-
+  relayConnected (relay) {
     this.connection = relay
     this.changeState(Session.CONNECTED)
     relay.id = this.id
@@ -99,29 +97,30 @@ export class Session extends EventEmitter {
     })
 
     relay.on('close', () => {
-      console.log("test closed")
       connectionManager.onRelayClose(relay)
       this.changeState(Session.CLOSED)
-
     })
 
-
-    
-
-    relay.sessionFounded(this).then(()=>{
-      this.listener_resolve()
-    }).catch((err)=>{
-      this.listener_reject(err)
-
+    relay.sessionFounded(this).then(() => {
+      this.listenerResolve()
+    }).catch((err) => {
+      this.listenerReject(err)
     })
-
-
-
   }
 
   changeState (state) {
     this.state = state
     this.emit('state-changed', state)
+  }
+
+  _initAllowedCategories (allowedCategories) {
+    let allowedCategoriesArray = []
+    if (allowedCategories) {
+      allowedCategories.forEach(cat => {
+        allowedCategoriesArray.push(cat.id)
+      })
+    }
+    return new Set(allowedCategoriesArray)
   }
 
   static get CREATED () { return 'created' }

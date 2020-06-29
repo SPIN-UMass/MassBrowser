@@ -37,7 +37,7 @@ export default [
       },
       {
         path: '/client/websites',
-        component: require('@/views/WebsitesView'),
+        component: require('@/views/websites/WebsitesView'),
         name: 'websites'
       },
       {
@@ -62,10 +62,28 @@ export default [
             component: require('@/views/settings/WebsiteSettings')
           }
         ]
+      },
+      {
+        path: '/client/stats',
+        component: require('@/views/stats/StatsView'),
+        name: 'debug',
+        children: [
+          { path: '/client/stats', redirect: '/client/stats/connections' },
+          {
+            path: '/client/stats/connections',
+            name: 'stats-connections',
+            component: require('@/views/stats/Connections.vue')
+          },
+          {
+            path: '/client/stats/sessions',
+            name: 'stats-sessions',
+            component: require('@/views/stats/Sessions.vue')
+          }
+        ]
       }
     ]
   },
-  
+
   {
     path: '*',
     redirect: '/'

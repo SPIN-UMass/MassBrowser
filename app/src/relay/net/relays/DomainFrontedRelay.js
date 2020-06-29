@@ -2,7 +2,7 @@ import http from 'http'
 const net = require('net')
 const url = require('url')
 import { EventEmitter } from 'events'
-import { ConnectionReceiver }  from '@/net/ConnectionReceiver'
+import { ConnectionReceiver }  from '@/net'
 
 export class DomainFrontedRelay {
   constructor(authenticator, port) {

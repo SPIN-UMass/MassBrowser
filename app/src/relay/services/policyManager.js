@@ -1,7 +1,7 @@
 import { Domain, Category } from '@/models'
 import * as errors from '@utils/errors'
 import { error, debug } from '@utils/log'
-import { torService } from '@/services'
+import { torService, telegramService } from '@common/services'
 
 class PolicyManager {
   /**
@@ -15,13 +15,21 @@ class PolicyManager {
 
     if (ipRegex.test(host)) {
       /* IP hosts are only allowed for Tor destinations */
-      const torCategory = Category.find({name: 'Tor'})
-      if (!torCategory.enabled) {
-        throw new errors.InvalidHostError('IP based filtering only supported for Tor, but Tor is disabled')
+      const torCategory = (await Category.find({name: 'Tor'}))[0]
+      const telegramCategory = (await Category.find({name: 'Messaging'}))[0]
+      if (torCategory.enabled && torService.isTorIP(host)) {
+        debug('Tor Relay')
+        return
       }
-      if (!torService.isTorIP(host)) {
-        throw new errors.InvalidHostError('IP based filtering only supported for Tor')
+      else if ( telegramCategory.enabled && telegramService.isTelegramIP(host))
+      {
+        debug('Telegram IP')
+        return 
       }
+      else{
+        throw new errors.InvalidHostError('IP based filtering only supported for Tor and Telegram')
+      }
+      
     }
 
     let domain = await Domain.findDomain(host)

@@ -1,30 +1,32 @@
-<template lang='pug'>
-  .general-settings-container
-    settings-group(title="Application Settings")
-      div(slot="help")
-        p
-      div(slot="body")
-        .row(v-if="errorMessage")
-          .col-xs-12
-            .alert.alert-pink.err-message
-              p {{ errorMessage }}
-        .row
-          .col-xs-8
-            label Launch MassBuddy on startup
-          .col-xs-4.align-right
-            toggle-button.toggle(:labels= {
-            checked: 'Yes',
-            unchecked: 'No'
-            } :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged")
-        .row(v-if="showDockHideOption")
-          .col-xs-8
-            label Show dock icon when closed
-          .col-xs-4.align-right
-            toggle-button.toggle(:labels= {
-            checked: 'Yes',
-            unchecked: 'No'
-            } :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged")
-
+<template>
+    <div class="general-settings-container">
+        <settings-group :title="$t('SETTINGS_RELAY_GENERAL_SETTING_TITLE')">
+            <div slot="help">
+                <p></p>
+            </div>
+            <div slot="body">
+                <div class="row" v-if="errorMessage">
+                    <div class="col-xs-12">
+                        <div class="alert alert-pink err-message">
+                            <p>{{ errorMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8"><label>{{$t('SETTINGS_RELAY_STARTUP')}}</label></div>
+                    <div class="col-xs-4 align-right">
+                        <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="autoLaunchEnabled" v-on:change="autoLaunchChanged"></toggle-button>
+                    </div>
+                </div>
+                <div class="row" v-if="showDockHideOption">
+                    <div class="col-xs-8"><label>{{$t('SETTINGS_RELAY_SHOW_DOCK')}}</label></div>
+                    <div class="col-xs-4 align-right">
+                        <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged"></toggle-button>
+                    </div>
+                </div>
+            </div>
+        </settings-group>
+    </div>
 </template>
 
 <script>
@@ -53,24 +55,24 @@
       this.autoLaunchEnabled = await autoLauncher.isEnabled()
     },
     methods: {
-      async autoLaunchChanged(e) { 
+      async autoLaunchChanged (e) {
         const isEnabled = await autoLauncher.isEnabled()
         if (e.value && !isEnabled) {
           await autoLauncher.enable()
           if (!(await autoLauncher.isEnabled())) {
-            this.showError("Unable to configure launch on startup, it may not be supported on your system.")
+            this.showError(this.$t('ERROR_UNABLE_TO_CONFIGURE_LAUNCH_STARTUP'))
           }
         } else if (!e.value && isEnabled) {
           await autoLauncher.disable()
           if (await autoLauncher.isEnabled()) {
-            this.showError("Unable to configure launch on startup, it may not be supported on your system.")
+            this.showError(this.$t('ERROR_UNABLE_TO_CONFIGURE_LAUNCH_STARTUP'))
           }
         }
       },
-      async dockVisibleChanged(e) {
+      async dockVisibleChanged (e) {
         dockHider.changeVisibility(e.value)
       },
-      showError(message) {
+      showError (message) {
         this.errorMessage = message
       }
     }
@@ -79,23 +81,23 @@
 </script>
 
 <style scoped lang='scss'>
-  @import '~@/views/styles/settings.scss';
-  
-  .general-settings-container {
-    padding: 0px 0px;
+    @import '~@/views/styles/settings.scss';
 
-    .align-right {
-      text-align: right;
-    }
+    .general-settings-container {
+        padding: 0 0;
 
-    .align-center {
-      text-align: center;
-    }
+        .align-right {
+            text-align: right;
+        }
 
-    .err-message {
-      font-size: 12px;
-      margin-bottom: 5px;
-      padding: 5px;
+        .align-center {
+            text-align: center;
+        }
+
+        .err-message {
+            font-size: 12px;
+            margin-bottom: 5px;
+            padding: 5px;
+        }
     }
-  }
 </style>

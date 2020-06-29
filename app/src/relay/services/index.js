@@ -1,6 +1,5 @@
 export * from './syncService'
-export * from './policyManager'
 export * from './relayManager'
 export * from './networkMonitor'
+export * from './policyManager'
 export * from './registrationService'
-export * from './torService'
