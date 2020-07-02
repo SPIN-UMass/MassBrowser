@@ -48,10 +48,12 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   deleteNatPunchingListItem (addressKey) {
+    this._natPunchingList[addressKey] = null
     delete this._natPunchingList[addressKey]
   }
 
   deleteConnectionListItem (addressKey) {
+    this._connections[addressKey] = null
     delete this._connections[addressKey]
   }
 
@@ -65,6 +67,7 @@ export class UDPConnectionService extends EventEmitter {
       this._expectedConnections[key] = true
       setTimeout(() => {
         if (this._expectedConnections[key]) {
+          this._expectedConnections[key] = null
           delete this._expectedConnections[key]
         }
       }, 20000)
@@ -82,7 +85,7 @@ export class UDPConnectionService extends EventEmitter {
         this.deleteNatPunchingListItem(secondAddressKey)
       }
       connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port, sessionKey))
-      connection.on('close', () => {
+      connection.once('close', () => {
         this.deleteNatPunchingListItem(secondAddressKey)
         this.deleteConnectionListItem(secondAddressKey)
       })
@@ -93,7 +96,7 @@ export class UDPConnectionService extends EventEmitter {
       this.deleteNatPunchingListItem(addressKey)
     }
     connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port, sessionKey))
-    connection.on('close', () => {
+    connection.once('close', () => {
       this.deleteNatPunchingListItem(addressKey)
       this.deleteConnectionListItem(addressKey)
     })
@@ -176,7 +179,7 @@ export class UDPConnectionService extends EventEmitter {
         connection.on('stun-data', (tid, data) => {
           this.emit('stun-data', tid, data)
         })
-        connection.on('close', () => {
+        connection.once('close', () => {
           this.deleteNatPunchingListItem(secondAddressKey)
           this.deleteConnectionListItem(secondAddressKey)
         })
@@ -190,21 +193,17 @@ export class UDPConnectionService extends EventEmitter {
         connection.on('stun-data', (tid, data) => {
           this.emit('stun-data', tid, data)
         })
-        connection.on('close', () => {
+        connection.once('close', () => {
           this.deleteNatPunchingListItem(addressKey)
           this.deleteConnectionListItem(addressKey)
         })
         this._connections[addressKey] = connection
-        // console.log('got new connection wasnt expecting')
       } else {
         let key = address + ':' + port
         connection = this._connections[addressKey]
         if (this._expectedConnections[key]) {
-          // console.log('got connection i was expecting', addressKey)
           this.emit('relay-new-connection', connection, addressKey)
           delete this._expectedConnections[key]
-        } else {
-          // console.log('got connection wasnt expecting', addressKey)
         }
       }
     }
@@ -328,9 +327,11 @@ export class UDPConnectionService extends EventEmitter {
     let promises = []
     for (let addressKey in this._connections) {
       let connection = this._connections[addressKey]
-      connection.removeListener('close', () => this.deleteConnectionListItem(addressKey))
+      // connection.removeListener('close', () => this.deleteConnectionListItem(addressKey))
+      connection.removeAllListeners(['close'])
       let promise = new Promise((resolve, reject) => {
         connection.on('close', () => {
+          connection.removeAllListeners(['close'])
           resolve()
         })
       })

@@ -39,6 +39,9 @@ function Connection(packetSender) {
   this._sender.on('fin_acked', () => {
     if (this.currentTCPState === constants.TCPStates.LAST_ACK) {
       this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+      this._sender.clear();
+      this._packetSender.clear();
+      this._receiver.clear();
       this._sender._stopTimeoutTimer();
       this._stopTimeoutTimer();
       this.emit('close');
@@ -88,6 +91,7 @@ Connection.prototype._startTimeoutTimer = function () {
     this._changeCurrentTCPState(constants.TCPStates.CLOSED);
     this._sender._stopTimeoutTimer();
     this._sender.clear();
+    this._packetSender.clear();
     this._receiver.clear();
     this.emit('close');
     this.emit('connection_timeout');
@@ -261,6 +265,9 @@ Connection.prototype._changeCurrentTCPState = function (newState) {
 
 Connection.prototype.close = async function () {
   if (this.stunMode) {
+    this._sender.clear();
+    this._packetSender.clear();
+    this._receiver.clear();
     this.emit('close');
     return;
   }
@@ -270,6 +277,7 @@ Connection.prototype.close = async function () {
     case constants.TCPStates.SYN_RCVD:
     case constants.TCPStates.ESTABLISHED:
       this._sender.clear();
+      this._packetSender.clear();
       this._receiver.clear();
       await this._sender.sendFin();
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_1)
