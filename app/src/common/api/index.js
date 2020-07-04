@@ -74,7 +74,6 @@ export class CommonAPI {
     return this.transport.get(
       CLIENT_URL + '/' + this.userID + '/sessions?limit='+ limit + '&status=' + status
     ).then((r) =>  {
-      console.log(r.data)
       return r.data.results
     })
   }
