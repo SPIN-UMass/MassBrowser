@@ -6,7 +6,7 @@ import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks } from '@/net'
 import config from '@utils/config'
 import Raven from '@utils/raven'
-import { eventHandler } from '@/events'
+// import { eventHandler } from '@/events'sdf
 import API from '@/api'
 import {
   AuthenticationError, NetworkError, RequestError, InvalidInvitationCodeError,
@@ -15,7 +15,7 @@ import {
 import { store } from '@utils/store'
 import networkManager from './net/NetworkManager'
 import { swap } from 'change-case';
-import {WebSocketTransport} from '../utils/transport'
+// import {WebSocketTransport} from '../utils/transport'
 
 // TODO: examine
 require('events').EventEmitter.prototype._maxListeners = 10000

@@ -57,7 +57,7 @@ class CDNSocketMeek extends EventEmitter {
 
     this.socket = socket
     this.connection = new ConnectionReceiver(this, this, this, this.authenticator)
-    this.responses = Buffer(0)
+    this.responses = Buffer.alloc(0)
     this.needresponse = false
     this.response = undefined
     this.laststate = true

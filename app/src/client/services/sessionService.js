@@ -355,7 +355,7 @@ class SessionService extends EventEmitter {
     this.reachTestPollInterval = setInterval(() => {
         API.getReachSession()
         .then(ses => relayManager.handleNewRelaySessions(ses))
-    }, 60000)
+    }, 3 * 60000)
   }
 
   _startSessionPoll () {

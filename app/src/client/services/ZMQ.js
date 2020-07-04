@@ -14,6 +14,17 @@ class _ZMQListener {
     console.log('starting ZMQ')
     this.requests = zeromq.socket('pull')
     this.results = zeromq.socket('push')
+    this.results.setsockopt(zeromq.longOptions.ZMQ_HWM, 1000)
+    this.results.setsockopt(zeromq.longOptions.ZMQ_SNDHWM, 1000)
+    this.results.setsockopt(zeromq.longOptions.ZMQ_SNDBUF, -1)
+    this.results.setsockopt(zeromq.longOptions.ZMQ_RATE, 100)
+    this.results.setsockopt(zeromq.longOptions.ZMQ_BACKLOG, 100)
+    this.requests.setsockopt(zeromq.longOptions.ZMQ_HWM, 1000)
+    this.requests.setsockopt(zeromq.longOptions.ZMQ_RCVHWM, 1000)
+    this.requests.setsockopt(zeromq.longOptions.ZMQ_RCVBUF, -1)
+    this.requests.setsockopt(zeromq.longOptions.ZMQ_RATE, 100)
+    this.requests.setsockopt(zeromq.longOptions.ZMQ_BACKLOG, 100)
+    
     this.validSessions = new Set()
   }
 
@@ -36,7 +47,10 @@ class _ZMQListener {
       }
     }
     return new Promise((resolve, reject) => {
-      setTimeout(()=>{reject('timeout')}, SESSION_TIMEOUT)
+      setTimeout(()=>{
+        reject('timeout')
+        console.log(session.id, session.connection_type, 'timeout')
+      }, SESSION_TIMEOUT)
       try {
         console.log(session)
         var desc = {
@@ -54,7 +68,7 @@ class _ZMQListener {
           _session = new Session(session.id, session.relay.ip, session.relay.port, session.relay.udp_port, desc, session.relay['allowed_categories'], session.connection_type)
         }
         _session.connect().then(() => {
-          console.log('Session Connected')
+          console.log('Session Connected', session.id)
           connectionManager.testConnect(session.destination.dst, session.destination.port, _session.connection, () => {
             if (this.validSessions.has(session)) {
               this.validSessions.delete(session)
@@ -90,7 +104,7 @@ class _ZMQListener {
     this.testConnection(session).then(() => {
       console.log('session received')
     }, () => {
-      console.log('session received but rejected')
+      console.log('session', session.id, session.connection_type, ' received but rejected')
       this.onDisconnect(session)
     })
   }

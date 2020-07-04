@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { Domain } from '@/models'
+import { torService, telegramService } from '@common/services'
 import * as errors from '@utils/errors'
 
 class PolicyManager extends EventEmitter {
