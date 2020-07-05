@@ -19,7 +19,7 @@ class _ZMQListener {
 
   async connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
-    await this.results.bind(RESULTS_ZMQ_SERVER)
+    this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
     await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
     console.log('waiting for a message:')
@@ -34,6 +34,8 @@ class _ZMQListener {
     //   await new Promise(resolve => setTimeout(resolve, 100))
     // }
   }
+
+  /usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin:/home/ec2-user/.local/bin:/home/ec2-user/bin:/srv/client/node-v10.21.0-linux-x64/bin
 
   async testConnection (session) {
     if (session.connection_type === ConnectionTypes.UDP) {
