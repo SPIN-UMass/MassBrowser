@@ -12,30 +12,20 @@ const zeromq = require('zeromq')
 class _ZMQListener {
   constructor () {
     console.log('starting ZMQ')
-    this.requests = new zeromq.Pull
-    this.results = new zeromq.Push
+    this.requests = zeromq.socket('pull')
+    this.results = zeromq.socket('push')
     this.validSessions = new Set()
   }
 
   async connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
+    this.requests.on('message', (msg) => {
+      this.onRequest(msg)
+    })
     this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
     await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
-    console.log('waiting for a message:')
-    while (!this.requests.closed) {
-      const [msg] = await this.requests.receive()
-      this.onRequest(msg)
-      console.log("work: %s", msg.toString())
-    }
-    // for await (const [msg] of this.requests) {
-    //   console.log("work: %s", msg.toString())
-    //   this.onRequest(msg)
-    //   await new Promise(resolve => setTimeout(resolve, 100))
-    // }
   }
-
-  /usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin:/home/ec2-user/.local/bin:/home/ec2-user/bin:/srv/client/node-v10.21.0-linux-x64/bin
 
   async testConnection (session) {
     if (session.connection_type === ConnectionTypes.UDP) {
