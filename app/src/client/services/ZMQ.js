@@ -12,28 +12,27 @@ const zeromq = require('zeromq')
 class _ZMQListener {
   constructor () {
     console.log('starting ZMQ')
-    this.requests = zeromq.socket('pull')
-    this.results = zeromq.socket('push')
-    this.results.setsockopt('hwm', 1000)
-    this.results.setsockopt('sndbuf', -1)
-    this.results.setsockopt('rate', 100)
-    this.results.setsockopt('backlog', 100)
-    this.requests.setsockopt('hwm', 1000)
-    this.requests.setsockopt('rcvbuf', 1000)
-    this.requests.setsockopt('rate', 100)
-    this.requests.setsockopt('backlog', 100)
-    
+    this.requests = new zeromq.Pull
+    this.results = new zeromq.Push
     this.validSessions = new Set()
   }
 
   async connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
-    this.requests.on('message', (msg) => {
-      this.onRequest(msg)
-    })
-    this.results.connect(RESULTS_ZMQ_SERVER)
+    await this.results.bind(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
     await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
+    console.log('waiting for a message:')
+    while (!this.requests.closed) {
+      const [msg] = await this.requests.receive()
+      this.onRequest(msg)
+      console.log("work: %s", msg.toString())
+    }
+    // for await (const [msg] of this.requests) {
+    //   console.log("work: %s", msg.toString())
+    //   this.onRequest(msg)
+    //   await new Promise(resolve => setTimeout(resolve, 100))
+    // }
   }
 
   async testConnection (session) {

@@ -7,12 +7,9 @@
 
 
 import ZMQListener from '@/services/ZMQ'
-console.log("Control")
-try {
+
+async function run () {
 	ZMQListener.connect()
-} catch(e) {
-	console.log(e)
 }
 
-
-
+run()
