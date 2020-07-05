@@ -18,7 +18,7 @@ let config = {
     rules: common.rules
   },
   node: {
-    __dirname: true,
+    __dirname: false,
     __filename: false
   },
   output: {
