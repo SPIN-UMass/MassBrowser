@@ -177,7 +177,9 @@ export class UDPConnectionService extends EventEmitter {
       if (!this._connections[secondAddressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
         connection.on('stun-data', (tid, data) => {
-          this.emit('stun-data', tid, data)
+          if (data && data.port && data.address) {
+            this.emit('stun-data', tid, data)
+          }
         })
         connection.once('close', () => {
           this.deleteNatPunchingListItem(secondAddressKey)
@@ -191,7 +193,9 @@ export class UDPConnectionService extends EventEmitter {
       if (!this._connections[addressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
         connection.on('stun-data', (tid, data) => {
-          this.emit('stun-data', tid, data)
+          if (data && data.port && data.address) {
+            this.emit('stun-data', tid, data)
+          }
         })
         connection.once('close', () => {
           this.deleteNatPunchingListItem(addressKey)
