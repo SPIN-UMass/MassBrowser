@@ -36,10 +36,6 @@ class _ZMQListener {
       }
     }
     return new Promise((resolve, reject) => {
-      setTimeout(()=>{
-        reject('timeout')
-        console.log(session.id, session.connection_type, 'timeout')
-      }, SESSION_TIMEOUT)
       try {
         console.log(session)
         var desc = {
