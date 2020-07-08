@@ -85,7 +85,7 @@ export class UDPConnectionService extends EventEmitter {
         this.deleteNatPunchingListItem(secondAddressKey)
       }
       connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port, sessionKey))
-      connection.once('close', () => {
+      connection.on('close', () => {
         this.deleteNatPunchingListItem(secondAddressKey)
         this.deleteConnectionListItem(secondAddressKey)
       })
@@ -96,7 +96,7 @@ export class UDPConnectionService extends EventEmitter {
       this.deleteNatPunchingListItem(addressKey)
     }
     connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port, sessionKey))
-    connection.once('close', () => {
+    connection.on('close', () => {
       this.deleteNatPunchingListItem(addressKey)
       this.deleteConnectionListItem(addressKey)
     })
@@ -177,9 +177,11 @@ export class UDPConnectionService extends EventEmitter {
       if (!this._connections[secondAddressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
         connection.on('stun-data', (tid, data) => {
-          this.emit('stun-data', tid, data)
+          if (data && data.port && data.address) {
+            this.emit('stun-data', tid, data)
+          }
         })
-        connection.once('close', () => {
+        connection.on('close', () => {
           this.deleteNatPunchingListItem(secondAddressKey)
           this.deleteConnectionListItem(secondAddressKey)
         })
@@ -191,9 +193,11 @@ export class UDPConnectionService extends EventEmitter {
       if (!this._connections[addressKey]) {
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
         connection.on('stun-data', (tid, data) => {
-          this.emit('stun-data', tid, data)
+          if (data && data.port && data.address) {
+            this.emit('stun-data', tid, data)
+          }
         })
-        connection.once('close', () => {
+        connection.on('close', () => {
           this.deleteNatPunchingListItem(addressKey)
           this.deleteConnectionListItem(addressKey)
         })

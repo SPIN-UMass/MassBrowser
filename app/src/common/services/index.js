@@ -1,7 +1,7 @@
 import config from '@utils/config'
 
 module.exports = {
-    // ...require('./autoUpdater'),
+    ...require('./autoUpdater'),
     ...require('./statusManager'),
     ...require('./SyncService'),
     ...require('./torService'),

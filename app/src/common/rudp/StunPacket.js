@@ -91,8 +91,9 @@ StunPacket.prototype._encodeAttributes = function _encodeAttributes() {
 
 // Determines whether STUN StunPacket
 StunPacket.isStunPacket = function _isStunStunPacket(buffer) {
-    let block = buffer.readUInt16BE(0)
-    return (block === 0x0101) ? true : false;
+    let block1 = buffer.readUInt32BE(0)
+    let block2 = buffer.readUInt32BE(4)
+    return (block1 === 0x0101000c && block2 === 0x2112a442  && buffer.length === 32) ? true : false;
     // var block = buffer.readUInt8(0);
     // var bit1 = block & 0x80;
     // var bit2 = block & 0x40;
