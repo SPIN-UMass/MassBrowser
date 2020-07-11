@@ -47,15 +47,15 @@ Queue.prototype.enqueue = async function (id, object) {
 Queue.prototype.dequeue =  async function () {
   var selected_node = null
   let release = await this._lock.acquire()
-
-    if (this._head === null) {
-      return null;
-    }
-    this.size = this.size - 1;
-    let node = new Node(this._head.id, this._head.value);
-    delete this._ids[node.id]
-    this._head = this._head.next;
-    selected_node = node
+  if (this._head === null) {
+    return null;
+  }
+  this.size = this.size - 1;
+  let node = new Node(this._head.id, this._head.value);
+  this._ids[node.id] = null;
+  delete this._ids[node.id]
+  this._head = this._head.next;
+  selected_node = node
   release()
   return selected_node
 }

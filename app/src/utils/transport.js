@@ -158,9 +158,12 @@ export class WebSocketTransport extends Transport {
     if (resp['message_id'] in this.connectionMap) {
       // debug('I am HERE',this.connectionMap[resp['message_id']])
       let handler = this.connectionMap[resp['message_id']]
-
+      // remove connectionMap item after receiving the reply
+      this.connectionMap[resp['message_id']] = null
+      delete this.connectionMap[resp['message_id']]
       if (handler) {
         handler(resp)
+
       } else {
         warn("Websocket reply received for a request which doesn't exit")
       }

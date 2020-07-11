@@ -1,0 +1,42 @@
+yarn run v1.22.4
+$ cross-env NODE_ENV=development node --inspect ./app/dist/relay/relay.js
+Running in development mode
+[32minfo[39m: Booting relay...
+[35mstatus[39m: Waiting for Internet conection
+[35mstatus[39m: Authenticating Relay
+[35mstatus[39m: Connecting to WebSocket server
+[35mstatus[39m: Syncing database
+[35mstatus[39m: Syncing allowed categories
+[35mstatus[39m: Loading Tor list
+[35mstatus[39m: Loading Telegram list
+[35mstatus[39m: Connecting to Connectivity server
+[32minfo[39m: UDP Connection Service is started 47661
+[33mwarn[39m: TCP changed
+[33mwarn[39m: UDP changed
+[35mstatus[39m: Obtaining NAT information
+[32minfo[39m: TCP Keepalive sent, connected: true  reachable: false
+[32minfo[39m: UDP Keepalive sent, connected: true  reachable: false
+[35mstatus[39m: Starting Relay
+[33mwarn[39m: change access has been changed
+[33mwarn[39m: restarting the relays!
+[32minfo[39m: TCP relay running on port 12948
+closing all connections
+waiting for connections to close
+closing all connections
+waiting for connections to close
+all connections are closed
+[32minfo[39m: UDP Connection Service is started 47661
+[35mstatus[39m: TCP Relay server started on port 12948
+[35mstatus[39m: UDP Relay server started on port 47661
+[35mstatus[39m: Finalizing
+[32minfo[39m: Boot complete
+[32minfo[39m: TCP Keepalive sent, connected: true  reachable: false
+[32minfo[39m: UDP Keepalive sent, connected: true  reachable: false
+RELAY NEW CONNECTION
+LISTEN -> SYN_RCVD
+SYN_RCVD -> ESTABLISHED
+RELAY NEW CONNECTION
+LISTEN -> SYN_RCVD
+SYN_RCVD -> ESTABLISHED
+[32minfo[39m: TCP Keepalive sent, connected: true  reachable: false
+[32minfo[39m: UDP Keepalive sent, connected: true  reachable: false
