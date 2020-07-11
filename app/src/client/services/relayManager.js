@@ -93,7 +93,6 @@ class RelayManager {
 
     connection.on('close', () => {
       debug('removing UDP connection')
-      this.authenticator.removeConnection(connection.getSessionKey())
       receiver.closeConnections()
       connection.unpipe(upPipe)
       downPipe.unpipe(connection)
