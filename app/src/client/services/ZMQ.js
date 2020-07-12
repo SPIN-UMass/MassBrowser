@@ -13,7 +13,7 @@ class _ZMQListener {
   constructor () {
     console.log('starting ZMQ')
     this.requests = zeromq.socket('pull')
-    // this.results = zeromq.socket('push')
+    this.results = zeromq.socket('push')
     this.validSessions = new Set()
   }
 
@@ -22,7 +22,7 @@ class _ZMQListener {
     this.requests.on('message', (msg) => {
       this.onRequest(msg)
     })
-    // this.results.connect(RESULTS_ZMQ_SERVER)
+    this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
     await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
   }
@@ -101,13 +101,7 @@ class _ZMQListener {
       is_reachable: false
     }
     console.log(session.id, 'is not reachable')
-    let resultSocket = zeromq.socket('push')
-    resultSocket.connect(RESULTS_ZMQ_SERVER)
-    resultSocket.send(JSON.stringify(result))
-    setTimeout(() => {
-      resultSocket.close()
-      resultSocket = null
-    }, 5000)
+    this.results.send(JSON.stringify(result))
   }
 
   onConnect (session) {
@@ -117,13 +111,7 @@ class _ZMQListener {
       is_reachable: true
     }
     console.log(session.id, 'is reachable')
-    let resultSocket = zeromq.socket('push')
-    resultSocket.connect(RESULTS_ZMQ_SERVER)
-    resultSocket.send(JSON.stringify(result))
-    setTimeout(() => {
-      resultSocket.close()
-      resultSocket = null
-    }, 5000)
+    this.results.send(JSON.stringify(result))
   }
 }
 var ZMQListener = new _ZMQListener()
