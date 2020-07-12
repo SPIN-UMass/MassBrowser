@@ -16,7 +16,6 @@ function PacketSender(socket, address, port, sessionKey) {
 PacketSender.prototype.clear = function () {
   this._closed = true;
   this._socket.removeListener('close', this.clear)
-  console.log('listeners:', this._socket.listeners.length)
 }
 
 PacketSender.prototype.sendBuffer = function (buffer) {

@@ -6,6 +6,7 @@ const constants = require('./constants');
 const helpers = require('./helpers');
 const Duplex = require('stream').Duplex;
 const util = require('util');
+import { debug } from '@utils/log'
 const crypto = require('crypto');
 import {Semaphore} from 'await-semaphore'
 import { throwStatement } from 'babel-types';
@@ -50,7 +51,7 @@ function Connection(packetSender) {
     }
   });
   this._sender.on('timeout', () => {
-    console.log('maximum number of tries reached')
+    debug('RUDP: maximum number of tries reached')
     this.emit('timeout')
   })
   this._receiver.on('send_ack', () => {
@@ -143,13 +144,17 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
 }
 
 Connection.prototype._decrypt = function(encryptedPacketWithIV) {
-  let iv = encryptedPacketWithIV.slice(0,16);
-  let key = this._packetSender._sessionKey.slice(0,32);
-  let encryptedPacket = encryptedPacketWithIV.slice(16);
-  let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
-  let decrypted = decipher.update(encryptedPacket);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted;
+  try {
+    let iv = encryptedPacketWithIV.slice(0,16);
+    let key = this._packetSender._sessionKey.slice(0,32);
+    let encryptedPacket = encryptedPacketWithIV.slice(16);
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+    let decrypted = decipher.update(encryptedPacket);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted;
+  } catch (err) {
+    debug('error in decrypt', err)
+  }
 };
 
 Connection.prototype.send = async function (data) {
@@ -259,7 +264,7 @@ Connection.prototype.receive = async function (buffer) {
 };
 
 Connection.prototype._changeCurrentTCPState = function (newState) {
-  console.log(helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState))
+  debug('RUDP:', helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState))
   this.currentTCPState = newState;
 }
 

@@ -20,7 +20,7 @@ class RelayManager {
 
     udpConnectionService.on('relay-new-connection', (connection, addressKey) => {
       udpConnectionService.updateNatPunchingListItem(addressKey)
-      console.log('new relay connection')
+      debug('new relay connection')
       this.onNewUDPConnection(connection)
     })
   }
@@ -92,6 +92,7 @@ class RelayManager {
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
     connection.on('close', () => {
+      debug('removing UDP connection')
       receiver.closeConnections()
       connection.unpipe(upPipe)
       downPipe.unpipe(connection)

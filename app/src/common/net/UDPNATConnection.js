@@ -48,10 +48,13 @@ class UDPNATConnection extends EventEmitter {
           firstUDPPort = Number(data.port)
           remoteAddress = data.address
           firstPromiseResolve()
-        } else {
+        } else if (tid === this.secondtid) {
           secondUDPPort = Number(data.port)
           remoteAddress = data.address
           secondPromiseResolve()
+        } else {
+          debug('EXPECTING:', this.firsttid, 'or', this.secondtid, 'got', tid)
+          return
         }
         this.emit('udp-net-update', {
             remoteSecondUDPPort: secondUDPPort,

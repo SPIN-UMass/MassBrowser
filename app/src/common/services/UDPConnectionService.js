@@ -38,6 +38,7 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   updateNatPunchingListItem (addressKey) {
+    debug('updating Natpunching list for ', addressKey)
     if (this._natPunchingList[addressKey]) {
       this._natPunchingList[addressKey].isPunched = true
     } else {
@@ -91,6 +92,8 @@ export class UDPConnectionService extends EventEmitter {
       })
       this._connections[secondAddressKey] = connection 
     }
+    debug('creating encrypted connection', addressKey)
+    debug('connections:', Object.keys(this._connections))
     if (this._connections[addressKey]) {
       this.deleteConnectionListItem(addressKey)
       this.deleteNatPunchingListItem(addressKey)
@@ -207,6 +210,7 @@ export class UDPConnectionService extends EventEmitter {
         connection = this._connections[addressKey]
         if (this._expectedConnections[key]) {
           this.emit('relay-new-connection', connection, addressKey)
+          this._expectedConnections[key] = null
           delete this._expectedConnections[key]
         }
       }

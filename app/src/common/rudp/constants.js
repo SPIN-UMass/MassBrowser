@@ -36,5 +36,5 @@ module.exports.INITIAL_MAX_WINDOW_SIZE = 64;
 module.exports.MAX_SEQUENCE_NUMBER = 4294967295;
 module.exports.DELAYED_ACK_TIME = 5;
 module.exports.UDP_SAFE_SEGMENT_SIZE = 1400;
-module.exports.CONNECTION_TIMEOUT_INTERVAL = 30000;
+module.exports.CONNECTION_TIMEOUT_INTERVAL = 10000;
 module.exports.SAMPLING_INTERVAL = 50;
