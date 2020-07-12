@@ -95,11 +95,15 @@ class _ZMQListener {
   }
 
   onDisconnect (session) {
-    session['is_reachable'] = false
+    let result = {
+      id: session.id,
+      token: session.token,
+      is_reachable: false
+    }
     console.log(session.id, 'is not reachable')
     let resultSocket = zeromq.socket('push')
     resultSocket.connect(RESULTS_ZMQ_SERVER)
-    resultSocket.send(JSON.stringify(session))
+    resultSocket.send(JSON.stringify(result))
     setTimeout(() => {
       resultSocket.close()
       resultSocket = null
@@ -107,11 +111,15 @@ class _ZMQListener {
   }
 
   onConnect (session) {
-    session['is_reachable'] = true
+    let result = {
+      id: session.id,
+      token: session.token,
+      is_reachable: true
+    }
     console.log(session.id, 'is reachable')
     let resultSocket = zeromq.socket('push')
     resultSocket.connect(RESULTS_ZMQ_SERVER)
-    resultSocket.send(JSON.stringify(session))
+    resultSocket.send(JSON.stringify(result))
     setTimeout(() => {
       resultSocket.close()
       resultSocket = null
