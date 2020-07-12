@@ -12,19 +12,22 @@ const zeromq = require('zeromq')
 class _ZMQListener {
   constructor () {
     console.log('starting ZMQ')
-    this.requests = zeromq.socket('pull')
-    // this.results = zeromq.socket('push')
+    this.requests = new zeromq.Pull
+    this.results = new zeromq.Push
     this.validSessions = new Set()
   }
 
   async connect () {
     this.requests.connect(REQUEST_ZMQ_SERVER)
-    this.requests.on('message', (msg) => {
-      this.onRequest(msg)
-    })
-    // this.results.connect(RESULTS_ZMQ_SERVER)
+    this.results.connect(RESULTS_ZMQ_SERVER)
     console.log('Connected TO ZMQ servers')
     await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
+    console.log('waiting for a message:')
+    while (true) {
+      const [msg] = await this.requests.receive()
+      // this.onRequest(msg)
+      console.log("work: %s", msg.toString())
+    }
   }
 
   async testConnection (session) {
@@ -36,6 +39,10 @@ class _ZMQListener {
       }
     }
     return new Promise((resolve, reject) => {
+      setTimeout(()=>{
+        reject('timeout')
+        console.log(session.id, session.connection_type, 'timeout')
+      }, SESSION_TIMEOUT)
       try {
         console.log(session)
         var desc = {
@@ -87,7 +94,7 @@ class _ZMQListener {
   onRequest (data) {
     let session = JSON.parse(data.toString())
     this.testConnection(session).then(() => {
-      console.log('session', session.id, 'received')
+      console.log('session received')
     }, () => {
       console.log('session', session.id, session.connection_type, ' received but rejected')
       this.onDisconnect(session)
@@ -97,17 +104,13 @@ class _ZMQListener {
   onDisconnect (session) {
     session['is_reachable'] = false
     console.log(session.id, 'is not reachable')
-    let resultSocket = zeromq.socket('push')
-    resultSocket.connect(RESULTS_ZMQ_SERVER)
-    resultsSocket.send(JSON.stringify(session))
+    this.results.send(JSON.stringify(session))
   }
 
   onConnect (session) {
     session['is_reachable'] = true
     console.log(session.id, 'is reachable')
-    let resultSocket = zeromq.socket('push')
-    resultSocket.connect(RESULTS_ZMQ_SERVER)
-    resultsSocket.send(JSON.stringify(session))
+    this.results.send(JSON.stringify(session))
   }
 }
 var ZMQListener = new _ZMQListener()
