@@ -81,6 +81,7 @@ export class UDPConnectionService extends EventEmitter {
     let addressKey = address + ':' + port  + this.port
     let secondAddressKey = address + ':' + port  + this.secondPort
     if (useAltPort) {
+        debug('creating encrypted connection', secondAddressKey)
       if (this._connections[secondAddressKey]) {
         this.deleteConnectionListItem(secondAddressKey)
         this.deleteNatPunchingListItem(secondAddressKey)
@@ -93,7 +94,6 @@ export class UDPConnectionService extends EventEmitter {
       this._connections[secondAddressKey] = connection 
     }
     debug('creating encrypted connection', addressKey)
-    debug('connections:', Object.keys(this._connections))
     if (this._connections[addressKey]) {
       this.deleteConnectionListItem(addressKey)
       this.deleteNatPunchingListItem(addressKey)
@@ -104,6 +104,7 @@ export class UDPConnectionService extends EventEmitter {
       this.deleteConnectionListItem(addressKey)
     })
     this._connections[addressKey] = connection 
+    debug('connections:', Object.keys(this._connections))
   }
 
   performUDPHolePunchingRelay (address, port) {
