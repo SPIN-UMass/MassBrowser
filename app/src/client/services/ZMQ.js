@@ -102,6 +102,7 @@ class _ZMQListener {
     res['client_id'] = session['client']['id']
     res['relay_id'] = session['relay_id']
     res['connection_type'] = session['connection_type']
+    res['test_type'] = session['test_type']
     console.log(session.id, 'is not reachable')
     this.results.send(JSON.stringify(res))
   }
@@ -114,6 +115,7 @@ class _ZMQListener {
     res['client_id'] = session['client']['id']
     res['relay_id'] = session['relay_id']
     res['connection_type'] = session['connection_type']
+    res['test_type'] = session['test_type']
     console.log(session.id, 'is reachable')
     this.results.send(JSON.stringify(res))
   }
