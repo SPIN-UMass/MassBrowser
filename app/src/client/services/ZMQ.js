@@ -27,7 +27,7 @@ class _ZMQListener {
     await udpConnectionService.start(false, REACH_CLIENT_MAIN_UDP_PORT, REACH_CLIENT_ALT_UDP_PORT)
   }
 
-  testConnection (session) {
+  async testConnection (session) {
     if (session.connection_type === ConnectionTypes.UDP) {
       if (session.test_type === 'client') {
         udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
@@ -95,15 +95,27 @@ class _ZMQListener {
   }
 
   onDisconnect (session) {
-    session['is_reachable'] = false
+    let res = {}
+    res['token'] = session['token']
+    res['id'] = session['id']
+    res['is_reachable'] = false
+    res['client_id'] = session['client']['id']
+    res['relay_id'] = session['relay_id']
+    res['connection_type'] = session['connection_type']
     console.log(session.id, 'is not reachable')
-    this.results.send(JSON.stringify(session))
+    this.results.send(JSON.stringify(res))
   }
 
   onConnect (session) {
-    session['is_reachable'] = true
+    let res = {}
+    res['token'] = session['token']
+    res['id'] = session['id']
+    res['is_reachable'] = true
+    res['client_id'] = session['client']['id']
+    res['relay_id'] = session['relay_id']
+    res['connection_type'] = session['connection_type']
     console.log(session.id, 'is reachable')
-    this.results.send(JSON.stringify(session))
+    this.results.send(JSON.stringify(res))
   }
 }
 var ZMQListener = new _ZMQListener()
