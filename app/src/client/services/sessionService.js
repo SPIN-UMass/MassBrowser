@@ -416,6 +416,7 @@ function sessionToSessionDetails (session) {
   return {
     id: session.id,
     state: session.state,
+    type: session.connectionType,
     ip: session.ip,
     port: session.port,
     domainName: session.domainName,
@@ -429,6 +430,7 @@ function pendingSessionToSessionDetails (sessionInfo) {
   return {
     id: sessionInfo.id,
     state: session.state,
+    type: session.connectionType,
     ip: session.ip,
     port: session.port,
     sent: 0,

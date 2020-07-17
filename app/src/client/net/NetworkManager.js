@@ -117,7 +117,7 @@ class NetworkManager {
       this.remoteTCPPort = data.remoteTCPPort
     }
     if (changed) {
-      this.restartListenerServer()
+      // this.restartListenerServer()
       API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
     }
   }

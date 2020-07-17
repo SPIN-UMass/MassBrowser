@@ -7,6 +7,7 @@
                         td.session-enabled
                             .switch(:class="getEnabledState(item)")
                         td.session-id {{item.id}}
+                        td.session-type {{item.type === 2?'UDP':'TCP'}}
                         td.session-address {{item.ip}}:{{item.port}}
                         td.session-state {{item.state}}
                         td.session-traffic {{prettyBytes(item.sent)}}
@@ -97,6 +98,10 @@
         }
 
         .session-item {
+        }
+
+        .session-type {
+          color: red;
         }
 
         .session-id {
