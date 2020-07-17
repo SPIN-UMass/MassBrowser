@@ -123,6 +123,20 @@ function initializeConfig(options) {
     config.environment == 'production'
     config.isDevelopment = false
     config.isProduction = true
+
+    if (config.OS == "osx"){
+      config.torPath =  path.join(__dirname,'../../../../Tor/MacOS/Tor/tor')
+      config.extPath = path.join(__dirname,'../../../../Resources/')
+    }
+    if (config.OS == "windows"){
+      config.torPath =  path.join(process.cwd(),'Tor/tor.exe')
+      config.extPath = process.cwd() //path.join(process.cwd(),'')
+    }
+    if (config.OS == "linux"){
+      config.torPath =  path.join(process.cwd(),'Tor/tor')
+      config.extPath = process.cwd() //path.join(process.cwd(),'')
+    }
+
   }
 
   config.isClient = role === 'client'

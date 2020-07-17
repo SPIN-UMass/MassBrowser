@@ -10,11 +10,11 @@
           span.status-label(v-if='!connected') {{$t('RELAY_NOT_WORKING')}}
       .row.row-stat
         .col-xs-1.col-led
-          icon.status-led.on(name="check-circle"  scale="1.2" v-if="reachable")
-          icon.status-led.off(name="times-circle" scale="1.2" v-if="!reachable")
+          icon.status-led.on(name="check-circle"  scale="1.2" v-if="(reachableTCP || reachableUDP)")
+          icon.status-led.off(name="times-circle" scale="1.2" v-if="!(reachableTCP || reachableUDP)")
         .col-xs-8.col-text
-          span.status-label(v-if='reachable') {{$t('RELAY_REACHABLE')}}
-          span.status-label(v-if='!reachable') {{$t('RELAY_NOT_REACHABLE')}}
+          span.status-label(v-if='(reachableTCP || reachableUDP)') {{$t('RELAY_REACHABLE')}}
+          span.status-label(v-if='!(reachableTCP || reachableUDP)') {{$t('RELAY_NOT_REACHABLE')}}
 </template>
 
 <script>
@@ -25,7 +25,8 @@
   export default {
     store,
     computed: mapState({
-      reachable: 'isTCPRelayReachable',
+      reachableTCP: 'isTCPRelayReachable',
+      reachableUDP: 'isUDPRelayReachable',
       connected: 'isServerConnected',
     }),
   }

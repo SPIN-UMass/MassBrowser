@@ -7,7 +7,6 @@
 </template>
 
 <script>
-  import AutoUpdater from '@common/services/AutoUpdater'
   import ModalManager from '@common/widgets/ModalManager'
   import PrivacyPolicyModal from '@common/widgets/PrivacyPolicyModal'
   import { showConfirmDialog } from '@common/utils'

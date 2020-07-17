@@ -12,7 +12,6 @@ import API from '@/api'
 import {throttleCall} from '@utils'
 
 let TEST_URL = 'backend.yaler.co'
-let REACH_TEST_DUMMY_RELAY_ID = '111111'
 /**
  * Note: Implements RelayAssigner
  *
@@ -355,7 +354,7 @@ class SessionService extends EventEmitter {
     this.reachTestPollInterval = setInterval(() => {
         API.getReachSession()
         .then(ses => relayManager.handleNewRelaySessions(ses))
-    }, 3 * 60000)
+    }, 60000)
   }
 
   _startSessionPoll () {

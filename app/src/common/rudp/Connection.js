@@ -158,7 +158,10 @@ Connection.prototype._decrypt = function(encryptedPacketWithIV) {
 };
 
 Connection.prototype.send = async function (data) {
-
+  if (this.currentTCPState === constants.TCPStates.CLOSED) {
+    debug('CONNECTION IS CLOSED SEND IGNORED')
+    return
+  }
   let release = await this._sendLock.acquire();
   await this._sender.addDataToQueue(data)
   

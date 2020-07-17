@@ -69,7 +69,7 @@ class RelayManager {
     debug(`Session [${session.id}] accepted`)
 
     if (session.reach_client_main_port && session.reach_client_alt_port && session.connection_type === ConnectionTypes.UDP) {
-      await this.timeout(7000)
+      await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(session.reach_client_ip, session.reach_client_alt_port)
       await this.timeout(3000)
       await udpConnectionService.performUDPHolePunchingRelay(session.reach_client_ip, session.reach_client_main_port)      
@@ -92,7 +92,6 @@ class RelayManager {
     let receiver = new ConnectionReceiver(upPipe, downPipe, connection, this.authenticator)
 
     connection.on('close', () => {
-      debug('removing UDP connection')
       receiver.closeConnections()
       connection.unpipe(upPipe)
       downPipe.unpipe(connection)

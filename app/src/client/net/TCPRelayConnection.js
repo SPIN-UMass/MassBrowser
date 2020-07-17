@@ -93,7 +93,7 @@ export class TCPRelayConnection extends EventEmitter {
   _initRelay (socket) {
     var desc = this.desc
     var i = Math.random() * (100 - 1) + 1
-    var padarr = [Buffer(desc['token'])]
+    var padarr = [Buffer.from(desc['token'])]
     while (i > 0) {
       padarr.push(this.cipher.encryptzero())
       i -= 1
@@ -122,7 +122,7 @@ export class TCPRelayConnection extends EventEmitter {
   }
 
   write (conid, command, data) {
-    let sendpacket = Buffer(7)
+    let sendpacket = Buffer.alloc(7)
     sendpacket.writeUInt16BE(conid)
     sendpacket.write(command, 2)
     sendpacket.writeUInt32BE(data.length, 3)
