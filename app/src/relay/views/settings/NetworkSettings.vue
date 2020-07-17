@@ -43,6 +43,22 @@
                         <code>{{ behindNAT ? 'Yes' : 'No'}}</code>
                     </div>
                 </div>
+                <div class="row" v-if="completeVersion">
+                    <div class="col-xs-7">
+                        <label>TCP Reachable</label>
+                    </div>
+                    <div class="col-xs-2">
+                        <code>{{ tcpReachable ? 'Yes' : 'No'}}</code>
+                    </div>
+                </div>
+                <div class="row" v-if="completeVersion">
+                    <div class="col-xs-7">
+                        <label>UDP Reachable</label>
+                    </div>
+                    <div class="col-xs-2">
+                        <code>{{ udpReachable ? 'Yes' : 'No'}}</code>
+                    </div>
+                </div>
                 <div class="row" v-if="completeVersion &amp;&amp; behindNAT">
                     <div class="col-xs-7">
                         <label>{{$t('SETTINGS_RELAY_LOCAL_ADDRESS')}}</label>
@@ -131,6 +147,16 @@
       },
     },
     computed: {
+      tcpReachable: {
+        get () {
+          return this.$store.state.isTCPRelayReachable
+        }
+      },
+      udpReachable: {
+        get () {
+          return this.$store.state.isUDPRelayReachable
+        }
+      },
       privateAddress: {
         get () {
           return this.$store.state.privateAddress
