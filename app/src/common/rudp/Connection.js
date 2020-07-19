@@ -276,7 +276,7 @@ Connection.prototype.receive = async function (buffer) {
 };
 
 Connection.prototype._changeCurrentTCPState = function (newState) {
-  debug('RUDP:', helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState))
+  debug('RUDP:', helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState), this._packetSender.getAddressKey())
   this.currentTCPState = newState;
 }
 
