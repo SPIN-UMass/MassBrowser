@@ -13,6 +13,10 @@ function PacketSender(socket, address, port, sessionKey) {
   this._socket.on('close', this.clear)
 };
 
+PacketSender.prototype.getAddressKey = function () {
+  return this._address + ':' + this._port
+}
+
 PacketSender.prototype.clear = function () {
   this._closed = true;
   this._socket.removeListener('close', this.clear)

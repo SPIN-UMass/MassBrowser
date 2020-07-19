@@ -9,7 +9,6 @@ const util = require('util');
 import { debug } from '@utils/log'
 const crypto = require('crypto');
 import {Semaphore} from 'await-semaphore'
-import { throwStatement } from 'babel-types';
 
 module.exports = Connection;
 function Connection(packetSender) {
@@ -41,18 +40,24 @@ function Connection(packetSender) {
     if (this.currentTCPState === constants.TCPStates.LAST_ACK) {
       this._changeCurrentTCPState(constants.TCPStates.CLOSED);
       this._sender.clear();
-      this._packetSender.clear();
       this._receiver.clear();
       this._sender._stopTimeoutTimer();
       this._stopTimeoutTimer();
+      this._packetSender.clear();
       this.emit('close');
     } else if (this.currentTCPState === constants.TCPStates.FIN_WAIT_1){
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
     }
   });
   this._sender.on('timeout', () => {
+    this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+    this._sender.clear();
+    this._receiver.clear();
+    this._stopTimeoutTimer();
+    this._packetSender.clear();
+    this.emit('close');
+    this.emit('connection_timeout');
     debug('RUDP: maximum number of tries reached')
-    this.emit('timeout')
   })
   this._receiver.on('send_ack', () => {
     this._sender.sendAck();
@@ -94,6 +99,7 @@ Connection.prototype._startTimeoutTimer = function () {
     this._sender.clear();
     this._packetSender.clear();
     this._receiver.clear();
+    this._stopTimeoutTimer();
     this.emit('close');
     this.emit('connection_timeout');
   }, constants.CONNECTION_TIMEOUT_INTERVAL)
@@ -153,7 +159,7 @@ Connection.prototype._decrypt = function(encryptedPacketWithIV) {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted;
   } catch (err) {
-    debug('error in decrypt', err)
+    debug('error in decrypt', this._packetSender.getAddressKey(), err)
   }
 };
 
@@ -251,6 +257,9 @@ Connection.prototype.receive = async function (buffer) {
             this._changeCurrentTCPState(constants.TCPStates.CLOSED);
             this._sender._stopTimeoutTimer();
             this._stopTimeoutTimer();
+            this._sender.clear();
+            this._receiver.clear();
+            this._packetSender.clear();
             this.emit('close');
           }, constants.CLOSE_WAIT_TIME);
         }
@@ -285,7 +294,6 @@ Connection.prototype.close = async function () {
     case constants.TCPStates.SYN_RCVD:
     case constants.TCPStates.ESTABLISHED:
       this._sender.clear();
-      this._packetSender.clear();
       this._receiver.clear();
       await this._sender.sendFin();
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_1)

@@ -150,7 +150,7 @@ export class UDPConnectionService extends EventEmitter {
           resolve(this._connections[secondAddressKey])
         })
         let timer = setTimeout(() => {
-          debug('NAT Punching failed')
+          debug('NAT Punching failed for ', address,':', port)
           reject()
         }, 10000)
         this._natPunchingList[addressKey] = {
