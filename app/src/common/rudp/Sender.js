@@ -77,18 +77,6 @@ Sender.prototype.restartTimeoutTimer = function () {
 }
 
 Sender.prototype._timeout = function () {
-  if (this._retransmissionQueue.size) {
-    this._timeoutCount += 1;
-  }
-  if (this._timeoutCount > constants.Retransmission.MAX_NUMBER_OF_RETRANSMISSION) {
-    this.emit('timeout')
-    this._stopTimeoutTimer()
-    return
-  } else {
-    this._timeoutTimer = setTimeout(() => {
-      this._timeout();
-    }, this._timeoutInterval)
-  }
   switch(this._currentCongestionControlState) {
     case constants.CongestionControl.States.SLOW_START:
       this._slowStartThreshold = Math.floor(this._maxWindowSize / 2);
@@ -105,6 +93,12 @@ Sender.prototype._timeout = function () {
       this._changeCurrentCongestionControlState(constants.CongestionControl.States.SLOW_START);
       break;
   }
+  if (this._retransmissionQueue.size) {
+    this._timeoutCount += 1;
+  }
+  this._timeoutTimer = setTimeout(() => {
+    this._timeout();
+  }, this._timeoutInterval)
 }
 
 Sender.prototype._retransmit = async function () {
