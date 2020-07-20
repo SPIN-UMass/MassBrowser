@@ -104,7 +104,10 @@ export class UDPConnectionService extends EventEmitter {
       this.deleteConnectionListItem(addressKey)
     })
     this._connections[addressKey] = connection 
-    debug('connections:', Object.keys(this._connections))
+    debug('connections:', Object.keys(this._connections).map((addressKey) => {
+      let c = this._connections[addressKey]
+      return addressKey + ' ' + c.currentTCPState
+    }))
   }
 
   performUDPHolePunchingRelay (address, port) {

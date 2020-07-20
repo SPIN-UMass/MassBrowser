@@ -176,6 +176,7 @@ Connection.prototype.send = async function (data) {
       await this._sender.sendSyn();
       await this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
       this._changeCurrentTCPState(constants.TCPStates.SYN_SENT)
+      // this._restartTimeoutTimer();
       break;
     case constants.TCPStates.ESTABLISHED:
       this._sender.send();
@@ -192,6 +193,7 @@ Connection.prototype.receive = async function (buffer) {
       packet = new Packet(this._decrypt(buffer))
     }
     this._restartTimeoutTimer();
+    debug('RUDP', this._packetSender.getAddressKey(), packet.packetType)
     switch(this.currentTCPState) {
       case constants.TCPStates.LISTEN:
         if (packet.packetType === constants.PacketTypes.SYN) {

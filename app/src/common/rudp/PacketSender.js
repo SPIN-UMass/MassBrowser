@@ -14,7 +14,7 @@ function PacketSender(socket, address, port, sessionKey) {
 };
 
 PacketSender.prototype.getAddressKey = function () {
-  return this._address + ':' + this._port
+  return this._address + ':' + this._port + this._socket.address().port
 }
 
 PacketSender.prototype.clear = function () {
