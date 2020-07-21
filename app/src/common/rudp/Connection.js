@@ -198,10 +198,6 @@ Connection.prototype.receive = async function (buffer) {
       packet = new Packet(this._decrypt(buffer))
     }
     this._restartTimeoutTimer();
-    debug('RUDP', this._packetSender.getAddressKey(), packet.packetType)
-    if (packet.packetType === constants.PacketTypes.NOT_VALID) {
-      debug(packet.payload)
-    }
     switch(this.currentTCPState) {
       case constants.TCPStates.LISTEN:
         if (packet.packetType === constants.PacketTypes.SYN) {
