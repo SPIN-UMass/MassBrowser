@@ -182,6 +182,10 @@ export class UDPConnectionService extends EventEmitter {
         return null
       }
       if (!this._connections[secondAddressKey]) {
+        if (port !== 19302) {
+          debug('IGNORING THE INCOMMING CONNECTION')
+          return null
+        }
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
         connection.on('stun-data', (tid, data) => {
           if (data && data.port && data.address) {
@@ -198,6 +202,10 @@ export class UDPConnectionService extends EventEmitter {
       }
     } else {
       if (!this._connections[addressKey]) {
+        if (port !== 19302) {
+          debug('IGNORING THE INCOMMING CONNECTION')
+          return null
+        }
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
         connection.on('stun-data', (tid, data) => {
           if (data && data.port && data.address) {
@@ -253,14 +261,16 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
-          if (rudp.StunPacket.isStunPacket(message)) {
-            setImmediate(() => {
-              connection.receiveStunPacket(message)
-            })
-          } else {
+          if (connection) {
+            if (rudp.StunPacket.isStunPacket(message)) {
               setImmediate(() => {
-              connection.receive(message)
-            })
+                connection.receiveStunPacket(message)
+              })
+            } else {
+                setImmediate(() => {
+                connection.receive(message)
+              })
+            }
           }
         })
 
@@ -339,8 +349,6 @@ export class UDPConnectionService extends EventEmitter {
     let promises = []
     for (let addressKey in this._connections) {
       let connection = this._connections[addressKey]
-      // connection.removeListener('close', () => this.deleteConnectionListItem(addressKey))
-      connection.removeAllListeners(['close'])
       let promise = new Promise((resolve, reject) => {
         connection.on('close', () => {
           connection.removeAllListeners(['close'])

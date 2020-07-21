@@ -3,7 +3,8 @@ module.exports.PacketTypes = {
   'SYN': 2,
   'FIN': 3,
   'SYN_ACK': 4,
-  'DATA': 5
+  'DATA': 5,
+  'NOT_VALID': 6
 };
 module.exports.TCPStates = {
   'CLOSED': 0,
@@ -31,7 +32,7 @@ module.exports.Retransmission = {
   'MAX_NUMBER_OF_RETRANSMISSION': 5,
   'INITIAL_RETRANSMISSION_INTERVAL': 100
 };
-module.exports.CLOSE_WAIT_TIME = 1000;
+module.exports.CLOSE_WAIT_TIME = 10000;
 module.exports.INITIAL_MAX_WINDOW_SIZE = 64;
 module.exports.MAX_SEQUENCE_NUMBER = 4294967295;
 module.exports.DELAYED_ACK_TIME = 5;

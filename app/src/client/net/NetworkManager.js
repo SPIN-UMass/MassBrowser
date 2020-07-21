@@ -104,7 +104,7 @@ class NetworkManager {
     })
 
     setTimeout(() => this._sendKeepAlive(), 500)
-    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 10 * 1000)
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 15000)
   }
 
   _onTCPNetworkUpdate (data) {

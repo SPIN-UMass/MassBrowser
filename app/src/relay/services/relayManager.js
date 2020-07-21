@@ -225,8 +225,9 @@ class RelayManager {
   }
 
   async _startUDPRelayServer () {
-    let localAddress = this._getLocalAddress()
-    await udpConnectionService.setPort(localAddress.UDPPort)
+    // let localAddress = this._getLocalAddress()
+    // await udpConnectionService.setPort(localAddress.UDPPort)
+    await udpConnectionService.start(true)
     this.isUDPRelayServerRunning = true
   }
 

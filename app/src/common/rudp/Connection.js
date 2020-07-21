@@ -42,8 +42,8 @@ function Connection(packetSender) {
       this._sender.clear();
       this._receiver.clear();
       this._sender._stopTimeoutTimer();
-      this._stopTimeoutTimer();
       this._packetSender.clear();
+      this._stopTimeoutTimer();
       this.emit('close');
     } else if (this.currentTCPState === constants.TCPStates.FIN_WAIT_1){
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
@@ -65,16 +65,21 @@ function Connection(packetSender) {
   this._sender.once('done', () => {
     this.emit('done');
   })
+
+  this._restartTimeoutTimer();
 };
 
 util.inherits(Connection, Duplex);
 
 Connection.prototype.setStunMode = function () {
   this.stunMode = true;
+  this._stopTimeoutTimer();
 }
 
 Connection.prototype.receiveStunPacket = function (buffer) {
-  this.stunMode = true;
+  if (!this.stunMode) {
+    this.setStunMode()
+  }
   let sp = StunPacket.decode(buffer)
   let res = sp.attrs[StunPacket.ATTR.XOR_MAPPED_ADDRESS]
   this.emit('stun-data', sp.tid, res);
@@ -194,6 +199,9 @@ Connection.prototype.receive = async function (buffer) {
     }
     this._restartTimeoutTimer();
     debug('RUDP', this._packetSender.getAddressKey(), packet.packetType)
+    if (packet.packetType === constants.PacketTypes.NOT_VALID) {
+      debug(packet.payload)
+    }
     switch(this.currentTCPState) {
       case constants.TCPStates.LISTEN:
         if (packet.packetType === constants.PacketTypes.SYN) {
@@ -232,7 +240,7 @@ Connection.prototype.receive = async function (buffer) {
             this._receiver.clear();
             this._sender.sendAck();
             this._changeCurrentTCPState(constants.TCPStates.CLOSE_WAIT);
-            this._sender.sendFin();
+            await this._sender.sendFin();
             this._changeCurrentTCPState(constants.TCPStates.LAST_ACK);
             break;
           case constants.PacketTypes.DATA:
@@ -242,6 +250,7 @@ Connection.prototype.receive = async function (buffer) {
         break;
       case constants.TCPStates.LAST_ACK:
         if (packet.packetType === constants.PacketTypes.ACK) {
+          debug(packet.acknowledgementNumber)
           await this._sender.verifyAck(packet.acknowledgementNumber);
         }
         break;

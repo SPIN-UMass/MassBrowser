@@ -38,8 +38,11 @@ function Packet(sequenceNumber, acknowledgementNumber, packetType, payload) {
       case 10:
         this.packetType = constants.PacketTypes.SYN_ACK;
         break;
-      default:
+      case 0:
         this.packetType = constants.PacketTypes.DATA;
+        break;
+      default:
+        this.packetType = constants.PacketTypes.NOT_VALID;
     }
     this.payload = Buffer.alloc(buffer.length - 12);
     buffer.copy(this.payload, 0, 12);
