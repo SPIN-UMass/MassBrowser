@@ -99,7 +99,6 @@ Connection.prototype._stopTimeoutTimer = function () {
 
 Connection.prototype._startTimeoutTimer = function () {
   this._connectionTimeoutTimer = setTimeout(() => {
-    debug('TIMEOUT',  this._packetSender.getAddressKey())
     this._changeCurrentTCPState(constants.TCPStates.CLOSED);
     this._sender._stopTimeoutTimer();
     this._sender.clear();
@@ -112,7 +111,6 @@ Connection.prototype._startTimeoutTimer = function () {
 }
 
 Connection.prototype._restartTimeoutTimer = function () {
-  debug('RESET TIMEOUT',  this._packetSender.getAddressKey())
   this._stopTimeoutTimer();
   this._startTimeoutTimer();
 }
@@ -193,6 +191,10 @@ Connection.prototype.send = async function (data) {
 };
 
 Connection.prototype.receive = async function (buffer) {
+    if (this.currentTCPState === constants.TCPStates.CLOSED) {
+      debug('CONNECTION IS CLOSED RECEIVE IGNORED')
+      return
+    }
     let release = await this._receiverLock.acquire()
     let packet = new Packet(buffer)
     if (this._packetSender._sessionKey) {
