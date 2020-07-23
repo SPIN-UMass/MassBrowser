@@ -38,12 +38,12 @@ function Connection(packetSender) {
   });
   this._sender.on('fin_acked', () => {
     if (this.currentTCPState === constants.TCPStates.LAST_ACK) {
+      this._stopTimeoutTimer();
       this._changeCurrentTCPState(constants.TCPStates.CLOSED);
       this._sender.clear();
       this._receiver.clear();
       this._sender._stopTimeoutTimer();
       this._packetSender.clear();
-      this._stopTimeoutTimer();
       this.emit('close');
     } else if (this.currentTCPState === constants.TCPStates.FIN_WAIT_1){
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
@@ -99,6 +99,7 @@ Connection.prototype._stopTimeoutTimer = function () {
 
 Connection.prototype._startTimeoutTimer = function () {
   this._connectionTimeoutTimer = setTimeout(() => {
+    debug('TIMEOUT',  this._packetSender.getAddressKey())
     this._changeCurrentTCPState(constants.TCPStates.CLOSED);
     this._sender._stopTimeoutTimer();
     this._sender.clear();
@@ -111,6 +112,7 @@ Connection.prototype._startTimeoutTimer = function () {
 }
 
 Connection.prototype._restartTimeoutTimer = function () {
+  debug('RESET TIMEOUT',  this._packetSender.getAddressKey())
   this._stopTimeoutTimer();
   this._startTimeoutTimer();
 }
@@ -181,7 +183,6 @@ Connection.prototype.send = async function (data) {
       await this._sender.sendSyn();
       await this._setNextSequenceNumber(this.getInitialSequenceNumber() + 1);
       this._changeCurrentTCPState(constants.TCPStates.SYN_SENT)
-      // this._restartTimeoutTimer();
       break;
     case constants.TCPStates.ESTABLISHED:
       this._sender.send();
@@ -246,7 +247,6 @@ Connection.prototype.receive = async function (buffer) {
         break;
       case constants.TCPStates.LAST_ACK:
         if (packet.packetType === constants.PacketTypes.ACK) {
-          debug(packet.acknowledgementNumber)
           await this._sender.verifyAck(packet.acknowledgementNumber);
         }
         break;

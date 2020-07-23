@@ -147,6 +147,7 @@ class NetworkMonitor {
     }
     if (changed) {
       warn('UDP changed')
+      warn(data)
       relayManager.handleReconnect()
     }
   }
