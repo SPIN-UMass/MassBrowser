@@ -28,14 +28,20 @@ class _ZMQListener {
   }
 
   async testConnection (session) {
-    if (session.connection_type === ConnectionTypes.UDP) {
-      if (session.test_type === 'client') {
-        udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
-      } else {
-        udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, true)
-      }
-    }
     return new Promise((resolve, reject) => {
+      if (session.connection_type === ConnectionTypes.UDP) {
+        if (session.test_type === 'client') {
+          if (session.client.udp_port === 0 || session.client.udp_port === -1) {
+            reject()
+          }
+          udpConnectionService.createEncryptedConnection(session.client.ip, session.client.udp_port, session.token, true)
+        } else {
+          if (session.relay.udp_port === 0 || session.relay.udp_port === -1) {
+            reject()
+          }
+          udpConnectionService.createEncryptedConnection(session.relay.ip, session.relay.udp_port, session.token, true)
+        }
+      }
       try {
         console.log(session)
         var desc = {
