@@ -99,20 +99,11 @@ Connection.prototype._stopTimeoutTimer = function () {
 
 Connection.prototype._startTimeoutTimer = function () {
   this._connectionTimeoutTimer = setTimeout(() => {
-    debug('TIMEOUT',  this._packetSender.getAddressKey())
-    this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-    this._sender._stopTimeoutTimer();
-    this._sender.clear();
-    this._packetSender.clear();
-    this._receiver.clear();
-    this._stopTimeoutTimer();
-    this.emit('close');
-    this.emit('connection_timeout');
+    this._cleanClose();
   }, constants.CONNECTION_TIMEOUT_INTERVAL)
 }
 
 Connection.prototype._restartTimeoutTimer = function () {
-  debug('RESET TIMEOUT',  this._packetSender.getAddressKey())
   this._stopTimeoutTimer();
   this._startTimeoutTimer();
 }
@@ -156,6 +147,16 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
   release()
 }
 
+Connection.prototype._cleanClose = function() {
+  this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+  this._sender._stopTimeoutTimer();
+  this._sender.clear();
+  this._packetSender.clear();
+  this._receiver.clear();
+  this._stopTimeoutTimer();
+  this.emit('close');
+}
+
 Connection.prototype._decrypt = function(encryptedPacketWithIV) {
   try {
     let iv = encryptedPacketWithIV.slice(0,16);
@@ -166,7 +167,8 @@ Connection.prototype._decrypt = function(encryptedPacketWithIV) {
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted;
   } catch (err) {
-    debug('error in decrypt', this._packetSender.getAddressKey(), err)
+    debug('RUDP ERROR IN DECRYPT! REMOVING CONNECTION')
+    this._cleanClose();
   }
 };
 
