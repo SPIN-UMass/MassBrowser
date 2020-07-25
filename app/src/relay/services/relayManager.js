@@ -125,8 +125,8 @@ class RelayManager {
     if (this.openAccess) {
       let publicAddress = this._getReachableAddress()
       API.relayUp(publicAddress.ip, publicAddress.port, publicAddress.UDPPort)
-      // this._restartTCPRelayServer()
-      // this._restartUDPRelayServer()
+      this._restartTCPRelayServer()
+      this._restartUDPRelayServer()
     }
   }
 

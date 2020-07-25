@@ -142,16 +142,6 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         let connection = this.getConnection(address, port, false)
         let secondConnection = this.getConnection(address, port, true)
-        connection.on('connect', () => {
-          this._natPunchingList[addressKey].isPunched = true
-          clearTimeout(timer)
-          resolve(this._connections[addressKey])
-        })
-        secondConnection.on('connect', () => {
-          this._natPunchingList[secondAddressKey].isPunched = true
-          clearTimeout(timer)
-          resolve(this._connections[secondAddressKey])
-        })
         let timer = setTimeout(() => {
           debug('NAT Punching failed for ', address,':', port)
           reject()
@@ -163,8 +153,22 @@ export class UDPConnectionService extends EventEmitter {
           isPunched: false
         }
         debug(`punching for ${address}:${port}`)
-        connection.send(Buffer.alloc(0))
-        secondConnection.send(Buffer.alloc(0))
+        if (connection) {
+          connection.on('connect', () => {
+            this._natPunchingList[addressKey].isPunched = true
+            clearTimeout(timer)
+            resolve(this._connections[addressKey])
+          })
+          connection.send(Buffer.alloc(0))
+        }
+        if (secondConnection) {
+          secondConnection.on('connect', () => {
+            this._natPunchingList[secondAddressKey].isPunched = true
+            clearTimeout(timer)
+            resolve(this._connections[secondAddressKey])
+          })
+          secondConnection.send(Buffer.alloc(0))
+        }
       }
     })
   }
