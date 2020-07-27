@@ -207,7 +207,11 @@ export class UDPConnectionService extends EventEmitter {
     } else {
       if (!this._connections[addressKey]) {
         if (port !== 19302) {
-          debug('IGNORING THE INCOMMING CONNECTION')
+          debug('IGNORING THE INCOMMING CONNECTION', addressKey)
+          debug('connections:', Object.keys(this._connections).map((addressKey) => {
+            let c = this._connections[addressKey]
+            return addressKey + ' ' + c.currentTCPState
+          }))
           return null
         }
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
