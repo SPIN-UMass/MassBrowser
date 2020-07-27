@@ -208,7 +208,7 @@ function torProxy (socket, address, port, proxyReady) {
   connectionStats.remoteSocketConnected(socket, proxy)
 
   proxy.on('connect', () => {
-    console.log("connected")
+    // console.log("connected")
     proxyReady()
   })
 

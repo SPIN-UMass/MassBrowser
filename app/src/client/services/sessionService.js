@@ -153,18 +153,6 @@ class SessionService extends EventEmitter {
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
       }
 
-      sessionInfo.relay.allowed_categories.forEach(category => {
-        if (!this.categoryWaitLists[category.id]) {
-          this.categoryWaitLists[category.id] = []
-        }
-      })
-
-
-      if (sessionInfo.connection_type === ConnectionTypes.UDP) {
-        debug('creating connection object for udp pending session')
-        udpConnectionService.createEncryptedConnection(sessionInfo.relay.ip, sessionInfo.relay.udp_port, sessionInfo.token, true)
-      }
-
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
@@ -276,13 +264,13 @@ class SessionService extends EventEmitter {
     let validSessionInfos = this._filterValidSessions(sessionInfos)
 
     for (let sessionInfo of validSessionInfos) {
-
       var desc = {
         'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
         'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
         'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
         'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
-        'token': Buffer.from(sessionInfo.token, 'base64')
+        'token': Buffer.from(sessionInfo.token, 'base64'),
+        'b64token': sessionInfo.token
       }
 
       if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
@@ -293,7 +281,7 @@ class SessionService extends EventEmitter {
       for (let i = 0; i < this.sessions.length; i++) {
         if (this.sessions[i].ip === sessionInfo.relay.ip) {
           // it means we already have a session with this relay
-          return
+          continue
         }
       }
 

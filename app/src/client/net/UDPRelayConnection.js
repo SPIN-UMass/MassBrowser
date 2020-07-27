@@ -17,6 +17,7 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   async connect () {
+    udpConnectionService.createEncryptedConnection(this.relayAddress, this.relayPort, this.desc.b64token, true)
     await udpConnectionService.performUDPHolePunchingClient(this.relayAddress, this.relayPort)
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
