@@ -172,9 +172,8 @@ class RelayManager {
     API.acceptSession(data.client, data.id)
 
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
-      await this.timeout(3000) // this one is for delay in zmq client
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_alt_port)
-      await this.timeout(3000)
+      await this.timeout(8000)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_main_port)      
     }
 
