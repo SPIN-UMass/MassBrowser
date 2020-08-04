@@ -17,7 +17,7 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   async connect () {
-    if (relayPort === 0 || relayPort === -1){
+    if (this.relayPort === 0 || this.relayPort === -1){
       return Promise.reject('BAD UDP PORT')
     }
     udpConnectionService.createEncryptedConnection(this.relayAddress, this.relayPort, this.desc.b64token, true)
