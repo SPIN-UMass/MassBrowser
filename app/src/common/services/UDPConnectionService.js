@@ -313,14 +313,16 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, true)
-          if (rudp.StunPacket.isStunPacket(message)) {
-            setImmediate(() => {
-              connection.receiveStunPacket(message)
-            })
-          } else {
+          if (connection) {
+            if (rudp.StunPacket.isStunPacket(message)) {
               setImmediate(() => {
-              connection.receive(message)
-            })
+                connection.receiveStunPacket(message)
+              })
+            } else {
+                setImmediate(() => {
+                connection.receive(message)
+              })
+            }
           }
         })
 
