@@ -151,6 +151,12 @@ class SessionService extends EventEmitter {
           }
         })
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
+      } else {
+        sessionInfo.relay.allowed_categories.forEach(category => {
+          if (!this.categoryWaitLists[category.id]) {
+            this.categoryWaitLists[category.id] = []
+          }
+        })
       }
 
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
@@ -210,51 +216,51 @@ class SessionService extends EventEmitter {
     this.sessions.splice(index, 1)
   }
 
-  async handleNewClientSessions (sessionInfo) {
-    debug('GOT ACCEPTED SESSION')
-    let desc = {
-      'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
-      'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
-      'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
-      'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
-      'token': Buffer.from(sessionInfo.token, 'base64')
-    }
-    if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
-      // TODO: give warning here
-      debug('HERE is something wrong')
-      return
-    }
+  // async handleNewClientSessions (sessionInfo) {
+  //   debug('GOT ACCEPTED SESSION')
+  //   let desc = {
+  //     'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
+  //     'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
+  //     'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
+  //     'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
+  //     'token': Buffer.from(sessionInfo.token, 'base64')
+  //   }
+  //   if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
+  //     // TODO: give warning here
+  //     debug('HERE is something wrong')
+  //     return
+  //   }
 
-    for (let i = 0; i < this.sessions.length; i++) {
-      if (this.sessions[i].ip === sessionInfo.relay.ip) {
-        debug('I already have a session with this relay')
-        // it means we already have a session with this relay
-        return
-      }
-    }
+  //   for (let i = 0; i < this.sessions.length; i++) {
+  //     if (this.sessions[i].ip === sessionInfo.relay.ip) {
+  //       debug('I already have a session with this relay')
+  //       // it means we already have a session with this relay
+  //       return
+  //     }
+  //   }
 
-    let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, sessionInfo.relay.udp_port,
-      desc, sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
+  //   let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, sessionInfo.relay.udp_port,
+  //     desc, sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
 
-    let resolve = this.pendingSessions[sessionInfo.id].accept
-    delete this.pendingSessions[sessionInfo.id]
+  //   let resolve = this.pendingSessions[sessionInfo.id].accept
+  //   delete this.pendingSessions[sessionInfo.id]
 
-    session.on('send', () => this.emitSessionUpdate(session))
-    session.on('receive', () => this.emitSessionUpdate(session))
-    session.on('state-changed', () => this.emitSessionUpdate(session))
+  //   session.on('send', () => this.emitSessionUpdate(session))
+  //   session.on('receive', () => this.emitSessionUpdate(session))
+  //   session.on('state-changed', () => this.emitSessionUpdate(session))
 
-    try {
-      await resolve(session)
-      await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
-    } catch (e) {
-      /* Refer to Bug #1 */
-      (sessionInfo.relay['allowed_categories'] || []).forEach(category => {
-        if (this.categoryWaitLists[category.id]) {
-          delete this.categoryWaitLists[category.id]
-        }
-      })
-    }
-  }
+  //   try {
+  //     await resolve(session)
+  //     await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
+  //   } catch (e) {
+  //     /* Refer to Bug #1 */
+  //     (sessionInfo.relay['allowed_categories'] || []).forEach(category => {
+  //       if (this.categoryWaitLists[category.id]) {
+  //         delete this.categoryWaitLists[category.id]
+  //       }
+  //     })
+  //   }
+  // }
 
   async _handleRetrievedSessions (sessionInfos) {
     if (sessionInfos === undefined) {

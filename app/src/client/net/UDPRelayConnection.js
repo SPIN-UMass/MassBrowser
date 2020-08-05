@@ -17,7 +17,8 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   async connect () {
-    if (this.relayPort === 0 || this.relayPort === -1){
+    try {
+      if (this.relayPort === 0 || this.relayPort === -1){
       return Promise.reject('BAD UDP PORT')
     }
     udpConnectionService.createEncryptedConnection(this.relayAddress, this.relayPort, this.desc.b64token, true)
@@ -25,6 +26,9 @@ export class UDPRelayConnection extends EventEmitter {
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
     info(`Relay ${this.id} UDP connected`)
+    } catch (e) {
+      return Promise.reject('NAT PUNCHING FAILED')
+    }
   }
 
   sessionFounded (session) {

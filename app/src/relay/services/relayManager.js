@@ -153,6 +153,7 @@ class RelayManager {
       this.authenticator.addPendingConnection((desc.token), desc)
     }
 
+    // FOR UDP CLIENTS
     if (data.client.ip && desc.connectiontype === ConnectionTypes.UDP) {
       debug('created connection object for udp session')
       udpConnectionService.createEncryptedConnection(data.client.ip, data.client.udp_port, data.token, false)
@@ -161,6 +162,7 @@ class RelayManager {
       await udpConnectionService.addExpectedIncomingConnection(data.client.ip, data.client.udp_port)
     }
 
+    // FOR REACH TEST
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
       debug(' Got a new reach test', data.reach_client_main_port, data.reach_client_alt_port, data.reach_client_ip)
       udpConnectionService.createEncryptedConnection(reachClientAddress, data.reach_client_main_port, data.token, false)
@@ -171,6 +173,7 @@ class RelayManager {
 
     API.acceptSession(data.client, data.id)
 
+    // FOR REACH TEST
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_alt_port)
       await this.timeout(8000)
