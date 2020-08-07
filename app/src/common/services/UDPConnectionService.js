@@ -127,7 +127,6 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   getUDPSessionKey (message) {
-    console.log(message.toString())
     return message.toString()
   }
 
@@ -162,10 +161,9 @@ export class UDPConnectionService extends EventEmitter {
 
   performUDPHolePunchingClientv2 (address, port, token) {
     return new Promise((resolve, reject) => {
-      debug(`punching for ${address}:${port} ${UDPSessionKey}` )
       let UDPSessionKey = this.generateSessionUDPKey(token)
+      debug(`punching for ${address}:${port} ${UDPSessionKey}`)
       let interval = setInterval(() => {
-        debug('sending packet')
         this.sendPacket(address, port, UDPSessionKey, false)
         this.sendPacket(address, port, UDPSessionKey, true)
       }, 500);
@@ -324,12 +322,12 @@ export class UDPConnectionService extends EventEmitter {
           if (message.length < 12) {
             return
           }
-          console.log('got message', message.toString(), remoteInfo)
+          debug('got message', message.toString(), remoteInfo)
           if (this.isPunchingMessage(message)) {
-            console.log('it is punching')
+            debug('it is punching')
             let UDPSessionKey = this.getUDPSessionKey(message)
             if (!this._UDPSessionKeyMap[UDPSessionKey]) {
-              console.log('ignored')
+              debug('ignored')
               return
             }
             let sessionToken = this._UDPSessionKeyMap[UDPSessionKey]['token']
@@ -369,7 +367,7 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.mainServer.on('error', (e) => {
-          console.log('UDP Connection Service Error: ', e)
+          debug('UDP Connection Service Error: ', e)
           if (!this._isMainServerRunning) {
             reject(e)
           }
@@ -396,10 +394,10 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           if (this.isPunchingMessage(message)) {
-            console.log('it is punching')
+            debug('it is punching')
             let UDPSessionKey = this.getUDPSessionKey(message)
             if (!this._UDPSessionKeyMap[UDPSessionKey]) {
-              console.log('ignored')
+              debug('ignored')
               return
             }
             let sessionToken = this._UDPSessionKeyMap[UDPSessionKey]['token']
@@ -439,7 +437,7 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.secondServer.on('error', (e) => {
-          console.log('UDP Connection Service Error: ', e)
+          debug('UDP Connection Service Error: ', e)
           this.secondPort = 10000 + Math.floor(Math.random() * (65535 - 10000))
           this.secondServer.bind({
             port: this.secondPort,
@@ -456,7 +454,7 @@ export class UDPConnectionService extends EventEmitter {
   }
 
   closeAllConnections () {
-    console.log('closing all connections')
+    debug('closing all connections')
     let promises = []
     for (let addressKey in this._connections) {
       let connection = this._connections[addressKey]
@@ -469,7 +467,7 @@ export class UDPConnectionService extends EventEmitter {
       connection.close()
       promises.push(promise)
     }
-    console.log('waiting for connections to close')
+    debug('waiting for connections to close')
     return Promise.all(promises)
   }
 
@@ -478,7 +476,7 @@ export class UDPConnectionService extends EventEmitter {
       if (this._isMainServerRunning) {
         await this.closeAllConnections()
           .then(() => {
-            console.log('all connections are closed')
+            debug('all connections are closed')
             this._connections = {}
             this.mainServer.close(() => {
               this.mainServer = null
