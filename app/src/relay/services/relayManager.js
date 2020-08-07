@@ -177,7 +177,7 @@ class RelayManager {
     // FOR REACH TEST
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_alt_port, data.token)
-      await this.timeout(8000)
+      await this.timeout(5000)
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_main_port, data.token)      
     }
 

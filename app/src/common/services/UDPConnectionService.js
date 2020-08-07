@@ -114,12 +114,11 @@ export class UDPConnectionService extends EventEmitter {
       })
       this._connections[addressKey] = connection       
     }
-    return connection
-
     debug('connections:', Object.keys(this._connections).map((addressKey) => {
       let c = this._connections[addressKey]
       return addressKey + ' ' + c.currentTCPState
     }))
+    return connection
   }
 
   generateSessionUDPKey (token) {
@@ -151,10 +150,10 @@ export class UDPConnectionService extends EventEmitter {
         }, 500)
 
         let timer = setTimeout(() => {
+          resolve()
           clearInterval(interval)
           interval = null
-        })
-        resolve()
+        }, 3000)
       }
     })
   }
@@ -339,7 +338,9 @@ export class UDPConnectionService extends EventEmitter {
                 this.emit('relay-new-connection', connection)
               } else {
                 debug('trying to resolve')
-                this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                setTimeout(() => {
+                  this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                }, 2000)
                 clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
                 clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
               }
@@ -396,10 +397,10 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           if (this.isPunchingMessage(message)) {
-            debug('it is punching')
+            debug('it is punching second')
             let UDPSessionKey = this.getUDPSessionKey(message)
             if (!this._UDPSessionKeyMap[UDPSessionKey]) {
-              debug('ignored')
+              debug('ignored second')
               return
             }
             let sessionToken = this._UDPSessionKeyMap[UDPSessionKey]['token']
@@ -410,8 +411,10 @@ export class UDPConnectionService extends EventEmitter {
               if (this._expectedConnections[UDPSessionKey]) {
                 this.emit('relay-new-connection', connection)
               } else {
-                debug('trying to resolve')
-                this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                debug('trying to resolve second')
+                setTimeout(() => {
+                  this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                }, 2000)
                 clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
                 clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
               }
