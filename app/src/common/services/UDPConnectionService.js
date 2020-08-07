@@ -340,9 +340,9 @@ export class UDPConnectionService extends EventEmitter {
                 debug('trying to resolve')
                 setTimeout(() => {
                   this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                  clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
+                  clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
                 }, 2000)
-                clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
-                clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
               }
             }
             return
@@ -414,9 +414,9 @@ export class UDPConnectionService extends EventEmitter {
                 debug('trying to resolve second')
                 setTimeout(() => {
                   this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                  clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
+                  clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
                 }, 2000)
-                clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
-                clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
               }
             }
             return
