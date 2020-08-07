@@ -134,7 +134,6 @@ export class UDPConnectionService extends EventEmitter {
   performUDPHolePunchingRelay (address, port, token) {
     return new Promise((resolve, reject) => {
       let UDPSessionKey = this.generateSessionUDPKey(token)
-      console.log('gen:', UDPSessionKey)
       this._UDPSessionKeyMap[UDPSessionKey] = {
         'token': token
       }
@@ -148,11 +147,14 @@ export class UDPConnectionService extends EventEmitter {
           isPunched: false
         }
         debug(`punching for ${address}:${port} ${UDPSessionKey}`)
-        for (let i = 1; i < 5; i++) {
+        let interval = setInterval(() => {
           this.sendPacket(address, port, UDPSessionKey, false)
-          
-          // this.sendDummyPacket(address, port)
-        }
+        }, 500)
+
+        let timer = setTimeout(() => {
+          clearInterval(interval)
+          interval = null
+        })
         resolve()
       }
     })
@@ -160,12 +162,13 @@ export class UDPConnectionService extends EventEmitter {
 
   performUDPHolePunchingClientv2 (address, port, token) {
     return new Promise((resolve, reject) => {
-      debug(`punching for ${address}:${port}`)
+      debug(`punching for ${address}:${port} ${UDPSessionKey}` )
       let UDPSessionKey = this.generateSessionUDPKey(token)
       let interval = setInterval(() => {
+        debug('sending packet')
         this.sendPacket(address, port, UDPSessionKey, false)
         this.sendPacket(address, port, UDPSessionKey, true)
-      }, 1000);
+      }, 500);
 
       let timer = setTimeout(() => {
         debug('NAT Punching failed for ', address,':', port)
@@ -321,6 +324,7 @@ export class UDPConnectionService extends EventEmitter {
           if (message.length < 12) {
             return
           }
+          console.log('got message', message.toString(), remoteInfo)
           if (this.isPunchingMessage(message)) {
             console.log('it is punching')
             let UDPSessionKey = this.getUDPSessionKey(message)
