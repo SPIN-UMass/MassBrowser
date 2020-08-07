@@ -149,13 +149,13 @@ export class UDPConnectionService extends EventEmitter {
         debug(`punching for ${address}:${port} ${UDPSessionKey}`)
         let interval = setInterval(() => {
           this.sendPacket(address, port, UDPSessionKey, false)
-        }, 500)
+        }, 300)
 
         let timer = setTimeout(() => {
-          resolve()
           clearInterval(interval)
           interval = null
-        }, 3000)
+        }, 10000)
+        resolve()
       }
     })
   }
@@ -167,7 +167,7 @@ export class UDPConnectionService extends EventEmitter {
       let interval = setInterval(() => {
         this.sendPacket(address, port, UDPSessionKey, false)
         this.sendPacket(address, port, UDPSessionKey, true)
-      }, 500);
+      }, 300);
 
       let timer = setTimeout(() => {
         debug('NAT Punching failed for ', address,':', port)
