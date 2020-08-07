@@ -334,10 +334,11 @@ export class UDPConnectionService extends EventEmitter {
             let addressKey = remoteInfo.address + ':' + remoteInfo.port  + this.port
             let connection
             if (!this._connections[addressKey]) {
+              connection = this.createEncryptedConnection(remoteInfo.address, remoteInfo.port, sessionToken, UDPSessionKey, false)
               if (this._expectedConnections[UDPSessionKey]) {
-                connection = this.createEncryptedConnection(remoteInfo.address, remoteInfo.port, sessionToken, UDPSessionKey, false)
                 this.emit('relay-new-connection', connection)
               } else {
+                debug('trying to resolve')
                 this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
                 clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
                 clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
@@ -390,6 +391,7 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.secondServer.on('message', (message, remoteInfo) => {
+          debug('got message', message.toString(), remoteInfo)
           if (message.length < 12) {
             return
           }
@@ -404,10 +406,11 @@ export class UDPConnectionService extends EventEmitter {
             let addressKey = remoteInfo.address + ':' + remoteInfo.port  + this.secondPort
             let connection
             if (!this._connections[addressKey]) {
+              connection = this.createEncryptedConnection(remoteInfo.address, remoteInfo.port, sessionToken, UDPSessionKey, true)
               if (this._expectedConnections[UDPSessionKey]) {
-                connection = this.createEncryptedConnection(remoteInfo.address, remoteInfo.port, sessionToken, UDPSessionKey, false)
                 this.emit('relay-new-connection', connection)
               } else {
+                debug('trying to resolve')
                 this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
                 clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
                 clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
