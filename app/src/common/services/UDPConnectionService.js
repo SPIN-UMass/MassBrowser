@@ -78,6 +78,8 @@ export class UDPConnectionService extends EventEmitter {
       setTimeout(() => {
         if (this._expectedConnections[key]) {
           this._expectedConnections[key] = null
+          this._UDPSessionKeyMap[key] = null
+          delete this._UDPSessionKeyMap[key]
           delete this._expectedConnections[key]
         }
       }, 20000)
@@ -321,7 +323,6 @@ export class UDPConnectionService extends EventEmitter {
           if (message.length < 12) {
             return
           }
-          debug('got message', message.toString(), remoteInfo)
           if (this.isPunchingMessage(message)) {
             debug('it is punching')
             let UDPSessionKey = this.getUDPSessionKey(message)
@@ -392,7 +393,6 @@ export class UDPConnectionService extends EventEmitter {
         })
 
         this.secondServer.on('message', (message, remoteInfo) => {
-          debug('got message', message.toString(), remoteInfo)
           if (message.length < 12) {
             return
           }
