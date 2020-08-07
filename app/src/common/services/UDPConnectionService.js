@@ -4,7 +4,7 @@ import * as dgram from 'dgram'
 import * as rudp from '../rudp'
 import { EventEmitter } from 'events'
 import { Semaphore } from 'await-semaphore'
-
+const crypto = require('crypto')
 export class UDPConnectionService extends EventEmitter {
   constructor () {
 
@@ -15,6 +15,7 @@ export class UDPConnectionService extends EventEmitter {
     this.port = 10000 + Math.floor(Math.random() * (65535 - 10000))
     this.secondPort = 10000 + Math.floor(Math.random() * (65535 - 10000))
     this._connections = {}
+    this._UDPSessionKeyMap = {}
     this._expectedConnections = {}
     this._isMainServerRunning = false
     this._isSecondServerRunning = false
@@ -62,9 +63,17 @@ export class UDPConnectionService extends EventEmitter {
     this.mainServer.send(Buffer.alloc(0), port, address)
   }
 
-  addExpectedIncomingConnection (address, port) {
+  sendPacket (address, port, str, useSecondServer) {
+    if (useSecondServer) {
+      this.secondServer.send(Buffer.from(str), port, address)
+    } else {
+      this.mainServer.send(Buffer.from(str), port, address)
+    }
+  }
+
+  addExpectedIncomingConnection (key) {
     return new Promise((resolve, reject) => {
-      let key = address + ':' + port
+      // let key = address + ':' + port
       this._expectedConnections[key] = true
       setTimeout(() => {
         if (this._expectedConnections[key]) {
@@ -76,12 +85,12 @@ export class UDPConnectionService extends EventEmitter {
     })
   }
 
-  createEncryptedConnection (address, port, sessionKey, useAltPort) {
+  createEncryptedConnection (address, port, sessionKey, UDPSessionKey, useAltPort) {
     let connection
     let addressKey = address + ':' + port  + this.port
     let secondAddressKey = address + ':' + port  + this.secondPort
     if (useAltPort) {
-        debug('creating encrypted connection', secondAddressKey)
+        debug('creating encrypted connection alt', secondAddressKey)
       if (this._connections[secondAddressKey]) {
         this.deleteConnectionListItem(secondAddressKey)
         this.deleteNatPunchingListItem(secondAddressKey)
@@ -92,26 +101,44 @@ export class UDPConnectionService extends EventEmitter {
         this.deleteConnectionListItem(secondAddressKey)
       })
       this._connections[secondAddressKey] = connection 
+    } else {
+      debug('creating encrypted connection main', addressKey)
+      if (this._connections[addressKey]) {
+        this.deleteConnectionListItem(addressKey)
+        this.deleteNatPunchingListItem(addressKey)
+      }
+      connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port, sessionKey))
+      connection.on('close', () => {
+        this.deleteNatPunchingListItem(addressKey)
+        this.deleteConnectionListItem(addressKey)
+      })
+      this._connections[addressKey] = connection       
     }
-    debug('creating encrypted connection', addressKey)
-    if (this._connections[addressKey]) {
-      this.deleteConnectionListItem(addressKey)
-      this.deleteNatPunchingListItem(addressKey)
-    }
-    connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port, sessionKey))
-    connection.on('close', () => {
-      this.deleteNatPunchingListItem(addressKey)
-      this.deleteConnectionListItem(addressKey)
-    })
-    this._connections[addressKey] = connection 
+    return connection
+
     debug('connections:', Object.keys(this._connections).map((addressKey) => {
       let c = this._connections[addressKey]
       return addressKey + ' ' + c.currentTCPState
     }))
   }
 
-  performUDPHolePunchingRelay (address, port) {
+  generateSessionUDPKey (token) {
+    return crypto.createHash('sha1').update(token).digest('hex')
+  }
+
+  getUDPSessionKey (message) {
+    console.log(message.toString())
+    return message.toString()
+  }
+
+  performUDPHolePunchingRelay (address, port, token) {
     return new Promise((resolve, reject) => {
+      let UDPSessionKey = this.generateSessionUDPKey(token)
+      console.log('gen:', UDPSessionKey)
+      this._UDPSessionKeyMap[UDPSessionKey] = {
+        'token': token
+      }
+      this.addExpectedIncomingConnection(UDPSessionKey)
       let addressKey = address + ':' + port  + this.port
       if (this._natPunchingList[addressKey] && this._natPunchingList[addressKey].isPunched === true) {
         debug('Already punched')
@@ -120,11 +147,40 @@ export class UDPConnectionService extends EventEmitter {
         this._natPunchingList[addressKey] = {
           isPunched: false
         }
-        debug(`punching for ${address}:${port}`)
+        debug(`punching for ${address}:${port} ${UDPSessionKey}`)
         for (let i = 1; i < 5; i++) {
-          this.sendDummyPacket(address, port)
+          this.sendPacket(address, port, UDPSessionKey, false)
+          
+          // this.sendDummyPacket(address, port)
         }
         resolve()
+      }
+    })
+  }
+
+  performUDPHolePunchingClientv2 (address, port, token) {
+    return new Promise((resolve, reject) => {
+      debug(`punching for ${address}:${port}`)
+      let UDPSessionKey = this.generateSessionUDPKey(token)
+      let interval = setInterval(() => {
+        this.sendPacket(address, port, UDPSessionKey, false)
+        this.sendPacket(address, port, UDPSessionKey, true)
+      }, 1000);
+
+      let timer = setTimeout(() => {
+        debug('NAT Punching failed for ', address,':', port)
+        clearInterval(interval)
+        interval = null
+        this._UDPSessionKeyMap[UDPSessionKey] = null
+        delete this._UDPSessionKeyMap[UDPSessionKey]
+        reject()
+      }, 10000)
+
+      this._UDPSessionKeyMap[UDPSessionKey] = {
+        'token': token,
+        'punchResolve': resolve,
+        'punchInterval': interval,
+        'punchTimer': timer
       }
     })
   }
@@ -224,11 +280,6 @@ export class UDPConnectionService extends EventEmitter {
       } else {
         let key = address + ':' + port
         connection = this._connections[addressKey]
-        if (this._expectedConnections[key]) {
-          this.emit('relay-new-connection', connection, addressKey)
-          this._expectedConnections[key] = null
-          delete this._expectedConnections[key]
-        }
       }
     }
     return connection
@@ -246,6 +297,14 @@ export class UDPConnectionService extends EventEmitter {
     }
   }
 
+  isPunchingMessage (message, remoteInfo) {
+    if (message.length === 40) {
+      return true
+    } else {
+      return false
+    }
+  }
+
   async startMainServer () {
     return new Promise((resolve, reject) => {
       if (this.mainServer) {
@@ -260,8 +319,28 @@ export class UDPConnectionService extends EventEmitter {
 
         this.mainServer.on('message', async (message, remoteInfo) => {
           if (message.length < 12) {
-            // dummy message
-            console.log('DUMMY')
+            return
+          }
+          if (this.isPunchingMessage(message)) {
+            console.log('it is punching')
+            let UDPSessionKey = this.getUDPSessionKey(message)
+            if (!this._UDPSessionKeyMap[UDPSessionKey]) {
+              console.log('ignored')
+              return
+            }
+            let sessionToken = this._UDPSessionKeyMap[UDPSessionKey]['token']
+            let addressKey = remoteInfo.address + ':' + remoteInfo.port  + this.port
+            let connection
+            if (!this._connections[addressKey]) {
+              if (this._expectedConnections[UDPSessionKey]) {
+                connection = this.createEncryptedConnection(remoteInfo.address, remoteInfo.port, sessionToken, UDPSessionKey, false)
+                this.emit('relay-new-connection', connection)
+              } else {
+                this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
+                clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
+              }
+            }
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
@@ -310,6 +389,28 @@ export class UDPConnectionService extends EventEmitter {
 
         this.secondServer.on('message', (message, remoteInfo) => {
           if (message.length < 12) {
+            return
+          }
+          if (this.isPunchingMessage(message)) {
+            console.log('it is punching')
+            let UDPSessionKey = this.getUDPSessionKey(message)
+            if (!this._UDPSessionKeyMap[UDPSessionKey]) {
+              console.log('ignored')
+              return
+            }
+            let sessionToken = this._UDPSessionKeyMap[UDPSessionKey]['token']
+            let addressKey = remoteInfo.address + ':' + remoteInfo.port  + this.secondPort
+            let connection
+            if (!this._connections[addressKey]) {
+              if (this._expectedConnections[UDPSessionKey]) {
+                connection = this.createEncryptedConnection(remoteInfo.address, remoteInfo.port, sessionToken, UDPSessionKey, false)
+                this.emit('relay-new-connection', connection)
+              } else {
+                this._UDPSessionKeyMap[UDPSessionKey].punchResolve(connection)
+                clearTimeout(this._UDPSessionKeyMap[UDPSessionKey]['punchTimer'])
+                clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
+              }
+            }
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port, true)
