@@ -19,7 +19,6 @@ class RelayManager {
     this.authenticator = new ConnectionAuthenticator()
 
     udpConnectionService.on('relay-new-connection', (connection) => {
-      // udpConnectionService.updateNatPunchingListItem(addressKey)
       debug('new relay connection')
       this.onNewUDPConnection(connection)
     })
@@ -59,10 +58,6 @@ class RelayManager {
 
     if (session.connection_type === ConnectionTypes.UDP) {
       this.authenticator.addPendingConnection((desc.token), desc)
-      // udpConnectionService.createEncryptedConnection(session.reach_client_ip, session.reach_client_main_port, session.token, false)
-      // udpConnectionService.createEncryptedConnection(session.reach_client_ip, session.reach_client_alt_port, session.token, false)
-      // await udpConnectionService.addExpectedIncomingConnection(session.reach_client_ip, session.reach_client_main_port)
-      // await udpConnectionService.addExpectedIncomingConnection(session.reach_client_ip, session.reach_client_alt_port)
     }
     
     API.updateSessionStatus(session.id, 'client_accepted')
@@ -70,7 +65,7 @@ class RelayManager {
 
     if (session.reach_client_main_port && session.reach_client_alt_port && session.connection_type === ConnectionTypes.UDP) {
       await udpConnectionService.performUDPHolePunchingRelay(session.reach_client_ip, session.reach_client_alt_port, session.token)
-      await this.timeout(5000)
+      await this.timeout(6000)
       await udpConnectionService.performUDPHolePunchingRelay(session.reach_client_ip, session.reach_client_main_port, session.token)      
     }
   }

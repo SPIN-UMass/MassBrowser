@@ -21,9 +21,8 @@ export class UDPRelayConnection extends EventEmitter {
       if (this.relayPort === 0 || this.relayPort === -1){
       return Promise.reject('BAD UDP PORT')
     }
-    // udpConnectionService.createEncryptedConnection(this.relayAddress, this.relayPort, this.desc.b64token, true)
 
-    await udpConnectionService.performUDPHolePunchingClientv2(this.relayAddress, this.relayPort, this.desc.b64token)
+    await udpConnectionService.performUDPHolePunchingClient(this.relayAddress, this.relayPort, this.desc.b64token)
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
     info(`Relay ${this.id} UDP connected`)
