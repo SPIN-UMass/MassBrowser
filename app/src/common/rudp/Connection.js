@@ -38,27 +38,21 @@ function Connection(packetSender) {
   });
   this._sender.on('fin_acked', () => {
     if (this.currentTCPState === constants.TCPStates.LAST_ACK) {
-      this._stopTimeoutTimer();
-      this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-      this._sender.clear();
-      this._receiver.clear();
-      this._sender._stopTimeoutTimer();
-      this._packetSender.clear();
-      this.emit('close');
+      this._cleanClose()
     } else if (this.currentTCPState === constants.TCPStates.FIN_WAIT_1){
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
     }
   });
-  this._sender.on('timeout', () => {
-    this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-    this._sender.clear();
-    this._receiver.clear();
-    this._stopTimeoutTimer();
-    this._packetSender.clear();
-    this.emit('close');
-    this.emit('connection_timeout');
-    debug('RUDP: maximum number of tries reached')
-  })
+  // this._sender.on('timeout', () => {
+  //   this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+  //   this._sender.clear();
+  //   this._receiver.clear();
+  //   this._stopTimeoutTimer();
+  //   this._packetSender.clear();
+  //   this.emit('close');
+  //   this.emit('connection_timeout');
+  //   debug('RUDP: maximum number of tries reached')
+  // })
   this._receiver.on('send_ack', () => {
     this._sender.sendAck();
   })
@@ -268,13 +262,7 @@ Connection.prototype.receive = async function (buffer) {
           this._sender.sendAck();
           this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
           setTimeout(() => {
-            this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-            this._sender._stopTimeoutTimer();
-            this._stopTimeoutTimer();
-            this._sender.clear();
-            this._receiver.clear();
-            this._packetSender.clear();
-            this.emit('close');
+            this._cleanClose()
           }, constants.CLOSE_WAIT_TIME);
         }
         break;
@@ -296,14 +284,14 @@ Connection.prototype._changeCurrentTCPState = function (newState) {
 
 Connection.prototype.close = async function () {
   if (this.stunMode) {
-    this._sender.clear();
-    this._packetSender.clear();
-    this._receiver.clear();
+    this._cleanClose();
     this.emit('close');
     return;
   }
   switch(this.currentTCPState) {
     case constants.TCPStates.LISTEN:
+      this._cleanClose();
+      break;
     case constants.TCPStates.SYN_SENT:
     case constants.TCPStates.SYN_RCVD:
     case constants.TCPStates.ESTABLISHED:

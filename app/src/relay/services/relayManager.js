@@ -173,7 +173,6 @@ class RelayManager {
     // }
 
     API.acceptSession(data.client, data.id)
-
     // FOR REACH TEST
     if (data.reach_client_main_port && data.reach_client_alt_port && data.connection_type === ConnectionTypes.UDP) {
       await udpConnectionService.performUDPHolePunchingRelay(reachClientAddress, data.reach_client_alt_port, data.token)

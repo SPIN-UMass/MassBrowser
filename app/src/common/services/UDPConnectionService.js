@@ -118,7 +118,7 @@ export class UDPConnectionService extends EventEmitter {
       debug(`punching for ${address}:${port} ${UDPSessionKey}`)
       let interval = setInterval(() => {
         this.sendPacket(address, port, UDPSessionKey, false)
-      }, 300)
+      }, 100)
 
       let timer = setTimeout(() => {
         clearInterval(interval)
@@ -135,7 +135,7 @@ export class UDPConnectionService extends EventEmitter {
       let interval = setInterval(() => {
         this.sendPacket(address, port, UDPSessionKey, false)
         this.sendPacket(address, port, UDPSessionKey, true)
-      }, 300);
+      }, 100);
 
       let timer = setTimeout(() => {
         debug('NAT Punching failed for ', address,':', port)
@@ -266,9 +266,7 @@ export class UDPConnectionService extends EventEmitter {
                   clearInterval(this._UDPSessionKeyMap[UDPSessionKey]['punchInterval'])
                 }, 2000)
               }
-            } else {
-
-            }
+            } 
             return
           }
           let connection = this.getConnection(remoteInfo.address, remoteInfo.port)
@@ -406,6 +404,7 @@ export class UDPConnectionService extends EventEmitter {
             debug('all connections are closed')
             this._connections = {}
             this.mainServer.close(() => {
+              debug('server closed!')
               this.mainServer = null
               this._isMainServerRunning = false
               resolve()
