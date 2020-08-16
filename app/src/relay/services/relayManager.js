@@ -41,10 +41,6 @@ class RelayManager {
       }
     })
 
-    setTimeout(() => {
-      this._restartUDPRelayServer()
-    }, 20000)
-
     udpConnectionService.on('relay-new-connection', (connection) => {
       debug('RELAY NEW CONNECTION')
       // udpConnectionService.updateNatPunchingListItem(addressKey)
