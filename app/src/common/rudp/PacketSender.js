@@ -14,7 +14,11 @@ function PacketSender(socket, address, port, sessionKey) {
 };
 
 PacketSender.prototype.getAddressKey = function () {
-  return this._address + ':' + this._port + this._socket.address().port
+  try {
+      return this._address + ':' + this._port + this._socket.address().port
+  } catch (err) {
+    console.log('Error in getAddressKey in PacketSender', err)
+  }
 }
 
 PacketSender.prototype._closePacketSender = function () {
@@ -22,26 +26,38 @@ PacketSender.prototype._closePacketSender = function () {
 }
 
 PacketSender.prototype.clear = function () {
-  this._closed = true;
-  if (this._socket) {
-    this._socket.removeListener('close', this._closePacketSender)
+  try {
+    this._closed = true;
+    if (this._socket) {
+      this._socket.removeListener('close', this._closePacketSender)
+    }
+  } catch (err) {
+    console.log('Error in clear in PacketSender', err)
   }
 }
 
 PacketSender.prototype.sendBuffer = function (buffer) {
-  if (!this._closed) {
-    this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+  try {
+      if (!this._closed) {
+      this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+    }
+  } catch (err) {
+    console.log('Error in sendBuffer in PacketSender', err)
   }
 }
 
 PacketSender.prototype.send = function (packet) {
-  let buffer = packet.toBuffer();
-  if (this._sessionKey) {
-    buffer = this._encrypt(packet.toBuffer())
-  }
+  try {
+    let buffer = packet.toBuffer();
+    if (this._sessionKey) {
+      buffer = this._encrypt(packet.toBuffer())
+    }
 
-  if (!this._closed) {
-    this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+    if (!this._closed) {
+      this._socket.send(buffer, 0, buffer.length, this._port, this._address);
+    }
+  } catch (err) {
+    console.log('Error in send in PacketSender', err)
   }
 };
 
