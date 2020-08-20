@@ -50,6 +50,7 @@ class RelayAPI extends CommonAPI {
       'udp_port': UDPPort,
       'fingerprint': this.fingerprint
     }
+    debug('Sending status update for relay', data)
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
 

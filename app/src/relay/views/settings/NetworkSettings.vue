@@ -5,15 +5,22 @@
                 <p>
                     {{$t('SETTINGS_RELAY_NETWORK_HELP_FIRST')}}
                 </p>
-                <p>
-                    {{$t('SETTINGS_RELAY_NETWORK_HELP_SECOND')}}
+                <p v-html="$t('SETTINGS_RELAY_NETWORK_HELP_SECOND')">
                 </p>
                 <p>
                     {{$t('SETTINGS_RELAY_NETWORK_HELP_THIRD')}}
                 </p>
             </div>
             <div class="form" slot="body">
-                <div class="row">
+                <div class="row m-top-20">
+                  <div class="col-xs-9">
+                      <label>{{$t('SETTINGS_RELAY_LIMIT_BANDWIDTH')}}</label>
+                  </div>
+                  <div class="col-xs-3">
+                      <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="50" :value="showLimitBandwidth" v-on:change="onLimitBandwidth"></toggle-button>
+                  </div>
+                </div>
+                <div class="row" v-if="showLimitBandwidth">
                     <div class="col-xs-5">
                         <div class="form-group">
                             <label class="control-label">{{$t('UPLOAD_LIMIT')}}</label>
@@ -106,7 +113,7 @@
   import SlidedNumberPicker from '@common/widgets/SlidedNumberPicker'
   import SettingsGroup from '@common/widgets/SettingsGroup'
   import { Money } from 'v-money'
-
+  import { UNLIMITED_BANDWIDTH } from '@common/constants'
   import { store } from '@utils/store'
   import { prettyBytes } from '@utils'
   import { getService } from '@utils/remote'
@@ -131,6 +138,7 @@
     data() {
       return {
         useCustomPort: !this.$store.state.natEnabled,
+        showLimitBandwidth: false,
         bandwidthInputSettings: {
           thousands: ',',
           prefix: '',
@@ -199,7 +207,11 @@
       },
       uploadLimit: {
         get () {
-          return Number(this.$store.state.uploadLimit)
+          let val = Number(this.$store.state.uploadLimit)
+          if (val === 0) {
+            return UNLIMITED_BANDWIDTH
+          }
+          return val
         },
         set (uploadLimit) {
           if (uploadLimit == this.$store.state.uploadLimit) {
@@ -222,7 +234,11 @@
       },
       downloadLimit: {
         get () {
-          return Number(this.$store.state.downloadLimit)
+          let val = Number(this.$store.state.downloadLimit)
+          if (val === 0) {
+            return UNLIMITED_BANDWIDTH
+          }
+          return val 
         },
         set (downloadLimit) {
           if (downloadLimit == this.$store.state.downloadLimit) {
@@ -262,6 +278,14 @@
           return 10000
         } else {
           return 100000
+        }
+      },
+      onLimitBandwidth (e) {
+        this.showLimitBandwidth = e.value
+        if (e.value === false) {
+          info(`setting upload limit to ${UNLIMITED_BANDWIDTH}`)
+            relayManager.setUploadLimit(UNLIMITED_BANDWIDTH)
+            relayManager.setDownloadLimit(UNLIMITED_BANDWIDTH)
         }
       },
       async onUseCustomPortChange (e) {

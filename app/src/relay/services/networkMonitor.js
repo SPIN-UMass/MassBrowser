@@ -13,6 +13,7 @@ class NetworkMonitor {
     this.remoteTCPPort = -1
     this.localUDPPort = -1
     this.remoteUDPPort = -1
+    this.NATInfoChanged = false
     this.remoteAddress = ''
     this.localAddress = ''
     this.isTCPRelayReachable = false
@@ -122,32 +123,29 @@ class NetworkMonitor {
   }
 
   _onTCPNetworkUpdate (data) {
-    let changed = false
     if (this.localTCPPort !== data.localTCPPort || this.remoteTCPPort !== data.remoteTCPPort) {
-      changed = true
+      this.NATInfoChanged = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localTCPPort = data.localTCPPort
       this.remoteTCPPort = data.remoteTCPPort
     }
-    if (changed) {
-      warn('TCP changed')
+    if (this.NATInfoChanged && this.remoteUDPPort !== -1) {
+      this.NATInfoChanged = false
       relayManager.handleReconnect()
     }
   }
 
   _onUDPNetworkUpdate (data) {
-    let changed = false
     if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
-      changed = true
+      this.NATInfoChanged = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localUDPPort = data.localUDPPort
       this.remoteUDPPort = data.remoteUDPPort
     }
-    if (changed) {
-      warn('UDP changed')
-      warn(data)
+    if (this.NATInfoChanged && this.remoteTCPPort !== -1 && this.remoteUDPPort !== -1) {
+      this.NATInfoChanged = false
       relayManager.handleReconnect()
     }
   }
