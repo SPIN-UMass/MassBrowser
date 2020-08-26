@@ -39,15 +39,11 @@ export class UDPConnectionService extends EventEmitter {
     this._connections[addressKey] = null
     delete this._connections[addressKey]
   }
-
-  sendDummyPacket (address, port) {
-    this.mainServer.send(Buffer.alloc(0), port, address)
-  }
-
+  
   sendPacket (address, port, str, useSecondServer) {
-    if (useSecondServer) {
+    if (useSecondServer && this.secondServer) {
       this.secondServer.send(Buffer.from(str), port, address)
-    } else {
+    } else if (this.mainServer) {
       this.mainServer.send(Buffer.from(str), port, address)
     }
   }
