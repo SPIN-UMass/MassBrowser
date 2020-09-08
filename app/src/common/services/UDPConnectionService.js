@@ -164,10 +164,10 @@ export class UDPConnectionService extends EventEmitter {
         return null
       }
       if (!this._connections[secondAddressKey]) {
-        if (port !== 19302) {
-          debug('IGNORING THE INCOMMING CONNECTION', addressKey)
-          return null
-        }
+        // if (port !== 19302) {
+        //   debug('IGNORING THE INCOMMING CONNECTION', addressKey)
+        //   return null
+        // }
         connection = new rudp.Connection(new rudp.PacketSender(this.secondServer, address, port))
         connection.on('stun-data', (tid, data) => {
           if (data && data.port && data.address) {
@@ -183,10 +183,10 @@ export class UDPConnectionService extends EventEmitter {
       }
     } else {
       if (!this._connections[addressKey]) {
-        if (port !== 19302) {
-          debug('IGNORING THE INCOMMING CONNECTION', addressKey)
-          return null
-        }
+        // if (port !== 19302) {
+        //   debug('IGNORING THE INCOMMING CONNECTION', addressKey)
+        //   return null
+        // }
         connection = new rudp.Connection(new rudp.PacketSender(this.mainServer, address, port))
         connection.on('stun-data', (tid, data) => {
           if (data && data.port && data.address) {

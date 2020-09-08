@@ -16,8 +16,8 @@ class RelayAPI extends CommonAPI {
   requestNewUDPStunServer () {
     return new Promise((resolve, reject) => {
       resolve({
-        'ip': 'stun.l.google.com',
-        'port': 19302
+        'ip': 'voyager.cs.umass.edu',
+        'port': 3478
       })
     })
   }
