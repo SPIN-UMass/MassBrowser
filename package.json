@@ -93,7 +93,7 @@
     "copy-webpack-plugin": "^4.0.0",
     "electron-builder-http": "^19.27.5",
     "electron-publish": "^20.42.0",
-    "electron-updater": "2",
+    "electron-updater": "4",
     "ip": "^1.1.5",
     "node-abi": "2.5.0",
     "semaphore": "^1.1.0",
