@@ -12,10 +12,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const common = require('./common')
 
 let config = {
+  mode: common.mode,
   devtool: '#source-map',
   devServer: { overlay: true },
   entry: {
-    renderer: ['babel-polyfill', path.join(common.rootDir, 'app/src/relay/main/electron/renderer.js')]
+    renderer: ["@babel/polyfill", path.join(common.rootDir, 'app/src/relay/main/electron/renderer.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -40,6 +41,7 @@ let config = {
       minimize: true
     })
   ]),
+
   resolve: common.resolve('relay'),
   target: 'electron-renderer'
 }

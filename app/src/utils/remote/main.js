@@ -1,8 +1,16 @@
 import { EventEmitter } from 'events'
-import { ipcMain } from 'electron'
+// import { ipcMain } from 'electron'
+const {ipcMain} = require('electron')
+import config from '@utils/config'
+
+
 
 import { error } from '@utils/log'
+export let remote 
 
+
+if (config.applicationInterface === 'electron') {
+  if (config.isElectronMainProcess) { 
 const services = {}
 
 function serializeError(err) {
@@ -12,9 +20,9 @@ function serializeError(err) {
     stack: err.stack
   }
 }
-
 class Remote {
   constructor() {
+    console.log("MMM")
     this.services = {}
     this.webContents = null
     this._initIPCListeners()
@@ -155,4 +163,5 @@ class Remote {
   }
 }
 
-export const remote = new Remote()
+ remote = new Remote()}
+}

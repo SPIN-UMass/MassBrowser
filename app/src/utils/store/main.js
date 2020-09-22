@@ -4,10 +4,11 @@ import { NoSuchMutationError } from '@utils/errors'
 import KVStore from '@utils/kvstore'
 import { parseStoreConfig } from './common'
 import config from '@utils/config'
+import {remote} from '@utils/remote'
 
-if (config.applicationInterface == 'electron') {
-  var remote = require('@utils/remote').remote
-}
+// if (config.applicationInterface === 'electron') {
+//   var remote = require('@utils/remote').remote
+// }
 
 class Store {
   constructor(storeConfig){
@@ -29,8 +30,7 @@ class Store {
 
     this.requestIDCounter = 0
     this.pendingRequests = {}
-    this.useRemote = config.applicationInterface == 'electron'
-
+    this.useRemote = config.applicationInterface === 'electron'
     this.ready = this.loadPersistedStates()
 
     if (this.useRemote) {
@@ -95,5 +95,7 @@ class Store {
     }
   }
 }
-
-export const store = new Store(storeConfig)
+export let store
+  if (!config.isElectronRendererProcess) { 
+ store = new Store(storeConfig)
+  }

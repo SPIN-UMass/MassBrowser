@@ -23,6 +23,7 @@ const telegramFilePath = path.join(getDataDir(), config.configFoldername, 'teleg
 class TelegramService {
   constructor() {
     this.ipSet = new Set()
+    console.log("Telegram Service Loaded!")
   }
 
   isTelegramIP(ip) {

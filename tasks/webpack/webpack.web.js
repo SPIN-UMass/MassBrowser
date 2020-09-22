@@ -6,6 +6,8 @@ const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 const common = require('./common')
 
@@ -13,6 +15,7 @@ const rootPath = path.join(common.rootDir, 'app/src/client/web')
 const pkg = require(path.join(rootPath, 'package.json'))
 
 let webConfig = {
+  mode: common.mode,
   devtool: '#source-map',
   devServer: { overlay: true },
   entry: {
@@ -23,39 +26,40 @@ let webConfig = {
     exprContextCritical: false,
     rules: [
       {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader'
-        })
+        test: /\.css$/i,
+        use: [
+          'vue-style-loader',
+          'css-loader'
+        ]
       },
       {
-        test: /\.json$/,
-        use: 'json-loader'
-      },
-      {
-        test: /\.scss$/,
-        use: {
-          loader: 'sass-loader'
-        }
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader',
+        ],
       },
       {
         test: /\.pug$/,
-        use: {
-          loader: 'pug-loader'
-        }
+        oneOf: [
+          // this applies to `<template lang="pug">` in Vue components
+          {
+            resourceQuery: /^\?vue/,
+            use: ['pug-plain-loader']
+          },
+          // this applies to pug imports inside JavaScript
+          {
+            use: ['raw-loader', 'pug-plain-loader']
+          }
+        ]
       },
       {
         test: /\.vue$/,
-        use: {
-          loader: 'vue-loader',
-          options: {
-            loaders: {
-              sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
-              scss: 'vue-style-loader!css-loader!sass-loader'
-            }
-          }
-        }
+        loader: 'vue-loader'
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -90,6 +94,7 @@ let webConfig = {
         : false,
     }),
     new webpack.NoEmitOnErrorsPlugin(),
+    new VueLoaderPlugin()
   ],
   output: {
     filename: '[name].js',
@@ -104,6 +109,7 @@ let webConfig = {
     ]
   },
   target: 'web'
+  
 }
 
 module.exports = webConfig

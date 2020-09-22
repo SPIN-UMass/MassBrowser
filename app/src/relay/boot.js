@@ -16,6 +16,7 @@ import {
 } from '@utils/errors'
 
 export default async function bootRelay () {
+  console.log("Boot Sequence")
   let status
 
   try {

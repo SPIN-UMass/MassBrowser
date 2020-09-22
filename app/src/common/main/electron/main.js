@@ -16,8 +16,11 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed,additional
   windowClosedCallback = onWindowClosed
 
   app.on('ready', () => {
+
     initializeTray(additionalMenu)
+
     createWindow()
+
   })
 
   app.on('window-all-closed', () => {
@@ -34,9 +37,11 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed,additional
 }
 
 function initializeTray(additionalMenu) {
-  var image = nativeImage.createFromDataURL(require(`@assets/icons/${config.role}/tray.png`))
-  tray = new Tray(image)
+  let iconpath = `@assets/icons/${config.role}/tray.png`
 
+  var image = nativeImage.createFromDataURL(`@assets/icons/${config.role}/tray.png`)
+
+  tray = new Tray(image)
   var menu = [
     {
       label: `Open Settings`,
@@ -60,7 +65,7 @@ function initializeTray(additionalMenu) {
     }
   const contextMenu = Menu.buildFromTemplate(menu)
 
-  tray.setContextMenu(contextMenu)
+  // tray.setContextMenu(contextMenu)
 
   if (config.isProduction) {
     Menu.setApplicationMenu(Menu.buildFromTemplate( [{
@@ -101,7 +106,11 @@ function createWindow () {
     maximizable: false,
     fullscreenable: false,
     titleBarStyle: 'hidden',
-    useContentSize: true
+    useContentSize: true,
+    webPreferences: { nodeIntegration: true,
+      enableRemoteModule: true,
+      nodeIntegrationInWorker: true
+     }
   })
   mainWindow.runID = runID
   mainWindow.setTitle(config.appName);
@@ -121,7 +130,7 @@ function createWindow () {
   if (windowCreatedCallback) {
     windowCreatedCallback(mainWindow)
   }
-
+  console.log("Window created!!")
   // eslint-disable-next-line no-console
   return mainWindow
 }

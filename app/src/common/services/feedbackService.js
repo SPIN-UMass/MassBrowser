@@ -9,6 +9,7 @@ import { info, error, warn, readLogs } from '@utils/log'
 
 class FeedbackService {
   constructor() {
+    console.log("Feedback Service Loaded!")
   }
 
   async sendFeedback(content, rating, includeLogs) {

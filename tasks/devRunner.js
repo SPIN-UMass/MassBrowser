@@ -92,7 +92,7 @@ Promise.all([rendererHotDevProcess.promise, mainWatchProcess.promise])
 .then(() =>  {
   mainProcess = run(
     mainProcessPanel, 
-    `cross-env NODE_ENV=development DEV_PORT=${PORT} electron app/dist/${TARGET}/electron.main.js`,
+    `cross-env NODE_ENV=development DEV_PORT=${PORT} electron  app/dist/${TARGET}/electron.main.js`,
     null,
     'SIGKILL'
   )

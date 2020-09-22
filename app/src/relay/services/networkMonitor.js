@@ -23,6 +23,7 @@ class NetworkMonitor {
     this.UDPNATConnection = null
     this.keepAliveInterval = null
     this.isUDPNATRoutineRunning = false
+    console.log("Network manager Loaded!")
   }
 
   async start () {

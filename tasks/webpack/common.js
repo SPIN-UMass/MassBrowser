@@ -1,5 +1,8 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+
 const path = require('path')
 const webpack = require('webpack')
 
@@ -8,49 +11,71 @@ const rootDir = path.join(__dirname, '../..')
 const rules = [
   {
     test: /\.css$/,
-    use: ExtractTextPlugin.extract({
-      fallback: 'style-loader',
-      use: 'css-loader'
-    })
+    use: [
+      'vue-style-loader',
+      'css-loader'
+    ]
   },
   {
     test: /\.html$/,
     use: 'vue-html-loader'
   },
   {
-    test: /\.js$/,
-    use: 'babel-loader',
+    test:  /\.js$/,
     include: [ path.resolve(rootDir, 'app/src') ],
-    exclude: [/node_modules/]
-  },
-  {
-    test: /\.json$/,
-    use: 'json-loader'
+    exclude:  /(node_modules|bower_components)/,
+    use: {
+      loader: 'babel-loader',
+
+      options: {
+        
+        sourceType: 'unambiguous',
+        presets: [['@babel/preset-env',{
+          debug: true,
+          loose: true,
+          modules: 'commonjs',
+          shippedProposals: true,
+          targets: false,
+        }]],
+        plugins: ["@babel/plugin-syntax-dynamic-import"]
+      }
+    }
   },
   {
     test: /\.node$/,
     use: 'node-loader'
   },
   {
-    test: /\.vue$/,
-    use: {
-      loader: 'vue-loader',
-      options: {
-        loaders: {
-          sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
-          scss: 'vue-style-loader!css-loader!sass-loader'
-        }
+    test: /\.s[ac]ss$/i,
+    use: [
+      // Creates `style` nodes from JS strings
+      'style-loader',
+      // Translates CSS into CommonJS
+      'css-loader',
+      // Compiles Sass to CSS
+      'sass-loader',
+    ],
+  },
+  {
+    test: /\.pug$/,
+    oneOf: [
+      // this applies to `<template lang="pug">` in Vue components
+      {
+        resourceQuery: /^\?vue/,
+        use: ['pug-plain-loader']
+      },
+      // this applies to pug imports inside JavaScript
+      {
+        use: ['raw-loader', 'pug-plain-loader']
       }
-    }
+    ]
   },
   {
-    test: /\.scss$/,
-    use: {
-      loader: 'sass-loader'
-    }
+    test: /\.vue$/,
+    loader: 'vue-loader'
   },
   {
-    test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+    test: /\.(png|jpe?g|gif|svg|pdf)$/,
     use: {
       loader: 'url-loader',
       query: {
@@ -92,7 +117,7 @@ const resolve = (target) => {
 
 const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false) => {
   return [
-
+    new VueLoaderPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': process.env.NODE_ENV === 'production'
@@ -105,11 +130,14 @@ const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false
     })
   ].concat(otherPlugins || [])}
 
+  const mode =   process.env.NODE_ENV === 'production' ? 'production' : 'development'
+  
 
 
 module.exports = {
   rootDir,
   rules,
+  mode,
   resolve,
   plugins
 }

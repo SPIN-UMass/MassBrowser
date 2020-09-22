@@ -22,6 +22,7 @@ class RelayManager {
     this.isTCPRelayServerRunning = false
     this.isUDPRelayServerRunning = false
     this.openAccess = false
+    
 
     store.ready.then(() => {
       this.natEnabled = store.state.natEnabled

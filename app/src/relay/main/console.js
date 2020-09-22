@@ -6,43 +6,45 @@ tls.connect = function (...args) {
   return tlsconnect(...args)
 }
 ////DANGERIOUS
-import API from '@/api'
+// import API from '@/api'
 
-import Raven from '@utils/raven'
-import { InvalidInvitationCodeError } from '@utils/errors'
-import { info, error } from '@utils/log'
+// import Raven from '@utils/raven'
+// import { InvalidInvitationCodeError } from '@utils/errors'
+// import { info, error } from '@utils/log'
+
 import config from '@utils/config'
+
 import { remote } from '@utils/remote'
 
-import { registrationService } from '@/services'
-import { statusManager, autoUpdater } from '@common/services'
-import bootRelay from '@/boot'
-import { store } from '@utils/store'
+// import { registrationService } from '@/services'
+// import { statusManager, autoUpdater } from '@common/services'
+// import bootRelay from '@/boot'
+// import { store } from '@utils/store'
 
-// Raven
-//   .smartConfig({'role': 'relay'})
-//   .install()
+// // Raven
+// //   .smartConfig({'role': 'relay'})
+// //   .install()
 
-async function main() {
-  await store.ready
+// async function main() {
+//   await store.ready
   
-  if (!(await registrationService.isRegistered())) {
-    info('Registering relay...')
-    await registrationService.registerRelay()
-  }
+//   if (!(await registrationService.isRegistered())) {
+//     info('Registering relay...')
+//     await registrationService.registerRelay()
+//   }
   
-  info('Booting relay...')
-  try {
-    await bootRelay()
-    info('Boot complete')
-  } catch (e) {
-    error(e)
-    error('Boot failed, exiting')
-  }
-}
+//   info('Booting relay...')
+//   try {
+//     await bootRelay()
+//     info('Boot complete')
+//   } catch (e) {
+//     error(e)
+//     error('Boot failed, exiting')
+//   }
+// }
 
-process.on('uncaughtException', function (err) {
-  console.log('err uncaught Exception  : ', err)
-})
-
-main()
+// process.on('uncaughtException', function (err) {
+//   console.log('err uncaught Exception  : ', err)
+// })
+// console.log(" I AM HERERERERERE 12  ")
+// main()

@@ -9,9 +9,10 @@ const webpack = require('webpack')
 const common = require('./common')
 
 let config = {
+  mode: common.mode,
   devtool: '#source-map',
   entry: {
-    client: ['babel-polyfill', path.join(common.rootDir, 'app/src/client/main/console.js')]
+    client: ["@babel/polyfill", path.join(common.rootDir, 'app/src/client/main/console.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -28,6 +29,7 @@ let config = {
   },
   plugins: common.plugins('client', 'console'),
   resolve: common.resolve('client'),
+
   target: 'node'
 }
 

@@ -22,7 +22,14 @@ dmg:
       type: file
 mac: 
   icon: "app/assets/icons/relay/icon.icns"
+  target: 
+    - target: default
 win:
   icon: "app/assets/icons/relay/icon.ico"
+  target: 
+    - target: nsis
+      arch:
+         - x64
 linux:
   icon: "app/assets/icons/relay"
+  

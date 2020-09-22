@@ -1,59 +1,76 @@
+
+
+import Boot from '@common/views/Boot'
+import Feedback from '@common/views/Feedback'
+
+import Root from '@/views/Root'
+import Start from '@/views/Start'
+import Index from '@/views/Index'
+import Home from '@/views/Home'
+import ClientsView from '@/views/clients/ClientsView'
+
+import SettingsView from '@/views/settings/SettingsView'
+import GeneralSettings from '@/views/settings/GeneralSettings'
+import NetworkSettings from '@/views/settings/NetworkSettings'
+import CategorySettings from '@/views/settings/CategorySettings'
+
 export default [
+
   {
     path: '/',
     name: 'root',
-    component: require('@/views/Root')
+    component:  Root
   },
   {
     path: '/boot',
     name: 'boot',
-    component: require('@common/views/Boot')
+    component: Boot
   },
   {
     path: '/start',
     name: 'start',
-    component: require('@/views/Start')
+    component: Start
   },
   {
     path: '/relay',
     name: 'relay',
-    component: require('@/views/Index'),
+    component: Index,
     children: [
       {
         path: '/relay',
-        component: require('@/views/Home'),
+        component: Home,
         name: 'home'
       },
       {
         path: '/relay/clients',
-        component: require('@/views/clients/ClientsView'),
+        component: ClientsView,
         name: 'clients'
       },
       {
         path: '/relay/feedback',
         name: 'feedback',
-        component: require('@common/views/Feedback')
+        component: Feedback
       },
       {
         path: '/relay/settings',
-        component: require('@/views/settings/SettingsView'),
+        component: SettingsView,
         name: 'settings',
         children: [
           { path: '/relay/settings', redirect: '/relay/settings/general' },
           {
             path: '/relay/settings/general',
             name: 'settings-general',
-            component: require('@/views/settings/GeneralSettings')
+            component: GeneralSettings
           },
           {
             path: '/relay/settings/network',
             name: 'settings-network',
-            component: require('@/views/settings/NetworkSettings')
+            component: NetworkSettings
           },
           {
             path: '/relay/settings/categories',
             name: 'settings-categories',
-            component: require('@/views/settings/CategorySettings')
+            component: CategorySettings
           }
         ]
       }

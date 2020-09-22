@@ -9,9 +9,10 @@ const webpack = require('webpack')
 const common = require('./common')
 
 let config = {
+  mode: common.mode,
   devtool: '#source-map',
   entry: {
-    main: ['babel-polyfill', path.join(common.rootDir, 'app/src/relay/main/electron/main.js')]
+    main: ["@babel/polyfill", path.join(common.rootDir, 'app/src/relay/main/electron/main.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {

@@ -4,12 +4,13 @@ import Vue from 'vue'
 import { getService, remote } from '@utils/remote'
 import storeConfig from '@/store'
 import { parseStoreConfig } from './common'
-import electron from 'electron'
+import {remote as electronRemote} from 'electron'
 import config from '@utils/config'
+export let store
+if (config.isElectronRendererProcess) {
 
 let { state, stateConfig } = parseStoreConfig(storeConfig, config)
-
-let currentWindow = electron.remote.getCurrentWindow();
+let currentWindow = electronRemote.getCurrentWindow();
 let runID = currentWindow.runID
 let firstBoot = localStorage.getItem('runID') !== runID
 if (firstBoot) {
@@ -48,7 +49,7 @@ parsedConfig.state = state
 parsedConfig.getters = storeConfig.getters
 
 Vue.use(Vuex)
-export const store = new Vuex.Store(parsedConfig)
+store = new Vuex.Store(parsedConfig)
 
 store._commit = store.commit
 store.commit = (name, arg) => {
@@ -73,3 +74,6 @@ remote.on('store.commit', (sender, details) => {
   store._commit(details.name, details.arg)
   remote.send('store.commit.ack', details.requestID)
 })
+
+
+}

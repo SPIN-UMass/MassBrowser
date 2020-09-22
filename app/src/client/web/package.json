@@ -5,8 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.19.0",
-    "bootstrap": "^3.4.1",
-    "vue": "^2.4.1",
-    "vue-router": "^2.7.0"
+    "bootstrap": "4.5.2",
+    "vue": "2.6.12",
+    "vue-router": "3.4.3"
   }
 }

@@ -9,9 +9,10 @@ const webpack = require('webpack')
 const common = require('./common')
 
 let config = {
+  mode: common.mode,
   devtool: '#source-map',
   entry: {
-    control: ['babel-polyfill',path.join(common.rootDir, 'app/src/client/main/control.js')]
+    control: ["@babel/polyfill",path.join(common.rootDir, 'app/src/client/main/control.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {

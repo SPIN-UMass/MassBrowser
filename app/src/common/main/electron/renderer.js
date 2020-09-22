@@ -32,19 +32,21 @@ import locales from '@utils/locales'
 import App from '@common/views/App'
 
 export async function initializeRendererProcess (routes) {
+  Vue.component('icon', Icon)
+  Vue.component('v-select', vSelect)
   Vue.use(Electron)
   Vue.use(Resource)
   Vue.use(VueRouter)
   Vue.use(VueMask)
   Vue.use(VueI18n)
   Vue.use(ToggleButton)
-  // Vue.use(Vuex)
-  Vue.component('icon', Icon)
-  Vue.component('v-select', vSelect)
+  // // Vue.use(Vuex)
+  
+  console.log(routes)
 
   Vue.config.debug = true
   let lang = 'en'
-
+  console.log(routes)
   const remoteStore = getService('store')
   await remoteStore.getState().then((remoteState) => {
     lang = remoteState.language || lang
@@ -58,12 +60,12 @@ export async function initializeRendererProcess (routes) {
 
   const router = new VueRouter({
     scrollBehavior: () => ({ y: 0 }),
-    routes
+    routes: routes
   })
 
-  /* eslint-disable no-new */
+  // /* eslint-disable no-new */
   // var options = Object.assign({router}, App)
-  var options = {
+  var options = {    
     router,
     i18n,
     render: h => h(App)

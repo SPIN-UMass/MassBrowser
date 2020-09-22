@@ -7,6 +7,11 @@ import { SyncService as BaseSyncService, SyncProgress } from '@common/services'
 import { store } from '@utils/store'
 
 class SyncService extends BaseSyncService {
+  constructor (){
+    super()
+    console.log("Sync Service Loaded!")
+
+  }
   syncAll () {
     let progress = new SyncProgress(4)
 

@@ -164,7 +164,6 @@ function initializeConfig(options) {
     }
     return base;
   }
-
   return config
 }
 
