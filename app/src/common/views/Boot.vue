@@ -54,7 +54,9 @@
     methods: {
       boot() {
         return Boot.boot()
-          .then(() => this.$router.push('/'))
+          .then(
+          () => this.$router.push('/')
+          )
           .catch(err => {
             if (err instanceof ApplicationBootError) {
               this.errorMessage = err.message
@@ -71,7 +73,7 @@
 
 
 <style scoped lang='scss'>
-    @import '~@/views/styles/settings.scss';
+    @import '@/views/styles/settings.scss';
 
     #m-splash {
         background-color: white;

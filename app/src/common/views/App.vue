@@ -84,6 +84,6 @@
     height: 100%;
   }
   #app {
-    height: 100%;
+    height: 100vh;
   }
 </style>
