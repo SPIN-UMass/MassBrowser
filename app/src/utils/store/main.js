@@ -95,7 +95,4 @@ class Store {
     }
   }
 }
-export let store
-  if (!config.isElectronRendererProcess) { 
- store = new Store(storeConfig)
-  }
+export let store = new Store(storeConfig)

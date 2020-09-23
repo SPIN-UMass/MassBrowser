@@ -6,8 +6,7 @@ import storeConfig from '@/store'
 import { parseStoreConfig } from './common'
 import {remote as electronRemote} from 'electron'
 import config from '@utils/config'
-export let store
-if (config.isElectronRendererProcess) {
+
 
 let { state, stateConfig } = parseStoreConfig(storeConfig, config)
 let currentWindow = electronRemote.getCurrentWindow();
@@ -49,7 +48,8 @@ parsedConfig.state = state
 parsedConfig.getters = storeConfig.getters
 
 Vue.use(Vuex)
-store = new Vuex.Store(parsedConfig)
+
+export let store = new Vuex.Store(parsedConfig)
 
 store._commit = store.commit
 store.commit = (name, arg) => {
@@ -76,4 +76,3 @@ remote.on('store.commit', (sender, details) => {
 })
 
 
-}
