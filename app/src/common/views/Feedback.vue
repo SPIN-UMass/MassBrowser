@@ -23,7 +23,7 @@
             <textarea
                     class="form-control"
                     id="feedback-input"
-                    rows="4"
+                    rows="2"
                     v-model="content"
                     :class="{ invalid: !contentValid }"
                     :placeholder="rate === -1 ? $t('FEEDBACK_TELL_US_MORE') : rate === 0 ? $t('FEEDBACK_POKER') : rate === 1 ? $t('FEEDBACK_HAPPY'): $t('FEEDBACK_TELL_US_MORE')"
@@ -184,7 +184,8 @@
             align-items: center;
             justify-content: center;
             width: 50%;
-            height: 50px;
+            margin-top: 20px;
+            height: 35px;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;

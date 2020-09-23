@@ -78,12 +78,7 @@
   }
 </script>
 
-<style>
-  @import url(https://fonts.googleapis.com/css?family=Lato:300);
-  @import url(https://fonts.googleapis.com/css?family=Alegreya+Sans+SC);
-
-
-
+<style  scoped lang='scss'>
   html,
   body {
     height: 100%;

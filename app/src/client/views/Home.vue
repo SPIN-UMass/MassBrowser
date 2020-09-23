@@ -16,7 +16,7 @@
                 {{$t('HOME_OPEN_BROWSER')}}
             </div>
             <div v-else >
-                <icon name="firefox"></icon>
+                <i class="fa fa-firefox" aria-hidden="true"></i>
                 {{$t('HOME_OPEN_FIREFOX')}}
             </div>
         </div>

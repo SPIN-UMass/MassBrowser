@@ -1,7 +1,7 @@
 'use strict'
 
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
-
+import '@assets/nifty/nifty.min.css'
 import config from '@utils/config'
 
 let mainWindow

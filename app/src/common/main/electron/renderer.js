@@ -8,12 +8,6 @@ import ToggleButton from 'vue-js-toggle-button'
 import vSelect from 'vue-select'
 // import { initializeStore } from '@utils/store'
 
-import '@assets/font-awesome/css/font-awesome.min.css'
-import '@assets/bootstrap/css/bootstrap.min.css'
-import '@assets/nifty/nifty.min.css'
-import '@assets/fonts/neuropol.ttf'
-import 'vue-select/dist/vue-select.css'
-
 import Icon from 'vue-awesome/components/Icon'
 import 'vue-awesome/icons/globe'
 import 'vue-awesome/icons/cogs'
