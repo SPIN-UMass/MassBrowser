@@ -30,10 +30,6 @@ class RegistrationService {
 
     return relay;
   }
-  constructor (){
-    console.log("Registration Service Loaded!")
-
-  }
 }
 
 export const registrationService = new RegistrationService()

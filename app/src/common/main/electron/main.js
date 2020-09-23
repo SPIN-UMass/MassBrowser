@@ -65,7 +65,7 @@ function initializeTray(additionalMenu) {
     }
   const contextMenu = Menu.buildFromTemplate(menu)
 
-  // tray.setContextMenu(contextMenu)
+  tray.setContextMenu(contextMenu)
 
   if (config.isProduction) {
     Menu.setApplicationMenu(Menu.buildFromTemplate( [{
