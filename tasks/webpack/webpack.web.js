@@ -33,6 +33,27 @@ let webConfig = {
         ]
       },
       {
+        test:  /\.js$/,
+        include: [ path.resolve(rootDir, 'app/src') ],
+        exclude:  /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+    
+          options: {
+            
+            sourceType: 'unambiguous',
+            presets: [['@babel/preset-env',{
+              debug: true,
+              loose: true,
+              modules: 'commonjs',
+              shippedProposals: true,
+              targets: false,
+            }]],
+            plugins: ["@babel/plugin-syntax-dynamic-import"]
+          }
+        }
+      },
+      {
         test: /\.s[ac]ss$/i,
         use: [
           // Creates `style` nodes from JS strings
@@ -84,7 +105,7 @@ let webConfig = {
     ]
   },
   plugins: [
-    new ExtractTextPlugin('styles.css'),
+    //new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       minify: false,
       filename: 'index.html',

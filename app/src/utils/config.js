@@ -109,8 +109,10 @@ function initializeConfig(options) {
     console.log("Running in development mode")
     config.isDevelopment = true
     config.isProduction = false
+    config.extPath = path.join(process.cwd(),'app/assets/ext/')
     if (config.OS == "osx"){
       config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-osx-x86_64/Contents/MacOS/Tor/tor')
+
     }
 
     if (config.OS == "windows"){
@@ -164,6 +166,7 @@ function initializeConfig(options) {
     }
     return base;
   }
+
   return config
 }
 

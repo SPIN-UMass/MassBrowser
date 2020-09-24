@@ -15,16 +15,16 @@ import {websiteSupportService} from './websiteSupportService'
 class WebPanelService {
   constructor () {
     this.app = connect()
-
+    
     this.server = null
     this.initializeApp(this.app)
-
-
-
+    
+    
+    
   }
 
   start() {
-
+    
     let port = config.web.port
     this.server = http.createServer(this.app)
     this.server.listen(port, () => debug(`Web panel server started on port ${port}`))
@@ -41,7 +41,7 @@ class WebPanelService {
     app.use('/plugin', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'application/x-xpinstall')
-      fs.readFile(path.join(getDataDir(), 'massbrowser_manager-0.1.0-fx.xpi'))
+      fs.readFile(path.join(config.extPath, 'massbrowser_manager-current.xpi'))
       .then(f => {
         console.log(f)
         res.end(f)
@@ -49,22 +49,8 @@ class WebPanelService {
       })
     })
 
-    app.use('/check-plugin', function (req, res, next) {
-      res.setHeader('Access-Control-Allow-Origin', '*')
-      res.setHeader('Content-Type', 'text/plain')
-      if (store.state.pluginInstallationComplete) {
-        res.end('active')
-      }
-    })
-
-    app.use('/plugin-complete', function (req, res, next) {
-      res.setHeader('Access-Control-Allow-Origin', '*')
-      res.end('ok')
-      store.commit('completePluginInstallation')
-    })
-
     app.use('/report', function (req, res, next) {
-
+      
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'text/plain')
       websiteSupportService.requestWebsiteSupport(req.body.domain)
