@@ -120,7 +120,6 @@
     "semaphore": "^1.1.0",
     "socks5-client": "^1.2.8",
     "vue-i18n": "8.21.1",
-    "vue-select": "3.10.8",
-    "zeromq": "^6.0.0-beta.6"
+    "vue-select": "3.10.8"
   }
 }
