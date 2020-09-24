@@ -4,7 +4,7 @@
   "main": "script.js",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "0.20.0",
     "bootstrap": "4.5.2",
     "vue": "2.6.12",
     "vue-router": "3.4.3"

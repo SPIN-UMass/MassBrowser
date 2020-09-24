@@ -6,11 +6,8 @@ import config from '@utils/config'
 
 
 import { error } from '@utils/log'
-export let remote 
 
 
-if (config.applicationInterface === 'electron') {
-  if (config.isElectronMainProcess) { 
 const services = {}
 
 function serializeError(err) {
@@ -145,13 +142,20 @@ class Remote {
 
       if (async) {
         try {
-          let response = service[property].apply(service, args)
-          if (response && response.then !== undefined) {
-            response
-            .then(response => sendResponse(response))
-            .catch(err => sendError(err))
+          // console.log("applying",service,args,property) 
+          let mainresponse = service[property].apply(service, args)
+          
+          if (mainresponse && mainresponse.then !== undefined) {
+            mainresponse
+            .then(response => {
+             
+                return sendResponse(response)
+            })
+            .catch(err => {
+              return sendError(err)
+            })
           } else {
-            sendResponse(response)
+            sendResponse(mainresponse)
           }
         } catch (err) {
           sendError(err)
@@ -163,5 +167,4 @@ class Remote {
   }
 }
 
- remote = new Remote()}
-}
+export const remote = new Remote()

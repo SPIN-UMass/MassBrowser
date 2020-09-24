@@ -25,6 +25,7 @@
       }
     },
     created () {
+      console.log("I AM ASGASW")
       this.browser = getBrowser()
       this.supported = SUPPORTED_BROWSERS.indexOf(this.browser) !== -1
     },
