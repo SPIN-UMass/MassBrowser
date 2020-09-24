@@ -34,7 +34,7 @@ let webConfig = {
       },
       {
         test:  /\.js$/,
-        include: [ path.resolve(rootDir, 'app/src') ],
+        include: [ path.resolve(common.rootDir, 'app/src') ],
         exclude:  /(node_modules|bower_components)/,
         use: {
           loader: 'babel-loader',
