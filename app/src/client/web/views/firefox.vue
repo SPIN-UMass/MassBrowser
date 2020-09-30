@@ -376,6 +376,7 @@
       width: 200px;
 
       li {
+        padding: 10px;
         a {
           cursor: pointer;
         }

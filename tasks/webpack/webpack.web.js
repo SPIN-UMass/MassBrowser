@@ -17,7 +17,10 @@ const pkg = require(path.join(rootPath, 'package.json'))
 let webConfig = {
   mode: common.mode,
   devtool: '#source-map',
-  devServer: { overlay: true },
+  devServer: {
+    overlay: true,
+    historyApiFallback: true, // is it enabled ?
+  },
   entry: {
     script: path.join(rootPath, 'script.js')
   },
@@ -83,10 +86,11 @@ let webConfig = {
         loader: 'vue-loader'
       },
       {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        test: /\.(png|jpe?g|gif|svg|pdf)$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
+            esModule: false,
             limit: 10000,
             name: 'imgs/[name].[ext]'
           }
@@ -96,7 +100,8 @@ let webConfig = {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
+            esModule: false,
             limit: 10000,
             name: 'fonts/[name].[ext]'
           }
