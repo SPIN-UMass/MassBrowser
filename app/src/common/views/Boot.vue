@@ -72,7 +72,7 @@
 </script>
 
 
-<style scoped lang='scss'>
+<style lang='scss'>
     @import '@/views/styles/settings.scss';
 
     #m-splash {

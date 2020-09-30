@@ -78,7 +78,15 @@
   }
 </script>
 
-<style  scoped lang='scss'>
+<style lang=scss>
+  @import '@assets/font-awesome/css/font-awesome.min.css';
+  @import '@assets/bootstrap/css/bootstrap.min.css';
+  @import '@assets/nifty/nifty.min.css';
+  @import 'vue-select/dist/vue-select.css';
+  @import url(https://fonts.googleapis.com/css?family=Lato:300);
+  @import url(https://fonts.googleapis.com/css?family=Alegreya+Sans+SC);
+
+
   html,
   body {
     height: 100%;

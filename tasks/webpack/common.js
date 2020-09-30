@@ -13,6 +13,7 @@ const rules = [
     test: /\.css$/,
     use: [
       'vue-style-loader',
+      MiniCssExtractPlugin.loader,
       'css-loader'
     ]
   },
@@ -120,6 +121,7 @@ const resolve = (target) => {
 const plugins = (role, interface, electronProcess, otherPlugins, isFirefox=false) => {
   return [
     new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({filename: "[name].css"}),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': process.env.NODE_ENV === 'production'
