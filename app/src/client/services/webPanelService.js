@@ -38,6 +38,12 @@ class WebPanelService {
       res.end('active')
     })
 
+    app.use('/check-plugin', function (req, res) {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Content-Type', 'text/plain')
+      res.end('active')
+    })
+
     app.use('/plugin', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'application/x-xpinstall')

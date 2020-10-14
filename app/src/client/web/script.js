@@ -18,6 +18,10 @@ const router = new VueRouter({
 var app = new Vue({
   el: '#app',
   router: router,
+  components: {
+    FirefoxComponent,
+    StartComponent
+  },
   data: {
 
   },

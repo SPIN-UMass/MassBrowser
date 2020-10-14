@@ -1,6 +1,7 @@
 /**
  * https://stackoverflow.com/questions/2400935/browser-detection-in-javascript
  */
+import path from 'path'
 export function getBrowser() {
   var ua= navigator.userAgent, tem,
   M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
