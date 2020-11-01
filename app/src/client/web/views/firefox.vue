@@ -161,30 +161,34 @@
       .then(() => {
         if (this.plugin.success) {
           this.nextStep()
-          this.checkCert()
-          .then(() => {
-            if (this.cert.success && this.tab === 'cert') {
-              this.nextStep()
-              this.checkDNSCache()
-              .then(() => {
-                console.log(this.dnsCache.success, this.tab)
-                if (this.dnsCache.success && this.tab === 'dnsCache') {
-                  this.nextStep()
-                }
-              })
-            }
-          })
+          // this.checkCert()
+          // .then(() => {
+          //   if (this.cert.success && this.tab === 'cert') {
+          //     this.nextStep()
+          //     this.checkDNSCache()
+          //     .then(() => {
+          //       console.log(this.dnsCache.success, this.tab)
+          //       if (this.dnsCache.success && this.tab === 'dnsCache') {
+          //         this.nextStep()
+          //       }
+          //     })
+          //   }
+          // })
         }
       })
     },
     methods: {
-      onFinishTab () {
-
+      settignsComplete () {
+        console.log('SENDING REQUEST TO FINISH! ')
+        // not the best way to send this request but for some reason first time doesnt work so I send it 5 to make sure we set the settings
+        for(let i=0;i<5;i++) {
+          axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
+        }
       },
       onTabChange () {
         console.log('tab changed to', this.tab)
         if (this.tab === 'finish') {
-          return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
+          this.settignsComplete()
         } else if (this.tab === 'cert') {
           this.checkCert()
         } else if (this.tab === 'dnsCache') {
@@ -323,10 +327,10 @@
         console.log(this.tab)
         let next = steps.indexOf(this.tab) + 1
         this.tab = steps[next]
-        if (this[this.tab] && this[this.tab].success) {
-          console.log('herreeeee', this.tab)
-          return this.nextStep()
-        }
+        // if (this[this.tab] && this[this.tab].success) {
+        //   console.log('herreeeee', this.tab)
+        //   return this.nextStep()
+        // }
 
         this.onTabChange()
       }

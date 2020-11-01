@@ -44,6 +44,13 @@ class WebPanelService {
       res.end('active')
     })
 
+    app.use('/settings-complete', function (req, res) {
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Content-Type', 'text/plain')
+      res.end('ok')
+      store.commit('completeBrowserIntegration')
+    })
+
     app.use('/plugin', function (req, res, next) {
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Content-Type', 'application/x-xpinstall')
@@ -74,11 +81,6 @@ class WebPanelService {
         })
     })
 
-    app.use('/settings-complete', function (req, res, next) {
-      res.setHeader('Access-Control-Allow-Origin', '*')
-      res.end('ok')
-      store.commit('completeBrowserIntegration')
-    })
     if (config.isElectronMainProcess) {
       const electron = require('electron')
       /* TODO: hadi: I don't like this */
