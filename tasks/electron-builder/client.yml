@@ -32,7 +32,10 @@ mac:
     "from":  "app/assets/ext/massbrowser_manager-current.xpi",
     "to": "./Resources",
     "filter": ["**/*"]
-  },]
+  },{ "from":  "app/assets/icons/",
+    "to": "./Resources/icons",
+    "filter": ["**/*"]
+  }]
 
 
 win:
@@ -45,6 +48,10 @@ win:
   },{
     "from":  "app/assets/ext/massbrowser_manager-current.xpi",
     "to": ".",
+    "filter": ["**/*"]
+  },
+  { "from":  "app/assets/icons/",
+    "to": "./icons",
     "filter": ["**/*"]
   }]
 linux:

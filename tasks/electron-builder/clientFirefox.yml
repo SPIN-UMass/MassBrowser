@@ -32,6 +32,9 @@ win:
     "from":  "app/assets/ext/massbrowser_manager-current.xpi",
     "to": ".",
     "filter": ["**/*"]
+  },{ "from":  "app/assets/icons",
+    "to": ".",
+    "filter": ["**/*"]
   }]
 linux:
   icon: "app/assets/icons/client"

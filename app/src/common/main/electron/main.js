@@ -3,11 +3,14 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron'
 import '@assets/nifty/nifty.min.css'
 import config from '@utils/config'
+const path = require('path')
+
 
 let mainWindow
 let tray
 let windowCreatedCallback
 let windowClosedCallback
+
 
 const runID = Math.random().toString(36).substring(7)
 
@@ -37,10 +40,11 @@ export function initializeMainProcess(onWindowCreated, onWindowClosed,additional
 }
 
 function initializeTray(additionalMenu) {
-  let iconpath = `@assets/icons/${config.role}/tray.png`
-
-  var image = nativeImage.createFromDataURL(`@assets/icons/${config.role}/tray.png`)
-
+  let iconpath = `${config.iconPath}/icons/${config.role}/tray.png`
+  
+  
+  var image = nativeImage.createFromPath(iconpath)
+  console.log("INITIING",image,iconpath)
   tray = new Tray(image)
   var menu = [
     {
@@ -66,7 +70,8 @@ function initializeTray(additionalMenu) {
   const contextMenu = Menu.buildFromTemplate(menu)
 
   tray.setContextMenu(contextMenu)
-
+  
+  tray.set
   if (config.isProduction) {
     Menu.setApplicationMenu(Menu.buildFromTemplate( [{
       label: config.appName,
