@@ -33,7 +33,7 @@ win:
     "to": ".",
     "filter": ["**/*"]
   },{ "from":  "app/assets/icons",
-    "to": ".",
+    "to": "./icons",
     "filter": ["**/*"]
   }]
 linux:
