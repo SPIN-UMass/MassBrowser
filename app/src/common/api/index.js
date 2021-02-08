@@ -4,6 +4,7 @@ import { error } from '@utils/log'
 
 const SESSION_URL = '/sessions'
 const CLIENT_URL = '/client'
+const SESSION_PATH = '/session/'
 
 export class CommonAPI {
   constructor () {
@@ -23,7 +24,7 @@ export class CommonAPI {
       {
         'username': username,
         'password': password
-      }  
+      }
     )
     .then(response => response.data)
     .then(body => {
@@ -31,7 +32,17 @@ export class CommonAPI {
       return body
     })
   }
-  
+
+  clientSessionDisconnected (client, sessionid) {
+    return new Promise((resolve, reject) => {
+      resolve()
+    })
+  }
+
+  clientSessionConnected (client, sessionid) {
+    return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'used'})
+  }
+
   getLastModificationTime (entity) {
     return this.transport.get('/meta/last_modification_date')
       .then(response => response.data)
@@ -45,10 +56,26 @@ export class CommonAPI {
     .then(response => response.data)
   }
 
-  getSessions () {
+  getReachSession () {
     return this.transport.get(
-      CLIENT_URL + '/' + this.userID + '/sessions?limit=50&status=1'
-    ).then(r => r.data.results)
+      CLIENT_URL + '/' + this.userID + '/reach'
+    ).then((r) =>  {
+      return r.data
+    })
+  }
+
+  getSessions (status, limit) {
+    if (status === undefined) {
+      status = 1
+    }
+    if (limit === undefined) {
+      limit = 50
+    }
+    return this.transport.get(
+      CLIENT_URL + '/' + this.userID + '/sessions?limit='+ limit + '&status=' + status
+    ).then((r) =>  {
+      return r.data.results
+    })
   }
 
   updateSessionStatus(sessionID, status) {

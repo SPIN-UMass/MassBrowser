@@ -14,27 +14,25 @@
             <div class="s-start" v-if="page === 'start'">
                 <div class="well">
                     <i18n path="START_RELAY_WELCOME_MSG">
+                        <strong slot="hey">{{$t('HEY_THERE')}}</strong>
                         <strong slot="appName">{{appName}}</strong>
+                        <br slot='break'>
                     </i18n>
                 </div>
                 <button class="btn btn-info" v-on:click="nextPage">Start</button>
             </div>
             <div class="s-sync" v-if="page === 'sync'">
-                <div class="well">
-                    {{$t('START_RELAY_SYNC')}}
-                    <p>
+                <div class="well" v-html="$t('START_RELAY_SYNC')">
                 </div>
                 <button class="btn btn-info" v-on:click="startSync" v-if="sync.state==''">{{$t('START_RELAY_DOWNLOAD_BTN')}}</button>
                 <div class="progress" v-if="sync.state=='downloading'">
                     <div class="progress-bar progress-bar-info" ref="syncProgress"></div>
                 </div>
-                <p v-if="sync.state=='done'">
-                    {{$t('START_RELAY_DONE')}}
+                <p v-if="sync.state=='done'" v-html="$t('START_RELAY_DONE')">
                 </p>
             </div>
             <div class="s-network-settings" v-if="page === 'network-settings'">
-                <div class="well well-sm">
-                    {{$t('START_RELAY_NETWORK_SETTINGS_HELP_MSG')}}
+                <div class="well well-sm" v-html="$t('START_RELAY_NETWORK_SETTINGS_HELP_MSG')">
                 </div>
                 <div class="network-settings-container">
                     <network-settings :completeVersion="false"></network-settings>

@@ -98,7 +98,7 @@
 </script>
 
 
-<style scoped lang='scss'>
+<style lang='scss'>
   @import '~@/views/styles/settings.scss';
 
   .y-register {

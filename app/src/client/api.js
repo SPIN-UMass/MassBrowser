@@ -2,11 +2,8 @@ import { CommonAPI } from '@common/api'
 import { PermissionDeniedError, InvalidInvitationCodeError } from '@utils/errors'
 import config from '@utils/config'
 import { debug } from '@utils/log'
-// @ above means the root of the project (MassBrowser/app/scr)
-// It is implemented by a babel plugin:
-// https://github.com/entwicklerstube/babel-plugin-root-import
 
-const SESSION_URL = '/sessions'
+const SESSIONS_PATH = '/sessions'
 const CLIENT_URL = '/client'
 const globalDNSCache = {}
 
@@ -19,10 +16,6 @@ class ClientAPI extends CommonAPI {
         'invitation_code': invitationCode
       }
     )
-    // r, as a parameter of an arrow function, will be the value of
-    // what returned by this.transport.post()
-    // Note that the final value returned by the registerClient
-    // function is r.data
       .then(r => r.data)
       .catch(err => {
         if (err instanceof PermissionDeniedError) {
@@ -40,8 +33,8 @@ class ClientAPI extends CommonAPI {
 
   requestSession (categories) {
     return this.transport.post(
-      CLIENT_URL + '/' + this.userID + SESSION_URL, {
-        //'testing': true,
+      CLIENT_URL + '/' + this.userID + SESSIONS_PATH, {
+        'testing': false,
         'categories': categories
       }
     )
@@ -66,6 +59,15 @@ class ClientAPI extends CommonAPI {
       }).then(r => r.data)
   }
 
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': 'voyager.cs.umass.edu',
+        'port': 3478
+      })
+    })
+  }
+
   requestNewStunServer () {
     return new Promise((resolve, reject) => {
       resolve({
@@ -78,9 +80,6 @@ class ClientAPI extends CommonAPI {
   }
 
   async sendFeedback (content, rating, logs) {
-    // Without the await, the value returned is a promise. With the
-    // await, it will wait untill getting a value from
-    // tranpsort.post function
     return await this.transport.post('/client/feedback', {
       content,
       rating,

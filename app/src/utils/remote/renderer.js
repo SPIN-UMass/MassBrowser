@@ -1,9 +1,14 @@
 import { ipcRenderer } from 'electron'
 import { EventEmitter } from 'events'
-
 import * as errors from '@utils/errors'
+import config from '@utils/config'
+export let remote
 
-export const remote = ipcRenderer
+if (config.applicationInterface === 'electron') {
+  if (config.isElectronRendererProcess) { 
+ remote = ipcRenderer
+}}
+  
 
 const services = {}
 const pendingRequests = {}

@@ -80,7 +80,7 @@ class ConnectionManager {
         }
       } else {
         if (this.carry) {
-          data = Buffer(this.carry + data)
+          data = Buffer.from(this.carry + data)
         }
         if (data.length < 7) {
           this.carry = data
@@ -140,20 +140,18 @@ class ConnectionManager {
           debug(`Relay [${relay.id}] assigned for connection`)
           this.connectionMaps[conid] = relay
           let cr = String(dstip) + ':' + String(dstport)
-          this.connectionMaps[conid].write(conid, 'N', Buffer(cr))
-
+          this.connectionMaps[conid].write(conid, 'N', Buffer.from(cr))
           connection.on('data', (data) => {
             this.writer(data, conid)
           })
 
           connection.on('close', () => {
-            this.connectionMaps[conid].write(conid, 'C', Buffer(0))
+            this.connectionMaps[conid].write(conid, 'C', Buffer.alloc(0))
             connection.end()
           })
           connection.on('error', (err) => {
-            this.connectionMaps[conid].write(conid, 'C', Buffer(0))
+            this.connectionMaps[conid].write(conid, 'C', Buffer.alloc(0))
           })
-
           connectionStats.connectionRelayAssigned(connection, relay)
           resolve('Assigned')
         })
@@ -174,11 +172,11 @@ class ConnectionManager {
     this.clientConnections[conid].relayConnected = () => { onConnect() }
     this.clientConnections[conid].end = () => { onDisconnect() }
     return new Promise((resolve, reject) => {
-      debug(`Relay ${relay} assigned for connection`)
+      debug(`Relay ${relay.id} assigned for connection`)
       this.connectionMaps[conid] = relay
       var cr = String(dstip) + ':' + String(dstport)
       // console.log('sendsize:', cr.length, cr)
-      this.connectionMaps[conid].write(conid, 'N', Buffer(cr))
+      this.connectionMaps[conid].write(conid, 'N', Buffer.from(cr))
 
       resolve('Assigned')
     })

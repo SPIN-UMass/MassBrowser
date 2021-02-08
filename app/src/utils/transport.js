@@ -6,7 +6,7 @@ import { debug, warn, error } from '~/utils/log'
 import randomstring from 'randomstring'
 
 export class Transport {
-  constructor() {
+  constructor () {
     this.get = this.request.bind(this, 'get')
     this.post = this.request.bind(this, 'post')
     this.delete = this.request.bind(this, 'delete')
@@ -51,7 +51,7 @@ export class HttpTransport extends Transport {
     this.authToken = authToken
   }
 
-  async request(method, path, data, config) {
+  async request (method, path, data, config) {
     let options = {
       url: path,
       method: method,
@@ -67,7 +67,7 @@ export class HttpTransport extends Transport {
 
 
 
-    return  axios.request(options)
+    return axios.request(options)
     .catch((r) => {
       return this.handleNetworkError({url: path, data: data}, r)
     })
@@ -102,15 +102,15 @@ export class WebSocketTransport extends Transport {
     this.eventHandler = null
   }
 
-  setEventHandler(eventHandler) {
+  setEventHandler (eventHandler) {
     this.eventHandler = eventHandler
   }
 
-  reconnect() {
+  reconnect () {
     return this.connect(this.url)
   }
 
-  connect() {
+  connect () {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(this.url, {
         perMessageDeflate: false,
@@ -146,28 +146,31 @@ export class WebSocketTransport extends Transport {
     })
   }
 
-  eventReceived(resp) {
+  eventReceived (resp) {
     this.eventHandler(resp.event, resp.data)
   }
 
-  handleReconnect() {
+  handleReconnect () {
     this.eventHandler('reconnected','')
   }
 
-  replyReceived(resp) {
+  replyReceived (resp) {
     if (resp['message_id'] in this.connectionMap) {
       // debug('I am HERE',this.connectionMap[resp['message_id']])
       let handler = this.connectionMap[resp['message_id']]
-
+      // remove connectionMap item after receiving the reply
+      this.connectionMap[resp['message_id']] = null
+      delete this.connectionMap[resp['message_id']]
       if (handler) {
         handler(resp)
+
       } else {
         warn("Websocket reply received for a request which doesn't exit")
       }
     }
   }
 
-  request(method, pathtail, data) {
+  request (method, pathtail, data) {
     var path = this.basePath + pathtail
 
     return new Promise((resolve, reject) => {

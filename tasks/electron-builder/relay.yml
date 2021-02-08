@@ -22,7 +22,25 @@ dmg:
       type: file
 mac: 
   icon: "app/assets/icons/relay/icon.icns"
+  target: 
+    - target: default
+  extraFiles: [
+  { "from":  "app/assets/icons/",
+    "to": "./Resources/icons",
+    "filter": ["**/*"]
+  }]
 win:
   icon: "app/assets/icons/relay/icon.ico"
+  target: 
+    - target: nsis
+      arch:
+         - x64
+  extraFiles: [
+    { "from":  "app/assets/icons/",
+    "to": "./icons",
+    "filter": ["**/*"]
+  }
+  ]
 linux:
   icon: "app/assets/icons/relay"
+  

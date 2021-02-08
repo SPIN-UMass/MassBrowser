@@ -16,6 +16,7 @@ import {
 } from '@utils/errors'
 
 export default async function bootRelay () {
+  console.log("Boot Sequence")
   let status
 
   try {
@@ -45,13 +46,6 @@ export default async function bootRelay () {
     transport.setEventHandler(eventHandler)
     await transport.connect()
     API.setTransport(transport)
-    status.clear()
-
-    status = statusManager.info('Connecting to Connectivity server')
-    await networkMonitor.start()
-    status.clear()
-    status = statusManager.info('Obtaining NAT information')
-    await networkMonitor.waitForNetworkStatus()
     status.clear()
 
     /** Only sync database in boot if it is the first time booting
@@ -93,8 +87,15 @@ export default async function bootRelay () {
     await telegramService.loadTelegramList()
     status.clear()
 
+    status = statusManager.info('Connecting to Connectivity server')
+    await networkMonitor.start()
+    status.clear()
+    status = statusManager.info('Obtaining NAT information')
+    await networkMonitor.waitForNetworkStatus()
+    status.clear()
+
     status = statusManager.info('Starting Relay')
-    relayManager.startRelay()
+    await relayManager.startRelay()
     status.clear()
 
     if (config.domainfrontable) {

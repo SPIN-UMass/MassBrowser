@@ -1,17 +1,21 @@
 const Sender = require('./Sender');
 const Receiver = require('./Receiver');
+const Packet = require('./Packet');
+const StunPacket = require('./StunPacket');
 const constants = require('./constants');
 const helpers = require('./helpers');
 const Duplex = require('stream').Duplex;
 const util = require('util');
+import { debug } from '@utils/log'
+const crypto = require('crypto');
 import {Semaphore} from 'await-semaphore'
-import { throwStatement } from 'babel-types';
 
 module.exports = Connection;
 function Connection(packetSender) {
+  this.stunMode = false;
   this.currentTCPState = constants.TCPStates.LISTEN;
+  this._packetSender = packetSender;
   this._sender = new Sender(this, packetSender);
-
   this._receiver = new Receiver(this, packetSender);
   this.initialSequenceNumber = helpers.generateRandomNumber(constants.INITIAL_MAX_WINDOW_SIZE, constants.MAX_SEQUENCE_NUMBER);
   this.nextSequenceNumber = 0;
@@ -34,27 +38,53 @@ function Connection(packetSender) {
   });
   this._sender.on('fin_acked', () => {
     if (this.currentTCPState === constants.TCPStates.LAST_ACK) {
-      this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-      this._sender._stopTimeoutTimer();
-      this._stopTimeoutTimer();
-      this.emit('close');
+      this._cleanClose()
     } else if (this.currentTCPState === constants.TCPStates.FIN_WAIT_1){
       this._changeCurrentTCPState(constants.TCPStates.FIN_WAIT_2);
     }
   });
-  this._sender.on('timeout', () => {
-    console.log('maximum number of tries reached')
-    this.emit('timeout')
-  })
+  // this._sender.on('timeout', () => {
+  //   this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+  //   this._sender.clear();
+  //   this._receiver.clear();
+  //   this._stopTimeoutTimer();
+  //   this._packetSender.clear();
+  //   this.emit('close');
+  //   this.emit('connection_timeout');
+  //   debug('RUDP: maximum number of tries reached')
+  // })
   this._receiver.on('send_ack', () => {
     this._sender.sendAck();
   })
   this._sender.once('done', () => {
     this.emit('done');
   })
+
+  this._restartTimeoutTimer();
 };
 
 util.inherits(Connection, Duplex);
+
+Connection.prototype.setStunMode = function () {
+  this.stunMode = true;
+  this._stopTimeoutTimer();
+}
+
+Connection.prototype.receiveStunPacket = function (buffer) {
+  if (!this.stunMode) {
+    this.setStunMode()
+  }
+  let sp = StunPacket.decode(buffer)
+  let res = sp.attrs[StunPacket.ATTR.XOR_MAPPED_ADDRESS]
+  this.emit('stun-data', sp.tid, res);
+}
+
+Connection.prototype.sendStunRequest = function () {
+  let sp = new StunPacket(StunPacket.BINDING_CLASS, StunPacket.METHOD.REQUEST, {});
+  let message = sp.encode();
+  this._packetSender.sendBuffer(message);
+  return sp.tid;
+}
 
 Connection.prototype._stopTimeoutTimer = function () {
   clearTimeout(this._connectionTimeoutTimer);
@@ -63,12 +93,7 @@ Connection.prototype._stopTimeoutTimer = function () {
 
 Connection.prototype._startTimeoutTimer = function () {
   this._connectionTimeoutTimer = setTimeout(() => {
-    this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-    this._sender._stopTimeoutTimer();
-    this._sender.clear();
-    this._receiver.clear();
-    this.emit('close');
-    this.emit('connection_timeout');
+    this._cleanClose();
   }, constants.CONNECTION_TIMEOUT_INTERVAL)
 }
 
@@ -116,8 +141,36 @@ Connection.prototype.incrementNextExpectedSequenceNumber = async function () {
   release()
 }
 
-Connection.prototype.send = async function (data) {
+Connection.prototype._cleanClose = function() {
+  this._changeCurrentTCPState(constants.TCPStates.CLOSED);
+  this._sender._stopTimeoutTimer();
+  this._sender.clear();
+  this._packetSender.clear();
+  this._receiver.clear();
+  this._stopTimeoutTimer();
+  this.emit('close');
+}
 
+Connection.prototype._decrypt = function(encryptedPacketWithIV) {
+  try {
+    let iv = encryptedPacketWithIV.slice(0,16);
+    let key = this._packetSender._sessionKey.slice(0,32);
+    let encryptedPacket = encryptedPacketWithIV.slice(16);
+    let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key), iv);
+    let decrypted = decipher.update(encryptedPacket);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted;
+  } catch (err) {
+    debug('RUDP ERROR IN DECRYPT! REMOVING CONNECTION')
+    this._cleanClose();
+  }
+};
+
+Connection.prototype.send = async function (data) {
+  if (this.currentTCPState === constants.TCPStates.CLOSED) {
+    debug('CONNECTION IS CLOSED SEND IGNORED')
+    return
+  }
   let release = await this._sendLock.acquire();
   await this._sender.addDataToQueue(data)
   
@@ -135,8 +188,17 @@ Connection.prototype.send = async function (data) {
 
 };
 
-Connection.prototype.receive = async function (packet) {
+Connection.prototype.receive = async function (buffer) {
     let release = await this._receiverLock.acquire()
+    let packet = new Packet(buffer)
+    if (this._packetSender._sessionKey) {
+      packet = new Packet(this._decrypt(buffer))
+    }
+    if (this.currentTCPState === constants.TCPStates.CLOSED) {
+      debug('CONNECTION IS CLOSED RECEIVE IGNORED')
+      release();
+      return
+    }
     this._restartTimeoutTimer();
     switch(this.currentTCPState) {
       case constants.TCPStates.LISTEN:
@@ -176,7 +238,7 @@ Connection.prototype.receive = async function (packet) {
             this._receiver.clear();
             this._sender.sendAck();
             this._changeCurrentTCPState(constants.TCPStates.CLOSE_WAIT);
-            this._sender.sendFin();
+            await this._sender.sendFin();
             this._changeCurrentTCPState(constants.TCPStates.LAST_ACK);
             break;
           case constants.PacketTypes.DATA:
@@ -200,10 +262,7 @@ Connection.prototype.receive = async function (packet) {
           this._sender.sendAck();
           this._changeCurrentTCPState(constants.TCPStates.TIME_WAIT)
           setTimeout(() => {
-            this._changeCurrentTCPState(constants.TCPStates.CLOSED);
-            this._sender._stopTimeoutTimer();
-            this._stopTimeoutTimer();
-            this.emit('close');
+            this._cleanClose()
           }, constants.CLOSE_WAIT_TIME);
         }
         break;
@@ -219,15 +278,22 @@ Connection.prototype.receive = async function (packet) {
 };
 
 Connection.prototype._changeCurrentTCPState = function (newState) {
-  console.log(helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState))
+  debug('RUDP:', helpers.getKeyByValue(constants.TCPStates, this.currentTCPState), '->', helpers.getKeyByValue(constants.TCPStates, newState), this._packetSender.getAddressKey())
   this.currentTCPState = newState;
 }
 
 Connection.prototype.close = async function () {
+  if (this.stunMode) {
+    this._cleanClose();
+    this.emit('close');
+    return;
+  }
   switch(this.currentTCPState) {
-    case constants.LISTEN:
-    case constants.SYN_SENT:
-    case constants.SYN_RCVD:
+    case constants.TCPStates.LISTEN:
+      this._cleanClose();
+      break;
+    case constants.TCPStates.SYN_SENT:
+    case constants.TCPStates.SYN_RCVD:
     case constants.TCPStates.ESTABLISHED:
       this._sender.clear();
       this._receiver.clear();
@@ -239,8 +305,6 @@ Connection.prototype.close = async function () {
 
 Connection.prototype._write = async function (chunk, encoding, callback) {
     this.send(chunk).then(()=>{callback();});
-    
-
 }
 
 Connection.prototype._read = function (n) {

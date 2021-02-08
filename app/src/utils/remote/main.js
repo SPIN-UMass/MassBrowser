@@ -1,7 +1,12 @@
 import { EventEmitter } from 'events'
-import { ipcMain } from 'electron'
+// import { ipcMain } from 'electron'
+const {ipcMain} = require('electron')
+import config from '@utils/config'
+
+
 
 import { error } from '@utils/log'
+
 
 const services = {}
 
@@ -12,9 +17,9 @@ function serializeError(err) {
     stack: err.stack
   }
 }
-
 class Remote {
   constructor() {
+    console.log("MMM")
     this.services = {}
     this.webContents = null
     this._initIPCListeners()
@@ -137,13 +142,20 @@ class Remote {
 
       if (async) {
         try {
-          let response = service[property].apply(service, args)
-          if (response && response.then !== undefined) {
-            response
-            .then(response => sendResponse(response))
-            .catch(err => sendError(err))
+          // console.log("applying",service,args,property) 
+          let mainresponse = service[property].apply(service, args)
+          
+          if (mainresponse && mainresponse.then !== undefined) {
+            mainresponse
+            .then(response => {
+             
+                return sendResponse(response)
+            })
+            .catch(err => {
+              return sendError(err)
+            })
           } else {
-            sendResponse(response)
+            sendResponse(mainresponse)
           }
         } catch (err) {
           sendError(err)

@@ -20,7 +20,6 @@ remote.registerService('dockHider', dockHider)
 remote.registerService('feedback', feedbackService)
 remote.registerService('privacy-policy', privacyPolicyService)
 
-
 // var requireControllerFilter = require.context('@/controllers', true, /\.js$/)
 // requireControllerFilter.keys().forEach(requireControllerFilter)
 

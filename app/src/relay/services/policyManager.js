@@ -1,8 +1,7 @@
 import { Domain, Category } from '@/models'
 import * as errors from '@utils/errors'
 import { error, debug } from '@utils/log'
-import { torService } from '@common/services'
-import { telegramService } from '../../common/services/telegramService';
+import { torService, telegramService } from '@common/services'
 
 class PolicyManager {
   /**

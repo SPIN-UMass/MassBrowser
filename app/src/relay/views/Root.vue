@@ -17,9 +17,11 @@
   }
 
   export default {
-    async created () {
-      let route = await getRoute()
-      this.$router.push(route)
-    }
+      async created () {
+        console.log("I AM HRERER54")
+        
+        let route = await getRoute()
+        this.$router.push(route)
+      }
   }
 </script>

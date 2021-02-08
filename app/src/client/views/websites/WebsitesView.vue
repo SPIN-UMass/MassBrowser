@@ -69,6 +69,7 @@
     'Telegram': TelegramView
   }
 
+
   export default {
     data () {
       return {
@@ -92,7 +93,9 @@
       'website-instructions-modal': WebsiteInstructionsModal
     },
     async created () {
+        console.log('in created')
       allWebsites = await Website.find({thirdParty: false})
+      console.log('step')
       this.websites = allWebsites
 
       let categories = await Category.find({parent: null})
@@ -104,6 +107,7 @@
         this.helpStage = 1
         KVStore.set('websites-page-help-finished', true)
       }
+      console.log('done created', allWebsites)
     },
     watch: {
       'searchQuery': function (val) {
@@ -144,7 +148,7 @@
 </script>
 
 <style scoped lang='scss'>
-    @import '~@/views/styles/settings.scss';
+    @import '@/views/styles/settings.scss';
 
     $toolbar_height: 34px;
     $toolbar_footer_height: 24px;

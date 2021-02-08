@@ -73,6 +73,7 @@ function initializeConfig(options) {
   }
 
   function configureWith(pConfig) {
+    
     let devConfig = pConfig.dev || {}
     let prodConfig = pConfig.prod || {}
     pConfig.dev = undefined
@@ -108,12 +109,16 @@ function initializeConfig(options) {
     console.log("Running in development mode")
     config.isDevelopment = true
     config.isProduction = false
+    config.iconPath = path.join(process.cwd(),'app/assets/')
+    config.extPath = path.join(process.cwd(),'app/assets/ext/')
     if (config.OS == "osx"){
       config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-osx-x86_64/Contents/MacOS/Tor/tor')
+      
     }
 
     if (config.OS == "windows"){
       config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-windows-x86_64/Tor/tor.exe')
+      
     }
     if (config.OS == "linux"){
       config.torPath =  path.join(process.cwd(),'app/assets/tor/tor-MB-linux-x86_64/Tor/tor')
@@ -122,6 +127,24 @@ function initializeConfig(options) {
     config.environment == 'production'
     config.isDevelopment = false
     config.isProduction = true
+
+    if (config.OS == "osx"){
+      config.torPath =  path.join(__dirname,'../../../../Tor/MacOS/Tor/tor')
+      config.extPath = path.join(__dirname,'../../../../Resources/')
+      config.iconPath = path.join(__dirname,'../../../../Resources/')
+
+    }
+    if (config.OS == "windows"){
+      config.torPath =  path.join(process.cwd(),'Tor/tor.exe')
+      config.extPath = process.cwd() //path.join(process.cwd(),'')
+      config.iconPath = process.cwd()
+    }
+    if (config.OS == "linux"){
+      config.torPath =  path.join(process.cwd(),'Tor/tor')
+      config.extPath = process.cwd() //path.join(process.cwd(),'')
+      config.iconPath = process.cwd()
+    }
+
   }
 
   config.isClient = role === 'client'

@@ -8,9 +8,10 @@ const webpack = require('webpack')
 const common = require('./common')
 
 let config = {
+  mode: common.mode,
   devtool: '#source-map',
   entry: {
-    main: ['babel-polyfill', path.join(common.rootDir, 'app/src/client/main/electron/main.js')]
+    main: ["@babel/polyfill", path.join(common.rootDir, 'app/src/client/main/electron/main.js')]
   },
   externals: Object.keys(pkg.dependencies || {}),
   module: {
@@ -27,6 +28,7 @@ let config = {
   },
   plugins: common.plugins('client', 'electron', 'main'),
   resolve: common.resolve('client'),
+  
   target: 'electron-main'
 }
 

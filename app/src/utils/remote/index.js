@@ -1,9 +1,12 @@
 import config from '@utils/config'
 
+
+
+
 if (config.applicationInterface === 'electron') {
   if (config.isElectronRendererProcess) {
-    const { remote, getService } = require('./renderer')
-
+    const { remote,getService } = require('./renderer')
+    
     module.exports = {
       getService,
       remote,

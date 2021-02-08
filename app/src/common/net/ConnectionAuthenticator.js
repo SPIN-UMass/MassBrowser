@@ -10,7 +10,8 @@ export class ConnectionAuthenticator {
   authenticate (token) {
     if (token in this.connections) {
       const desc = this.connections[token]
-      delete (this.connections[token])
+      this.connections[token] = null
+      delete this.connections[token]
       return desc
     }
     return false

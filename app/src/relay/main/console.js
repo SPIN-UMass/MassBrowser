@@ -11,7 +11,9 @@ import API from '@/api'
 import Raven from '@utils/raven'
 import { InvalidInvitationCodeError } from '@utils/errors'
 import { info, error } from '@utils/log'
+
 import config from '@utils/config'
+
 import { remote } from '@utils/remote'
 
 import { registrationService } from '@/services'
@@ -44,5 +46,5 @@ async function main() {
 process.on('uncaughtException', function (err) {
   console.log('err uncaught Exception  : ', err)
 })
-
+console.log(" I AM HERERERERERE 12  ")
 main()

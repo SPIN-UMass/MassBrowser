@@ -23,7 +23,6 @@
 <script>
   import { store } from '@utils/store'
   import { getService } from '@utils/remote'
-  import { policyManager} from '@/services'
   import { prettyBytes } from '@utils'
 
   const connectionStats = getService('connection-stats')
@@ -68,9 +67,9 @@
       },
       policyName (policyCode) {
         return {
-          [policyManager.POLICY_VANILLA_PROXY]: 'Direct',
-          [policyManager.POLICY_YALER_PROXY]: 'Proxy',
-          [policyManager.POLICY_CACHEBROWSE]: 'CacheBrowse'
+          'vanilla_proxy': 'Direct',
+          'yaler_proxy': 'Proxy',
+          'cachebrowse': 'CacheBrowse'
         }[policyCode] || 'unknown'
       },
       prettyBytes

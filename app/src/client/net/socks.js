@@ -122,7 +122,7 @@ function initSocksConnection (on_accept) {
       return
     }
 
-    errorLog('my error %j', e)
+    // errorLog('my error %j', e)
   })
 
   // do a handshake
@@ -167,7 +167,7 @@ function handshake5 (chunk) {
   }
   log('Supported auth methods: %j', this.auth_methods)
 
-  var resp = new Buffer(2)
+  var resp = new Buffer.alloc(2)
   resp[0] = 0x05
 
   // user/pass auth
@@ -207,7 +207,7 @@ function handshake4 (chunk) {
 
   // Wrong version!
   if (chunk[0] !== SOCKS_VERSION4) {
-    this.end(new Buffer([0x00, 0x5b]))
+    this.end(new Buffer.from([0x00, 0x5b]))
     errorLog('socks4 handleConnRequest: wrong socks version: %d', chunk[0])
     return
   }
@@ -235,7 +235,7 @@ function handshake4 (chunk) {
         if (err) {
           errorLog(err + ',socks4a dns lookup failed')
 
-          this.end(new Buffer([0x00, 0x5b]))
+          this.end(new Buffer.from([0x00, 0x5b]))
           return
         } else {
           this.socksAddress = ip
@@ -248,13 +248,13 @@ function handshake4 (chunk) {
             this.request = chunk
             this.on_accept(this, port, ip, proxyReady4.bind(this))
           } else {
-            this.end(new Buffer([0x00, 0x5b]))
+            this.end(new Buffer.from([0x00, 0x5b]))
             return
           }
         }
       })
     } else {
-      this.end(new Buffer([0x00, 0x5b]))
+      this.end(new Buffer.from([0x00, 0x5b]))
       return
     }
   } else {
@@ -277,7 +277,7 @@ function handshake4 (chunk) {
       this.request = chunk
       this.on_accept(this, port, address, proxyReady4.bind(this))
     } else {
-      this.end(new Buffer([0x00, 0x5b]))
+      this.end(new Buffer.from([0x00, 0x5b]))
       return
     }
   }
@@ -288,17 +288,17 @@ function handleAuthRequest (chunk) {
     password
   // Wrong version!
   if (chunk[0] !== 1) { // MUST be 1
-    this.end(new Buffer([0x01, 0x01]))
+    this.end(new Buffer.from([0x01, 0x01]))
     errorLog('socks5 handleAuthRequest: wrong socks version: %d', chunk[0])
     return
   }
 
   try {
     var na = [], pa = [], ni, pi
-    for (ni = 2; ni < (2 + chunk[1]); ni++) na.push(chunk[ni]); username = new Buffer(na).toString('utf8')
-    for (pi = ni + 1; pi < (ni + 1 + chunk[ni]); pi++) pa.push(chunk[pi]); password = new Buffer(pa).toString('utf8')
+    for (ni = 2; ni < (2 + chunk[1]); ni++) na.push(chunk[ni]); username = new Buffer.from(na).toString('utf8')
+    for (pi = ni + 1; pi < (ni + 1 + chunk[ni]); pi++) pa.push(chunk[pi]); password = new Buffer.from(pa).toString('utf8')
   } catch (e) {
-    this.end(new Buffer([0x01, 0x01]))
+    this.end(new Buffer.from([0x01, 0x01]))
     errorLog('socks5 handleAuthRequest: username/password ' + e)
     return
   }
@@ -310,9 +310,9 @@ function handleAuthRequest (chunk) {
     log('Handing off to handleConnRequest')
     this.handleConnRequest = handleConnRequest.bind(this)
     this.once('data', this.handleConnRequest)
-    this.write(new Buffer([0x01, 0x00]))
+    this.write(new Buffer.from([0x01, 0x00]))
   } else {
-    this.end(new Buffer([0x01, 0x01]))
+    this.end(new Buffer.from([0x01, 0x01]))
     errorLog('socks5 handleConnRequest: wrong socks version: %d', chunk[0])
     return
   }
@@ -325,7 +325,7 @@ function handleConnRequest (chunk) {
     offset = 3
   // Wrong version!
   if (chunk[0] !== SOCKS_VERSION5) {
-    this.end(new Buffer([0x05, 0x01]))
+    this.end(new Buffer.from([0x05, 0x01]))
     errorLog('socks5 handleConnRequest: wrong socks version: %d', chunk[0])
     return
   } /* else if (chunk[2] == 0x00) {
@@ -347,7 +347,7 @@ function handleConnRequest (chunk) {
     this.request = chunk
     this.on_accept(this, port, address, proxyReady5.bind(this))
   } else {
-    this.end(new Buffer([0x05, 0x01]))
+    this.end(new Buffer.from([0x05, 0x01]))
     return
   }
 }
@@ -355,7 +355,7 @@ function handleConnRequest (chunk) {
 function proxyReady5 () {
   log('Indicating to the client that the proxy is ready')
   // creating response
-  var resp = new Buffer(this.request.length)
+  var resp = new Buffer.alloc(this.request.length)
   this.request.copy(resp)
   // rewrite response header
   resp[0] = SOCKS_VERSION5
@@ -370,7 +370,7 @@ function proxyReady5 () {
 function proxyReady4 () {
   log('Indicating to the client that the proxy is ready')
   // creating response
-  var resp = new Buffer(8)
+  var resp = new Buffer.alloc(8)
 
   // write response header
   resp[0] = 0x00

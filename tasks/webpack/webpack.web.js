@@ -5,8 +5,9 @@ process.env.BABEL_ENV = 'web'
 const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const CopyPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 const common = require('./common')
 
@@ -14,8 +15,12 @@ const rootPath = path.join(common.rootDir, 'app/src/client/web')
 const pkg = require(path.join(rootPath, 'package.json'))
 
 let webConfig = {
+  mode: common.mode,
   devtool: '#source-map',
-  devServer: { overlay: true },
+  devServer: {
+    overlay: true,
+    historyApiFallback: true, // is it enabled ?
+  },
   entry: {
     script: path.join(rootPath, 'script.js')
   },
@@ -24,45 +29,68 @@ let webConfig = {
     exprContextCritical: false,
     rules: [
       {
-        test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader'
-        })
+        test: /\.css$/i,
+        use: [
+          'vue-style-loader',
+          'css-loader'
+        ]
       },
       {
-        test: /\.json$/,
-        use: 'json-loader'
-      },
-      {
-        test: /\.scss$/,
+        test:  /\.js$/,
+        include: [ path.resolve(common.rootDir, 'app/src') ],
+        exclude:  /(node_modules|bower_components)/,
         use: {
-          loader: 'sass-loader'
-        }
-      },
-      {
-        test: /\.pug$/,
-        use: {
-          loader: 'pug-loader'
-        }
-      },
-      {
-        test: /\.vue$/,
-        use: {
-          loader: 'vue-loader',
+          loader: 'babel-loader',
+    
           options: {
-            loaders: {
-              sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
-              scss: 'vue-style-loader!css-loader!sass-loader'
-            }
+            
+            sourceType: 'unambiguous',
+            presets: [['@babel/preset-env',{
+              debug: true,
+              loose: true,
+              modules: 'commonjs',
+              shippedProposals: true,
+              targets: false,
+            }]],
+            plugins: ["@babel/plugin-syntax-dynamic-import"]
           }
         }
       },
       {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader',
+        ],
+      },
+      {
+        test: /\.pug$/,
+        oneOf: [
+          // this applies to `<template lang="pug">` in Vue components
+          {
+            resourceQuery: /^\?vue/,
+            use: ['pug-plain-loader']
+          },
+          // this applies to pug imports inside JavaScript
+          {
+            use: ['raw-loader', 'pug-plain-loader']
+          }
+        ]
+      },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|pdf)$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
+            esModule: false,
             limit: 10000,
             name: 'imgs/[name].[ext]'
           }
@@ -72,7 +100,8 @@ let webConfig = {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
         use: {
           loader: 'url-loader',
-          query: {
+          options: {
+            esModule: false,
             limit: 10000,
             name: 'fonts/[name].[ext]'
           }
@@ -81,7 +110,7 @@ let webConfig = {
     ]
   },
   plugins: [
-    new ExtractTextPlugin('styles.css'),
+    //new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       minify: false,
       filename: 'index.html',
@@ -91,13 +120,7 @@ let webConfig = {
         : false,
     }),
     new webpack.NoEmitOnErrorsPlugin(),
-    new CopyPlugin([
-      {
-        from: path.join(common.rootDir, 'app/src/utils/locales/'),
-        to: path.join(common.rootDir, `app/dist/web/locales`),
-        toType: 'dir'
-      }
-    ])
+    new VueLoaderPlugin()
   ],
   output: {
     filename: '[name].js',
@@ -112,6 +135,7 @@ let webConfig = {
     ]
   },
   target: 'web'
+  
 }
 
 module.exports = webConfig

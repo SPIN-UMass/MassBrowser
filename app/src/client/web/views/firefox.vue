@@ -1,119 +1,147 @@
-<template lang='pug'>
-  #page-firefox
-    //- h1 SwarmProxy Settings
-    .tab-base.tab-stacked-left
-      ul.nav.nav-tabs
-        li(:class="{active: tab==='proxy'}")
-          a(v-on:click="tab='proxy'") Proxy Settings
-            i.step-status.text-danger.fa.fa-times-circle(v-if="!proxy.success")
-            i.step-status.text-success.fa.fa-check-circle(v-if="proxy.success")
-        li(:class="{active: tab==='cert', disabled: !proxy.success}")
-          a(v-on:click="tab='cert'") Trust CA Certificate
-            i.step-status.text-danger.fa.fa-times-circle(v-if="!cert.success")
-            i.step-status.text-success.fa.fa-check-circle(v-if="cert.success")
-        li( :class="{active: tab==='dnsCache', disabled: !proxy.success}")
-          a(v-on:click="tab='dnsCache'") Disable DNS Cache
-            i.step-status.text-danger.fa.fa-times-circle(v-if="!dnsCache.success")
-            i.step-status.text-success.fa.fa-check-circle(v-if="dnsCache.success")
-      .tab-content
-        .tab-pane.step-proxy(:class="{active: tab==='proxy', in: tab==='proxy'}")
-          .step-title.text-thin Proxy Settings
-          div(v-if="!proxy.success")
-            ol
-              li 
-                | Set your browser proxy to use #[code SOCKS v5] proxy with host #[code localhost] and port #[code {{socksPort}}]
-              li Make sure the #[code Proxy DNS when using SOCKS v5] option is enabled
-              li Click on the button below the verify your settings
-            
-            .control-containers
-              .text-primary.text-bold(v-if="proxy.success===null") Checking Proxy Settings...
-              .text-success.text-bold(v-if="proxy.success===true") Proxy settings are valid
-              .text-danger.text-bold(v-if="proxy.success===false && proxy.errorMessage") {{proxy.errorMessage}}
-              button.proxy-btn.btn.btn-primary(v-if="proxy.success!==null" v-on:click="checkProxySettings") Check Proxy Settings
-              
-
-            .help-container
-              span.help(v-if="!proxy.helpEnabled" v-on:click="proxy.helpEnabled = true") Need Help? Click here to show step by step instructions.
-              .help-steps-container(v-if="proxy.helpEnabled")
-                .help-image(v-for="image in proxy.stepImages")
-                  img(width='400' :src="image")
-          div(v-if="proxy.success").text-center.pad-all
-            i.fa.fa-check-circle.fa-4x.text-success.mar-all
-            div
-              button.continue-btn.btn.btn-success.btn-rounded.mar-all(v-on:click="nextStep") Continue
-
-        .tab-pane.step-cert(:class="{active: tab==='cert', in: tab==='cert'}")
-          .step-title.text-thin Trust CA Certificate
-          div(v-if="!cert.success")
-            p #[strong MassBrowser] requires your browser to trust a root CA Certificate. The certificate is generated locally and does not expose you to any security risks as long as it is kept within your machine.
-
-            .alert.alert-info
-              p This is a #[strong local certificate that does not pose any threat] to your confidentiality when you browse websites. The certifcate is generated and stored only on this machine, you #[strong must not] share it with anyone. Click #[strong here] to view the location of the stored certificate.
-              p You can remove the certificate at any time by going to your browser’s setting and searching for #[code MassBrowser]
-            p Follow the instructions below to install the certificate
-            ol
-              li Click on the #[code Install Certificate] button below
-              li(style='font-weight: bold') Select the #[code Trust this CA to identify websites] option and click OK
-            .help-steps-container.text-center
-              .help-image
-                img(width='300' :src="cert.image")
-            div.text-center.mar-all
-              button.cert-btn.btn.btn-success(v-on:click="installCert") Install Certificate
-          
-          div(v-if="cert.success").text-center.pad-all
-            i.fa.fa-check-circle.fa-4x.text-success.mar-all
-            div
-              button.continue-btn.btn.btn-success.btn-rounded.mar-all(v-on:click="nextStep") Continue
-
-        .tab-pane.fade(:class="{active: tab==='dnsCache', in: tab==='dnsCache'}")
-          .step-title.text-thin Disable DNS Cache
-          div(v-if="!dnsCache.success")
-            p The browser's DNS cache must be disabled for MassBrowser to work
-
-            ol
-                li In your URL bar enter #[code about:config]
-                li If a warning message appears click on #[code I accept the risk!] button
-                li Search for the key #[code network.dnsCacheExpiration] and change the value to #[code 0]
-                li Click on the button below test whether the change was successful
-            div.text-center.mar-all            
-              button.cert-btn.btn.btn-primary(v-on:click="checkDNSCache") Check DNS Cache
-          div(v-if="dnsCache.success").text-center.pad-all
-            i.fa.fa-check-circle.fa-4x.text-success.mar-all
-            div
-              button.continue-btn.btn.btn-success.btn-rounded.mar-all(v-on:click="nextStep") Continue
-
-        .tab-pane.fade(:class="{active: tab==='finish', in: tab==='finish'}")
-          .text-center.mar-all.pad-all
-            i.fa.fa-check-circle.fa-5x.text-success.mar-all
-            h4 You're good to go
-        
+<template>
+  <div id="page-firefox">
+    <div class="tab-base tab-stacked-left">
+      <ul class="nav nav-tabs">
+        <li :class="{active: tab==='plugin'}"> 
+          <a v-on:click="tab='plugin'" >
+            MassBrowser Plugin
+            <i class="step-status text-danger fa fa-times-circle" v-if="!plugin.success"></i>
+            <i class="step-status text-success fa fa-check-circle" v-if="plugin.success"></i>
+          </a> 
+        </li>
+        <li :class="{active: tab==='cert', disabled: !plugin.success}" > 
+          <a v-on:click="tab='cert'" > Trust CA Certificate
+            <i class="step-status text-danger fa fa-times-circle" v-if="!cert.success"></i>
+            <i class="step-status text-success fa fa-check-circle" v-if="cert.success"></i>
+          </a> 
+        </li>
+        <li :class="{active: tab==='dnsCache', disabled: !cert.success}">
+          <a v-on:click="tab='dnsCache'">
+            Disable DNS Cache
+            <i class="step-status text-danger fa fa-times-circle" v-if="!dnsCache.success"></i>
+            <i class="step-status text-success fa fa-check-circle" v-if="dnsCache.success"></i>
+          </a>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane step-plugin" :class="{active: tab==='plugin', in: tab==='plugin'}">
+          <div class="step-title text-thin">Add MassBrowser Plugin</div>
+          <div v-if="!plugin.success">
+            <ol>
+              <li>Click on the button bellow to add MassBrowser plugin into your Firefox.</li>
+              <li>Click on 'Continue to Installation'</li>
+              <li>Click on 'Add'</li>
+              <li>To verify your installation click the verify button bellow.</li>
+            </ol>
+            <div class="control-containers">
+              <div class="text-primary text-bold" v-if="plugin.success===null"> Checking plugin working ... </div>
+              <div class="text-success text-bold" v-if="plugin.success===true"> Plugin is working </div>
+              <div class="text-danger text-bold" v-if="plugin.success===false &amp;&amp; plugin.errorMessage"> {{plugin.errorMessage}} </div>
+              <button class="plugin-btn btn btn-primary" v-if="plugin.success !== null" v-on:click="checkPlugin"> Verify Installations </button>
+              <button class="cert-btn btn btn-success" v-on:click="addPlugin"> Add plugin </button>
+            </div>
+            <div class="help-container">
+              <span class="help" v-if="!plugin.helpEnabled" v-on:click="plugin.helpEnabled = true">
+                Need Help? Click here to show step by step instructions.
+              </span>
+              <div class="help-steps-container" v-if="plugin.helpEnabled">
+                <div class="help-image" v-for="image in plugin.stepImages">
+                  <img :src="image" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="text-center pad-all" v-if="plugin.success">
+            <i class="fa fa-check-circle fa-4x text-success mar-all"></i>
+            <div>
+              <button class="continue-btn btn btn-success btn-rounded mar-all" v-on:click="nextStep">
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane step-cert" :class="{active: tab==='cert', in: tab==='cert'}">
+          <div class="step-title text-thin">Trust CA Certificate</div>
+          <div v-if="!cert.success">
+            <p><strong>MassBrowser</strong> requires your browser to trust a root CA Certificate. The certificate is generated locally and does not expose you to any security risks as long as it is kept within your machine.</p>
+            <div class="alert alert-info">
+              <p>This is a <strong>local certificate that does not pose any threat</strong> to your confidentiality when you browse websites. The certifcate is generated and stored only on this machine, you <strong>must not</strong> share it with anyone. Click <strong>here</strong> to view the location of the stored certificate.</p>
+              <p>You can remove the certificate at any time by going to your browser’s setting and searching for <code>MassBrowser</code></p>
+            </div>
+            <p>Follow the instructions below to install the certificate</p>
+            <ol>
+              <li>Click on the button below to save your local certificate in your desired location</li>
+              <li>Open Firefox <strong>Preferences</strong> and click on <strong> View Certificate </strong> button under <strong> Privacy & Security</strong></li>
+              <li>Click on <strong>Import</strong> button under <strong>Authorities</strong> tab </li>
+              <li>Select <code>ca.pem</code> file which you saved in step 1</li>
+              <li style="font-weight: bold">Select the <code>Trust this CA to identify websites</code> option and click OK</li>
+            </ol>
+            <div class="help-steps-container text-center">
+              <div class="help-image"><img width="300" :src="cert.image" /></div>
+            </div>
+            <div class="text-center mar-all">
+              <button class="cert-btn btn btn-success" v-on:click="installCert">Get your local certificate</button>
+            </div>
+          </div>
+          <div class="text-center pad-all" v-if="cert.success"><i class="fa fa-check-circle fa-4x text-success mar-all"></i>
+            <div>
+              <button class="continue-btn btn btn-success btn-rounded mar-all" v-on:click="nextStep">Continue</button>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" :class="{active: tab==='dnsCache', in: tab==='dnsCache'}">
+          <div class="step-title text-thin">Disable DNS Cache</div>
+          <div v-if="!dnsCache.success">
+            <p>The browser's DNS cache must be disabled for MassBrowser to work</p>
+            <ol>
+              <li>In your URL bar enter <code>about:config</code></li>
+              <li>If a warning message appears click on <code>I accept the risk!</code> button</li>
+              <li>Search for the key <code>network.dnsCacheExpiration</code> and change the value to <code>0</code></li>
+              <li>Click on the button below test whether the change was successful</li>
+            </ol>
+            <div class="text-center mar-all">
+              <button class="cert-btn btn btn-primary" v-on:click="checkDNSCache">Check DNS Cache</button>
+            </div>
+          </div>
+          <div class="text-center pad-all" v-if="dnsCache.success"><i class="fa fa-check-circle fa-4x text-success mar-all"></i>
+            <div>
+              <button class="continue-btn btn btn-success btn-rounded mar-all" v-on:click="nextStep">Continue</button>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" :class="{active: tab==='finish', in: tab==='finish'}">
+          <div class="text-center mar-all pad-all"><i class="fa fa-check-circle fa-5x text-success mar-all"></i>
+            <h4>You're good to go</h4> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
   import axios from 'axios/dist/axios'
   import { ONBOARDING_DOMAIN, ONBOARDING_ADDRESS, NO_HOST_HANDLER_PORT, SOCKS_PORT } from '../config'
 
-  var proxyStepImages = [
-    require('../assets/images/proxy-step-1.png'),
-    require('../assets/images/proxy-step-2.png'),
-    require('../assets/images/proxy-step-3.png'),
-    require('../assets/images/proxy-step-4.png'),
-    require('../assets/images/proxy-step-5.png'),
-    require('../assets/images/proxy-step-6.png')
+  var pluginStepImages = [
+    require('../assets/images/plugin-step-1.png'),
+    require('../assets/images/plugin-step-2.png'),
+    require('../assets/images/plugin-step-3.png')
   ]
 
-  var certImage =  require('../assets/images/cert.png')
+  var certImage = require('../assets/images/cert.png')
 
-  var steps = ['proxy', 'cert', 'dnsCache', 'finish']
+  var steps = ['plugin','cert', 'dnsCache', 'finish']
 
   export default {
     data() {
       return {
-        proxy: {
+        name: 'FirefoxComponent',
+        plugin: {
           success: null,
           errorMessage: null,
           helpEnabled: false,
-          stepImages: proxyStepImages
+          stepImages: pluginStepImages
         },
         cert: {
           success: null,
@@ -124,80 +152,107 @@
         dnsCache: {
           success: null
         },
-        tab: 'proxy',
+        tab: 'plugin',
         socksPort: SOCKS_PORT
       }
     },
-    created() {
-      this.checkProxySettings(false)
+    created () {
+      this.checkPlugin()
       .then(() => {
-        if (this.proxy.success) {
+        if (this.plugin.success) {
           this.nextStep()
-
-          this.checkCert()
-          .then(() => {
-            if (this.cert.success && this.tab === 'cert') {
-              this.nextStep()
-            }
-          })
-
-          this.checkDNSCache()
-          .then(() => {
-            if (this.dnsCache.success && this.tab === 'dnsCache') {
-              this.nextStep()
-            }
-          })
+          // this.checkCert()
+          // .then(() => {
+          //   if (this.cert.success && this.tab === 'cert') {
+          //     this.nextStep()
+          //     this.checkDNSCache()
+          //     .then(() => {
+          //       console.log(this.dnsCache.success, this.tab)
+          //       if (this.dnsCache.success && this.tab === 'dnsCache') {
+          //         this.nextStep()
+          //       }
+          //     })
+          //   }
+          // })
         }
       })
     },
     methods: {
-      onFinishTab() {
-        
+      settignsComplete () {
+        console.log('SENDING REQUEST TO FINISH! ')
+        // not the best way to send this request but for some reason first time doesnt work so I send it 5 to make sure we set the settings
+        for(let i=0;i<5;i++) {
+          axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
+        }
       },
-      onTabChange() {
+      onTabChange () {
+        console.log('tab changed to', this.tab)
         if (this.tab === 'finish') {
-          return axios.get(`http://${ONBOARDING_DOMAIN}/settings-complete`)
+          this.settignsComplete()
         } else if (this.tab === 'cert') {
           this.checkCert()
         } else if (this.tab === 'dnsCache') {
           this.checkDNSCache()
+          .then(() => {
+            console.log(this.dnsCache.success, this.tab)
+              if (this.dnsCache.success && this.tab === 'dnsCache') {
+                  this.nextStep()
+            }
+          })
         }
       },
-      checkProxySettings(showError=true) {
+      checkPlugin () {
+        return axios.get(`http://${ONBOARDING_DOMAIN}/check-plugin`)
+          .then(response => {
+            if (response.data === 'active') {
+              this.plugin.success = true
+              this.pollCertValidation = true
+            }
+          })
+          .catch(e => {
+            console.error(e)
+            this.plugin.success = false
+            this.plugin.errorMessage = 'Plugin settings not valid. Make sure to install the plugin.'
+          })
+      },
+      checkProxySettings (showError=true) {
         return axios.get(`http://${ONBOARDING_DOMAIN}/check-proxy`)
         .then(response => {
           if (response.data === 'active') {
-            this.proxy.success = true
+            this.plugin.success = true
 
             // this.checkCert()
             this.pollCertValidation = true
           } else {
             if (showError) {
-              this.proxy.errorMessage = 'Proxy settings not valid.'
+              this.plugin.errorMessage = 'Proxy settings not valid.'
             }
           }
         })
         .catch(e => {
           console.error(e)
-          this.proxy.success = false
+          this.plugin.success = false
           if (showError) {
-            this.proxy.errorMessage = 'Proxy settings not valid. Make sure the application is running.'
+            this.plugin.errorMessage = 'Proxy settings not valid. Make sure the application is running.'
           }
         })
       },
-      installCert() {
-        console.log("Requesting certificate dialog")
+      addPlugin () {
+        window.open(`http://${ONBOARDING_ADDRESS}/plugin`, '_self')
+      },
+      installCert () {
+        console.log('Requesting certificate dialog')
         window.open(`http://${ONBOARDING_ADDRESS}/cert`,'_self')
         if (!this.cert.checkIntervalStarted) {
           this.pollCertValidation = true
           this.cert.checkIntervalStarted = true;
-          setTimeout(this.checkCert, 2000) 
+          setTimeout(this.checkCert, 2000)
         }
       },
-      checkCert() {
-        console.log("Checking Certificate")
-        if (!this.proxy.success) {
-          return new Promise((resolve, reject) => { 
+      checkCert () {
+        console.log('Checking Certificate')
+        if (!this.plugin.success) {
+          return new Promise((resolve, reject) => {
             this.cert.success = false
             resolve()
           })
@@ -217,12 +272,12 @@
             setTimeout(this.checkCert, 2000)
           }
         })
-        
+
       },
-      checkDNSCache() {
-        console.log("Checking DNS")
-        if (!this.proxy.success) {
-          return new Promise((resolve, reject) => { 
+      checkDNSCache () {
+        console.log('Checking DNS')
+        if (!this.plugin.success) {
+          return new Promise((resolve, reject) => {
             this.dnsCache.success = false
             resolve()
           })
@@ -235,12 +290,12 @@
          * will respond to the /ping request with a 'pong'. So if a pong reply is received
          * it means the DNS cache is not disabled.
          */
-        function testDNSCache() {
+        function testDNSCache () {
           return new Promise((resolve, reject) => {
             axios.get(`https://www.thecocktaildb.com/ping`, { validateStatus: () => true })
             .then(response => {
               console.log("RESPONSE")
-              console.log(response)
+              // console.log(response)
               if (response.data === 'pong') {
                 resolve(false)
               } else {
@@ -253,7 +308,7 @@
             })
           })
         }
-      
+
         /**
          * The DNS cache disabling test will be successful first time
          * should check multiple times to make sure cache isn't working
@@ -262,20 +317,22 @@
           return testDNSCache()
           .then(success => success ? (count >= 1 ? runMultipleTests(count-1) : true) : false)
         }
-        
+
         return runMultipleTests(3)
         .then(success => {
           this.dnsCache.success = success
         })
       },
       nextStep() {
+        console.log(this.tab)
         let next = steps.indexOf(this.tab) + 1
         this.tab = steps[next]
-        if (this[this.tab] && this[this.tab].success) {
-          return this.nextStep()
-        }
+        // if (this[this.tab] && this[this.tab].success) {
+        //   console.log('herreeeee', this.tab)
+        //   return this.nextStep()
+        // }
 
-        this.onTabChange(this.tab)
+        this.onTabChange()
       }
     }
   }
@@ -295,17 +352,17 @@
     }
 
     .tab-pane {
-      padding-left: 20px;
+      padding: 0 20px;
       .step-title {
         margin-bottom: 20px;
       }
 
       li {
         margin-top: 10px;
-      } 
+      }
     }
 
-    .step-proxy {
+    .step-plugin {
       .help-container {
         margin-top: 50px;
         margin-bottom: 20px;
@@ -321,23 +378,28 @@
         }
 
         .help-steps-container {
-          padding: 20px;
-          padding-left: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .help-image {
           border: 1px solid black;
           margin-bottom: 30px;
-          width: 400px;
         }
       }
 
       .control-containers {
+          display: flex;
+          flex-direction: row-reverse;
+          align-items: center;
+          justify-content: center;
         margin-top: 30px;
         text-align: center;
 
-        .proxy-btn {
-          margin-top: 20px;
+        .plugin-btn {
+          margin: 5px;
         }
       }
     }
@@ -357,11 +419,12 @@
       width: 200px;
 
       li {
+        padding: 10px;
         a {
           cursor: pointer;
         }
       }
-      
+
       li.disabled {
         pointer-events:none;
       }

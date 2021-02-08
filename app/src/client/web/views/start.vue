@@ -25,6 +25,7 @@
       }
     },
     created () {
+      console.log("I AM ASGASW")
       this.browser = getBrowser()
       this.supported = SUPPORTED_BROWSERS.indexOf(this.browser) !== -1
     },
@@ -36,7 +37,16 @@
   }
 </script>
 
-<style lang='scss'>
+<style lang=scss>
+  @import '../assets/font-awesome/css/font-awesome.min.css';
+  @import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+  @import '../assets/nifty.min.css';
+  @import '../styles.css';
+
+  .content {
+    width: 100%;
+  }
+
     #page-start {
         .center {
             text-align: center;

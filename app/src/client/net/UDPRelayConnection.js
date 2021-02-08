@@ -17,10 +17,18 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   async connect () {
-    await udpConnectionService.performUDPHolePunchingClient(this.relayAddress, this.relayPort)
+    try {
+      if (this.relayPort === 0 || this.relayPort === -1){
+      return Promise.reject('BAD UDP PORT')
+    }
+
+    await udpConnectionService.performUDPHolePunchingClient(this.relayAddress, this.relayPort, this.desc.b64token)
       .then((socket) => this._initSocket(socket))
       .then((socket) => this._initRelay(socket))
     info(`Relay ${this.id} UDP connected`)
+    } catch (e) {
+      return Promise.reject('NAT PUNCHING FAILED')
+    }
   }
 
   sessionFounded (session) {
@@ -60,7 +68,7 @@ export class UDPRelayConnection extends EventEmitter {
   _initRelay (socket) {
     let desc = this.desc
     let i = Math.random() * (100 - 1) + 1
-    let padarr = [Buffer(desc['token'])]
+    let padarr = [Buffer.from(desc['token'])]
     while (i > 0) {
       padarr.push(this.cipher.encryptzero())
       i -= 1
@@ -74,14 +82,18 @@ export class UDPRelayConnection extends EventEmitter {
   }
 
   write (connectionID, command, data) {
-    let sendPacket = Buffer(7)
+    let sendPacket = Buffer.alloc(7)
     sendPacket.writeUInt16BE(connectionID)
     sendPacket.write(command, 2)
     sendPacket.writeUInt32BE(data.length, 3)
     const b = Buffer.concat([sendPacket, data])
     const enc = this.cipher.encrypt(b)
     this.emit('send', enc)
-    this.socket.write(enc)
+    if (this.socket.writable) {      
+      this.socket.write(enc)
+    } else {
+      console.log('not writeable??')
+    }
   }
 }
 

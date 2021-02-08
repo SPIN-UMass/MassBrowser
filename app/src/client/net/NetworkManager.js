@@ -8,6 +8,7 @@ import udpConnectionService from '@common/services/UDPConnectionService'
 
 class NetworkManager {
   constructor () {
+    this.NATInfoChanged = false
     this.localTCPPort = -1
     this.remoteTCPPort = -1
     this.localUDPPort = -1
@@ -96,44 +97,44 @@ class NetworkManager {
       this.startTCPNATRoutine()
     })
 
-    // let address = await getAddress(echoServer.ip)
-    // this.UDPNATConnection = new UDPNATConnection(address, echoServer.port)
-    this.UDPNATConnection = new UDPNATConnection('80.240.22.240', 8823)
+    let udpStunServer = await API.requestNewUDPStunServer()
+    this.UDPNATConnection = new UDPNATConnection(udpStunServer.ip, udpStunServer.port)
     this.UDPNATConnection.on('udp-net-update', data => { this._onUDPNetworkUpdate(data) })
     await this.UDPNATConnection.connect().then(() => {
       this.startUDPNATRoutine()
     })
 
     setTimeout(() => this._sendKeepAlive(), 500)
-    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 5 * 1000)
+    this.keepAliveInterval = setInterval(() => this._sendKeepAlive(), 15000)
   }
 
   _onTCPNetworkUpdate (data) {
-    let changed = false
     if (this.localTCPPort !== data.localTCPPort || this.remoteTCPPort !== data.remoteTCPPort) {
-      changed = true
+      this.NATInfoChanged = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localTCPPort = data.localTCPPort
       this.remoteTCPPort = data.remoteTCPPort
     }
-    if (changed) {
-      this.restartListenerServer()
-      API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort)
+    if (this.NATInfoChanged && this.remoteSecondUDPPort !== -1 && this.remoteUDPPort !== -1) {
+      this.NATInfoChanged = false
+      // this.restartListenerServer()
+      API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
     }
   }
 
   _onUDPNetworkUpdate (data) {
-    let changed = false
     if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort || this.remoteSecondUDPPort !== data.remoteSecondUDPPort) {
-      changed = true
+      this.NATInfoChanged = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localUDPPort = data.localUDPPort
       this.remoteUDPPort = data.remoteUDPPort
       this.remoteSecondUDPPort = data.remoteSecondUDPPort
     }
-    if (changed) {
+    if (this.NATInfoChanged && this.remoteTCPPort !== -1 && this.remoteSecondUDPPort !== -1 && this.remoteUDPPort !== -1) {
+      this.NATInfoChanged = false
+      debug(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
       API.updateClientAddress(this.remoteAddress, this.remoteTCPPort, this.remoteUDPPort, this.remoteSecondUDPPort)
     }
   }

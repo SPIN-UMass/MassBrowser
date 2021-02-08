@@ -24,7 +24,7 @@
     store,
     data () {
       return {
-        webDomain: '127.0.0.1', //config.web.domain,
+        webDomain: 'localhost', //config.web.domain,
         webPanelPort: config.web.port,
         error: ''
       }

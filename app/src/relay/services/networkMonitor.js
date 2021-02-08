@@ -13,6 +13,7 @@ class NetworkMonitor {
     this.remoteTCPPort = -1
     this.localUDPPort = -1
     this.remoteUDPPort = -1
+    this.NATInfoChanged = false
     this.remoteAddress = ''
     this.localAddress = ''
     this.isTCPRelayReachable = false
@@ -22,19 +23,20 @@ class NetworkMonitor {
     this.UDPNATConnection = null
     this.keepAliveInterval = null
     this.isUDPNATRoutineRunning = false
+    console.log("Network manager Loaded!")
   }
 
   async start () {
-    await udpConnectionService.start(true)
+    await udpConnectionService.start(true).then(() => relayManager.isUDPRelayServerRunning = true)
     this.TCPNATConnection = new TCPNATConnection(config.echoServer.host, config.echoServer.port)
     this.TCPNATConnection.on('tcp-net-update', data => this._onTCPNetworkUpdate(data))
     this.TCPNATConnection.on('close', () => { this.TCPNATConnection.reconnect() })
     await this.TCPNATConnection.connect()
 
-    this.UDPNATConnection = new UDPNATConnection('80.240.22.240', 8823)
+    let udpStunServer = await API.requestNewUDPStunServer()
+    this.UDPNATConnection = new UDPNATConnection(udpStunServer.ip, udpStunServer.port)
     this.UDPNATConnection.on('udp-net-update', data => this._onUDPNetworkUpdate(data))
     this.UDPNATConnection.on('error', () => { this.UDPNATConnection.reconnect() })
-    // this.UDPNATConnection = new UDPNATConnection(config.echoServer.host, config.echoServer.port)
     udpConnectionService.on('start', () => {
       this.UDPNATConnection.reconnect()
     })
@@ -122,33 +124,29 @@ class NetworkMonitor {
   }
 
   _onTCPNetworkUpdate (data) {
-    let changed = false
     if (this.localTCPPort !== data.localTCPPort || this.remoteTCPPort !== data.remoteTCPPort) {
-      changed = true
+      this.NATInfoChanged = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localTCPPort = data.localTCPPort
       this.remoteTCPPort = data.remoteTCPPort
     }
-    if (changed) {
-      warn('TCP changed')
-      console.log(data)
+    if (this.NATInfoChanged && this.remoteUDPPort !== -1) {
+      this.NATInfoChanged = false
       relayManager.handleReconnect()
     }
   }
 
   _onUDPNetworkUpdate (data) {
-    let changed = false
     if (this.localUDPPort !== data.localUDPPort || this.remoteUDPPort !== data.remoteUDPPort) {
-      changed = true
+      this.NATInfoChanged = true
       this.localAddress = data.localAddress
       this.remoteAddress = data.remoteAddress
       this.localUDPPort = data.localUDPPort
       this.remoteUDPPort = data.remoteUDPPort
     }
-    if (changed) {
-      warn('UDP changed')
-      console.log(data)
+    if (this.NATInfoChanged && this.remoteTCPPort !== -1 && this.remoteUDPPort !== -1) {
+      this.NATInfoChanged = false
       relayManager.handleReconnect()
     }
   }

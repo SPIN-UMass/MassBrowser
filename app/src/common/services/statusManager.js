@@ -19,6 +19,7 @@ class LogStatus {
       let timeout = this.options.timeout === true ? 4000 : this.options.timeout
       setTimeout(() => { this.manager._removeStatus(this.key) }, timeout)
     }
+    
   }
 
   clear() {
@@ -99,6 +100,7 @@ class ProgressStatus {
 class StatusManager extends EventEmitter {
   constructor () {
     super()
+    console.log("Status Manager Loaded!")
 
     this.statuses = []
     this.idCounter = 0

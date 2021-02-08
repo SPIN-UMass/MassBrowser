@@ -2,7 +2,7 @@ import http from 'http'
 const net = require('net')
 const url = require('url')
 import { EventEmitter } from 'events'
-import { ConnectionReceiver }  from '@/net/ConnectionReceiver'
+import { ConnectionReceiver }  from '@/net'
 
 export class DomainFrontedRelay {
   constructor(authenticator, port) {
@@ -57,7 +57,7 @@ class CDNSocketMeek extends EventEmitter {
 
     this.socket = socket
     this.connection = new ConnectionReceiver(this, this, this, this.authenticator)
-    this.responses = Buffer(0)
+    this.responses = Buffer.alloc(0)
     this.needresponse = false
     this.response = undefined
     this.laststate = true

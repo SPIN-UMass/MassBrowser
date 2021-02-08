@@ -33,9 +33,9 @@ function Sender(connection, packetSender) {
 }
 util.inherits(Sender, EventEmitter);
 
-Sender.prototype.clear = function () {
+Sender.prototype.clear = async function () {
   clearInterval(this._samplingTimer);
-  this._retransmissionQueue.clear();
+  await this._retransmissionQueue.clear();
   this._sendingQueue = Buffer.alloc(0);
 }
 
@@ -109,11 +109,10 @@ Sender.prototype._retransmit = async function () {
     return 
   }  
 
-    this._amIResending = true
-    release()
+  this._amIResending = true
+  release()
 
   let packetsCount = Math.min(this._retransmissionQueue.size, Math.floor(this._maxWindowSize));
-
   let iterator = await this._retransmissionQueue.getIterator();
   for (let i = 0; i < packetsCount; i++) {
     let packetObject = iterator.value;
@@ -265,6 +264,9 @@ Sender.prototype.verifyAck = async function (sequenceNumber) {
       this.restartTimeoutTimer();
       while (!!this._retransmissionQueue.currentValue() && this._retransmissionQueue.currentValue().packet.sequenceNumber < sequenceNumber) {
         let packetObject = await this._retransmissionQueue.dequeue();
+        if (packetObject === null) {
+          break;
+        }
         packetObject = packetObject.value;
         packetObject.packet.acknowledge();
         if (packetObject.sampling && packetObject.retransmitted === false) {

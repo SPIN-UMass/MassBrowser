@@ -5,6 +5,11 @@ import { debug, error } from '@utils/log'
 import fs from 'fs-extra'
 import { getDataDir } from '@utils'
 import path from 'path'
+import find from 'find-process'
+import { throws } from 'assert'
+
+
+
 
 class TorManager  {
   constructor () {
@@ -33,16 +38,29 @@ class TorManager  {
     }
     this.process = spawn(config.torPath, ['-f', path.join(this.torConfigPath, 'torrc')])
     this.isRunning = true
+    console.log("PID is ",this.process.pid)
+    
     this.process.on("error",(err)=>{
+      debug('killing existing processes')
+      find('port',9055).then((l)=>{
+        l.forEach( (p)=>{
+          process.kill(p['pid'])
+        })
+      })
       error(err)
-      this.restart()
+      setTimeout(()=>{this.restart()},50)
     })
     this.process.on("exit",(code,signal )=>{
       debug(`TOR stopped with code ${code} signal ${signal}`)
-      this.restart()
+      find('port',9055).then((l)=>{
+        l.forEach( (p)=>{
+          process.kill(p['pid'])
+        })
+      })
+      setTimeout(()=>{this.restart()},50)
     })
 
-
+    
   }
   async stop (){
     if (!this.isRunning)

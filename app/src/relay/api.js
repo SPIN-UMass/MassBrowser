@@ -13,6 +13,15 @@ class RelayAPI extends CommonAPI {
     return response.data
   }
 
+  requestNewUDPStunServer () {
+    return new Promise((resolve, reject) => {
+      resolve({
+        'ip': 'voyager.cs.umass.edu',
+        'port': 3478
+      })
+    })
+  }
+
   acceptSession (client, sessionid) {
     return this.transport.put(SESSION_PATH + sessionid + '/status', {status: 'relay_accepted'})
   }
@@ -41,6 +50,7 @@ class RelayAPI extends CommonAPI {
       'udp_port': UDPPort,
       'fingerprint': this.fingerprint
     }
+    debug('Sending status update for relay', data)
     return this.transport.post(RELAY_PATH + this.userID, data)
   }
 

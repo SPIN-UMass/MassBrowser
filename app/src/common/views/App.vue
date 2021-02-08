@@ -7,7 +7,6 @@
 </template>
 
 <script>
-  // import AutoUpdater from '@common/services/AutoUpdater'
   import ModalManager from '@common/widgets/ModalManager'
   import PrivacyPolicyModal from '@common/widgets/PrivacyPolicyModal'
   import { showConfirmDialog } from '@common/utils'
@@ -79,10 +78,13 @@
   }
 </script>
 
-<style>
+<style lang=scss>
+  @import '@assets/font-awesome/css/font-awesome.min.css';
+  @import '@assets/bootstrap/css/bootstrap.min.css';
+  @import '@assets/nifty/nifty.min.css';
+  @import 'vue-select/dist/vue-select.css';
   @import url(https://fonts.googleapis.com/css?family=Lato:300);
   @import url(https://fonts.googleapis.com/css?family=Alegreya+Sans+SC);
-
 
 
   html,
@@ -90,6 +92,6 @@
     height: 100%;
   }
   #app {
-    height: 100%;
+    height: 100vh;
   }
 </style>

@@ -1,17 +1,17 @@
 import { connectionManager, Session } from '@/net'
 import { EventEmitter } from 'events'
 import { warn, debug } from '@utils/log'
+import { relayManager } from '../services'
 import { SessionRejectedError, NoRelayAvailableError } from '@utils/errors'
 import { store } from '@utils/store'
 import { torService, telegramService } from '@common/services'
 import { ConnectionTypes } from '@common/constants'
+import udpConnectionService from '@common/services/UDPConnectionService'
 import { Domain, Category } from '@/models'
 import API from '@/api'
-import networkManager from '../net/NetworkManager'
-import udpConnectionService from '@common/services/UDPConnectionService'
-let TEST_URL = 'backend.yaler.co'
 import {throttleCall} from '@utils'
 
+let TEST_URL = 'backend.yaler.co'
 /**
  * Note: Implements RelayAssigner
  *
@@ -46,12 +46,14 @@ class SessionService extends EventEmitter {
      */
     this.categoryWaitLists = {}
     this.sessionPollInterval = null
+    this.reachTestPollInterval = null
     this.sessionHeartInterval = null
   }
 
   async start () {
     connectionManager.setRelayAssigner(this)
     this._startSessionPoll()
+    this._startReachTestPoll()
     this._startSessionHeart()
   }
 
@@ -75,7 +77,6 @@ class SessionService extends EventEmitter {
 
   async findHostModels (host) {
     if (net.isIP(host)) {
-      
       let torCategory = (await Category.find({name: 'Tor'}))[0]
       let telegramCategory = (await Category.find({name: 'Messaging'}))[0]
       if (torService.isTorIP(host)) {
@@ -87,8 +88,8 @@ class SessionService extends EventEmitter {
       }
     } else {
       const domain = await Domain.findDomain(host)
-      if (!domain){
-        let cat = {"name": "DIRECT"}
+      if (!domain) {
+        let cat = {'name': 'DIRECT'}
         return {host,host, cat}
       }
       const website = await domain.getWebsite()
@@ -140,6 +141,7 @@ class SessionService extends EventEmitter {
       })
 
       debug(`Requesting for new session`)
+      
       let sessionInfo = await API.requestSession(catIDs)
 
       if (!sessionInfo) {
@@ -149,7 +151,14 @@ class SessionService extends EventEmitter {
           }
         })
         return reject(new NoRelayAvailableError('No relay is available for the requested session'))
+      } else {
+        sessionInfo.relay.allowed_categories.forEach(category => {
+          if (!this.categoryWaitLists[category.id]) {
+            this.categoryWaitLists[category.id] = []
+          }
+        })
       }
+
       debug(`Session [${sessionInfo.id}] created, waiting for relay to accept`)
       this.pendingSessions[sessionInfo.id] = {
         accept: session => this._handleAcceptedSession(session, sessionInfo, resolve, reject),
@@ -207,6 +216,52 @@ class SessionService extends EventEmitter {
     this.sessions.splice(index, 1)
   }
 
+  // async handleNewClientSessions (sessionInfo) {
+  //   debug('GOT ACCEPTED SESSION')
+  //   let desc = {
+  //     'readkey': Buffer.from(sessionInfo.read_key, 'base64'),
+  //     'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
+  //     'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
+  //     'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
+  //     'token': Buffer.from(sessionInfo.token, 'base64')
+  //   }
+  //   if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
+  //     // TODO: give warning here
+  //     debug('HERE is something wrong')
+  //     return
+  //   }
+
+  //   for (let i = 0; i < this.sessions.length; i++) {
+  //     if (this.sessions[i].ip === sessionInfo.relay.ip) {
+  //       debug('I already have a session with this relay')
+  //       // it means we already have a session with this relay
+  //       return
+  //     }
+  //   }
+
+  //   let session = new Session(sessionInfo.id, sessionInfo.relay.ip, sessionInfo.relay.port, sessionInfo.relay.udp_port,
+  //     desc, sessionInfo.relay['allowed_categories'], sessionInfo.connection_type, sessionInfo.relay.domain_name)
+
+  //   let resolve = this.pendingSessions[sessionInfo.id].accept
+  //   delete this.pendingSessions[sessionInfo.id]
+
+  //   session.on('send', () => this.emitSessionUpdate(session))
+  //   session.on('receive', () => this.emitSessionUpdate(session))
+  //   session.on('state-changed', () => this.emitSessionUpdate(session))
+
+  //   try {
+  //     await resolve(session)
+  //     await this._flushCategoryWaitLists(sessionInfo.relay['allowed_categories'] || [], session)
+  //   } catch (e) {
+  //     /* Refer to Bug #1 */
+  //     (sessionInfo.relay['allowed_categories'] || []).forEach(category => {
+  //       if (this.categoryWaitLists[category.id]) {
+  //         delete this.categoryWaitLists[category.id]
+  //       }
+  //     })
+  //   }
+  // }
+
   async _handleRetrievedSessions (sessionInfos) {
     if (sessionInfos === undefined) {
       return
@@ -220,8 +275,10 @@ class SessionService extends EventEmitter {
         'readiv': Buffer.from(sessionInfo.read_iv, 'base64'),
         'writekey': Buffer.from(sessionInfo.write_key, 'base64'),
         'writeiv': Buffer.from(sessionInfo.write_iv, 'base64'),
-        'token': Buffer.from(sessionInfo.token, 'base64')
+        'token': Buffer.from(sessionInfo.token, 'base64'),
+        'b64token': sessionInfo.token
       }
+
       if (sessionInfo.id in this.sessions || !(sessionInfo.id in this.pendingSessions)) {
         // TODO: give warning here
         continue
@@ -230,7 +287,7 @@ class SessionService extends EventEmitter {
       for (let i = 0; i < this.sessions.length; i++) {
         if (this.sessions[i].ip === sessionInfo.relay.ip) {
           // it means we already have a session with this relay
-          return
+          continue
         }
       }
 
@@ -285,6 +342,20 @@ class SessionService extends EventEmitter {
         waitList.forEach(callback => callback(session))
       }
     })
+  }
+
+  _startReachTestPoll () {
+    if (this.reachTestPollInterval != null) {
+      return
+    }
+    setTimeout(() => {
+      API.getReachSession()
+        .then(ses => relayManager.handleNewRelaySessions(ses))
+      }, 8000)
+    this.reachTestPollInterval = setInterval(() => {
+        API.getReachSession()
+        .then(ses => relayManager.handleNewRelaySessions(ses))
+    }, 60000)
   }
 
   _startSessionPoll () {
@@ -346,6 +417,7 @@ function sessionToSessionDetails (session) {
   return {
     id: session.id,
     state: session.state,
+    type: session.connectionType,
     ip: session.ip,
     port: session.port,
     domainName: session.domainName,
@@ -359,6 +431,7 @@ function pendingSessionToSessionDetails (sessionInfo) {
   return {
     id: sessionInfo.id,
     state: session.state,
+    type: session.connectionType,
     ip: session.ip,
     port: session.port,
     sent: 0,

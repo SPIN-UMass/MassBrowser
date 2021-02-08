@@ -1,20 +1,27 @@
 <template lang="pug">
-  #m-relay-status
-    .status-container
-      .row.row-stat
-        .col-xs-1.col-led
-          icon.status-led.on(name="check-circle"  scale="1.2" v-if="connected")
-          icon.status-led.off(name="times-circle" scale="1.2" v-if="!connected")
-        .col-xs-8.col-text
-          span.status-label(v-if='connected') {{$t('RELAY_WORKING')}}
-          span.status-label(v-if='!connected') {{$t('RELAY_NOT_WORKING')}}
-      .row.row-stat
-        .col-xs-1.col-led
-          icon.status-led.on(name="check-circle"  scale="1.2" v-if="reachable")
-          icon.status-led.off(name="times-circle" scale="1.2" v-if="!reachable")
-        .col-xs-8.col-text
-          span.status-label(v-if='reachable') {{$t('RELAY_REACHABLE')}}
-          span.status-label(v-if='!reachable') {{$t('RELAY_NOT_REACHABLE')}}
+<div id="m-relay-status">
+    <div class="status-container">
+        <div class="row-stat">
+            <div class="col-led">
+                <i class="fa fa-2x fa-check-circle status-led on" name="check-circle" scale="1.2" v-if="connected"></i>
+                <i class="fa fa-2x fa-check-circle status-led off" name="times-circle" scale="1.2" v-if="!connected"></i>
+            </div>
+            <div class="col-text">
+            <span class="status-label" v-if="connected">{{$t('RELAY_WORKING')}}</span><span class="status-label" v-if="!connected">{{$t('RELAY_NOT_WORKING')}}</span>
+            </div>
+        </div>
+        <div class="row-stat">
+            <div class="col-led">
+                <i class="fa fa-2x fa-check-circle status-led on" name="check-circle" scale="1.2" v-if="(reachableTCP || reachableUDP)"></i>
+                <i class="fa fa-2x fa-check-circle status-led off" name="times-circle" scale="1.2" v-if="!(reachableTCP || reachableUDP)"></i>
+            </div>
+            <div class="col-text">
+            <span class="status-label" v-if="(reachableTCP || reachableUDP)">{{$t('RELAY_REACHABLE')}}</span>
+            <span class="status-label" v-if="!(reachableTCP || reachableUDP)">{{$t('RELAY_NOT_REACHABLE')}}</span>
+            </div>
+        </div>
+    </div>
+</div>
 </template>
 
 <script>
@@ -25,7 +32,8 @@
   export default {
     store,
     computed: mapState({
-      reachable: 'isTCPRelayReachable',
+      reachableTCP: 'isTCPRelayReachable',
+      reachableUDP: 'isUDPRelayReachable',
       connected: 'isServerConnected',
     }),
   }
@@ -42,6 +50,9 @@
     .status-container {
       padding: 0 20px;
       .row-stat {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
         margin-top: 15px;
 
         .col-led {
