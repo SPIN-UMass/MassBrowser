@@ -33,7 +33,7 @@ export class MeasurementTask {
     }
     
     generateReport(status,err,content){
-        let relay = null
+        let relay = -1
         if (this.socket){
             if (this.socket instanceof MassBrowserTestScoket)
             {
