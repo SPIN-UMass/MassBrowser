@@ -33,6 +33,7 @@ class ConnectionManager {
         const sp = data.split(':')
         const ip = sp[0]
         const port = sp[1]
+        
         // console.log('CREATE CONNECTION', ip, port)
         this.newconcarry = ''
         this.newConnection(ip, port, lastconid)
@@ -139,9 +140,16 @@ class ConnectionManager {
         .then(relay => {
           debug(`Relay [${relay.id}] assigned for connection`)
           this.connectionMaps[conid] = relay
+          connection.relay = relay
           let cr = String(dstip) + ':' + String(dstport)
           this.connectionMaps[conid].write(conid, 'N', Buffer.from(cr))
           connection.on('data', (data) => {
+            if (typeof data === "string")
+            {
+              data = Buffer.from(data)
+            }
+            
+
             this.writer(data, conid)
           })
 

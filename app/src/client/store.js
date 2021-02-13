@@ -1,4 +1,4 @@
-import { PersistedState, RendererCachedState, RendererCachedPersistedState } from '@utils/store'
+import { PersistedState, RendererCachedState, RendererCachedPersistedState, fromConfig } from '@utils/store'
 
 export default {
   state: {
@@ -11,6 +11,7 @@ export default {
     sessionMap: {},
     bootComplete: new RendererCachedState(false),
     client: new PersistedState({}),
+    measurementStatus: new RendererCachedPersistedState(true),
     registrationComplete: new RendererCachedPersistedState(false),
     browserIntegrationComplete: new RendererCachedPersistedState(false),
     pluginInstallationComplete: new RendererCachedPersistedState(false),
@@ -75,6 +76,9 @@ export default {
     },
     setLanguageAndCountry(state) {
       state.languageAndCountrySet = true
+    },
+    setMeasurement(state,enabled){
+      state.measurementStatus = enabled
     }
   }
 }

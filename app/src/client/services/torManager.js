@@ -26,7 +26,7 @@ class TorManager  {
       DataDirectory ${path.join(this.torConfigPath,'data')}
       Socks5Proxy 127.0.0.1:${config.socksPort}
       UseEntryGuards 0
-      SOCKSPort 9055
+      SOCKSPort ${config.tor.port}
       `)
     })
 

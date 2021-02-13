@@ -4,6 +4,7 @@ import config from '@utils/config'
 import { debug } from '@utils/log'
 
 const SESSIONS_PATH = '/sessions'
+
 const CLIENT_URL = '/client'
 const globalDNSCache = {}
 
@@ -25,9 +26,24 @@ class ClientAPI extends CommonAPI {
       })
   }
 
+  async submitMeasurementReport(report) {
+    return this.transport.post(CLIENT_URL + '/' + this.userID + '/measurement',report).then(r=>r.data)
+  }
+
   async clientUp () {
-    return this.transport.post(
-      CLIENT_URL + '/' + this.userID,
+    debug('HEEEEEEY sending version',this.userID)
+    return  this.transport.post(
+      CLIENT_URL + '/' + this.userID, {
+        'version': config.version
+      }).then(r => r.data)
+  }
+
+
+
+
+  async getMeasurementTask() {
+    return await this.transport.get(
+      CLIENT_URL + '/' + this.userID + '/measurement'
     ).then(r => r.data)
   }
 
@@ -55,7 +71,8 @@ class ClientAPI extends CommonAPI {
         'ip': remoteAddress,
         'port': remoteTCPPort,
         'udp_port': remoteUDPPort,
-        'udp_alt_port': remoteSecondUDPPort
+        'udp_alt_port': remoteSecondUDPPort,
+        'version': config.version
       }).then(r => r.data)
   }
 

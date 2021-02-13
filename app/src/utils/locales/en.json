@@ -41,6 +41,7 @@
 	"PRIVACY_POLICY_UPDATED_MSG": "We have updated our {link}, please read to continue",
 	"PRIVACY_POLICY_PLEASE_READ_MSG": "Please read our {link} to continue",
 	"PRIVACY_POLICY": "Privacy Policy",
+	"MEASUREMENT_ENABLE": "Enable Measurements",
 	"PRIVACY_POLICY_ACCEPT_MSG": "I have read and accept the MassBrowser {role} Privacy Policies",
 	"SPLASH_MSG": "Best censorship circumvention tool ever",
 	"ERROR_UNABLE_TO_CONFIGURE_LAUNCH_STARTUP": "Unable to configure launch on startup, it may not be supported on your system.",

@@ -1,7 +1,7 @@
 import { addCertificateToFirefox, setClientVersion } from './firefox'
 import { debug, error } from '@utils/log'
 import { statusManager, autoLauncher, torService, telegramService } from '@common/services'
-import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService,torManager } from '@/services'
+import { sessionService, syncService, webPanelService, noHostHandlerService, registrationService,torManager, measurementService } from '@/services'
 import { cacheProxy } from '@/cachebrowser'
 import { startClientSocks } from '@/net'
 import config from '@utils/config'
@@ -79,6 +79,9 @@ export default async function bootClient () {
     await sessionService.start()
     status.clear()
 
+
+   
+
     status = statusManager.info('Starting cachebrowser server')
     await cacheProxy.startCacheProxy()
     status.clear()
@@ -119,6 +122,10 @@ export default async function bootClient () {
       await addCertificateToFirefox()
       status.clear()
     }
+    
+    status = statusManager.info('Starting the measurement platform')
+    await measurementService.start()
+    status.clear()
 
     status = statusManager.info('Finalizing')
     if (config.isElectronProcess) {

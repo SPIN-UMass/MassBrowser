@@ -113,12 +113,14 @@
     "electron-publish": "^20.42.0",
     "electron-updater": "4.0.0",
     "ip": "^1.1.5",
+    "nedb": "^1.8.0",
     "node-abi": "2.5.0",
     "node-ipc": "^9.1.1",
     "pug-plain-loader": "^1.0.0",
     "raw-loader": "^4.0.1",
     "semaphore": "^1.1.0",
     "socks5-client": "^1.2.8",
+    "socks5-http-client": "^1.0.4",
     "vue-i18n": "8.21.1",
     "vue-select": "3.10.8"
   }

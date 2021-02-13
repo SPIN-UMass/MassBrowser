@@ -242,7 +242,7 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           if (this.isPunchingMessage(message)) {
-            debug('got punching message!', remoteInfo.address, remoteInfo.port)
+            // debug('got punching message!', remoteInfo.address, remoteInfo.port)
             let UDPSessionKey = this.getUDPSessionKey(message)
             if (!this._UDPSessionKeyMap[UDPSessionKey]) {
               debug('ignored')
@@ -314,7 +314,7 @@ export class UDPConnectionService extends EventEmitter {
             return
           }
           if (this.isPunchingMessage(message)) {
-            debug('got punching message!', remoteInfo.address, remoteInfo.port)
+            // debug('got punching message!', remoteInfo.address, remoteInfo.port)
             let UDPSessionKey = this.getUDPSessionKey(message)
             if (!this._UDPSessionKeyMap[UDPSessionKey]) {
               return

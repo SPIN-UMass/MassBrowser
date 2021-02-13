@@ -4,7 +4,7 @@ import { debug } from '@utils/log'
 import * as path from 'path'
 import { statusManager } from '@common/services/statusManager'
 import { autoUpdater, autoLauncher, dockHider, feedbackService, privacyPolicyService } from '@common/services'
-import { syncService, registrationService, websiteSupportService, connectionStats, sessionService } from '@/services'
+import { syncService, registrationService, websiteSupportService, connectionStats, sessionService,measurementService } from '@/services'
 import KVStore from '@utils/kvstore'
 import { store } from '@utils/store' // required for boot, don't remove
 import bootClient from '@/boot'
@@ -17,6 +17,7 @@ remote.registerService('registration', registrationService)
 remote.registerService('boot', { boot: bootClient })
 remote.registerService('autoupdate', autoUpdater)
 remote.registerService('autoLaunch', autoLauncher)
+remote.registerService('measurement', measurementService)
 remote.registerService('dockHider', dockHider)
 remote.registerService('kvstore', KVStore)
 remote.registerService('feedback', feedbackService)

@@ -1,5 +1,7 @@
 import { CommonAPI } from '@common/api'
 import { debug } from '@utils/log'
+import config from '@utils/config'
+
 
 const SESSION_PATH = '/session/'
 const RELAY_PATH = '/relays/'
@@ -48,7 +50,8 @@ class RelayAPI extends CommonAPI {
       'status': 'up',
       'port': TCPPort,
       'udp_port': UDPPort,
-      'fingerprint': this.fingerprint
+      'fingerprint': this.fingerprint,
+      'version': config.version
     }
     debug('Sending status update for relay', data)
     return this.transport.post(RELAY_PATH + this.userID, data)

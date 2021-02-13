@@ -34,6 +34,14 @@
                         <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="dockVisible" v-on:change="dockVisibleChanged"></toggle-button>
                     </div>
                 </div>
+                <div class="row" >
+                    <div class="col-xs-6">
+                        <label>{{$t("MEASUREMENT_ENABLE")}}</label>
+                    </div>
+                    <div class="col-xs-6 align-right">
+                        <toggle-button class="toggle" :labels="{&quot;checked&quot;:&quot;Yes&quot;,&quot;unchecked&quot;:&quot;No&quot;}" :width="60" :sync="true" v-model="measurementEnabled" v-on:change="measurementChanged"></toggle-button>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-xs-6">
                         <label>Language Setting</label>
@@ -65,6 +73,7 @@
 
   const autoLauncher = getService('autoLaunch')
   const dockHider = getService('dockHider')
+  const measurement = getService('measurement')
 
   export default {
     components: {
@@ -75,6 +84,7 @@
         errorMessage: '',
         initMessage: '',
         autoLaunchEnabled: store.state.autoLaunchEnabled,
+        measurementEnabled: store.state.measurementStatus,
         showDockHideOption: isPlatform(OSX),
         dockVisible: store.state.dockIconVisible,
         language: {value: store.state.language, label: this.$i18n.messages[store.state.language].nativeName},
@@ -84,6 +94,8 @@
     },
     async created () {
       this.autoLaunchEnabled = await autoLauncher.isEnabled()
+      this.measurementEnabled = await measurement.isEnabled()
+      // console.log('MEASUREMENT STATUS',this.measurementEnabled)
       this.initMessage = ''
       if (!store.state.languageAndCountrySet) {
         this.showFirstTime('Please indicate your preferred language and country')
@@ -123,6 +135,17 @@
       },
       showFirstTime (message) {
         this.initMessage = message
+      },
+      async measurementChanged(e) {
+        console.log("MEASUREMENT CHANGE",e)
+        const isEnabled = await measurement.isEnabled()
+        console.log("MEASUREMENT CHANGE",e,isEnabled)
+        if(e.value && !isEnabled){
+          await measurement.enable()
+        }
+        if(!e.value && isEnabled){
+          await measurement.disable()
+        }
       }
     }
   }
