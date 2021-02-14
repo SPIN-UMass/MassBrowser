@@ -8,7 +8,7 @@
     "dev:relay": "node tasks/devRunner.js relay",
     "release": "node tasks/release.js",
     "watch": " cross-env NODE_ENV=development webpack --progress --watch --config tasks/webpack/webpack.console.js",
-    "client": "cross-env NODE_ENV=production node ./app/dist/client/client.js",
+    "client": "cross-env NODE_ENV=production LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./app/assets/tor/tor-MB-linux-x86_64/Tor node ./app/dist/client/client.js",
     "relay": "cross-env NODE_ENV=production node ./app/dist/relay/relay.js",
     "client:dev": "cross-env NODE_ENV=development node ./app/dist/client/client.js",
     "relay:dev": "cross-env NODE_ENV=development CI=true node ./app/dist/relay/relay.js",
