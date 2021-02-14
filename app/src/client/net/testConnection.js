@@ -149,6 +149,8 @@ export class MeasurementTask {
             let req = https.get({
             hostname: this.targetUrl.hostname,
             port: this.targetUrl.port,
+            requestCert: true,
+            rejectUnauthorized: false,
             timeout : TIMEOUT
         }, (res) => {
             debug(res.headers)
@@ -236,21 +238,22 @@ export class MeasurementTask {
 
     runMeasurement(){
         this.startTime = Date.now()
-        if (this.type === HTTP){
-            return this.timedHTTPDownload()
-        }
-        if (this.type === HTTPS){
-            return this.timedHTTPSDownload()
-        }
-        if (this.type === DIRECT){
-            return this.timedDIRECTDownload()
-        }
-        if (this.type === TOR){
-            return this.timedTorDownload()
-        }
-        if (this.type === CACHEBROWSE){
-            return this.generateReport(-1,'NOT IMPLEMENTED',null)
-        }
+        return this.timedDIRECTDownload()
+        // if (this.type === HTTP){
+        //     return this.timedHTTPDownload()
+        // }
+        // if (this.type === HTTPS){
+        //     return this.timedHTTPSDownload()
+        // }
+        // if (this.type === DIRECT){
+        //     return this.timedDIRECTDownload()
+        // }
+        // if (this.type === TOR){
+        //     return this.timedTorDownload()
+        // }
+        // if (this.type === CACHEBROWSE){
+        //     return this.generateReport(-1,'NOT IMPLEMENTED',null)
+        // }
     }
 
 }
