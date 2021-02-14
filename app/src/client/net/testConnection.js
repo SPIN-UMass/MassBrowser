@@ -197,6 +197,8 @@ export class MeasurementTask {
             port: this.targetUrl.port,
             timeout : TIMEOUT,
             socksHost: 'localhost',
+            requestCert: true,
+            rejectUnauthorized: false,
             socksPort: config.tor.port
         }, (res) => {
             debug(res.headers)
