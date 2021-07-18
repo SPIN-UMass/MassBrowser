@@ -13,7 +13,7 @@
         <div class="row-stat">
             <div class="col-led">
                 <i class="fa fa-2x fa-check-circle status-led on" scale="1.2" v-if="(reachableTCP || reachableUDP)"></i>
-                <i class="fa fa-2x fa-times-circle" status-led off" scale="1.2" v-if="!(reachableTCP || reachableUDP)"></i>
+                <i class="fa fa-2x fa-times-circle status-led off" scale="1.2" v-if="!(reachableTCP || reachableUDP)"></i>
             </div>
             <div class="col-text">
             <span class="status-label" v-if="(reachableTCP || reachableUDP)">{{$t('RELAY_REACHABLE')}}</span>
