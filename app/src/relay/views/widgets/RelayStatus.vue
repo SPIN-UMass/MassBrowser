@@ -3,8 +3,8 @@
     <div class="status-container">
         <div class="row-stat">
             <div class="col-led">
-                <i class="fa fa-2x fa-check-circle status-led on" name="check-circle" scale="1.2" v-if="connected"></i>
-                <i class="fa fa-2x fa-check-circle status-led off" name="times-circle" scale="1.2" v-if="!connected"></i>
+                <i class="fa fa-2x fa-check-circle status-led on" scale="1.2" v-if="connected"></i>
+                <i class="fa fa-2x fa-times-circle status-led off" scale="1.2" v-if="!connected"></i>
             </div>
             <div class="col-text">
             <span class="status-label" v-if="connected">{{$t('RELAY_WORKING')}}</span><span class="status-label" v-if="!connected">{{$t('RELAY_NOT_WORKING')}}</span>
@@ -12,8 +12,8 @@
         </div>
         <div class="row-stat">
             <div class="col-led">
-                <i class="fa fa-2x fa-check-circle status-led on" name="check-circle" scale="1.2" v-if="(reachableTCP || reachableUDP)"></i>
-                <i class="fa fa-2x fa-times-circle" status-led off" name="times-circle" scale="1.2" v-if="!(reachableTCP || reachableUDP)"></i>
+                <i class="fa fa-2x fa-check-circle status-led on" scale="1.2" v-if="(reachableTCP || reachableUDP)"></i>
+                <i class="fa fa-2x fa-times-circle" status-led off" scale="1.2" v-if="!(reachableTCP || reachableUDP)"></i>
             </div>
             <div class="col-text">
             <span class="status-label" v-if="(reachableTCP || reachableUDP)">{{$t('RELAY_REACHABLE')}}</span>
